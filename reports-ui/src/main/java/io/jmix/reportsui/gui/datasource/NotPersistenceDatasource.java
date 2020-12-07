@@ -16,10 +16,10 @@
 
 package io.jmix.reportsui.gui.datasource;
 
-import io.jmix.core.JmixEntity;
+import io.jmix.core.Entity;
 import com.haulmont.cuba.gui.data.impl.DatasourceImpl;
 
-public class NotPersistenceDatasource<T extends JmixEntity> extends DatasourceImpl<T>{
+public class NotPersistenceDatasource<T extends Entity> extends DatasourceImpl<T>{
 
     @Override
     public void setItem(T item) {

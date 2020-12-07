@@ -16,7 +16,7 @@
 
 package io.jmix.reports.util;
 
-import com.haulmont.cuba.core.global.Metadata;
+import io.jmix.core.Metadata;
 import io.jmix.reports.entity.BandDefinition;
 import io.jmix.reports.entity.DataSet;
 import io.jmix.reports.entity.DataSetType;

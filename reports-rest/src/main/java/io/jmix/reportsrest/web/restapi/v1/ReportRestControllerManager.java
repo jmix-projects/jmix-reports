@@ -20,7 +20,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import io.jmix.core.EntityStates;
-import io.jmix.core.JmixEntity;
+import io.jmix.core.Entity;
 import io.jmix.core.metamodel.model.MetaClass;
 import com.haulmont.cuba.core.global.*;
 import io.jmix.core.security.EntityOp;
@@ -92,7 +92,7 @@ public class ReportRestControllerManager {
                         .addProperty("name")
                         .addProperty("code")
                         .addProperty("group"))
-                .setQueryString("select r from report$Report r where r.restAccess = true");
+                .setQueryString("select r from report_Report r where r.restAccess = true");
         reportSecurityManager.applySecurityPolicies(loadContext, null, SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         List<Report> reports = dataManager.loadList(loadContext);
 
@@ -164,7 +164,7 @@ public class ReportRestControllerManager {
 
         LoadContext<Report> loadContext = new LoadContext<>(Report.class);
         loadContext.setView(ReportService.MAIN_VIEW_NAME)
-                .setQueryString("select r from report$Report r where r.id = :id and r.restAccess = true")
+                .setQueryString("select r from report_Report r where r.id = :id and r.restAccess = true")
                 .setParameter("id", getReportIdFromString(entityId));
         reportSecurityManager.applySecurityPolicies(loadContext, null, SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 
@@ -199,7 +199,7 @@ public class ReportRestControllerManager {
                 checkCanReadEntity(entityClass);
                 Object entityId = getIdFromString(paramValue.value, entityClass);
                 //noinspection unchecked
-                JmixEntity entity = dataManager.load(entityClass.getJavaClass())
+                Entity entity = dataManager.load(entityClass.getJavaClass())
                         .view(View.MINIMAL)
                         .id(entityId).optional().orElse(null);
                 checkEntityIsNotNull(entityClass.getName(), paramValue.value, entity);
@@ -209,11 +209,11 @@ public class ReportRestControllerManager {
             if (paramValue.values != null) {
                 MetaClass entityClass = metadata.getClassNN(inputParam.getEntityMetaClass());
                 checkCanReadEntity(entityClass);
-                List<JmixEntity> entities = new ArrayList<>();
+                List<Entity> entities = new ArrayList<>();
                 for (String value : paramValue.values) {
                     Object entityId = getIdFromString(value, entityClass);
                     //noinspection unchecked
-                    JmixEntity entity = (JmixEntity) dataManager.load(entityClass.getJavaClass())
+                    Entity entity = (Entity) dataManager.load(entityClass.getJavaClass())
                             .view(View.MINIMAL)
                             .id(entityId).optional().orElse(null);
                     checkEntityIsNotNull(entityClass.getName(), value, entity);
@@ -371,10 +371,10 @@ public class ReportRestControllerManager {
         }
     }
 
-    protected void checkEntityIsNotNull(String entityName, String entityId, JmixEntity entity) {
+    protected void checkEntityIsNotNull(String entityName, String entityId, Entity entity) {
         if (entity == null) {
-            throw new RestAPIException("JmixEntity not found",
-                    String.format("JmixEntity %s with id %s not found", entityName, entityId),
+            throw new RestAPIException("Entity not found",
+                    String.format("Entity %s with id %s not found", entityName, entityId),
                     HttpStatus.NOT_FOUND);
         }
     }

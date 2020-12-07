@@ -17,30 +17,23 @@ package io.jmix.reportsui.gui.report.edit;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import com.haulmont.cuba.gui.components.FileUploadField;
-import com.haulmont.cuba.gui.components.GroupBoxLayout;
-import com.haulmont.cuba.gui.components.ListComponent;
-import com.haulmont.cuba.gui.components.SourceCodeEditor;
-import com.haulmont.cuba.gui.components.Table;
-import com.haulmont.cuba.gui.components.TextArea;
-import com.haulmont.cuba.gui.components.Tree;
-import com.haulmont.cuba.gui.components.actions.CreateAction;
-import com.haulmont.cuba.gui.components.actions.EditAction;
-import com.haulmont.cuba.gui.components.actions.ExcludeAction;
-import com.haulmont.cuba.gui.components.actions.RemoveAction;
-import io.jmix.core.CoreProperties;
-import io.jmix.core.Id;
+import io.jmix.core.*;
+import io.jmix.ui.*;
+import io.jmix.ui.action.list.CreateAction;
+import io.jmix.ui.action.list.EditAction;
+import io.jmix.ui.action.list.ExcludeAction;
+import io.jmix.ui.action.list.RemoveAction;
+import io.jmix.ui.component.FileUploadField;
+import io.jmix.ui.component.GroupBoxLayout;
+import io.jmix.ui.component.ListComponent;
+import io.jmix.ui.component.SourceCodeEditor;
+import io.jmix.ui.component.Table;
+import io.jmix.ui.component.TextArea;
+import io.jmix.ui.component.Tree;
 import io.jmix.core.common.util.ParamsMap;
 import io.jmix.core.metamodel.model.MetaClass;
-import io.jmix.core.JmixEntity;
-import com.haulmont.cuba.core.global.*;
-import com.haulmont.cuba.gui.app.core.file.FileUploadDialog;
-import com.haulmont.cuba.gui.components.*;
+import io.jmix.ui.component.*;
 import io.jmix.core.metamodel.model.MetaPropertyPath;
-import io.jmix.ui.UiComponents;
-import io.jmix.ui.UiProperties;
-import io.jmix.ui.WindowConfig;
-import io.jmix.ui.WindowInfo;
 import io.jmix.ui.action.*;
 import com.haulmont.cuba.gui.data.CollectionDatasource;
 import com.haulmont.cuba.gui.data.Datasource;
@@ -60,7 +53,10 @@ import io.jmix.reports.ReportPrintHelper;
 import io.jmix.reportsui.gui.definition.edit.BandDefinitionEditor;
 import com.haulmont.yarg.structure.BandOrientation;
 import io.jmix.ui.component.*;
-import io.jmix.ui.gui.OpenType;
+import io.jmix.ui.screen.StandardEditor;
+import io.jmix.ui.screen.Subscribe;
+import io.jmix.ui.screen.UiController;
+import io.jmix.ui.screen.UiDescriptor;
 import io.jmix.ui.sys.ScreensHelper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
@@ -74,16 +70,18 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ReportEditor extends AbstractEditor<Report> {
+@UiController("report_Report.edit")
+@UiDescriptor("report-edit.xml")
+public class ReportEditor extends StandardEditor<Report> {
 
     @Named("generalFrame.propertiesFieldGroup")
-    protected FieldGroup propertiesFieldGroup;
+    protected Form propertiesFieldGroup;
 
     @Named("generalFrame.bandEditor")
     protected BandDefinitionEditor bandEditor;
 
     @Named("securityFrame.screenIdLookup")
-    protected LookupField<String> screenIdLookup;
+    protected ComboBox<String> screenIdLookup;
 
     @Named("securityFrame.screenTable")
     protected Table<ReportScreen> screenTable;
@@ -214,8 +212,15 @@ public class ReportEditor extends AbstractEditor<Report> {
     @Autowired
     protected CoreProperties coreProperties;
 
-    @Override
-    protected void initNewItem(Report report) {
+    @Autowired
+    protected Notifications notifications;
+
+    @Autowired
+    protected Dialogs dialogs;
+
+    @Subscribe
+    protected void initNewItem(InitEntityEvent<Report> event) {
+        Report report = event.getEntity();
         report.setReportType(ReportType.SIMPLE);
 
         BandDefinition rootDefinition = metadata.create(BandDefinition.class);
@@ -234,18 +239,15 @@ public class ReportEditor extends AbstractEditor<Report> {
         }
     }
 
-    @Override
-    public void ready() {
-        super.ready();
-
-        if (!StringUtils.isEmpty(getItem().getName())) {
-            setCaption(messages.formatMessage(getClass(), "reportEditor.format", getItem().getName()));
+    @Subscribe
+    protected void onBeforeShow(BeforeShowEvent event) {
+        if (!StringUtils.isEmpty(getEditedEntity().getName())) {
+            setCaption(messages.formatMessage(getClass(), "reportEditor.format", getEditedEntity().getName()));
         }
     }
 
-    @Override
-    protected void postInit() {
-        super.postInit();
+    @Subscribe
+    protected void onAfterInit(AfterInitEvent event) {
 
         ((CollectionPropertyDatasourceImpl) treeDs).setModified(false);
         ((DatasourceImpl) reportDs).setModified(false);
@@ -264,9 +266,8 @@ public class ReportEditor extends AbstractEditor<Report> {
         initValidationScriptGroupBoxCaption();
     }
 
-    @Override
-    public void init(Map<String, Object> params) {
-        super.init(params);
+    @Subscribe
+    public void init(InitEvent event) {
         initGeneral();
         initTemplates();
         initParameters();
@@ -283,7 +284,7 @@ public class ReportEditor extends AbstractEditor<Report> {
                     public Map<String, Object> getInitialValues() {
                         Map<String, Object> params = new HashMap<>();
                         params.put("position", parametersDs.getItemIds().size());
-                        params.put("report", getItem());
+                        params.put("report", getEditedEntity());
                         return params;
                     }
 
@@ -309,7 +310,7 @@ public class ReportEditor extends AbstractEditor<Report> {
             public void actionPerform(Component component) {
                 ReportInputParameter parameter = (ReportInputParameter) target.getSingleSelected();
                 if (parameter != null) {
-                    List<ReportInputParameter> inputParameters = getItem().getInputParameters();
+                    List<ReportInputParameter> inputParameters = getEditedEntity().getInputParameters();
                     int index = parameter.getPosition();
                     if (index > 0) {
                         ReportInputParameter previousParameter = null;
@@ -347,7 +348,7 @@ public class ReportEditor extends AbstractEditor<Report> {
             public void actionPerform(Component component) {
                 ReportInputParameter parameter = (ReportInputParameter) target.getSingleSelected();
                 if (parameter != null) {
-                    List<ReportInputParameter> inputParameters = getItem().getInputParameters();
+                    List<ReportInputParameter> inputParameters = getEditedEntity().getInputParameters();
                     int index = parameter.getPosition();
                     if (index < parametersDs.getItemIds().size() - 1) {
                         ReportInputParameter nextParameter = null;
@@ -441,15 +442,19 @@ public class ReportEditor extends AbstractEditor<Report> {
 
     protected void initHelpButtons(){
         localesTextField.setContextHelpIconClickHandler(e ->
-                showMessageDialog(getMessage("localeText"), getMessage("report.localeTextHelp"),
-                        MessageType.CONFIRMATION_HTML
-                                .modal(false)
-                                .width(600f)));
+                dialogs.createMessageDialog()
+                .withCaption(messages.getMessage("localeText"))
+                .withMessage(messages.getMessage("report.localeTextHelp"))
+                .withModal(false)
+                .withWidth("600px")
+                .show());
         validationScriptCodeEditor.setContextHelpIconClickHandler(e ->
-                showMessageDialog(getMessage("validationScript"), getMessage("crossFieldValidationScriptHelp"),
-                        MessageType.CONFIRMATION_HTML
-                                .modal(false)
-                                .width(600f)));
+                dialogs.createMessageDialog()
+                .withCaption(messages.getMessage("validationScript"))
+                .withMessage(messages.getMessage("crossFieldValidationScriptHelp"))
+                .withModal(false)
+                .withWidth("600px")
+                .show());
     }
 
     protected void initScreens() {
@@ -485,7 +490,7 @@ public class ReportEditor extends AbstractEditor<Report> {
 
                     if (!exists) {
                         ReportScreen reportScreen = metadata.create(ReportScreen.class);
-                        reportScreen.setReport(getItem());
+                        reportScreen.setReport(getEditedEntity());
                         reportScreen.setScreenId(screenId);
                         reportScreensDs.addItem(reportScreen);
                     }
@@ -511,7 +516,7 @@ public class ReportEditor extends AbstractEditor<Report> {
 
     protected void initGeneral() {
         invisibleFileUpload.addFileUploadSucceedListener(invisibleUpload -> {
-            final ReportTemplate defaultTemplate = getItem().getDefaultTemplate();
+            final ReportTemplate defaultTemplate = getEditedEntity().getDefaultTemplate();
             if (defaultTemplate != null) {
                 if (!isTemplateWithoutFile(defaultTemplate)) {
                     File file = fileUpload.getFile(invisibleFileUpload.getFileId());
@@ -526,10 +531,14 @@ public class ReportEditor extends AbstractEditor<Report> {
                                 defaultTemplate.getCode()));
                     }
                 } else {
-                    showNotification(getMessage("notification.fileIsNotAllowedForSpecificTypes"), NotificationType.HUMANIZED);
+                    notifications.create(Notifications.NotificationType.HUMANIZED)
+                            .withCaption(messages.getMessage("notification.fileIsNotAllowedForSpecificTypes"))
+                            .show();
                 }
             } else {
-                showNotification(getMessage("notification.defaultTemplateIsEmpty"), NotificationType.HUMANIZED);
+                notifications.create(Notifications.NotificationType.HUMANIZED)
+                        .withCaption(messages.getMessage("notification.defaultTemplateIsEmpty"))
+                        .show();
             }
         });
 
@@ -583,7 +592,7 @@ public class ReportEditor extends AbstractEditor<Report> {
 
                     @Override
                     public String getDescription() {
-                        return getMessage("description.downloadTemplate");
+                        return messages.getMessage("description.downloadTemplate");
                     }
 
                     @Override
@@ -598,12 +607,16 @@ public class ReportEditor extends AbstractEditor<Report> {
 
                     @Override
                     public void actionPerform(Component component) {
-                        ReportTemplate defaultTemplate = getItem().getDefaultTemplate();
+                        ReportTemplate defaultTemplate = getEditedEntity().getDefaultTemplate();
                         if (defaultTemplate != null) {
                             if (defaultTemplate.isCustom()) {
-                                showNotification(getMessage("unableToSaveTemplateWhichDefinedWithClass"), NotificationType.HUMANIZED);
+                                notifications.create(Notifications.NotificationType.HUMANIZED)
+                                        .withCaption(messages.getMessage("unableToSaveTemplateWhichDefinedWithClass"))
+                                        .show();
                             } else if (isTemplateWithoutFile(defaultTemplate)) {
-                                showNotification(getMessage("notification.fileIsNotAllowedForSpecificTypes"), NotificationType.HUMANIZED);
+                                notifications.create(Notifications.NotificationType.HUMANIZED)
+                                        .withCaption(messages.getMessage("notification.fileIsNotAllowedForSpecificTypes"))
+                                        .show();
                             } else {
                                 ExportDisplay exportDisplay = AppBeans.getPrototype(ExportDisplay.class);
                                 byte[] reportTemplate = defaultTemplate.getContent();
@@ -611,7 +624,9 @@ public class ReportEditor extends AbstractEditor<Report> {
                                         defaultTemplate.getName(), ExportFormat.getByExtension(defaultTemplate.getExt()));
                             }
                         } else {
-                            showNotification(getMessage("notification.defaultTemplateIsEmpty"), NotificationType.HUMANIZED);
+                            notifications.create(Notifications.NotificationType.HUMANIZED)
+                                    .withCaption(messages.getMessage("notification.defaultTemplateIsEmpty"))
+                                    .show();
                         }
 
                         lookupPickerField.focus();
@@ -621,7 +636,7 @@ public class ReportEditor extends AbstractEditor<Report> {
                 lookupPickerField.addAction(new AbstractAction("upload") {
                     @Override
                     public String getDescription() {
-                        return getMessage("description.uploadTemplate");
+                        return messages.getMessage("description.uploadTemplate");
                     }
 
                     @Override
@@ -636,7 +651,7 @@ public class ReportEditor extends AbstractEditor<Report> {
 
                     @Override
                     public void actionPerform(Component component) {
-                        final ReportTemplate defaultTemplate = getItem().getDefaultTemplate();
+                        final ReportTemplate defaultTemplate = getEditedEntity().getDefaultTemplate();
                         if (defaultTemplate != null) {
                             if (!isTemplateWithoutFile(defaultTemplate)) {
                                 FileUploadDialog dialog = (FileUploadDialog) openWindow("fileUploadDialog", OpenType.DIALOG);
@@ -657,10 +672,14 @@ public class ReportEditor extends AbstractEditor<Report> {
                                     lookupPickerField.focus();
                                 });
                             } else {
-                                showNotification(getMessage("notification.fileIsNotAllowedForSpecificTypes"), NotificationType.HUMANIZED);
+                                notifications.create(Notifications.NotificationType.HUMANIZED)
+                                        .withCaption(messages.getMessage("notification.fileIsNotAllowedForSpecificTypes"))
+                                        .show();
                             }
                         } else {
-                            showNotification(getMessage("notification.defaultTemplateIsEmpty"), NotificationType.HUMANIZED);
+                            notifications.create(Notifications.NotificationType.HUMANIZED)
+                                    .withCaption(messages.getMessage("notification.defaultTemplateIsEmpty"))
+                                    .show();
                         }
                     }
 
@@ -674,7 +693,7 @@ public class ReportEditor extends AbstractEditor<Report> {
 
                     @Override
                     public String getDescription() {
-                        return getMessage("description.createTemplate");
+                        return messages.getMessage("description.createTemplate");
                     }
 
                     @Override
@@ -685,14 +704,14 @@ public class ReportEditor extends AbstractEditor<Report> {
                     @Override
                     public void actionPerform(Component component) {
                         ReportTemplate template = metadata.create(ReportTemplate.class);
-                        template.setReport(getItem());
+                        template.setReport(getEditedEntity());
 
-                        Editor editor = openEditor("report$ReportTemplate.edit", template, OpenType.DIALOG, templatesDs);
+                        Editor editor = openEditor("report_ReportTemplate.edit", template, OpenType.DIALOG, templatesDs);
                         editor.addCloseListener(actionId -> {
                             if (COMMIT_ACTION_ID.equals(actionId)) {
-                                ReportTemplate item = (ReportTemplate) editor.getItem();
+                                ReportTemplate item = (ReportTemplate) editor.getEditedEntity();
                                 templatesDs.addItem(item);
-                                getItem().setDefaultTemplate(item);
+                                getEditedEntity().setDefaultTemplate(item);
                                 //Workaround to disable button after default template setting
                                 Action defaultTemplate = templatesTable.getActionNN("defaultTemplate");
                                 defaultTemplate.refreshState();
@@ -710,7 +729,7 @@ public class ReportEditor extends AbstractEditor<Report> {
                 lookupPickerField.addAction(new AbstractAction("edit") {
                     @Override
                     public String getDescription() {
-                        return getMessage("description.editTemplate");
+                        return messages.getMessage("description.editTemplate");
                     }
 
                     @Override
@@ -720,21 +739,23 @@ public class ReportEditor extends AbstractEditor<Report> {
 
                     @Override
                     public void actionPerform(Component component) {
-                        ReportTemplate defaultTemplate = getItem().getDefaultTemplate();
+                        ReportTemplate defaultTemplate = getEditedEntity().getDefaultTemplate();
                         if (defaultTemplate != null) {
-                            Editor editor = openEditor("report$ReportTemplate.edit",
+                            Editor editor = openEditor("report_ReportTemplate.edit",
                                     defaultTemplate, OpenType.DIALOG, templatesDs);
 
                             editor.addCloseListener(actionId -> {
                                 if (Window.COMMIT_ACTION_ID.equals(actionId)) {
-                                    ReportTemplate item = (ReportTemplate) editor.getItem();
-                                    getItem().setDefaultTemplate(item);
+                                    ReportTemplate item = (ReportTemplate) editor.getEditedEntity();
+                                    getEditedEntity().setDefaultTemplate(item);
                                     templatesDs.modifyItem(item);
                                 }
                                 lookupPickerField.focus();
                             });
                         } else {
-                            showNotification(getMessage("notification.defaultTemplateIsEmpty"), NotificationType.HUMANIZED);
+                            notifications.create(Notifications.NotificationType.HUMANIZED)
+                                    .withCaption(messages.getMessage("notification.defaultTemplateIsEmpty"))
+                                    .show();
                         }
                     }
 
@@ -760,7 +781,7 @@ public class ReportEditor extends AbstractEditor<Report> {
         createBandDefinitionButton.setAction(new AbstractAction("create") {
             @Override
             public String getDescription() {
-                return getMessage("description.createBand");
+                return messages.getMessage("description.createBand");
             }
 
             @Override
@@ -771,7 +792,7 @@ public class ReportEditor extends AbstractEditor<Report> {
             @Override
             public void actionPerform(Component component) {
                 BandDefinition parentDefinition = treeDs.getItem();
-                Report report = getItem();
+                Report report = getEditedEntity();
                 // Use root band as parent if no items selected
                 if (parentDefinition == null) {
                     parentDefinition = report.getRootBandDefinition();
@@ -813,7 +834,7 @@ public class ReportEditor extends AbstractEditor<Report> {
         removeBandDefinitionButton.setAction(new RemoveAction((ListComponent) bandTree, false, "generalFrame.removeBandDefinition") {
             @Override
             public String getDescription() {
-                return getMessage("description.removeBand");
+                return messages.getMessage("description.removeBand");
             }
 
             @Override
@@ -824,9 +845,9 @@ public class ReportEditor extends AbstractEditor<Report> {
             @Override
             protected boolean isApplicable() {
                 if (target != null) {
-                    JmixEntity selectedItem = target.getSingleSelected();
+                    Entity selectedItem = target.getSingleSelected();
                     if (selectedItem != null) {
-                        return !Objects.equals(getItem().getRootBandDefinition(), selectedItem);
+                        return !Objects.equals(getEditedEntity().getRootBandDefinition(), selectedItem);
                     }
                 }
 
@@ -875,7 +896,7 @@ public class ReportEditor extends AbstractEditor<Report> {
         bandUpButton.setAction(new ListAction("generalFrame.up") {
             @Override
             public String getDescription() {
-                return getMessage("description.moveUp");
+                return messages.getMessage("description.moveUp");
             }
 
             @Override
@@ -917,7 +938,7 @@ public class ReportEditor extends AbstractEditor<Report> {
         bandDownButton.setAction(new ListAction("generalFrame.down") {
             @Override
             public String getDescription() {
-                return getMessage("description.moveDown");
+                return messages.getMessage("description.moveDown");
             }
 
             @Override
@@ -970,9 +991,9 @@ public class ReportEditor extends AbstractEditor<Report> {
             @Override
             public void actionPerform(Component component) {
                 if (validateAll()) {
-                    getItem().setIsTmp(true);
-                    Window runWindow = openWindow("report$inputParameters",
-                            OpenType.DIALOG, ParamsMap.of("report", getItem()));
+                    getEditedEntity().setIsTmp(true);
+                    Window runWindow = openWindow("report_inputParameters",
+                            OpenType.DIALOG, ParamsMap.of("report", getEditedEntity()));
 
                     runWindow.addCloseListener(actionId -> {
                         bandTree.focus();
@@ -983,7 +1004,7 @@ public class ReportEditor extends AbstractEditor<Report> {
     }
 
     protected void setupDropZoneForTemplate() {
-        final ReportTemplate defaultTemplate = getItem().getDefaultTemplate();
+        final ReportTemplate defaultTemplate = getEditedEntity().getDefaultTemplate();
         if (defaultTemplate != null) {
             invisibleFileUpload.setDropZone(new UploadField.DropZone(reportFields));
         } else {
@@ -997,7 +1018,7 @@ public class ReportEditor extends AbstractEditor<Report> {
     }
 
     protected boolean validateInputOutputFormats() {
-        ReportTemplate template = getItem().getDefaultTemplate();
+        ReportTemplate template = getEditedEntity().getDefaultTemplate();
         if (template != null && !template.isCustom()
                 && template.getReportOutputType() != ReportOutputType.CHART
                 && template.getReportOutputType() != ReportOutputType.TABLE
@@ -1005,7 +1026,9 @@ public class ReportEditor extends AbstractEditor<Report> {
             String inputType = template.getExt();
             if (!ReportPrintHelper.getInputOutputTypesMapping().containsKey(inputType) ||
                     !ReportPrintHelper.getInputOutputTypesMapping().get(inputType).contains(template.getReportOutputType())) {
-                showNotification(getMessage("inputOutputTypesError"), NotificationType.TRAY);
+                notifications.create(Notifications.NotificationType.TRAY)
+                        .withCaption(messages.getMessage("inputOutputTypesError"))
+                        .show();
                 return false;
             }
         }
@@ -1016,13 +1039,13 @@ public class ReportEditor extends AbstractEditor<Report> {
         CreateAction templateCreateAction = CreateAction.create(templatesTable, OpenType.DIALOG);
 
         templateCreateAction.setInitialValuesSupplier(() ->
-                ParamsMap.of("report", getItem())
+                ParamsMap.of("report", getEditedEntity())
         );
         templateCreateAction.setAfterCommitHandler(entity -> {
             ReportTemplate reportTemplate = (ReportTemplate) entity;
-            ReportTemplate defaultTemplate = getItem().getDefaultTemplate();
+            ReportTemplate defaultTemplate = getEditedEntity().getDefaultTemplate();
             if (defaultTemplate == null) {
-                getItem().setDefaultTemplate(reportTemplate);
+                getEditedEntity().setDefaultTemplate(reportTemplate);
             }
         });
 
@@ -1030,11 +1053,11 @@ public class ReportEditor extends AbstractEditor<Report> {
 
         templatesTable.addAction(new EditAction(templatesTable, OpenType.DIALOG) {
             @Override
-            protected void afterCommit(JmixEntity entity) {
+            protected void afterCommit(Entity entity) {
                 ReportTemplate reportTemplate = (ReportTemplate) entity;
-                ReportTemplate defaultTemplate = getItem().getDefaultTemplate();
+                ReportTemplate defaultTemplate = getEditedEntity().getDefaultTemplate();
                 if (defaultTemplate != null && defaultTemplate.equals(reportTemplate)) {
-                    getItem().setDefaultTemplate(reportTemplate);
+                    getEditedEntity().setDefaultTemplate(reportTemplate);
                 }
             }
         });
@@ -1044,7 +1067,7 @@ public class ReportEditor extends AbstractEditor<Report> {
             protected void afterRemove(Set selected) {
                 super.afterRemove(selected);
 
-                Report report = getItem();
+                Report report = getEditedEntity();
                 ReportTemplate defaultTemplate = report.getDefaultTemplate();
                 if (defaultTemplate != null && selected.contains(defaultTemplate)) {
                     ReportTemplate newDefaultTemplate = null;
@@ -1061,14 +1084,14 @@ public class ReportEditor extends AbstractEditor<Report> {
         templatesTable.addAction(new ListAction("defaultTemplate") {
             @Override
             public String getCaption() {
-                return getMessage("report.defaultTemplate");
+                return messages.getMessage("report.defaultTemplate");
             }
 
             @Override
             public void actionPerform(Component component) {
                 ReportTemplate template = (ReportTemplate) target.getSingleSelected();
                 if (template != null) {
-                    getItem().setDefaultTemplate(template);
+                    getEditedEntity().setDefaultTemplate(template);
                 }
 
                 refreshState();
@@ -1079,9 +1102,9 @@ public class ReportEditor extends AbstractEditor<Report> {
             @Override
             protected boolean isApplicable() {
                 if (target != null) {
-                    JmixEntity selectedItem = target.getSingleSelected();
+                    Entity selectedItem = target.getSingleSelected();
                     if (selectedItem != null) {
-                        return !Objects.equals(getItem().getDefaultTemplate(), selectedItem);
+                        return !Objects.equals(getEditedEntity().getDefaultTemplate(), selectedItem);
                     }
                 }
 
@@ -1102,7 +1125,7 @@ public class ReportEditor extends AbstractEditor<Report> {
                     ReportTemplate copy = metadata.getTools().copy(template);
                     copy.setId(uuidSource.createUuid());
 
-                    String copyNamingPattern = getMessage("template.copyNamingPattern");
+                    String copyNamingPattern = messages.getMessage("template.copyNamingPattern");
                     String copyCode = String.format(copyNamingPattern, StringUtils.isEmpty(copy.getCode()) ? StringUtils.EMPTY : copy.getCode());
                     //noinspection unchecked
                     List<String> codes = (List<String>) ((ListComponent)target).getDatasource().getItems().stream()
@@ -1133,12 +1156,12 @@ public class ReportEditor extends AbstractEditor<Report> {
     }
 
     protected void orderParameters() {
-        if (getItem().getInputParameters() == null) {
-            getItem().setInputParameters(new ArrayList<>());
+        if (getEditedEntity().getInputParameters() == null) {
+            getEditedEntity().setInputParameters(new ArrayList<>());
         }
 
-        for (int i = 0; i < getItem().getInputParameters().size(); i++) {
-            getItem().getInputParameters().get(i).setPosition(i);
+        for (int i = 0; i < getEditedEntity().getInputParameters().size(); i++) {
+            getEditedEntity().getInputParameters().get(i).setPosition(i);
         }
     }
 
@@ -1156,7 +1179,7 @@ public class ReportEditor extends AbstractEditor<Report> {
     protected boolean preCommit() {
         addCommitListeners();
 
-        if (PersistenceHelper.isNew(getItem())) {
+        if (PersistenceHelper.isNew(getEditedEntity())) {
             ((CollectionPropertyDatasourceImpl) treeDs).setModified(true);
         }
 
@@ -1164,8 +1187,8 @@ public class ReportEditor extends AbstractEditor<Report> {
     }
 
     protected void addCommitListeners() {
-        String xml = reportService.convertToString(getItem());
-        getItem().setXml(xml);
+        String xml = reportService.convertToString(getEditedEntity());
+        getEditedEntity().setXml(xml);
 
         reportDs.getDsContext().addBeforeCommitListener(context -> {
             context.getCommitInstances()
@@ -1177,15 +1200,15 @@ public class ReportEditor extends AbstractEditor<Report> {
 
     @Override
     protected void postValidate(ValidationErrors errors) {
-        if (getItem().getRootBand() == null) {
-            errors.add(getMessage("error.rootBandNull"));
+        if (getEditedEntity().getRootBand() == null) {
+            errors.add(messages.getMessage("error.rootBandNull"));
         }
 
-        if (CollectionUtils.isNotEmpty(getItem().getRootBandDefinition().getChildrenBandDefinitions())) {
+        if (CollectionUtils.isNotEmpty(getEditedEntity().getRootBandDefinition().getChildrenBandDefinitions())) {
             Multimap<String, BandDefinition> names = ArrayListMultimap.create();
-            names.put(getItem().getRootBand().getName(), getItem().getRootBandDefinition());
+            names.put(getEditedEntity().getRootBand().getName(), getEditedEntity().getRootBandDefinition());
 
-            for (BandDefinition band : getItem().getRootBandDefinition().getChildrenBandDefinitions()) {
+            for (BandDefinition band : getEditedEntity().getRootBandDefinition().getChildrenBandDefinitions()) {
                 validateBand(errors, band, names);
             }
 
@@ -1197,7 +1220,7 @@ public class ReportEditor extends AbstractEditor<Report> {
         for (String name : names.keySet()) {
             Collection<BandDefinition> bandDefinitionsWithsSameNames = names.get(name);
             if (bandDefinitionsWithsSameNames != null && bandDefinitionsWithsSameNames.size() > 1) {
-                errors.add(formatMessage("error.bandNamesDuplicated", name));
+                errors.add(messages.formatMessage("error.bandNamesDuplicated", name));
             }
         }
     }
@@ -1206,32 +1229,32 @@ public class ReportEditor extends AbstractEditor<Report> {
         names.put(band.getName(), band);
 
         if (StringUtils.isBlank(band.getName())) {
-            errors.add(getMessage("error.bandNameNull"));
+            errors.add(messages.getMessage("error.bandNameNull"));
         }
 
         if (band.getBandOrientation() == BandOrientation.UNDEFINED) {
-            errors.add(formatMessage("error.bandOrientationNull", band.getName()));
+            errors.add(messages.formatMessage("error.bandOrientationNull", band.getName()));
         }
 
         if (CollectionUtils.isNotEmpty(band.getDataSets())) {
             for (DataSet dataSet : band.getDataSets()) {
                 if (StringUtils.isBlank(dataSet.getName())) {
-                    errors.add(getMessage("error.dataSetNameNull"));
+                    errors.add(messages.getMessage("error.dataSetNameNull"));
                 }
 
                 if (dataSet.getType() == null) {
-                    errors.add(formatMessage("error.dataSetTypeNull", dataSet.getName()));
+                    errors.add(messages.formatMessage("error.dataSetTypeNull", dataSet.getName()));
                 }
 
                 if (dataSet.getType() == DataSetType.GROOVY
                         || dataSet.getType() == DataSetType.SQL
                         || dataSet.getType() == DataSetType.JPQL) {
                     if (StringUtils.isBlank(dataSet.getScript())) {
-                        errors.add(formatMessage("error.dataSetScriptNull", dataSet.getName()));
+                        errors.add(messages.formatMessage("error.dataSetScriptNull", dataSet.getName()));
                     }
                 } else if (dataSet.getType() == DataSetType.JSON) {
                     if (StringUtils.isBlank(dataSet.getJsonSourceText()) && dataSet.getJsonSourceType() != JsonSourceType.PARAMETER) {
-                        errors.add(formatMessage("error.jsonDataSetScriptNull", dataSet.getName()));
+                        errors.add(messages.formatMessage("error.jsonDataSetScriptNull", dataSet.getName()));
                     }
                 }
             }
@@ -1258,9 +1281,9 @@ public class ReportEditor extends AbstractEditor<Report> {
 
     protected void setValidationScriptGroupBoxCaption(Boolean onOffFlag) {
         if (BooleanUtils.isTrue(onOffFlag)) {
-            validationScriptGroupBox.setCaption(getMessage("report.validationScriptOn"));
+            validationScriptGroupBox.setCaption(messages.getMessage("report.validationScriptOn"));
         } else {
-            validationScriptGroupBox.setCaption(getMessage("report.validationScriptOff"));
+            validationScriptGroupBox.setCaption(messages.getMessage("report.validationScriptOff"));
         }
     }
 

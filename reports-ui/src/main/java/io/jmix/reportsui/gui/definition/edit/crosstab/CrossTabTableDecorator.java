@@ -17,9 +17,9 @@
 package io.jmix.reportsui.gui.definition.edit.crosstab;
 
 import com.google.common.base.Strings;
-import com.haulmont.cuba.core.global.Metadata;
+import io.jmix.core.Metadata;
 import com.haulmont.cuba.core.global.Security;
-import com.haulmont.cuba.gui.components.Table;
+import io.jmix.ui.component.Table;
 import com.haulmont.cuba.gui.data.CollectionDatasource;
 import com.haulmont.cuba.gui.data.Datasource;
 import io.jmix.core.security.EntityOp;
@@ -81,25 +81,26 @@ public class CrossTabTableDecorator {
             return textField;
         });
 
-        bandDefinitionDs.addItemChangeListener(band -> {
-            if (VALID == dataSets.getDatasource().getState()) {
-                onTableReady(dataSets, bandDefinitionDs);
-            } else {
-                dataSets.getDatasource().addStateChangeListener(new Datasource.StateChangeListener<DataSet>() {
-                    @Override
-                    public void stateChanged(Datasource.StateChangeEvent<DataSet> e) {
-                        if (VALID == e.getState()) {
-                            onTableReady(dataSets, bandDefinitionDs);
-                            dataSets.getDatasource().removeStateChangeListener(this);
-                        }
-                    }
-                });
-            }
-        });
+        //todo
+//        bandDefinitionDs.addItemChangeListener(band -> {
+//            if (VALID == dataSets.getDatasource().getState()) {
+//                onTableReady(dataSets, bandDefinitionDs);
+//            } else {
+//                dataSets.getDatasource().addStateChangeListener(new Datasource.StateChangeListener<DataSet>() {
+//                    @Override
+//                    public void stateChanged(Datasource.StateChangeEvent<DataSet> e) {
+//                        if (VALID == e.getState()) {
+//                            onTableReady(dataSets, bandDefinitionDs);
+//                            dataSets.getDatasource().removeStateChangeListener(this);
+//                        }
+//                    }
+//                });
+//            }
+//        });
     }
 
     protected boolean isUpdatePermitted() {
-        return security.isEntityOpPermitted(metadata.getClassNN(Report.class), EntityOp.UPDATE);
+        return security.isEntityOpPermitted(metadata.getClass(Report.class), EntityOp.UPDATE);
     }
 
     protected void onHorizontalSetChange(DataSet dataSet) {
@@ -112,9 +113,10 @@ public class CrossTabTableDecorator {
 
 
     protected void onTableReady(Table<DataSet> dataSets, Datasource<BandDefinition> bandDefinitionDs) {
-        CollectionDatasource<DataSet, UUID> dataSetsDs = dataSets.getDatasource();
-
-        initCrossDatasets(dataSetsDs, bandDefinitionDs);
+        //todo
+//        CollectionDatasource<DataSet, UUID> dataSetsDs = dataSets.getDatasource();
+//
+//        initCrossDatasets(dataSetsDs, bandDefinitionDs);
     }
 
     protected void initCrossDatasets(CollectionDatasource<DataSet, UUID> dataSetsDs,

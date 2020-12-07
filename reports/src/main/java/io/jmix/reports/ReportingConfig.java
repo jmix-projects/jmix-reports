@@ -194,7 +194,7 @@ public class ReportingConfig {
     }
 
     /**
-     * JmixEntity properties that will not be available for report creation wizard. Format is like {@code BaseUuidEntity.id,BaseUuidEntity.createTs,ref$Car.id,...}<br>
+     * Entity properties that will not be available for report creation wizard. Format is like {@code BaseUuidEntity.id,BaseUuidEntity.createTs,ref$Car.id,...}<br>
      * Properties support inheritance, i.e. {@code BaseUuidEntity.id} will filter that field for all descendants, e.g. {@code ref$Car}.
      * To allow selection of a field for a concrete descendant (e.g. {@code ref$Car}), use
      * {@code reporting.wizardPropertiesExcludedBlackList} setting with value {@code ref$Car.id}.
@@ -206,7 +206,7 @@ public class ReportingConfig {
     }
 
     /**
-     * JmixEntity properties that will not to be excluded by {@code reporting.wizardPropertiesBlackList} setting
+     * Entity properties that will not to be excluded by {@code reporting.wizardPropertiesBlackList} setting
      *
      * @see ReportingConfig#getWizardPropertiesBlackList()
      */

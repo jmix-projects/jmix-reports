@@ -16,7 +16,7 @@
 
 package io.jmix.reports;
 
-import com.haulmont.cuba.core.global.LoadContext;
+import io.jmix.core.LoadContext;
 import io.jmix.core.QueryTransformer;
 import io.jmix.core.QueryTransformerFactory;
 import io.jmix.core.QueryUtils;

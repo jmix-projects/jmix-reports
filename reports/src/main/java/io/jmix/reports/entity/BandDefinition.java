@@ -15,8 +15,8 @@
  */
 package io.jmix.reports.entity;
 
-import io.jmix.core.metamodel.annotation.ModelObject;
-import io.jmix.core.metamodel.annotation.ModelProperty;
+import io.jmix.core.metamodel.annotation.JmixEntity;
+import io.jmix.core.metamodel.annotation.JmixProperty;
 import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.BaseUuidEntity;
 import io.jmix.core.entity.annotation.SystemLevel;
@@ -27,32 +27,32 @@ import com.haulmont.yarg.structure.ReportQuery;
 import java.util.ArrayList;
 import java.util.List;
 
-@ModelObject(name = "report$BandDefinition")
+@JmixEntity(name = "report_BandDefinition")
 @NamePattern("%s|name")
 @SystemLevel
 public class BandDefinition extends BaseUuidEntity implements ReportBand {
 
     private static final long serialVersionUID = 8658220979738705511L;
 
-    @ModelProperty
+    @JmixProperty
     protected String name;
 
-    @ModelProperty
+    @JmixProperty
     protected BandDefinition parentBandDefinition;
 
-    @ModelProperty
+    @JmixProperty
     protected Report report;
 
-    @ModelProperty
+    @JmixProperty
     protected List<BandDefinition> childrenBandDefinitions = new ArrayList<>();
 
-    @ModelProperty
+    @JmixProperty
     protected List<DataSet> dataSets = new ArrayList<>();
 
-    @ModelProperty
+    @JmixProperty
     protected Integer orientation;
 
-    @ModelProperty
+    @JmixProperty
     protected Integer position;
 
     public BandDefinition getParentBandDefinition() {

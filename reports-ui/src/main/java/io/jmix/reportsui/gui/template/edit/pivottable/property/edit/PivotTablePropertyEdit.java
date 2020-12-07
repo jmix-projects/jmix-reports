@@ -16,26 +16,38 @@
 
 package io.jmix.reportsui.gui.template.edit.pivottable.property.edit;
 
-import com.haulmont.cuba.gui.components.AbstractEditor;
-import com.haulmont.cuba.gui.components.FieldGroup;
-import com.haulmont.cuba.gui.components.SourceCodeEditor;
+import io.jmix.core.Messages;
+import io.jmix.ui.Dialogs;
+import io.jmix.ui.component.Form;
+import io.jmix.ui.component.SourceCodeEditor;
 import com.haulmont.cuba.gui.data.Datasource;
 import io.jmix.reports.entity.pivottable.PivotTableProperty;
 import io.jmix.reports.entity.pivottable.PivotTablePropertyType;
 
+import io.jmix.ui.screen.StandardEditor;
+import io.jmix.ui.screen.Subscribe;
+import io.jmix.ui.screen.UiController;
+import io.jmix.ui.screen.UiDescriptor;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class PivotTablePropertyEdit extends AbstractEditor<PivotTableProperty> {
+import java.awt.*;
+
+@UiController("report_PivotTableProperty.edit")
+@UiDescriptor("pivottable-property-edit.xml")
+public class PivotTablePropertyEdit extends StandardEditor<PivotTableProperty> {
     @Autowired
-    protected FieldGroup editGroup;
+    protected Form editGroup;
     @Autowired
     protected Datasource<PivotTableProperty> propertyDs;
     @Autowired
     protected SourceCodeEditor sourceCodeEditor;
+    @Autowired
+    protected Messages messages;
+    @Autowired
+    protected Dialogs dialogs;
 
-    @Override
-    protected void postInit() {
-        super.postInit();
+    @Subscribe
+    protected void onAfterInit(AfterInitEvent event) {
         initFunctionField();
         propertyDs.addItemPropertyChangeListener(e -> {
             if ("type".equals(e.getProperty())) {
@@ -43,20 +55,22 @@ public class PivotTablePropertyEdit extends AbstractEditor<PivotTableProperty> {
             }
         });
         sourceCodeEditor.setContextHelpIconClickHandler(e ->
-                showMessageDialog(getMessage("pivotTable.functionHelpCaption"), getMessage("pivotTable.propertyFunctionHelp"),
-                        MessageType.CONFIRMATION_HTML
-                                .modal(false)
-                                .width(560f)));
+                dialogs.createMessageDialog()
+                        .withCaption(messages.getMessage("pivotTable.functionHelpCaption"))
+                        .withMessage(messages.getMessage("pivotTable.propertyFunctionHelp"))
+                        .withModal(false)
+                        .withWidth("560px")
+                        .show());
     }
 
     protected void initFunctionField() {
-        PivotTableProperty property = getItem();
-        editGroup.getFieldNN("function")
+        PivotTableProperty property = getEditedEntity();
+        editGroup.getComponent("function")
                 .setVisible(property.getType() == PivotTablePropertyType.DERIVED);
     }
 
-    @Override
-    public boolean commit() {
-        return true;
-    }
+//    @Override
+//    public boolean commit() {
+//        return true;
+//    }
 }

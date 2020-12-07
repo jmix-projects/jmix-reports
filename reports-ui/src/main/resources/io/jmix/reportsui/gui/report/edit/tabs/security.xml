@@ -29,7 +29,7 @@
                        reorderingAllowed="false" columnControlVisible="false">
                     <buttonsPanel>
                         <button action="rolesTable.exclude" caption="msg://roles.removeRole"
-                                icon="icons/remove.png"/>
+                                icon="REMOVE"/>
                     </buttonsPanel>
                     <columns>
                         <column id="name" caption="msg://roles.roleName"/>
@@ -48,7 +48,7 @@
                         reorderingAllowed="false" columnControlVisible="false">
                     <buttonsPanel>
                         <button action="screenTable.remove" caption="msg://screens.removeScreen"
-                                icon="icons/remove.png"/>
+                                icon="REMOVE"/>
                     </buttonsPanel>
                     <columns>
                         <column id="screenId" caption="msg://screens.screenId"/>

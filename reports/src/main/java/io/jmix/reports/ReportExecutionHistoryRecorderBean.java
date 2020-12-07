@@ -13,7 +13,7 @@ import com.haulmont.cuba.core.entity.contracts.Id;
 import com.haulmont.cuba.core.global.*;
 import com.haulmont.yarg.reporting.ReportOutputDocument;
 import com.haulmont.yarg.structure.ReportOutputType;
-import io.jmix.core.JmixEntity;
+import io.jmix.core.Entity;
 import io.jmix.core.TimeSource;
 import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.reports.entity.CubaReportOutputType;
@@ -113,8 +113,8 @@ public class ReportExecutionHistoryRecorderBean implements ReportExecutionHistor
 
         StringBuilder builder = new StringBuilder();
         for (Map.Entry<String, Object> entry : params.entrySet()) {
-            Object value = (entry.getValue() instanceof JmixEntity)
-                    ? String.format("%s-%s", metadata.getClass(entry.getValue().getClass()), Id.of((JmixEntity) entry.getValue()).getValue())
+            Object value = (entry.getValue() instanceof Entity)
+                    ? String.format("%s-%s", metadata.getClass(entry.getValue().getClass()), Id.of((Entity) entry.getValue()).getValue())
                     : entry.getValue();
             builder.append(String.format("key: %s, value: %s", entry.getKey(), value)).append("\n");
         }
@@ -199,14 +199,14 @@ public class ReportExecutionHistoryRecorderBean implements ReportExecutionHistor
         List<UUID> fileIds = new ArrayList<>();
 
         int deleted = persistence.callInTransaction(em -> {
-            List<UUID> ids = em.createQuery("select e.outputDocument.id from report$ReportExecution e"
+            List<UUID> ids = em.createQuery("select e.outputDocument.id from report_ReportExecution e"
                     + " where e.outputDocument is not null and e.startTime < :borderDate", UUID.class)
                     .setParameter("borderDate", borderDate)
                     .getResultList();
             fileIds.addAll(ids);
 
             em.setSoftDeletion(false);
-            return em.createQuery("delete from report$ReportExecution e where e.startTime < :borderDate")
+            return em.createQuery("delete from report_ReportExecution e where e.startTime < :borderDate")
                     .setParameter("borderDate", borderDate)
                     .executeUpdate();
         });
@@ -243,7 +243,7 @@ public class ReportExecutionHistoryRecorderBean implements ReportExecutionHistor
             return 0;
         }
 
-        List<UUID> allReportIds = dataManager.loadValues("select r.id from report$Report r")
+        List<UUID> allReportIds = dataManager.loadValues("select r.id from report_Report r")
                 .properties("id")
                 .list()
                 .stream()
@@ -265,7 +265,7 @@ public class ReportExecutionHistoryRecorderBean implements ReportExecutionHistor
             em.setSoftDeletion(false);
             int rows = 0;
             Date borderStartTime = em.createQuery(
-                    "select e.startTime from report$ReportExecution e"
+                    "select e.startTime from report_ReportExecution e"
                             + " where e.report.id = :reportId"
                             + " order by e.startTime desc", Date.class)
                     .setParameter("reportId", reportId)
@@ -274,14 +274,14 @@ public class ReportExecutionHistoryRecorderBean implements ReportExecutionHistor
                     .getFirstResult();
 
             if (borderStartTime != null) {
-                List<UUID> ids = em.createQuery("select e.outputDocument.id from report$ReportExecution e"
+                List<UUID> ids = em.createQuery("select e.outputDocument.id from report_ReportExecution e"
                         + " where e.outputDocument is not null and e.report.id = :reportId and e.startTime <= :borderTime", UUID.class)
                         .setParameter("reportId", reportId)
                         .setParameter("borderTime", borderStartTime)
                         .getResultList();
                 fileIds.addAll(ids);
 
-                rows = em.createQuery("delete from report$ReportExecution e"
+                rows = em.createQuery("delete from report_ReportExecution e"
                         + " where e.report.id = :reportId and e.startTime <= :borderTime")
                         .setParameter("reportId", reportId)
                         .setParameter("borderTime", borderStartTime)

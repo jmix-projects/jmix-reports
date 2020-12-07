@@ -16,19 +16,22 @@
 
 package io.jmix.reportsui.gui.template.edit.generator;
 
-import com.haulmont.cuba.core.global.AppBeans;
-import com.haulmont.cuba.core.global.Metadata;
+import io.jmix.core.Metadata;
 import io.jmix.core.entity.KeyValueEntity;
 import io.jmix.reports.entity.pivottable.PivotTableDescription;
 import io.jmix.reports.entity.pivottable.PivotTableProperty;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
+@Component("report_RandomPivotTableDataGenerator")
 public class RandomPivotTableDataGenerator {
 
-    protected Metadata metadata = AppBeans.get(Metadata.NAME);
+    @Autowired
+    protected Metadata metadata;
 
     public List<KeyValueEntity> generate(PivotTableDescription description, int size) {
         List<KeyValueEntity> result = new ArrayList<>(size);

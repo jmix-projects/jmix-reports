@@ -17,24 +17,26 @@
 package io.jmix.reportsui.gui.group.browse;
 
 import com.haulmont.cuba.core.global.LoadContext;
-import com.haulmont.cuba.core.global.Metadata;
-import com.haulmont.cuba.gui.components.AbstractLookup;
-import com.haulmont.cuba.gui.components.ListComponent;
-import com.haulmont.cuba.gui.components.Table;
-import io.jmix.ui.action.CreateAction;
-import io.jmix.ui.action.EditAction;
-import io.jmix.ui.action.RemoveAction;
-import com.haulmont.cuba.gui.data.DataSupplier;
+import io.jmix.core.DataManager;
+import io.jmix.core.Messages;
+import io.jmix.core.Metadata;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportGroup;
-
+import io.jmix.ui.Notifications;
+import io.jmix.ui.action.list.CreateAction;
+import io.jmix.ui.action.list.EditAction;
+import io.jmix.ui.action.list.RemoveAction;
 import io.jmix.ui.component.Component;
-import io.jmix.ui.gui.OpenType;
+import io.jmix.ui.component.ListComponent;
+import io.jmix.ui.component.Table;
+import io.jmix.ui.screen.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import javax.inject.Named;
-import java.util.Map;
 
-public class ReportGroupBrowser extends AbstractLookup {
+import javax.inject.Named;
+
+@UiController("report_ReportGroup.browse")
+@UiDescriptor("group-browse.xml")
+public class ReportGroupBrowser extends StandardLookup<ReportGroup> {
 
     @Autowired
     protected Table reportGroupsTable;
@@ -46,14 +48,21 @@ public class ReportGroupBrowser extends AbstractLookup {
     protected EditAction editAction;
 
     @Autowired
+    protected DataManager dataManager;
+
+    @Autowired
     protected Metadata metadata;
 
-    @Override
-    public void init(Map<String, Object> params) {
-        super.init(params);
+    @Autowired
+    protected Notifications notifications;
 
-        createAction.setOpenType(OpenType.DIALOG);
-        editAction.setOpenType(OpenType.DIALOG);
+    @Autowired
+    protected Messages messages;
+
+    @Subscribe
+    protected void onInit(InitEvent event) {
+        createAction.setOpenMode(OpenMode.DIALOG);
+        editAction.setOpenMode(OpenMode.DIALOG);
 
         reportGroupsTable.addAction(new RemoveReportGroupAction(reportGroupsTable));
     }
@@ -61,7 +70,7 @@ public class ReportGroupBrowser extends AbstractLookup {
     protected class RemoveReportGroupAction extends RemoveAction {
 
         public RemoveReportGroupAction(ListComponent owner) {
-            super(owner);
+            super(owner.getId());
         }
 
         @Override
@@ -73,20 +82,23 @@ public class ReportGroupBrowser extends AbstractLookup {
             ReportGroup group = (ReportGroup) target.getSingleSelected();
             if (group != null) {
                 if (group.getSystemFlag()) {
-                    showNotification(getMessage("unableToDeleteSystemReportGroup"), NotificationType.WARNING);
+                    notifications.create(Notifications.NotificationType.WARNING)
+                            .withCaption(messages.getMessage("unableToDeleteSystemReportGroup"))
+                            .show();
                 } else {
                     LoadContext<Report> loadContext = new LoadContext<>(Report.class);
-                    loadContext.setView("report.view");
+                    loadContext.setFetchPlan("report.view");
                     LoadContext.Query query =
-                            new LoadContext.Query("select r from report$Report r where r.group.id = :groupId");
+                            new LoadContext.Query("select r from report_Report r where r.group.id = :groupId");
                     query.setMaxResults(1);
                     query.setParameter("groupId", group.getId());
                     loadContext.setQuery(query);
 
-                    DataSupplier dataService = getDsContext().getDataSupplier();
-                    Report report = dataService.load(loadContext);
+                    Report report = dataManager.load(loadContext);
                     if (report != null) {
-                        showNotification(getMessage("unableToDeleteNotEmptyReportGroup"), NotificationType.WARNING);
+                        notifications.create(Notifications.NotificationType.WARNING)
+                                .withCaption(messages.getMessage("unableToDeleteNotEmptyReportGroup"))
+                                .show();
                     } else {
                         super.actionPerform(component);
                     }

@@ -15,28 +15,28 @@
  */
 package io.jmix.reports.entity;
 
-import io.jmix.core.metamodel.annotation.ModelObject;
-import io.jmix.core.metamodel.annotation.ModelProperty;
 import com.haulmont.cuba.core.entity.BaseUuidEntity;
-import io.jmix.core.entity.annotation.SystemLevel;
 import com.haulmont.yarg.structure.ReportFieldFormat;
+import io.jmix.core.entity.annotation.SystemLevel;
+import io.jmix.core.metamodel.annotation.JmixEntity;
+import io.jmix.core.metamodel.annotation.JmixProperty;
 
-@ModelObject(name = "report$ReportValueFormat")
+@JmixEntity(name = "report_ReportValueFormat")
 @SystemLevel
 public class ReportValueFormat extends BaseUuidEntity implements ReportFieldFormat {
 
     private static final long serialVersionUID = 680180375698449946L;
 
-    @ModelProperty
+    @JmixProperty
     protected String valueName;
 
-    @ModelProperty
+    @JmixProperty
     protected String formatString;
 
-    @ModelProperty
+    @JmixProperty
     protected Report report;
 
-    @ModelProperty
+    @JmixProperty
     protected Boolean groovyScript = false;
 
     public Report getReport() {

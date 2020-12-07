@@ -18,7 +18,7 @@ package io.jmix.reportsui.gui.report.wizard.step;
 
 import com.haulmont.cuba.core.global.AppBeans;
 import com.haulmont.cuba.core.global.Messages;
-import com.haulmont.cuba.gui.components.*;
+import io.jmix.ui.component.*;
 import io.jmix.reportsui.gui.report.wizard.ReportWizardCreator;
 import io.jmix.ui.component.Component;
 import io.jmix.ui.component.Frame;
@@ -50,7 +50,7 @@ public class StepFrame {
     public StepFrame(ReportWizardCreator reportWizardCreatorEditor, String name, String frameComponentName) {
         this.wizard = reportWizardCreatorEditor;
         this.name = name;
-        this.frame = (Frame) reportWizardCreatorEditor.getComponent(frameComponentName);
+        this.frame = (Frame) reportWizardCreatorEditor.getWindow().getComponent(frameComponentName);
         if (frame == null) {
             throw new UnsupportedOperationException("Frame component is not found");
         }
@@ -185,8 +185,10 @@ public class StepFrame {
     }
 
     protected String getDefaultRequiredMessage(String name) {
-        Messages messages = AppBeans.get(Messages.NAME);
-                return messages.formatMainMessage(
-                "validation.required.defaultMsg", name);
+        return name;
+        //todo
+//        Messages messages = AppBeans.get(Messages.NAME);
+//                return messages.formatMainMessage(
+//                "validation.required.defaultMsg", name);
     }
 }

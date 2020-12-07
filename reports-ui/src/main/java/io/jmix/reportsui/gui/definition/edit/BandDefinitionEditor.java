@@ -15,46 +15,45 @@
  */
 package io.jmix.reportsui.gui.definition.edit;
 
-import com.haulmont.cuba.gui.components.CheckBox;
-import com.haulmont.cuba.gui.components.Label;
-import com.haulmont.cuba.gui.components.SourceCodeEditor;
-import com.haulmont.cuba.gui.components.Table;
-import com.haulmont.cuba.gui.components.TextArea;
-import com.haulmont.cuba.gui.components.TextField;
-import io.jmix.core.Stores;
-import io.jmix.core.common.util.ParamsMap;
-import io.jmix.core.metamodel.model.MetaClass;
 import com.haulmont.cuba.core.global.*;
-import com.haulmont.cuba.gui.components.*;
-import io.jmix.ui.action.list.RemoveAction;
 import com.haulmont.cuba.gui.data.CollectionDatasource;
 import com.haulmont.cuba.gui.data.Datasource;
 import com.haulmont.cuba.gui.data.impl.DatasourceImplementation;
+import io.jmix.core.Stores;
+import io.jmix.core.common.util.ParamsMap;
+import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.core.security.EntityOp;
 import io.jmix.reports.app.service.ReportService;
 import io.jmix.reports.app.service.ReportWizardService;
 import io.jmix.reports.entity.*;
+import io.jmix.reports.util.DataSetFactory;
 import io.jmix.reportsui.gui.ReportingClientConfig;
 import io.jmix.reportsui.gui.definition.edit.crosstab.CrossTabTableDecorator;
 import io.jmix.reportsui.gui.definition.edit.scripteditordialog.ScriptEditorDialog;
-import io.jmix.reports.util.DataSetFactory;
+import io.jmix.ui.Actions;
+import io.jmix.ui.Dialogs;
+import io.jmix.ui.ScreenBuilders;
 import io.jmix.ui.action.AbstractAction;
 import io.jmix.ui.action.Action;
+import io.jmix.ui.action.list.CreateAction;
+import io.jmix.ui.action.list.RemoveAction;
 import io.jmix.ui.component.*;
 import io.jmix.ui.component.autocomplete.AutoCompleteSupport;
 import io.jmix.ui.component.autocomplete.JpqlSuggestionFactory;
 import io.jmix.ui.component.autocomplete.Suggester;
 import io.jmix.ui.component.autocomplete.Suggestion;
-import io.jmix.ui.gui.OpenType;
+import io.jmix.ui.screen.*;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nullable;
-import org.springframework.beans.factory.annotation.Autowired;
 import javax.inject.Named;
 import java.util.*;
 
-public class BandDefinitionEditor extends AbstractFrame implements Suggester {
+@UiController("report_BandDefinitionEditor.fragment")
+@UiDescriptor("definition-edit.xml")
+public class BandDefinitionEditor extends ScreenFragment implements Suggester {
 
     @Autowired
     protected Datasource<BandDefinition> bandDefinitionDs;
@@ -79,7 +78,7 @@ public class BandDefinitionEditor extends AbstractFrame implements Suggester {
     @Autowired
     protected GridLayout commonEntityGrid;
     @Autowired
-    protected LookupField jsonSourceTypeField;
+    protected ComboBox jsonSourceTypeField;
     @Autowired
     protected VBoxLayout jsonDataSetTypeVBox;
     @Autowired
@@ -95,19 +94,19 @@ public class BandDefinitionEditor extends AbstractFrame implements Suggester {
     @Autowired
     protected Label viewNameLabel;
     @Autowired
-    protected LookupField orientation;
+    protected ComboBox orientation;
     @Autowired
-    protected LookupField parentBand;
+    protected ComboBox parentBand;
     @Autowired
     protected TextField name;
     @Autowired
-    protected LookupField viewNameLookup;
+    protected ComboBox viewNameLookup;
     @Autowired
-    protected LookupField entitiesParamLookup;
+    protected ComboBox entitiesParamLookup;
     @Autowired
-    protected LookupField entityParamLookup;
+    protected ComboBox entityParamLookup;
     @Autowired
-    protected LookupField dataStore;
+    protected ComboBox dataStore;
     @Autowired
     protected CheckBox processTemplate;
     @Autowired
@@ -146,27 +145,33 @@ public class BandDefinitionEditor extends AbstractFrame implements Suggester {
     protected ReportingClientConfig reportingClientConfig;
     @Autowired
     protected Messages messages;
+    @Autowired
+    protected Dialogs dialogs;
+    @Autowired
+    protected ScreenBuilders screenBuilders;
+    @Autowired
+    protected Actions actions;
 
     protected SourceCodeEditor.Mode dataSetScriptFieldMode = SourceCodeEditor.Mode.Text;
 
-    public interface Companion {
-        void initDatasetsTable(Table table);
-    }
-
+    @Subscribe("jsonSourceGroovyCodeLinkBtn")
     public void showJsonScriptEditorDialog() {
-        ScriptEditorDialog editorDialog = (ScriptEditorDialog) openWindow(
-                "scriptEditorDialog",
-                OpenType.DIALOG,
-                ParamsMap.of(
+        ScriptEditorDialog editorDialog = (ScriptEditorDialog) screenBuilders.screen(this)
+                .withScreenId("scriptEditorDialog")
+                .withOpenMode(OpenMode.DIALOG)
+                .withOptions(new MapScreenOptions(ParamsMap.of(
                         "caption", getScriptEditorDialogCaption(),
                         "scriptValue", jsonGroovyCodeEditor.getValue(),
                         "helpHandler", jsonGroovyCodeEditor.getContextHelpIconClickHandler()
-                ));
-        editorDialog.addCloseListener(actionId -> {
-            if (Window.COMMIT_ACTION_ID.equals(actionId)) {
+                ))).build();
+
+        editorDialog.addAfterCloseListener(actionId -> {
+            if (Window.COMMIT_ACTION_ID.equals(((StandardCloseAction)actionId.getCloseAction()).getActionId())) {
                 jsonGroovyCodeEditor.setValue(editorDialog.getValue());
             }
         });
+
+        editorDialog.show();
     }
 
     protected String getScriptEditorDialogCaption() {
@@ -179,22 +184,26 @@ public class BandDefinitionEditor extends AbstractFrame implements Suggester {
         return null;
     }
 
+    @Subscribe("dataSetTextLinkBtn")
     public void showDataSetScriptEditorDialog() {
-        ScriptEditorDialog editorDialog = (ScriptEditorDialog) openWindow(
-                "scriptEditorDialog",
-                OpenType.DIALOG,
-                ParamsMap.of(
+        ScriptEditorDialog editorDialog = (ScriptEditorDialog) screenBuilders.screen(this)
+                .withScreenId("scriptEditorDialog")
+                .withOpenMode(OpenMode.DIALOG)
+                .withOptions(new MapScreenOptions(ParamsMap.of(
                         "caption", getScriptEditorDialogCaption(),
                         "mode", dataSetScriptFieldMode,
                         "suggester", dataSetScriptField.getSuggester(),
                         "scriptValue", dataSetScriptField.getValue(),
                         "helpHandler", dataSetScriptField.getContextHelpIconClickHandler()
-                ));
-        editorDialog.addCloseListener(actionId -> {
-            if (Window.COMMIT_ACTION_ID.equals(actionId)) {
+                ))).build();
+
+        editorDialog.addAfterCloseListener(actionId -> {
+            if (Window.COMMIT_ACTION_ID.equals(((StandardCloseAction)actionId.getCloseAction()).getActionId())) {
                 dataSetScriptField.setValue(editorDialog.getValue());
             }
         });
+
+        editorDialog.show();
     }
 
     public void setBandDefinition(BandDefinition bandDefinition) {
@@ -207,10 +216,11 @@ public class BandDefinitionEditor extends AbstractFrame implements Suggester {
         return bandDefinitionDs;
     }
 
-    @Override
+
+//    @Override
     public void setEnabled(boolean enabled) {
         //Desktop Component containers doesn't apply disable flags for child components
-        for (Component component : getComponents()) {
+        for (Component component : getFragment().getComponents()) {
             component.setEnabled(enabled);
         }
     }
@@ -225,17 +235,13 @@ public class BandDefinitionEditor extends AbstractFrame implements Suggester {
         return jpqlSuggestionFactory.requestHint(text, queryPosition, source, cursorPosition);
     }
 
-    @Override
-    public void init(Map<String, Object> params) {
-        super.init(params);
-
+    @Subscribe
+    protected void onInit(InitEvent event) {
         initDataSetListeners();
 
         initBandDefinitionsListeners();
 
         initParametersListeners();
-
-        initCompanion();
 
         initActions();
 
@@ -248,15 +254,19 @@ public class BandDefinitionEditor extends AbstractFrame implements Suggester {
 
     protected void initHelpButtons() {
         jsonGroovyCodeEditor.setContextHelpIconClickHandler(e ->
-                showMessageDialog(getMessage("dataSet.text"), getMessage("dataSet.jsonSourceGroovyCodeHelp"),
-                        MessageType.CONFIRMATION_HTML
-                                .modal(false)
-                                .width(700f)));
+                dialogs.createMessageDialog()
+                        .withCaption(messages.getMessage("dataSet.text"))
+                        .withMessage(messages.getMessage("dataSet.jsonSourceGroovyCodeHelp"))
+                        .withModal(false)
+                        .withWidth("700px")
+                        .show());
         jsonPathQueryTextAreaField.setContextHelpIconClickHandler(e ->
-                showMessageDialog(getMessage("dataSet.text"), getMessage("dataSet.jsonPathQueryHelp"),
-                        MessageType.CONFIRMATION_HTML
-                                .modal(false)
-                                .width(700f)));
+                dialogs.createMessageDialog()
+                        .withCaption(messages.getMessage("dataSet.text"))
+                        .withMessage(messages.getMessage("dataSet.jsonPathQueryHelp"))
+                        .withModal(false)
+                        .withWidth("700px")
+                        .show());
     }
 
     protected void initSourceCodeOptions() {
@@ -294,70 +304,46 @@ public class BandDefinitionEditor extends AbstractFrame implements Suggester {
 
     protected void initDataStoreField() {
         Map<String, Object> all = new HashMap<>();
-        all.put(getMessage("dataSet.dataStoreMain"), Stores.MAIN);
+        all.put(messages.getMessage("dataSet.dataStoreMain"), Stores.MAIN);
         for (String additional : stores.getAdditional()) {
             all.put(additional, additional);
         }
         dataStore.setOptionsMap(all);
     }
 
-    protected void initCompanion() {
-        Companion companion = getCompanion();
-        if (companion != null) {
-            companion.initDatasetsTable(dataSets);
-        }
-    }
-
     protected void initActions() {
-        dataSets.addAction(new RemoveAction(dataSets, false) {
-            @Override
-            public String getDescription() {
-                return getMessage("description.removeDataSet");
-            }
+        RemoveAction removeAction = (RemoveAction) actions.create(RemoveAction.class)
+                .withCaption("")
+                .withDescription(messages.getMessage("description.removeDataSet"));
+        dataSets.addAction(removeAction);
 
-            @Override
-            public String getCaption() {
-                return "";
-            }
-        });
 
-        dataSets.addAction(new AbstractAction("create") {
-            @Override
-            public String getDescription() {
-                return getMessage("description.createDataSet");
-            }
+        CreateAction createAction = (CreateAction) actions.create(CreateAction.class)
+                .withCaption("")
+                .withDescription(messages.getMessage("description.createDataSet"))
+                .withHandler(handle -> {
+                    BandDefinition selectedBand = bandDefinitionDs.getItem();
+                    if (selectedBand != null) {
+                        DataSet dataset = dataSetFactory.createEmptyDataSet(selectedBand);
+                        selectedBand.getDataSets().add(dataset);
+                        dataSetsDs.addItem(dataset);
+                        dataSetsDs.setItem(dataset);
+                        dataSets.setSelected(dataset);
+                    }
+                });
+        createAction.setEnabled(createAction.isEnabled() && isUpdatePermitted());
+        dataSets.addAction(createAction);
 
-            @Override
-            public String getCaption() {
-                return "";
-            }
-
-            @Override
-            public void actionPerform(Component component) {
-                BandDefinition selectedBand = bandDefinitionDs.getItem();
-                if (selectedBand != null) {
-                    DataSet dataset = dataSetFactory.createEmptyDataSet(selectedBand);
-                    selectedBand.getDataSets().add(dataset);
-                    dataSetsDs.addItem(dataset);
-                    dataSetsDs.setItem(dataset);
-                    dataSets.setSelected(dataset);
-                }
-            }
-
-            @Override
-            public boolean isEnabled() {
-                return super.isEnabled() && isUpdatePermitted();
-            }
-        });
-
+        //todo
         Action editDataSetViewAction = new EditViewAction(this);
         viewEditButton.setAction(editDataSetViewAction);
 
         viewNameLookup.setOptionsMap(new HashMap<>());
 
-        entitiesParamLookup.setNewOptionAllowed(true);
-        entityParamLookup.setNewOptionAllowed(true);
-        viewNameLookup.setNewOptionAllowed(true);
+        //todo
+//        entitiesParamLookup.setNewOptionAllowed(true);
+//        entityParamLookup.setNewOptionAllowed(true);
+//        viewNameLookup.setNewOptionAllowed(true);
         entitiesParamLookup.setNewOptionHandler(LinkedWithPropertyNewOptionHandler.handler(dataSetsDs, "listEntitiesParamName"));
         entityParamLookup.setNewOptionHandler(LinkedWithPropertyNewOptionHandler.handler(dataSetsDs, "entityParamName"));
         viewNameLookup.setNewOptionHandler(LinkedWithPropertyNewOptionHandler.handler(dataSetsDs, "viewName"));
@@ -517,10 +503,12 @@ public class BandDefinitionEditor extends AbstractFrame implements Suggester {
                     dataSetScriptField.setSuggester(null);
                     dataSetScriptField.setMode(SourceCodeEditor.Mode.Groovy);
                     dataSetScriptField.setContextHelpIconClickHandler(e ->
-                            showMessageDialog(getMessage("dataSet.text"), getMessage("dataSet.textHelp"),
-                                    MessageType.CONFIRMATION_HTML
-                                            .modal(false)
-                                            .width(700f)));
+                            dialogs.createMessageDialog()
+                                    .withCaption(messages.getMessage("dataSet.text"))
+                                    .withMessage(messages.getMessage("dataSet.textHelp"))
+                                    .withModal(false)
+                                    .withWidth("700px")
+                                    .show());
                     break;
 
                 case JPQL:
@@ -578,12 +566,6 @@ public class BandDefinitionEditor extends AbstractFrame implements Suggester {
         } else {
             dataSets.setSelected((DataSet) null);
         }
-    }
-
-    // For EditViewAction
-    @Override
-    protected String formatMessage(String key, Object... params) {
-        return super.formatMessage(key, params);
     }
 
     // This is a stub for using set in some DataSet change listener

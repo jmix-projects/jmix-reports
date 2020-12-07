@@ -16,23 +16,26 @@
 
 package io.jmix.reportsui.gui.template.edit;
 
-import com.haulmont.cuba.gui.components.AbstractFrame;
 import io.jmix.reports.entity.ReportOutputType;
 import io.jmix.reports.entity.ReportTemplate;
 import io.jmix.ui.component.BoxLayout;
 import io.jmix.ui.component.Window;
+import io.jmix.ui.screen.ScreenFragment;
+import io.jmix.ui.screen.Subscribe;
+import io.jmix.ui.screen.UiController;
+import io.jmix.ui.screen.UiDescriptor;
 
-import java.util.Map;
-
-public abstract class DescriptionEditFrame extends AbstractFrame {
+@UiController("report_DescriptionEdit.fragment")
+@UiDescriptor("template-edit.xml")
+public abstract class DescriptionEditFrame extends ScreenFragment {
 
     protected ReportTemplate reportTemplate;
     protected BoxLayout previewBox;
     protected boolean supportPreview;
 
-    public void init(Map<String, Object> params) {
-        super.init(params);
-        Window parent = (Window) getFrame();
+    @Subscribe
+    protected void onInit(InitEvent event) {
+        Window parent = (Window) getFragment();
         previewBox = (BoxLayout) parent.getComponentNN("previewBox");
     }
 
@@ -45,7 +48,7 @@ public abstract class DescriptionEditFrame extends AbstractFrame {
     }
 
     public void showPreview() {
-        Window parent = (Window) getFrame();
+//        Window parent = (Window) getFragment();
         previewBox.setVisible(true);
         previewBox.setHeight("100%");
         previewBox.setWidth("100%");
@@ -59,7 +62,7 @@ public abstract class DescriptionEditFrame extends AbstractFrame {
     }
 
     public void hidePreview() {
-        Window parent = (Window) getFrame();
+//        Window parent = (Window) getFragment();
         previewBox.setVisible(false);
         previewBox.removeAll();
         //TODO dialog options

@@ -13,13 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jmix.reports.wizard;
+package io.jmix.reportsui.wizard;
 
 import io.jmix.core.FetchPlan;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.core.metamodel.model.MetaProperty;
-import com.haulmont.cuba.core.global.AppBeans;
-import com.haulmont.cuba.core.global.View;
 import io.jmix.reports.app.EntityTree;
 import io.jmix.reports.app.service.ReportWizardService;
 import io.jmix.reports.entity.Report;
@@ -28,7 +26,8 @@ import io.jmix.reports.entity.wizard.ReportData;
 import io.jmix.reports.entity.wizard.ReportRegion;
 import io.jmix.reports.entity.wizard.TemplateFileType;
 import io.jmix.reports.exception.TemplateGenerationException;
-import io.jmix.reports.wizard.template.TemplateGeneratorApi;
+import io.jmix.reportsui.wizard.template.TemplateGenerator;
+import io.jmix.reportsui.wizard.template.TemplateGeneratorApi;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nullable;
@@ -43,13 +42,19 @@ public class ReportWizardServiceBean implements ReportWizardService {
     @Autowired
     private Provider<EntityTreeModelBuilderApi> entityTreeModelBuilderApiProvider;
 
+    //todo prototype
+    @Autowired
+    protected TemplateGeneratorApi templateGeneratorApi(ReportData reportData, TemplateFileType templateFileType) {
+        return new TemplateGenerator(reportData, templateFileType);
+    }
+
     @Override
     public Report toReport(ReportData reportData, boolean temporary) {
         return reportingWizardApi.toReport(reportData, temporary);
     }
 
     @Override
-    public View createViewByReportRegions(EntityTreeNode entityTreeRootNode, List<ReportRegion> reportRegions) {
+    public FetchPlan createViewByReportRegions(EntityTreeNode entityTreeRootNode, List<ReportRegion> reportRegions) {
         return reportingWizardApi.createViewByReportRegions(entityTreeRootNode, reportRegions);
     }
 
@@ -70,7 +75,7 @@ public class ReportWizardServiceBean implements ReportWizardService {
 
     @Override
     public byte[] generateTemplate(ReportData reportData, TemplateFileType templateFileType) throws TemplateGenerationException {
-        TemplateGeneratorApi templateGeneratorApi = AppBeans.getPrototype(TemplateGeneratorApi.NAME, reportData, templateFileType);
+        TemplateGeneratorApi templateGeneratorApi = templateGeneratorApi(reportData, templateFileType);
         return templateGeneratorApi.generateTemplate();
     }
 

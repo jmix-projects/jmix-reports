@@ -16,9 +16,9 @@
 
 package io.jmix.reportsui.gui.actions.list;
 
+import io.jmix.core.Messages;
 import io.jmix.core.common.util.ParamsMap;
 import io.jmix.core.metamodel.model.MetaClass;
-import com.haulmont.cuba.core.global.Messages;
 import io.jmix.ui.action.ListAction;
 import io.jmix.reports.entity.Report;
 import io.jmix.reportsui.gui.report.history.ReportExecutionBrowser;

@@ -17,20 +17,20 @@
 package io.jmix.reports.libintegration;
 
 import com.haulmont.chile.core.datatypes.Datatypes;
-import io.jmix.core.JmixEntity;
-import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.EntityLoadInfo;
-import com.haulmont.cuba.core.global.LoadContext;
-import com.haulmont.cuba.core.global.View;
 import com.haulmont.yarg.exception.ReportingException;
 import com.haulmont.yarg.util.converter.AbstractObjectToStringConverter;
-
+import io.jmix.core.DataManager;
+import io.jmix.core.Entity;
+import io.jmix.core.FetchPlan;
 import io.jmix.core.metamodel.datatype.Datatype;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import java.text.ParseException;
 import java.util.UUID;
 
 public class JmixObjectToStringConverter extends AbstractObjectToStringConverter {
+
     @Autowired
     protected DataManager dataManager;
 
@@ -40,8 +40,8 @@ public class JmixObjectToStringConverter extends AbstractObjectToStringConverter
             return null;
         } else if (String.class.isAssignableFrom(parameterClass)) {
             return (String) paramValue;
-        } else if (JmixEntity.class.isAssignableFrom(parameterClass)) {
-            return EntityLoadInfo.create((JmixEntity) paramValue).toString();
+        } else if (Entity.class.isAssignableFrom(parameterClass)) {
+            return EntityLoadInfo.create((Entity) paramValue).toString();
         } else {
             Datatype datatype = Datatypes.get(parameterClass);
             if (datatype != null) {
@@ -58,13 +58,19 @@ public class JmixObjectToStringConverter extends AbstractObjectToStringConverter
             return null;
         } else if (String.class.isAssignableFrom(parameterClass)) {
             return paramValueStr;
-        } else if (JmixEntity.class.isAssignableFrom(parameterClass)) {
+        } else if (Entity.class.isAssignableFrom(parameterClass)) {
             EntityLoadInfo entityLoadInfo = EntityLoadInfo.parse(paramValueStr);
             if (entityLoadInfo != null) {
-                return dataManager.load(new LoadContext(entityLoadInfo.getMetaClass()).setId(entityLoadInfo.getId()).setView(View.BASE));
+                return dataManager.load(entityLoadInfo.getClass())
+                        .id(entityLoadInfo.getId())
+                        .fetchPlan(FetchPlan.BASE)
+                        .one();
             } else {
                 UUID id = UUID.fromString(paramValueStr);
-                return dataManager.load(new LoadContext(parameterClass).setId(id).setView(View.BASE));
+                return dataManager.load(parameterClass)
+                        .id(id)
+                        .fetchPlan(FetchPlan.BASE)
+                        .one();
             }
         } else {
             Datatype datatype = Datatypes.get(parameterClass);

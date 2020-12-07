@@ -40,11 +40,11 @@
 //
 //    @Override
 //    @ScreenAccess(screenIds = {
-//            "report$inputParameters",
-//            "report$Report.run",
-//            "report$showReportTable",
-//            "report$showPivotTable",
-//            "report$showChart",
+//            "report_inputParameters",
+//            "report_Report.run",
+//            "report_showReportTable",
+//            "report_showPivotTable",
+//            "report_showChart",
 //            "commonLookup"
 //    })
 //    public ScreenPermissionsContainer screenPermissions() {

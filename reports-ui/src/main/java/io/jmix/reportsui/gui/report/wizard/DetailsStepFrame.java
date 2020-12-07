@@ -16,32 +16,33 @@
 
 package io.jmix.reportsui.gui.report.wizard;
 
+import com.haulmont.cuba.security.entity.FilterEntity;
 import io.jmix.core.MessageTools;
+import io.jmix.core.Messages;
 import io.jmix.core.MetadataTools;
 import io.jmix.core.common.util.Dom4j;
 import io.jmix.core.metamodel.model.MetaClass;
-import com.haulmont.cuba.core.global.AppBeans;
-import com.haulmont.cuba.core.global.Messages;
-import com.haulmont.cuba.gui.components.*;
-import com.haulmont.cuba.gui.components.filter.ConditionsTree;
-import com.haulmont.cuba.gui.components.filter.FilterParser;
-import com.haulmont.cuba.gui.components.filter.Param;
-import com.haulmont.cuba.gui.components.filter.condition.AbstractCondition;
-import com.haulmont.cuba.gui.components.filter.edit.FilterEditor;
-import com.haulmont.cuba.security.entity.FilterEntity;
+import io.jmix.reports.ParameterClassResolver;
 import io.jmix.reports.entity.ParameterType;
 import io.jmix.reports.entity.PredefinedTransformation;
 import io.jmix.reports.entity.wizard.ReportData;
 import io.jmix.reports.entity.wizard.ReportData.ReportType;
 import io.jmix.reports.entity.wizard.TemplateFileType;
-import io.jmix.reports.ParameterClassResolver;
 import io.jmix.reportsui.gui.report.run.ShowChartController;
 import io.jmix.reportsui.gui.report.wizard.step.StepFrame;
+import io.jmix.ui.Notifications;
 import io.jmix.ui.WindowConfig;
 import io.jmix.ui.action.AbstractAction;
 import io.jmix.ui.action.Action;
 import io.jmix.ui.action.DialogAction;
-import io.jmix.ui.component.*;
+import io.jmix.ui.component.Component;
+import io.jmix.ui.component.Frame;
+import io.jmix.ui.component.HasValue;
+import io.jmix.ui.component.Window;
+import io.jmix.ui.component.filter.ConditionsTree;
+import io.jmix.ui.component.filter.Param;
+import io.jmix.ui.component.filter.condition.AbstractCondition;
+import io.jmix.ui.component.filter.edit.FilterEditor;
 import io.jmix.ui.filter.*;
 import io.jmix.ui.gui.OpenType;
 import org.apache.commons.lang3.StringUtils;
@@ -51,9 +52,11 @@ import javax.persistence.TemporalType;
 import java.util.*;
 import java.util.function.Consumer;
 
+
 public class DetailsStepFrame extends StepFrame {
-    protected ConditionsTree conditionsTree;
-    protected Filter filter;
+    //todo
+//    protected ConditionsTree conditionsTree;
+//    protected Filter filter;
     protected FilterEntity filterEntity;
 
     public DetailsStepFrame(ReportWizardCreator wizard) {
@@ -99,15 +102,15 @@ public class DetailsStepFrame extends StepFrame {
         }
 
         protected void initReportTypeOptionGroup() {
-            wizard.reportTypeOptionGroup.setOptionsMap(getListedReportOptionsMap());
-            wizard.reportTypeOptionGroup.setValue(ReportType.SINGLE_ENTITY);
-            wizard.reportTypeOptionGroup.addValueChangeListener(new ClearRegionListener(
+            wizard.reportTypeRadioButtonGroup.setOptionsMap(getListedReportOptionsMap());
+            wizard.reportTypeRadioButtonGroup.setValue(ReportType.SINGLE_ENTITY);
+            wizard.reportTypeRadioButtonGroup.addValueChangeListener(new ClearRegionListener(
                     new DialogActionWithChangedValue(DialogAction.Type.YES) {
                         @Override
                         public void actionPerform(Component component) {
                             wizard.getItem().getReportRegions().clear();
                             wizard.regionsTable.refresh(); //for web6
-                            wizard.reportTypeOptionGroup.setValue(newValue);
+                            wizard.reportTypeRadioButtonGroup.setValue(newValue);
                         }
                     }));
         }
@@ -121,17 +124,17 @@ public class DetailsStepFrame extends StepFrame {
         }
 
         protected Map<String, TemplateFileType> getAvailableTemplateFormats() {
-            Messages messages = AppBeans.get(Messages.NAME);
+            Messages messages = wizard.messages;
             Map<String, TemplateFileType> result = new LinkedHashMap<>(4);
             result.put(messages.getMessage(TemplateFileType.XLSX), TemplateFileType.XLSX);
             result.put(messages.getMessage(TemplateFileType.DOCX), TemplateFileType.DOCX);
             result.put(messages.getMessage(TemplateFileType.HTML), TemplateFileType.HTML);
             result.put(messages.getMessage(TemplateFileType.CSV), TemplateFileType.CSV);
             result.put(messages.getMessage(TemplateFileType.TABLE), TemplateFileType.TABLE);
-            WindowConfig windowConfig = AppBeans.get(WindowConfig.NAME);
-            if (windowConfig.hasWindow(ShowChartController.JSON_CHART_SCREEN_ID)) {
-                result.put(messages.getMessage(TemplateFileType.CHART), TemplateFileType.CHART);
-            }
+//            WindowConfig windowConfig = AppBeans.get(WindowConfig.NAME);
+//            if (windowConfig.hasWindow(ShowChartController.JSON_CHART_SCREEN_ID)) {
+//                result.put(messages.getMessage(TemplateFileType.CHART), TemplateFileType.CHART);
+//            }
             return result;
         }
 
@@ -139,7 +142,7 @@ public class DetailsStepFrame extends StepFrame {
             Map<String, MetaClass> result = new TreeMap<>(String::compareTo);
             Collection<MetaClass> classes = wizard.metadataTools.getAllPersistentMetaClasses();
             for (MetaClass metaClass : classes) {
-                MetaClass effectiveMetaClass = wizard.metadata.getExtendedEntities().getEffectiveMetaClass(metaClass);
+                MetaClass effectiveMetaClass = wizard.extendedEntities.getEffectiveMetaClass(metaClass);
                 if (!wizard.reportWizardService.isEntityAllowedForReportWizard(effectiveMetaClass)) {
                     continue;
                 }
@@ -152,7 +155,7 @@ public class DetailsStepFrame extends StepFrame {
     @Override
     public List<String> validateFrame() {
         ArrayList<String> errors = new ArrayList<>(super.validateFrame());
-        if (wizard.reportTypeOptionGroup.getValue() == ReportType.LIST_OF_ENTITIES_WITH_QUERY && wizard.query == null) {
+        if (wizard.reportTypeRadioButtonGroup.getValue() == ReportType.LIST_OF_ENTITIES_WITH_QUERY && wizard.query == null) {
             errors.add(wizard.getMessage("fillReportQuery"));
         }
 
@@ -193,7 +196,9 @@ public class DetailsStepFrame extends StepFrame {
                         wizard.reportName.setValue(newText);
                         if (!oldReportName.equals(wizard.formatMessage("reportNamePattern", prevEntityCaption))) {
                             //if user changed auto generated report name and we have changed it, we show message to him
-                            wizard.showNotification(wizard.getMessage("reportNameChanged"), Frame.NotificationType.TRAY);
+                            wizard.notifications.create(Notifications.NotificationType.TRAY)
+                                    .withCaption(wizard.getMessage("reportNameChanged"))
+                                    .show();
                         }
                     }
                 }
@@ -208,14 +213,16 @@ public class DetailsStepFrame extends StepFrame {
 
         @Override
         public boolean isVisible() {
-            return ReportType.LIST_OF_ENTITIES_WITH_QUERY == wizard.reportTypeOptionGroup.getValue();
+            return ReportType.LIST_OF_ENTITIES_WITH_QUERY == wizard.reportTypeRadioButtonGroup.getValue();
         }
 
         @Override
         public void actionPerform(Component component) {
             MetaClass entityMetaClass = wizard.entity.getValue();
             if (entityMetaClass == null) {
-                wizard.showNotification(wizard.getMessage("fillEntityMsg"), Frame.NotificationType.TRAY_HTML);
+                wizard.notifications.create(Notifications.NotificationType.TRAY)
+                        .withCaption(wizard.getMessage("fillEntityMsg"))
+                        .show();
                 return;
             }
 //TODO Fake filter
@@ -230,8 +237,8 @@ public class DetailsStepFrame extends StepFrame {
 
             Map<String, Object> params = new HashMap<>();
             params.put("filterEntity", filterEntity);
-            params.put("filter", filter);
-            params.put("conditionsTree", conditionsTree);
+//            params.put("filter", filter);
+//            params.put("conditionsTree", conditionsTree);
             params.put("useShortConditionForm", true);
             params.put("showConditionHiddenOption", true);
             params.put("hideOperations", hideOperations);
@@ -260,7 +267,9 @@ public class DetailsStepFrame extends StepFrame {
 //                        wizard.query = collectQuery(queryFilter);
 //                        wizard.queryParameters = collectQueryParameters(queryFilter);
                     } else {
-                        wizard.showNotification(wizard.getMessage("defaultQueryHasBeenSet"), Frame.NotificationType.HUMANIZED);
+                        wizard.notifications.create(Notifications.NotificationType.HUMANIZED)
+                                .withCaption(wizard.getMessage("defaultQueryHasBeenSet"))
+                                .show();
                         wizard.query = filter.getDatasource().getQuery();
                         wizard.queryParameters = Collections.emptyList();
                     }
@@ -434,15 +443,14 @@ public class DetailsStepFrame extends StepFrame {
         @Override
         public void accept(HasValue.ValueChangeEvent e) {
             if (!wizard.getItem().getReportRegions().isEmpty()) {
-                wizard.showOptionDialog(
-                        wizard.getMessage("dialogs.Confirmation"),
-                        wizard.getMessage("regionsClearConfirm"),
-                        Frame.MessageType.CONFIRMATION,
-                        new AbstractAction[]{
+                wizard.dialogs.createOptionDialog()
+                        .withCaption(wizard.getMessage("dialogs.Confirmation"))
+                        .withMessage(wizard.getMessage("regionsClearConfirm"))
+                        .withActions(
                                 okAction.setValue(e.getValue()),
-
                                 new DialogAction(DialogAction.Type.NO, Action.Status.PRIMARY)
-                        });
+                        )
+                        .show();
             } else {
                 wizard.needUpdateEntityModel = true;
                 clearQueryAndFilter();
@@ -450,7 +458,7 @@ public class DetailsStepFrame extends StepFrame {
 
             if (wizard.setQueryButton != null) {
                 wizard.setQueryButton.setVisible(
-                        wizard.reportTypeOptionGroup.getValue() == ReportType.LIST_OF_ENTITIES_WITH_QUERY);
+                        wizard.reportTypeRadioButtonGroup.getValue() == ReportType.LIST_OF_ENTITIES_WITH_QUERY);
             }
         }
     }

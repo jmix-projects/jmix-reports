@@ -16,7 +16,7 @@
 
 package io.jmix.reports.libintegration;
 
-import io.jmix.core.JmixEntity;
+import io.jmix.core.Entity;
 import io.jmix.reports.app.EntityMap;
 import io.jmix.reports.entity.DataSet;
 import com.haulmont.yarg.structure.BandData;
@@ -56,9 +56,9 @@ public class SingleEntityDataLoader extends AbstractEntityDataLoader {
 
         EntityMap result;
         if (dataSet instanceof DataSet) {
-            result = new EntityMap((JmixEntity) entity, getView((JmixEntity)entity, (DataSet) dataSet),beanFactory);
+            result = new EntityMap((Entity) entity, getView((Entity)entity, (DataSet) dataSet),beanFactory);
         } else {
-            result = new EntityMap((JmixEntity) entity,beanFactory);
+            result = new EntityMap((Entity) entity,beanFactory);
         }
         return Collections.singletonList(result);
     }

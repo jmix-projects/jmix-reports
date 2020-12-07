@@ -19,8 +19,8 @@ package io.jmix.reports.entity.wizard;
 import com.haulmont.cuba.core.entity.BaseUuidEntity;
 import io.jmix.core.entity.annotation.SystemLevel;
 import io.jmix.core.metamodel.annotation.Composition;
-import io.jmix.core.metamodel.annotation.ModelObject;
-import io.jmix.core.metamodel.annotation.ModelProperty;
+import io.jmix.core.metamodel.annotation.JmixEntity;
+import io.jmix.core.metamodel.annotation.JmixProperty;
 import io.jmix.reports.entity.*;
 import io.jmix.reports.entity.charts.ChartType;
 
@@ -30,7 +30,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-@ModelObject(name = "report$WizardReportData")
+@JmixEntity(name = "report_WizardReportData")
 @SystemLevel
 public class ReportData extends BaseUuidEntity {
 
@@ -81,39 +81,39 @@ public class ReportData extends BaseUuidEntity {
         }
     }
 
-    @ModelProperty
+    @JmixProperty
     @Transient
     protected String name;
 
-    @ModelProperty
+    @JmixProperty
     @Transient
     protected EntityTreeNode entityTreeRootNode;
 
-    @ModelProperty
+    @JmixProperty
     @Transient
     protected Report generatedReport;
 
-    @ModelProperty
+    @JmixProperty
     @Transient
     protected ReportGroup group;
 
-    @ModelProperty
+    @JmixProperty
     @Transient
     protected ReportType reportType;
 
-    @ModelProperty
+    @JmixProperty
     @Transient
     protected String templateFileName;
 
-    @ModelProperty
+    @JmixProperty
     @Transient
     protected String outputNamePattern;
 
-    @ModelProperty
+    @JmixProperty
     @Transient
     protected ReportOutputType outputFileType;
 
-    @ModelProperty
+    @JmixProperty
     @Composition
     @Transient
     @OneToMany(targetEntity = RegionProperty.class)

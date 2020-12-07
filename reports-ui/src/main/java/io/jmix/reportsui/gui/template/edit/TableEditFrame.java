@@ -16,9 +16,11 @@
 
 package io.jmix.reportsui.gui.template.edit;
 
-import com.haulmont.cuba.core.global.Metadata;
-import com.haulmont.cuba.gui.components.Table;
-import com.haulmont.cuba.gui.components.actions.RemoveAction;
+import io.jmix.core.Messages;
+import io.jmix.core.Metadata;
+import io.jmix.ui.Notifications;
+import io.jmix.ui.action.list.RemoveAction;
+import io.jmix.ui.component.Table;
 import com.haulmont.cuba.gui.data.CollectionDatasource;
 import com.haulmont.cuba.gui.data.Datasource;
 import io.jmix.core.metamodel.model.MetaClass;
@@ -32,13 +34,17 @@ import io.jmix.ui.action.AbstractAction;
 import io.jmix.ui.action.ListAction;
 import io.jmix.ui.component.BoxLayout;
 import io.jmix.ui.component.Component;
+import io.jmix.ui.screen.Subscribe;
+import io.jmix.ui.screen.UiController;
+import io.jmix.ui.screen.UiDescriptor;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-
+@UiController("report_TableEdit.fragment")
+@UiDescriptor("table-edit-frame.xml")
 public class TableEditFrame extends DescriptionEditFrame {
 
     public static final int UP = 1;
@@ -66,20 +72,24 @@ public class TableEditFrame extends DescriptionEditFrame {
     @Autowired
     protected CollectionDatasource.Sortable<TemplateTableColumn, UUID> tableColumnsDs;
 
+    @Autowired
+    protected Messages messages;
+
+    @Autowired
+    protected Notifications notifications;
+
     public ReportTemplate getReportTemplate() {
         return reportTemplate;
     }
 
-    @Override
-    public void init(Map<String, Object> params) {
-        super.init(params);
-
+    @Subscribe
+    protected void onInit(InitEvent event) {
         initButtonBandTable();
         initButtonColumnTable();
     }
 
     protected void sortParametersByPosition(Class c, CollectionDatasource.Sortable collectionDatasource) {
-        MetaClass metaClass = metadata.getClassNN(c);
+        MetaClass metaClass = metadata.getClass(c);
         MetaPropertyPath mpp = new MetaPropertyPath(metaClass, metaClass.getProperty(POSITION));
 
         CollectionDatasource.Sortable.SortInfo<MetaPropertyPath> sortInfo = new CollectionDatasource.Sortable.SortInfo<>();
@@ -178,7 +188,9 @@ public class TableEditFrame extends DescriptionEditFrame {
                     tableColumnsDs.addItem(item);
                     tableColumnsDs.commit();
                 } else {
-                    showNotification(getMessage("template.bandRequired"), NotificationType.HUMANIZED);
+                    notifications.create(Notifications.NotificationType.HUMANIZED)
+                            .withCaption(messages.getMessage("template.bandRequired"))
+                            .show();
                 }
             }
         });
@@ -287,13 +299,17 @@ public class TableEditFrame extends DescriptionEditFrame {
 
         for (TemplateTableBand band : tableBandsDs.getItems()) {
             if (band.getBandName() == null) {
-                showNotification(getMessage("template.bandTableOrColumnTableRequired"), NotificationType.TRAY);
+                notifications.create(Notifications.NotificationType.TRAY)
+                        .withCaption(messages.getMessage("template.bandTableOrColumnTableRequired"))
+                        .show();
                 return false;
             }
 
             for (TemplateTableColumn column : band.getColumns()) {
                 if (column.getKey() == null || column.getCaption() == null) {
-                    showNotification(getMessage("template.bandTableOrColumnTableRequired"), NotificationType.TRAY);
+                    notifications.create(Notifications.NotificationType.TRAY)
+                            .withCaption(messages.getMessage("template.bandTableOrColumnTableRequired"))
+                            .show();
                     return false;
                 }
             }

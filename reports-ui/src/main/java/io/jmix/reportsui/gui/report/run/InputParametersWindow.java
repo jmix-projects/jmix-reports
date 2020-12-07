@@ -16,25 +16,32 @@
 package io.jmix.reportsui.gui.report.run;
 
 import com.sun.deploy.config.ClientConfig;
+import io.jmix.core.Messages;
 import io.jmix.core.common.util.Preconditions;
-import com.haulmont.cuba.gui.components.AbstractWindow;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportInputParameter;
 import io.jmix.reports.entity.ReportTemplate;
 import io.jmix.reports.exception.ReportParametersValidationException;
 import io.jmix.reportsui.gui.ReportGuiManager;
 import io.jmix.reportsui.gui.ReportParameterValidator;
+import io.jmix.ui.Notifications;
 import io.jmix.ui.action.Action;
 import io.jmix.ui.component.Button;
+import io.jmix.ui.screen.StandardLookup;
+import io.jmix.ui.screen.Subscribe;
+import io.jmix.ui.screen.UiController;
+import io.jmix.ui.screen.UiDescriptor;
 import org.apache.commons.lang3.BooleanUtils;
-
 import org.springframework.beans.factory.annotation.Autowired;
+
 import java.util.Collection;
 import java.util.Map;
 
 import static io.jmix.reportsui.gui.report.run.InputParametersFrame.PARAMETERS_PARAMETER;
 
-public class InputParametersWindow extends AbstractWindow {
+@UiController("report_InputParametersWindow")
+@UiDescriptor("input-parameters.xml")
+public class InputParametersWindow extends StandardLookup {
     public static final String TEMPLATE_CODE_PARAMETER = "templateCode";
     public static final String OUTPUT_FILE_NAME_PARAMETER = "outputFileName";
     public static final String INPUT_PARAMETER = "inputParameter";
@@ -68,10 +75,14 @@ public class InputParametersWindow extends AbstractWindow {
     @Autowired
     protected ReportParameterValidator reportParameterValidator;
 
-    @Override
-    public void init(Map<String, Object> params) {
-        super.init(params);
+    @Autowired
+    protected Notifications notifications;
 
+    @Autowired
+    protected Messages messages;
+
+    @Subscribe
+    protected void onInit(InitEvent event) {
         //noinspection unchecked
         templateCode = (String) params.get(TEMPLATE_CODE_PARAMETER);
         outputFileName = (String) params.get(OUTPUT_FILE_NAME_PARAMETER);
@@ -94,12 +105,12 @@ public class InputParametersWindow extends AbstractWindow {
         addAction(printReportAction);
     }
 
-    @Override
-    public void ready() {
-        super.ready();
+    @Subscribe
+    protected void onBeforeShow(BeforeShowEvent event) {
         inputParametersFrame.initTemplateAndOutputSelect();
     }
 
+    @Subscribe("printReportBtn")
     public void printReport() {
         if (inputParametersFrame.getReport() != null) {
             if (validateAll()) {
@@ -130,7 +141,11 @@ public class InputParametersWindow extends AbstractWindow {
                 reportParameterValidator.crossValidateParameters(inputParametersFrame.getReport(),
                         inputParametersFrame.collectParameters());
             } catch (ReportParametersValidationException e) {
-                showNotification(messages.getMainMessage("validationFail.caption"), e.getMessage(), NotificationType.WARNING);
+
+                notifications.create(Notifications.NotificationType.WARNING)
+                        .withCaption(messages.getMessage("validationFail.caption"))
+                        .withDescription(e.getMessage())
+                        .show();
                 isValid = false;
             }
         }
@@ -138,6 +153,7 @@ public class InputParametersWindow extends AbstractWindow {
         return isValid;
     }
 
+    @Subscribe("cancelBtn")
     public void cancel() {
         close(CLOSE_ACTION_ID);
     }

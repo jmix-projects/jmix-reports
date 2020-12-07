@@ -18,14 +18,12 @@ package io.jmix.reportsui.gui.template.edit;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
-import com.haulmont.cuba.gui.components.actions.CreateAction;
-import com.haulmont.cuba.gui.components.actions.EditAction;
 import com.haulmont.cuba.gui.components.actions.RemoveAction;
-import io.jmix.core.common.util.ParamsMap;
-import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.data.CollectionDatasource;
 import com.haulmont.cuba.gui.data.Datasource;
 import com.haulmont.cuba.gui.data.GroupDatasource;
+import io.jmix.core.Messages;
+import io.jmix.core.common.util.ParamsMap;
 import io.jmix.core.entity.KeyValueEntity;
 import io.jmix.reports.entity.BandDefinition;
 import io.jmix.reports.entity.ReportOutputType;
@@ -33,18 +31,20 @@ import io.jmix.reports.entity.ReportTemplate;
 import io.jmix.reports.entity.pivottable.*;
 import io.jmix.reportsui.gui.report.run.ShowPivotTableController;
 import io.jmix.reportsui.gui.template.edit.generator.RandomPivotTableDataGenerator;
-
-import io.jmix.ui.component.BoxLayout;
-import io.jmix.ui.component.Frame;
-import io.jmix.ui.component.PopupButton;
-import io.jmix.ui.component.ValidationErrors;
-import io.jmix.ui.gui.OpenType;
+import io.jmix.ui.Actions;
+import io.jmix.ui.action.list.CreateAction;
+import io.jmix.ui.action.list.EditAction;
+import io.jmix.ui.component.*;
+import io.jmix.ui.screen.*;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import javax.inject.Named;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+@UiController("report_PivotTableEdit.fragment")
+@UiDescriptor("pivottable-frame.xml")
 public class PivotTableEditFrame extends DescriptionEditFrame {
 
     public static final Set<RendererType> C3_RENDERER_TYPES = Sets.newHashSet(
@@ -70,13 +70,13 @@ public class PivotTableEditFrame extends DescriptionEditFrame {
     protected Table<PivotTableAggregation> aggregationsTable;
 
     @Named("rendererGroup.defaultRenderer")
-    protected LookupField defaultRenderer;
+    protected ComboBox defaultRenderer;
 
     @Autowired
-    protected LookupField defaultAggregation;
+    protected ComboBox defaultAggregation;
 
     @Named("pivotTableGroup.bandName")
-    protected LookupField bandName;
+    protected ComboBox bandName;
 
     @Autowired
     protected GroupBoxLayout customC3GroupBox;
@@ -87,12 +87,18 @@ public class PivotTableEditFrame extends DescriptionEditFrame {
     @Autowired
     protected PopupButton propertiesCreateButton;
 
+    @Autowired
+    protected Messages messages;
+
+    @Autowired
+    protected Actions actions;
+
+    @Autowired
     protected RandomPivotTableDataGenerator dataGenerator;
 
-    @Override
+    @Subscribe
     @SuppressWarnings("IncorrectCreateEntity")
-    public void init(Map<String, Object> params) {
-        super.init(params);
+    protected void onInit(InitEvent event) {
         dataGenerator = new RandomPivotTableDataGenerator();
         PivotTableDescription description = createDefaultPivotTableDescription();
         pivotTableDs.setItem(description);
@@ -120,7 +126,8 @@ public class PivotTableEditFrame extends DescriptionEditFrame {
     public boolean applyChanges() {
         ValidationErrors errors = validatePivotTableDescription(getPivotTableDescription());
         if (!errors.isEmpty()) {
-            showValidationErrors(errors);
+            //todo
+//            showValidationErrors(errors);
             return false;
         }
         getReportTemplate().setPivotTableDescription(getPivotTableDescription());
@@ -153,10 +160,11 @@ public class PivotTableEditFrame extends DescriptionEditFrame {
         ValidationErrors errors = validatePivotTableDescription(pivotTableDescription);
         if (errors.isEmpty()) {
             List<KeyValueEntity> data = dataGenerator.generate(pivotTableDescription, 10);
-            Frame frame = openFrame(previewBox, ShowPivotTableController.PIVOT_TABLE_SCREEN_ID, ParamsMap.of(
-                    "pivotTableJson", PivotTableDescription.toJsonString(pivotTableDescription),
-                    "values", data));
-            frame.setHeight("472px");
+            //todo
+//            Frame frame = openFrame(previewBox, ShowPivotTableController.PIVOT_TABLE_SCREEN_ID, ParamsMap.of(
+//                    "pivotTableJson", PivotTableDescription.toJsonString(pivotTableDescription),
+//                    "values", data));
+//            frame.setHeight("472px");
         }
     }
 
@@ -167,33 +175,33 @@ public class PivotTableEditFrame extends DescriptionEditFrame {
     protected ValidationErrors validatePivotTableDescription(PivotTableDescription description) {
         ValidationErrors validationErrors = new ValidationErrors();
         if (description.getBandName() == null) {
-            validationErrors.add(getMessage("pivotTableEdit.bandRequired"));
+            validationErrors.add(messages.getMessage("pivotTableEdit.bandRequired"));
         }
         if (description.getDefaultRenderer() == null) {
-            validationErrors.add(getMessage("pivotTableEdit.rendererRequired"));
+            validationErrors.add(messages.getMessage("pivotTableEdit.rendererRequired"));
         }
         if (description.getAggregations().isEmpty()) {
-            validationErrors.add(getMessage("pivotTableEdit.aggregationsRequired"));
+            validationErrors.add(messages.getMessage("pivotTableEdit.aggregationsRequired"));
         }
         if (description.getProperties().isEmpty()) {
-            validationErrors.add(getMessage("pivotTableEdit.propertiesRequired"));
+            validationErrors.add(messages.getMessage("pivotTableEdit.propertiesRequired"));
         }
         if (description.getAggregationProperties().isEmpty()) {
-            validationErrors.add(getMessage("pivotTableEdit.aggregationPropertiesRequired"));
+            validationErrors.add(messages.getMessage("pivotTableEdit.aggregationPropertiesRequired"));
         }
         if (description.getColumnsProperties().isEmpty() && description.getRowsProperties().isEmpty()) {
-            validationErrors.add(getMessage("pivotTableEdit.columnsOrRowsRequired"));
+            validationErrors.add(messages.getMessage("pivotTableEdit.columnsOrRowsRequired"));
         }
         if (!Collections.disjoint(description.getRowsProperties(), description.getColumnsProperties())
                 || !Collections.disjoint(description.getRowsProperties(), description.getAggregationProperties())
                 || !Collections.disjoint(description.getColumnsProperties(), description.getAggregationProperties())) {
-            validationErrors.add(getMessage("pivotTableEdit.propertyIntersection"));
+            validationErrors.add(messages.getMessage("pivotTableEdit.propertyIntersection"));
         } else if (description.getProperties() != null) {
             Set<String> propertyNames = description.getProperties().stream()
                     .map(PivotTableProperty::getName)
                     .collect(Collectors.toSet());
             if (propertyNames.size() != description.getProperties().size()) {
-                validationErrors.add(getMessage("pivotTableEdit.propertyIntersection"));
+                validationErrors.add(messages.getMessage("pivotTableEdit.propertyIntersection"));
             }
         }
         return validationErrors;
@@ -226,19 +234,23 @@ public class PivotTableEditFrame extends DescriptionEditFrame {
 
     protected void initAggregationTable() {
         Supplier<Map<String, Object>> paramsSupplier = () -> ParamsMap.of("existingItems", aggregationsDs.getItems());
-        CreateAction createAction = CreateAction.create(aggregationsTable);
-        createAction.setWindowParamsSupplier(paramsSupplier);
-        aggregationsTable.addAction(createAction);
-        EditAction editAction = EditAction.create(aggregationsTable);
-        editAction.setWindowParamsSupplier(paramsSupplier);
-        aggregationsTable.addAction(editAction);
-        aggregationsTable.addAction(RemoveAction.create(aggregationsTable));
 
-        aggregationsDs.addCollectionChangeListener(e -> {
-            if (e.getOperation() == CollectionDatasource.Operation.REMOVE) {
-                defaultAggregation.setOptionsDatasource(aggregationsDs);
-            }
-        });
+        CreateAction createAction = actions.create(CreateAction.class);
+        createAction.setScreenOptionsSupplier(paramsSupplier);
+        aggregationsTable.addAction(createAction);
+
+        EditAction editAction = actions.create(EditAction.class);
+        editAction.setScreenOptionsSupplier(paramsSupplier);
+        aggregationsTable.addAction(editAction);
+
+        aggregationsTable.addAction(actions.create(RemoveAction.class));
+
+        //todo
+//        aggregationsDs.addCollectionChangeListener(e -> {
+//            if (e.getOperation() == CollectionDatasource.Operation.REMOVE) {
+//                defaultAggregation.setOptionsDatasource(aggregationsDs);
+//            }
+//        });
     }
 
     protected void initCustomGroups() {
@@ -300,16 +312,15 @@ public class PivotTableEditFrame extends DescriptionEditFrame {
     }
 
     protected EditAction createPropertyEditAction() {
-        EditAction action = EditAction.create(propertyTable);
+        EditAction action = (EditAction) propertyTable.getAction(EditAction.ID);
         action.setAfterCommitHandler(entity -> propertyTable.expandAll());
         return action;
     }
 
     protected CreateAction createPropertyCreateAction(PivotTablePropertyType propertyType) {
-        CreateAction action = CreateAction.create(propertyTable, OpenType.THIS_TAB, "create_" + propertyType.getId());
-        Map<String, Object> values = new HashMap<>();
-        values.put("type", propertyType);
-        action.setInitialValues(values);
+        CreateAction action = actions.create(CreateAction.class, "create_" + propertyType.getId());
+        action.setOpenMode(OpenMode.THIS_TAB);
+        action.setScreenOptionsSupplier(() -> new MapScreenOptions(ParamsMap.of("type", propertyType)));
         action.setCaption(messages.getMessage(propertyType));
         return action;
     }

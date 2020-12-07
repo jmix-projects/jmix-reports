@@ -17,20 +17,28 @@
 package io.jmix.reportsui.gui.report.wizard.region;
 
 import com.haulmont.cuba.core.global.Configuration;
-import com.haulmont.cuba.gui.components.*;
+import io.jmix.ui.component.*;
 import com.haulmont.cuba.gui.data.impl.AbstractTreeDatasource;
+import io.jmix.core.Messages;
 import io.jmix.reports.entity.wizard.EntityTreeNode;
+import io.jmix.ui.Notifications;
 import io.jmix.ui.action.AbstractAction;
 import io.jmix.ui.action.Action;
 import io.jmix.ui.component.Button;
 import io.jmix.ui.component.Component;
+import io.jmix.ui.screen.*;
+import io.jmix.ui.screen.LookupComponent;
 import org.apache.commons.lang3.StringUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import javax.inject.Named;
 import java.util.Map;
+import java.util.function.Predicate;
 
-public class EntityTreeLookup extends AbstractLookup {
+@UiController("report_ReportEntityTree.lookup")
+@UiDescriptor("entity-tree-lookup.xml")
+@LookupComponent("entityTreeFrame.entityTree")
+public class EntityTreeLookup extends StandardLookup {
 
     @Named("entityTreeFrame.reportEntityTreeNodeDs")
     protected AbstractTreeDatasource reportEntityTreeNodeDs;
@@ -42,26 +50,37 @@ public class EntityTreeLookup extends AbstractLookup {
     protected Button reportPropertyNameSearchButton;
 
     @Autowired
+    protected Messages messages;
+
+    @Autowired
+    protected Notifications notifications;
+
+    @Autowired
     protected Configuration configuration;
 
     protected EntityTreeNode rootNode;
 
-    @Override
-    public void init(Map<String, Object> params) {
-        super.init(params);
-
+    @Subscribe
+    protected void onInit(InitEvent event) {
         params.put("component$reportPropertyName", reportPropertyName);
 
         reportEntityTreeNodeDs.refresh(params);
         rootNode = (EntityTreeNode) params.get("rootEntity");
         entityTree.expandTree();
+
+
         this.setLookupValidator(() -> {
             if (entityTree.getSingleSelected() == null) {
-                showNotification(getMessage("selectItemForContinue"), NotificationType.TRAY);
+                notifications.create(Notifications.NotificationType.TRAY)
+                        .withCaption(messages.getMessage("selectItemForContinue"))
+                        .show();
                 return false;
             } else {
                 if (((EntityTreeNode) entityTree.getSingleSelected()).getParent() == null) {
-                    showNotification(getMessage("selectNotARoot"), NotificationType.TRAY);
+                    notifications.create(Notifications.NotificationType.TRAY)
+                            .withCaption(messages.getMessage("selectNotARoot"))
+                            .show();
+
                     return false;
                 }
             }
@@ -79,7 +98,9 @@ public class EntityTreeLookup extends AbstractLookup {
                     } else
                         entityTree.expandTree();
                 } else {
-                    showNotification(getMessage("valueNotFound"), NotificationType.HUMANIZED);
+                    notifications.create(Notifications.NotificationType.HUMANIZED)
+                            .withCaption(messages.getMessage("valueNotFound"))
+                            .show();
                 }
             }
 
@@ -89,12 +110,6 @@ public class EntityTreeLookup extends AbstractLookup {
             }
         };
         reportPropertyNameSearchButton.setAction(search);
-        addAction(search);
     }
 
-    @Override
-    protected boolean preClose(String actionId) {
-
-        return super.preClose(actionId);
-    }
 }

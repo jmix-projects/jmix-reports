@@ -23,7 +23,7 @@
                 <button action="templatesTable.create"/>
                 <button action="templatesTable.edit"/>
                 <button action="templatesTable.remove"/>
-                <button action="templatesTable.defaultTemplate" icon="font-icon:CHECK"/>
+                <button action="templatesTable.defaultTemplate" icon="CHECK"/>
                 <button action="templatesTable.copy" icon="font-icon:COPY"/>
             </buttonsPanel>
             <columns>

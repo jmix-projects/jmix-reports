@@ -15,7 +15,7 @@
  */
 package io.jmix.reportsui.gui.datasource;
 
-import io.jmix.core.JmixEntity;
+import io.jmix.core.Entity;
 import com.haulmont.cuba.gui.data.impl.CollectionPropertyDatasourceImpl;
 import io.jmix.reports.entity.BandDefinition;
 import io.jmix.reports.entity.DataSet;
@@ -26,12 +26,12 @@ import java.util.*;
 public class DatasetsDatasource extends CollectionPropertyDatasourceImpl<DataSet, UUID> {
 
     @Override
-    public void committed(Set<JmixEntity> entities) {
+    public void committed(Set<Entity> entities) {
         if (!State.VALID.equals(masterDs.getState()))
             return;
         Collection<DataSet> collection = getCollection();
         if (collection != null) {
-            for (JmixEntity entity : entities) {
+            for (Entity entity : entities) {
                 if (entity instanceof Report) {
                     for (BandDefinition definition : ((Report) entity).getBands()) {
                         if (definition.equals(masterDs.getItem())) {

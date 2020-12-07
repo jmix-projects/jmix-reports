@@ -16,18 +16,21 @@
 
 package io.jmix.reportsui.gui.template.edit.generator;
 
-import com.haulmont.cuba.core.global.AppBeans;
-import com.haulmont.cuba.core.global.Messages;
+import io.jmix.core.Messages;
 import io.jmix.reports.entity.charts.*;
 import org.apache.commons.lang3.RandomUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
 import java.util.*;
 
+@Component("report_RandomChartDataGenerator")
 public class RandomChartDataGenerator {
     public static final List<String> COLORS = Arrays.asList("red", "green", "blue", "yellow", "orange", "black", "magenta");
 
-    protected Messages messages = AppBeans.get(Messages.NAME);
+    @Autowired
+    protected Messages messages;
 
     @Nullable
     public List<Map<String, Object>> generateRandomChartData(AbstractChartDescription abstractChartDescription) {

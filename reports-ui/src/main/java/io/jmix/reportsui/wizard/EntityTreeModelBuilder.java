@@ -17,7 +17,8 @@
 package io.jmix.reportsui.wizard;
 
 import com.haulmont.cuba.core.entity.FileDescriptor;
-import com.haulmont.cuba.core.global.Metadata;
+import io.jmix.core.ExtendedEntities;
+import io.jmix.core.Metadata;
 import io.jmix.core.MessageTools;
 import io.jmix.core.MetadataTools;
 import io.jmix.core.metamodel.model.MetaClass;
@@ -50,6 +51,12 @@ public class EntityTreeModelBuilder implements EntityTreeModelBuilderApi {
     @Autowired
     protected Metadata metadata;
 
+    @Autowired
+    protected ExtendedEntities extendedEntities;
+
+    @Autowired
+    protected MetadataTools metadataTools;
+
     protected int entityTreeModelMaxDeep = reportingConfig.getEntityTreeModelMaxDeep();
 
     public int getEntityTreeModelMaxDeep() {
@@ -79,17 +86,15 @@ public class EntityTreeModelBuilder implements EntityTreeModelBuilderApi {
         if (depth > getEntityTreeModelMaxDeep()) {
             return parentEntityTreeNode;
         }
-        MetaClass fileDescriptorMetaClass = metadata.getClassNN(FileDescriptor.class);
+        MetaClass fileDescriptorMetaClass = metadata.getClass(FileDescriptor.class);
         for (MetaProperty metaProperty : parentEntityTreeNode.getWrappedMetaClass().getProperties()) {
             if (!reportingWizardApi.isPropertyAllowedForReportWizard(parentEntityTreeNode.getWrappedMetaClass(), metaProperty)) {
                 continue;
             }
             if (metaProperty.getRange().isClass()) {
                 MetaClass metaClass = metaProperty.getRange().asClass();
-                MetaClass effectiveMetaClass = metadata.getExtendedEntities().getEffectiveMetaClass(metaClass);
+                MetaClass effectiveMetaClass = extendedEntities.getEffectiveMetaClass(metaClass);
                 //does we need to do security checks here? no
-
-                MetadataTools metadataTools = metadata.getTools();
 
                 if (fileDescriptorMetaClass.equals(effectiveMetaClass) || !metadataTools.isSystemLevel(effectiveMetaClass) && !metadataTools.isSystemLevel(metaProperty)) {
                     int newDepth = depth + 1;

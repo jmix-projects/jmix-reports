@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 
 @UiController("report_ReportExecution.browse")
 @UiDescriptor("report-execution-browse.xml")
-public class ReportExecutionBrowser extends StandardLookup {
+public class ReportExecutionBrowser extends StandardLookup<ReportExecution> {
 
     public static final String REPORTS_PARAMETER = "reports";
 

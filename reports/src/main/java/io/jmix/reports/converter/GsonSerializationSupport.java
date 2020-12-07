@@ -25,9 +25,9 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import com.haulmont.chile.core.datatypes.Datatypes;
 import com.haulmont.cuba.core.global.PersistenceHelper;
+import io.jmix.core.Entity;
 import io.jmix.core.ExtendedEntities;
 import io.jmix.core.Id;
-import io.jmix.core.JmixEntity;
 import io.jmix.core.Metadata;
 import io.jmix.core.common.util.ReflectionHelper;
 import io.jmix.core.entity.EntityValues;
@@ -49,7 +49,7 @@ import static java.lang.String.format;
 //todo add not meta property objects support
 public class GsonSerializationSupport {
     protected GsonBuilder gsonBuilder;
-    protected Map<Object, JmixEntity> processedObjects = new HashMap<>();
+    protected Map<Object, Entity> processedObjects = new HashMap<>();
     protected ExclusionPolicy exclusionPolicy;
 
     protected Metadata metadata;
@@ -63,14 +63,14 @@ public class GsonSerializationSupport {
         this.metadata = beanFactory.getBean(Metadata.class);
         this.extendedEntities = beanFactory.getBean(ExtendedEntities.class);
         gsonBuilder = new GsonBuilder()
-                .registerTypeHierarchyAdapter(JmixEntity.class, new TypeAdapter<JmixEntity>() {
+                .registerTypeHierarchyAdapter(Entity.class, new TypeAdapter<Entity>() {
                     @Override
-                    public void write(JsonWriter out, JmixEntity entity) throws IOException {
+                    public void write(JsonWriter out, Entity entity) throws IOException {
                         writeEntity(out, entity);
                     }
 
                     @Override
-                    public JmixEntity read(JsonReader in) throws IOException {
+                    public Entity read(JsonReader in) throws IOException {
                         return readEntity(in);
                     }
                 })
@@ -111,12 +111,12 @@ public class GsonSerializationSupport {
 
     }
 
-    private JmixEntity readEntity(JsonReader in) throws IOException {
+    private Entity readEntity(JsonReader in) throws IOException {
         in.beginObject();
         in.nextName();
         String metaClassName = in.nextString();
         MetaClass metaClass = metadata.getSession().getClass(metaClassName);
-        JmixEntity entity = metadata.create(metaClass);
+        Entity entity = (Entity) metadata.create(metaClass);
         in.nextName();
         String id = in.nextString();
         MetaProperty idProperty = metaClass.getProperty("id");
@@ -127,7 +127,7 @@ public class GsonSerializationSupport {
                     format("An error occurred while parsing id. Class [%s]. Value [%s].", idProperty.getJavaType(), id), e);
         }
 
-        JmixEntity processedObject = processedObjects.get(Id.of(entity).getValue());
+        Entity processedObject = processedObjects.get(Id.of(entity).getValue());
         if (processedObject != null) {
             entity = processedObject;
         } else {
@@ -138,7 +138,7 @@ public class GsonSerializationSupport {
         return entity;
     }
 
-    protected void readFields(JsonReader in, MetaClass metaClass, JmixEntity entity) throws IOException {
+    protected void readFields(JsonReader in, MetaClass metaClass, Entity entity) throws IOException {
         while (in.hasNext()) {
             String propertyName = in.nextName();
             MetaProperty property = metaClass.getProperty(propertyName);
@@ -149,7 +149,7 @@ public class GsonSerializationSupport {
                     Object value = readSimpleProperty(in, propertyType);
                     EntityValues.setValue(entity,propertyName, value);
                 } else if (propertyRange.isClass()) {
-                    if (JmixEntity.class.isAssignableFrom(propertyType)) {
+                    if (Entity.class.isAssignableFrom(propertyType)) {
                         EntityValues.setValue(entity,propertyName, readEntity(in));
                     } else if (Collection.class.isAssignableFrom(propertyType)) {
                         Collection entities = readCollection(in, propertyType);
@@ -173,7 +173,7 @@ public class GsonSerializationSupport {
         }
     }
 
-    protected void readUnresolvedProperty(JmixEntity entity, String propertyName, JsonReader in) throws IOException {
+    protected void readUnresolvedProperty(Entity entity, String propertyName, JsonReader in) throws IOException {
         in.skipValue();
     }
 
@@ -204,7 +204,7 @@ public class GsonSerializationSupport {
         }
         in.beginArray();
         while (in.hasNext()) {
-            JmixEntity entityForList = readEntity(in);
+            Entity entityForList = readEntity(in);
             entities.add(entityForList);
         }
         in.endArray();
@@ -212,7 +212,7 @@ public class GsonSerializationSupport {
     }
 
     @SuppressWarnings("unchecked")
-    protected void writeEntity(JsonWriter out, JmixEntity entity) throws IOException {
+    protected void writeEntity(JsonWriter out, Entity entity) throws IOException {
         out.beginObject();
         MetaClass metaClass = metadata.getClass(entity);
         Datatype idType = Datatypes.getNN(metaClass.getProperty("id").getJavaType());
@@ -235,7 +235,7 @@ public class GsonSerializationSupport {
     }
 
     @SuppressWarnings("unchecked")
-    protected void writeFields(JsonWriter out, JmixEntity entity) throws IOException {
+    protected void writeFields(JsonWriter out, Entity entity) throws IOException {
         MetaClass metaClass = metadata.getClass(entity);
         for (MetaProperty property : metaClass.getProperties()) {
             if (!"id".equalsIgnoreCase(property.getName())
@@ -247,9 +247,9 @@ public class GsonSerializationSupport {
                     writeSimpleProperty(out, entity, property);
                 } else if (propertyRange.isClass()) {
                     Object value = EntityValues.getValue(entity,property.getName());
-                    if (value instanceof JmixEntity) {
+                    if (value instanceof Entity) {
                         out.name(property.getName());
-                        writeEntity(out, (JmixEntity) value);
+                        writeEntity(out, (Entity) value);
                     } else if (value instanceof Collection) {
                         out.name(property.getName());
                         writeCollection(out, (Collection) value);
@@ -266,14 +266,14 @@ public class GsonSerializationSupport {
     protected void writeCollection(JsonWriter out, Collection value) throws IOException {
         out.beginArray();
         for (Object o : value) {
-            if (o instanceof JmixEntity) {
-                writeEntity(out, (JmixEntity) o);
+            if (o instanceof Entity) {
+                writeEntity(out, (Entity) o);
             }
         }
         out.endArray();
     }
 
-    protected void writeSimpleProperty(JsonWriter out, JmixEntity entity, MetaProperty property) throws IOException {
+    protected void writeSimpleProperty(JsonWriter out, Entity entity, MetaProperty property) throws IOException {
         Object value = EntityValues.getValue(entity,property.getName());
         if (value != null) {
             out.name(property.getName());
@@ -290,7 +290,7 @@ public class GsonSerializationSupport {
         return exclusionPolicy != null && exclusionPolicy.exclude(objectClass, propertyName);
     }
 
-    public String convertToString(JmixEntity entity) {
+    public String convertToString(Entity entity) {
         return gsonBuilder.create().toJson(entity);
     }
 

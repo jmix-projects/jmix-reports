@@ -6,7 +6,7 @@
 package io.jmix.reports.entity;
 
 import io.jmix.core.metamodel.annotation.DependsOnProperties;
-import io.jmix.core.metamodel.annotation.ModelProperty;
+import io.jmix.core.metamodel.annotation.JmixProperty;
 import com.haulmont.cuba.core.entity.BaseUuidEntity;
 import com.haulmont.cuba.core.entity.Creatable;
 import com.haulmont.cuba.core.entity.FileDescriptor;
@@ -194,7 +194,7 @@ public class ReportExecution extends BaseUuidEntity implements Creatable {
         this.serverId = serverId;
     }
 
-    @ModelProperty
+    @JmixProperty
     @DependsOnProperties({"finishTime", "startTime"})
     public Long getExecutionTimeSec() {
         if (finishTime == null || startTime == null)

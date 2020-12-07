@@ -41,7 +41,7 @@ public class ReportingMigrator implements io.jmix.reports.ReportingMigratorMBean
         LoadContext<Report> ctx = new LoadContext<>(Report.class);
         ctx.setLoadDynamicAttributes(true);
         ctx.setView("report.edit");
-        ctx.setQueryString("select r from report$Report r");
+        ctx.setQueryString("select r from report_Report r");
         List<Report> resultList = dataManager.loadList(ctx);
         for (Report report : resultList) {
             reportingApi.storeReportEntity(report);

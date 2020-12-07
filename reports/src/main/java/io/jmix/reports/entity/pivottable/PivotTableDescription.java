@@ -17,10 +17,10 @@
 package io.jmix.reports.entity.pivottable;
 
 import com.google.gson.*;
-import io.jmix.core.metamodel.annotation.ModelObject;
-import io.jmix.core.metamodel.annotation.ModelProperty;
 import com.haulmont.cuba.core.entity.BaseUuidEntity;
 import io.jmix.core.entity.annotation.SystemLevel;
+import io.jmix.core.metamodel.annotation.JmixEntity;
+import io.jmix.core.metamodel.annotation.JmixProperty;
 
 import javax.persistence.Lob;
 import java.lang.reflect.Type;
@@ -29,7 +29,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@ModelObject(name = "report$PivotTableDescription")
+@JmixEntity(name = "report_PivotTableDescription")
 @SystemLevel
 public class PivotTableDescription extends BaseUuidEntity {
 
@@ -42,51 +42,51 @@ public class PivotTableDescription extends BaseUuidEntity {
                 .create();
     }
 
-    @ModelProperty(mandatory = true)
+    @JmixProperty(mandatory = true)
     protected String bandName;
 
-    @ModelProperty(mandatory = true)
+    @JmixProperty(mandatory = true)
     protected RendererType defaultRenderer;
 
-    @ModelProperty(mandatory = true)
+    @JmixProperty(mandatory = true)
     protected Set<RendererType> renderers = new HashSet<>();
 
-    @ModelProperty
+    @JmixProperty
     protected PivotTableAggregation defaultAggregation;
 
-    @ModelProperty
+    @JmixProperty
     protected Set<PivotTableAggregation> aggregations = new HashSet<>();
 
-    @ModelProperty(mandatory = true)
+    @JmixProperty(mandatory = true)
     protected Set<PivotTableProperty> properties = new HashSet<>();
 
-    @ModelProperty
+    @JmixProperty
     protected Boolean editable = false;
 
     @Lob
-    @ModelProperty
+    @JmixProperty
     protected String filterFunction;
 
     @Lob
-    @ModelProperty
+    @JmixProperty
     protected String sortersFunction;
 
-    @ModelProperty
+    @JmixProperty
     protected String colorScaleGeneratorFunction;
 
-    @ModelProperty
+    @JmixProperty
     protected Double c3Width;
 
-    @ModelProperty
+    @JmixProperty
     protected Double c3Height;
 
-    @ModelProperty
+    @JmixProperty
     protected List<String> rowsProperties = new ArrayList<>();
 
-    @ModelProperty
+    @JmixProperty
     protected List<String> columnsProperties = new ArrayList<>();
 
-    @ModelProperty
+    @JmixProperty
     protected List<String> aggregationProperties = new ArrayList<>();
 
 

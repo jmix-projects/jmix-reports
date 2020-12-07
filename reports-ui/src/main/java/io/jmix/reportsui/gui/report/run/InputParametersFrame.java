@@ -16,33 +16,35 @@
 
 package io.jmix.reportsui.gui.report.run;
 
+import io.jmix.core.DataManager;
+import io.jmix.core.Id;
 import io.jmix.core.common.util.ParamsMap;
-import io.jmix.core.JmixEntity;
-import com.haulmont.cuba.gui.components.*;
-import com.haulmont.cuba.gui.data.CollectionDatasource;
-import com.haulmont.cuba.gui.data.DataSupplier;
 import io.jmix.reports.ParameterClassResolver;
+import io.jmix.reports.ReportPrintHelper;
 import io.jmix.reports.app.service.ReportService;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportInputParameter;
 import io.jmix.reports.entity.ReportOutputType;
 import io.jmix.reports.entity.ReportTemplate;
 import io.jmix.reportsui.gui.ReportGuiManager;
-import io.jmix.reports.ReportPrintHelper;
 import io.jmix.reportsui.gui.report.validators.ReportCollectionValidator;
 import io.jmix.reportsui.gui.report.validators.ReportParamFieldValidator;
-import io.jmix.ui.component.GridLayout;
+import io.jmix.ui.component.*;
+import io.jmix.ui.model.CollectionContainer;
+import io.jmix.ui.model.CollectionLoader;
+import io.jmix.ui.screen.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
-
 import org.springframework.beans.factory.annotation.Autowired;
+
 import java.util.*;
 
 import static io.jmix.reportsui.gui.report.run.InputParametersWindow.BULK_PRINT;
 import static io.jmix.reportsui.gui.report.run.InputParametersWindow.INPUT_PARAMETER;
 
-
-public class InputParametersFrame extends AbstractFrame {
+@UiController("report_InputParametersFrame")
+@UiDescriptor("input-parameters-frame.xml")
+public class InputParametersFrame extends ScreenFragment {
     public static final String REPORT_PARAMETER = "report";
     public static final String PARAMETERS_PARAMETER = "parameters";
 
@@ -52,10 +54,10 @@ public class InputParametersFrame extends AbstractFrame {
     protected ReportInputParameter inputParameter;
 
     @Autowired
-    protected LookupField<ReportTemplate> templateField;
+    protected ComboBox<ReportTemplate> templateField;
 
     @Autowired
-    protected LookupField<ReportOutputType> outputTypeField;
+    protected ComboBox<ReportOutputType> outputTypeField;
 
     @Autowired
     protected Label outputTypeLbl;
@@ -67,13 +69,16 @@ public class InputParametersFrame extends AbstractFrame {
     protected GridLayout parametersGrid;
 
     @Autowired
-    protected CollectionDatasource<ReportTemplate, UUID> templateReportsDs;
+    protected CollectionContainer<ReportTemplate> templateReportsDc;
+
+    @Autowired
+    protected CollectionLoader<ReportTemplate> templateReportsDl;
 
     @Autowired
     protected ReportService reportService;
 
     @Autowired
-    protected DataSupplier dataSupplier;
+    protected DataManager dataManager;
 
     @Autowired
     protected ReportGuiManager reportGuiManager;
@@ -85,13 +90,13 @@ public class InputParametersFrame extends AbstractFrame {
 
     protected ParameterFieldCreator parameterFieldCreator = new ParameterFieldCreator(this);
 
-    @Override
-    public void init(Map<String, Object> params) {
-        super.init(params);
-
+    @Subscribe
+    public void onInit(InitEvent event) {
         report = (Report) params.get(REPORT_PARAMETER);
         if (report != null && !report.getIsTmp()) {
-            report = dataSupplier.reload(report, ReportService.MAIN_VIEW_NAME);
+            report = dataManager.load(Id.of(report))
+                    .fetchPlan(ReportService.MAIN_VIEW_NAME)
+                    .one();
         }
         //noinspection unchecked
         parameters = (Map<String, Object>) params.get(PARAMETERS_PARAMETER);
@@ -115,7 +120,8 @@ public class InputParametersFrame extends AbstractFrame {
             }
             if (report.getTemplates() != null && report.getTemplates().size() > 1) {
                 if (!report.getIsTmp()) {
-                    templateReportsDs.refresh(ParamsMap.of("reportId", report.getId()));
+                    templateReportsDl.setParameter("reportId", report.getId());
+                    templateReportsDl.load();
                 }
             }
         }
@@ -147,13 +153,13 @@ public class InputParametersFrame extends AbstractFrame {
         if (!(field instanceof TokenList)) {
             field.setValue(value);
         } else {
-            CollectionDatasource datasource = (CollectionDatasource) field.getDatasource();
-            if (value instanceof Collection) {
-                Collection collection = (Collection) value;
-                for (Object selected : collection) {
-                    datasource.includeItem((JmixEntity) selected);
-                }
-            }
+//            CollectionDatasource datasource = (CollectionDatasource) field.getDatasource();
+//            if (value instanceof Collection) {
+//                Collection collection = (Collection) value;
+//                for (Object selected : collection) {
+//                    datasource.includeItem((Entity) selected);
+//                }
+//            }
         }
 
         if (BooleanUtils.isTrue(parameter.getValidationOn())) {

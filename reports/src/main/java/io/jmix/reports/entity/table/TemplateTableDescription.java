@@ -20,13 +20,13 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.haulmont.cuba.core.entity.BaseUuidEntity;
-import io.jmix.core.metamodel.annotation.ModelObject;
-import io.jmix.core.metamodel.annotation.ModelProperty;
+import io.jmix.core.metamodel.annotation.JmixEntity;
+import io.jmix.core.metamodel.annotation.JmixProperty;
 
 import java.util.LinkedList;
 import java.util.List;
 
-@ModelObject(name = "report$TemplateTableDescription")
+@JmixEntity(name = "report_TemplateTableDescription")
 public class TemplateTableDescription extends BaseUuidEntity {
 
     protected final static Gson gson;
@@ -36,7 +36,7 @@ public class TemplateTableDescription extends BaseUuidEntity {
                 .create();
     }
 
-    @ModelProperty
+    @JmixProperty
     protected List<TemplateTableBand> templateTableBands = new LinkedList<>();
 
     public List<TemplateTableBand> getTemplateTableBands() {

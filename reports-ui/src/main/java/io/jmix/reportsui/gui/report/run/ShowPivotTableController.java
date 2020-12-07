@@ -16,30 +16,32 @@
 
 package io.jmix.reportsui.gui.report.run;
 
-import com.haulmont.cuba.gui.components.AbstractWindow;
-import com.haulmont.cuba.gui.components.GroupBoxLayout;
-import com.haulmont.cuba.gui.components.Label;
-import com.haulmont.cuba.gui.components.LookupField;
 import com.haulmont.yarg.reporting.ReportOutputDocument;
+import io.jmix.core.LoadContext;
+import io.jmix.core.Messages;
 import io.jmix.core.common.util.ParamsMap;
 import io.jmix.core.entity.KeyValueEntity;
 import io.jmix.core.impl.StandardSerialization;
+import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.reports.entity.PivotTableData;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportOutputType;
 import io.jmix.reports.entity.ReportTemplate;
 import io.jmix.reportsui.gui.ReportGuiManager;
+import io.jmix.ui.UiComponents;
 import io.jmix.ui.WindowParam;
-import io.jmix.ui.component.BoxLayout;
-import io.jmix.ui.component.HBoxLayout;
+import io.jmix.ui.component.*;
+import io.jmix.ui.screen.*;
 import io.jmix.ui.theme.ThemeConstants;
-import io.jmix.ui.xml.layout.ComponentsFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 import java.util.Map;
 
-public class ShowPivotTableController extends AbstractWindow {
+
+@UiController("report_ShowPivotTableController")
+@UiDescriptor("show-pivot-table.xml")
+public class ShowPivotTableController extends StandardLookup {
     public static final String PIVOT_TABLE_SCREEN_ID = "chart$pivotTable";
 
     public static final String REPORT_PARAMETER = "report";
@@ -51,7 +53,7 @@ public class ShowPivotTableController extends AbstractWindow {
     protected ReportGuiManager reportGuiManager;
 
     @Autowired
-    protected ComponentsFactory componentsFactory;
+    protected UiComponents uiComponents;
 
     @Autowired
     protected ThemeConstants themeConstants;
@@ -66,13 +68,19 @@ public class ShowPivotTableController extends AbstractWindow {
     protected BoxLayout parametersFrameHolder;
 
     @Autowired
-    protected LookupField<Report> reportLookup;
+    protected ComboBox<Report> reportLookup;
 
     @Autowired
     protected HBoxLayout reportSelectorBox;
 
     @Autowired
     protected StandardSerialization serialization;
+
+    @Autowired
+    protected Messages messages;
+
+    @Autowired
+    protected CurrentAuthentication currentAuthentication;
 
     @WindowParam(name = REPORT_PARAMETER)
     protected Report report;
@@ -88,10 +96,15 @@ public class ShowPivotTableController extends AbstractWindow {
 
     protected InputParametersFrame inputParametersFrame;
 
-    @Override
-    public void init(Map<String, Object> params) {
-        super.init(params);
 
+    @Install(to = "reportsDl", target = Target.DATA_LOADER)
+    protected List<Report> reportsDlLoadDelegate(LoadContext<Report> loadContext) {
+        return reportGuiManager.getAvailableReports(null, currentAuthentication.getUser(), null);
+    }
+
+
+    @Subscribe
+    protected void onInit(InitEvent event) {
         //TODO dialog options
 //        getDialogOptions()
 //                .setWidth(themeConstants.get("cuba.gui.report.ShowPivotTable.width"))
@@ -125,13 +138,14 @@ public class ShowPivotTableController extends AbstractWindow {
         parametersFrameHolder.removeAll();
         if (report != null) {
             Map<String, Object> params = ParamsMap.of(InputParametersFrame.REPORT_PARAMETER, report, InputParametersFrame.PARAMETERS_PARAMETER, reportParameters);
-            inputParametersFrame = (InputParametersFrame) openFrame(parametersFrameHolder, "report$inputParametersFrame", params);
+            inputParametersFrame = (InputParametersFrame) openFrame(parametersFrameHolder, "report_inputParametersFrame", params);
             reportParamsBox.setVisible(true);
         } else {
             reportParamsBox.setVisible(false);
         }
     }
 
+    @Subscribe("printReportBtn")
     public void printReport() {
         if (inputParametersFrame != null && inputParametersFrame.getReport() != null) {
             if (validateAll()) {
@@ -165,9 +179,9 @@ public class ShowPivotTableController extends AbstractWindow {
 
     protected void showStubText() {
         if (reportBox.getOwnComponents().isEmpty()) {
-            Label label = componentsFactory.createComponent(Label.class);
-            label.setValue(getMessage("showPivotTable.caption"));
-            label.setAlignment(Alignment.MIDDLE_CENTER);
+            Label label = uiComponents.create(Label.class);
+            label.setValue(messages.getMessage("showPivotTable.caption"));
+            label.setAlignment(Component.Alignment.MIDDLE_CENTER);
             label.setStyleName("h1");
             reportBox.add(label);
         }

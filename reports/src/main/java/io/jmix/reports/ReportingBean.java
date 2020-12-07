@@ -20,11 +20,11 @@ import io.jmix.core.EntityStates;
 import io.jmix.core.FetchPlan;
 import io.jmix.core.TimeSource;
 import io.jmix.core.metamodel.model.MetaClass;
-import com.haulmont.cuba.core.EntityManager;
+import io.jmix.core.DataManager ;
 import com.haulmont.cuba.core.Persistence;
 import com.haulmont.cuba.core.Transaction;
 import com.haulmont.cuba.core.app.FileStorageAPI;
-import io.jmix.core.JmixEntity;
+import io.jmix.core.Entity;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.*;
 import io.jmix.core.security.EntityOp;
@@ -467,7 +467,7 @@ public class ReportingBean implements ReportingApi {
         try {
 
             Long countOfReportsWithSameName = (Long) persistence.getEntityManager()
-                    .createQuery("select count(r) from report$Report r where r.name = :name")
+                    .createQuery("select count(r) from report_Report r where r.name = :name")
                     .setParameter("name", reportName)
                     .getSingleResult();
             tx.commit();
@@ -584,7 +584,7 @@ public class ReportingBean implements ReportingApi {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T extends JmixEntity> T reloadEntity(T entity, FetchPlan view) {
+    public <T extends Entity> T reloadEntity(T entity, FetchPlan view) {
         if (entity instanceof Report && ((Report) entity).getIsTmp()) {
             return entity;
         }
@@ -689,7 +689,7 @@ public class ReportingBean implements ReportingApi {
     }
 
     @SuppressWarnings("unchecked")
-    protected <T extends JmixEntity> T reloadEntity(T entity, String viewName) {
+    protected <T extends Entity> T reloadEntity(T entity, String viewName) {
         if (entity instanceof Report && ((Report) entity).getIsTmp()) {
             return entity;
         }

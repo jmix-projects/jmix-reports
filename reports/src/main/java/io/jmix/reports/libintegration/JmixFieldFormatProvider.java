@@ -19,7 +19,7 @@ import com.haulmont.chile.core.datatypes.Datatypes;
 import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.yarg.formatters.impl.DefaultFormatProvider;
 import io.jmix.core.InstanceNameProvider;
-import io.jmix.core.JmixEntity;
+import io.jmix.core.Entity;
 import io.jmix.core.metamodel.datatype.Datatype;
 import io.jmix.core.security.CurrentAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,8 +47,8 @@ public class JmixFieldFormatProvider implements DefaultFormatProvider {
                 }
             } else if (o instanceof Enum) {
                 return messages.getMessage((Enum) o);
-            } else if (o instanceof JmixEntity) {
-                return instanceNameProvider.getInstanceName((JmixEntity) o);
+            } else if (o instanceof Entity) {
+                return instanceNameProvider.getInstanceName((Entity) o);
             } else {
                 return String.valueOf(o);
             }

@@ -15,40 +15,35 @@
  */
 package io.jmix.reportsui.gui.parameter.edit;
 
-import io.jmix.core.Id;
-import io.jmix.core.metamodel.model.MetaClass;
-import io.jmix.core.JmixEntity;
-import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.core.global.Security;
-import com.haulmont.cuba.gui.components.*;
 import com.haulmont.cuba.gui.data.Datasource;
 import com.haulmont.cuba.gui.data.impl.DatasourceImplementation;
+import io.jmix.core.*;
+import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.core.security.EntityOp;
+import io.jmix.reports.ParameterClassResolver;
 import io.jmix.reports.app.service.ReportService;
 import io.jmix.reports.entity.ParameterType;
 import io.jmix.reports.entity.PredefinedTransformation;
 import io.jmix.reports.entity.ReportInputParameter;
-import io.jmix.reports.ParameterClassResolver;
 import io.jmix.reportsui.gui.report.run.ParameterFieldCreator;
-import io.jmix.ui.component.BoxLayout;
-import io.jmix.ui.component.GridLayout;
-import io.jmix.ui.component.TabSheet;
-import io.jmix.ui.component.VBoxLayout;
+import io.jmix.ui.Dialogs;
+import io.jmix.ui.component.*;
 import io.jmix.ui.component.autocomplete.JpqlSuggestionFactory;
 import io.jmix.ui.component.autocomplete.Suggestion;
+import io.jmix.ui.screen.Screen;
+import io.jmix.ui.screen.StandardEditor;
+import io.jmix.ui.screen.Subscribe;
 import io.jmix.ui.sys.ScreensHelper;
 import io.jmix.ui.theme.ThemeConstants;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.inject.Named;
 import java.util.*;
 
-import static java.lang.String.format;
-
-public class ParameterEditor extends AbstractEditor<ReportInputParameter> {
+public class ParameterEditor extends StandardEditor<ReportInputParameter> {
     protected final static String LOOKUP_SETTINGS_TAB_ID = "lookupSettingsTab";
     protected final static String WHERE = " where ";
 
@@ -58,13 +53,13 @@ public class ParameterEditor extends AbstractEditor<ReportInputParameter> {
     protected BoxLayout defaultValueBox;
 
     @Autowired
-    protected LookupField<String> screen;
+    protected ComboBox<String> screen;
     @Autowired
-    protected LookupField<String> enumeration;
+    protected ComboBox<String> enumeration;
     @Autowired
-    protected LookupField<ParameterType> type;
+    protected ComboBox<ParameterType> type;
     @Autowired
-    protected LookupField<String> metaClass;
+    protected ComboBox<String> metaClass;
     @Autowired
     protected CheckBox lookup;
     @Autowired
@@ -102,7 +97,7 @@ public class ParameterEditor extends AbstractEditor<ReportInputParameter> {
     protected Label<String> transformationScriptLabel;
 
     @Autowired
-    protected LookupField<PredefinedTransformation> wildcards;
+    protected ComboBox<PredefinedTransformation> wildcards;
 
     @Autowired
     protected Label<String> wildcardsLabel;
@@ -144,29 +139,40 @@ public class ParameterEditor extends AbstractEditor<ReportInputParameter> {
     @Autowired
     protected JpqlSuggestionFactory jpqlSuggestionFactory;
 
+    @Autowired
+    protected MetadataTools metadataTools;
+
+    @Autowired
+    protected Dialogs dialogs;
+
+    @Autowired
+    protected Messages messages;
+
+    @Autowired
+    protected MessageTools messageTools;
+
     protected ReportInputParameter parameter;
 
-    protected ParameterFieldCreator parameterFieldCreator = new ParameterFieldCreator(this);
+    protected ParameterFieldCreator parameterFieldCreator /*= new ParameterFieldCreator(this)*/;
 
-    @Override
-    public void setItem(JmixEntity item) {
-        ReportInputParameter newParameter = (ReportInputParameter) metadata.create(parameterDs.getMetaClass());
-        metadata.getTools().copy(item, newParameter);
-        newParameter.setId((UUID) Id.of(item).getValue());
-        if (newParameter.getParameterClass() == null) {
-            newParameter.setParameterClass(parameterClassResolver.resolveClass(newParameter));
-        }
+    //todo
+//    @Override
+//    public void setItem(JmixEntity item) {
+//        ReportInputParameter newParameter = (ReportInputParameter) metadata.create(parameterDs.getMetaClass());
+//        metadataTools.copy(item, newParameter);
+//        newParameter.setId((UUID) Id.of(item).getValue());
+//        if (newParameter.getParameterClass() == null) {
+//            newParameter.setParameterClass(parameterClassResolver.resolveClass(newParameter));
+//        }
+//
+//        super.setItem(newParameter);
+//        enableControlsByParamType(newParameter.getType());
+//        initScreensLookup();
+//        initTransformations();
+//    }
 
-        super.setItem(newParameter);
-        enableControlsByParamType(newParameter.getType());
-        initScreensLookup();
-        initTransformations();
-    }
-
-    @Override
-    public void init(Map<String, Object> params) {
-        super.init(params);
-
+    @Subscribe
+    protected void onInit(Screen.InitEvent event) {
         type.setOptionsList(Arrays.asList(ParameterType.TEXT, ParameterType.NUMERIC, ParameterType.BOOLEAN, ParameterType.ENUMERATION,
                 ParameterType.DATE, ParameterType.TIME, ParameterType.DATETIME, ParameterType.ENTITY, ParameterType.ENTITY_LIST));
 
@@ -183,30 +189,42 @@ public class ParameterEditor extends AbstractEditor<ReportInputParameter> {
 
     protected void initHelpButtons() {
         localeTextField.setContextHelpIconClickHandler(e ->
-                showMessageDialog(getMessage("localeText"), getMessage("parameter.localeTextHelp"),
-                        MessageType.CONFIRMATION_HTML
-                                .modal(false)
-                                .width(700f)));
+                dialogs.createMessageDialog()
+                        .withCaption(messages.getMessage("localeText"))
+                        .withMessage(messages.getMessage("parameter.localeTextHelp"))
+                        .withContentMode(ContentMode.HTML)
+                        .withModal(false)
+                        .withWidth("700px")
+                        .show());
+
         transformationScript.setContextHelpIconClickHandler(e ->
-                showMessageDialog(getMessage("transformationScript"), getMessage("parameter.transformationScriptHelp"),
-                        MessageType.CONFIRMATION_HTML
-                                .modal(false)
-                                .width(700f)));
+                dialogs.createMessageDialog()
+                        .withCaption(messages.getMessage("transformationScript"))
+                        .withMessage(messages.getMessage("parameter.transformationScriptHelp"))
+                        .withContentMode(ContentMode.HTML)
+                        .withModal(false)
+                        .withWidth("700px")
+                        .show());
+
         validationScript.setContextHelpIconClickHandler(e ->
-                showMessageDialog(getMessage("validationScript"), getMessage("validationScriptHelp"),
-                        MessageType.CONFIRMATION_HTML
-                                .modal(false)
-                                .width(700f)));
+                dialogs.createMessageDialog()
+                        .withCaption(messages.getMessage("validationScript"))
+                        .withMessage(messages.getMessage("validationScriptHelp"))
+                        .withContentMode(ContentMode.HTML)
+                        .withModal(false)
+                        .withWidth("700px")
+                        .show());
     }
 
-    @Override
-    public boolean commit() {
-        if (super.commit()) {
-            metadata.getTools().copy(getItem(), parameter);
-            return true;
-        }
-        return false;
-    }
+    //todo
+//    @Override
+//    public boolean commit() {
+//        if (super.commit()) {
+//            metadataTools.copy(getEditedEntity(), parameter);
+//            return true;
+//        }
+//        return false;
+//    }
 
     protected void initListeners() {
         type.addValueChangeListener(e ->
@@ -218,7 +236,7 @@ public class ParameterEditor extends AbstractEditor<ReportInputParameter> {
             boolean classChanged = e.getProperty().equalsIgnoreCase("entityMetaClass")
                     || e.getProperty().equalsIgnoreCase("enumerationClass");
             boolean defaultDateIsCurrentChanged = e.getProperty().equalsIgnoreCase("defaultDateIsCurrent");
-            ReportInputParameter parameter = getItem();
+            ReportInputParameter parameter = getEditedEntity();
             if (typeChanged || classChanged) {
                 parameter.setParameterClass(parameterClassResolver.resolveClass(parameter));
 
@@ -265,7 +283,7 @@ public class ParameterEditor extends AbstractEditor<ReportInputParameter> {
     }
 
     protected void initScreensLookup() {
-        ReportInputParameter parameter = getItem();
+        ReportInputParameter parameter = getEditedEntity();
         if (parameter.getType() == ParameterType.ENTITY || parameter.getType() == ParameterType.ENTITY_LIST) {
             Class clazz = parameterClassResolver.resolveClass(parameter);
             if (clazz != null) {
@@ -277,7 +295,7 @@ public class ParameterEditor extends AbstractEditor<ReportInputParameter> {
 
     protected void initEnumsLookup() {
         Map<String, String> enumsOptionsMap = new TreeMap<>();
-        for (Class enumClass : metadata.getTools().getAllEnums()) {
+        for (Class enumClass : metadataTools.getAllEnums()) {
             String enumLocalizedName = messages.getMessage(enumClass, enumClass.getSimpleName());
             enumsOptionsMap.put(enumLocalizedName + " (" + enumClass.getSimpleName() + ")", enumClass.getCanonicalName());
         }
@@ -288,27 +306,27 @@ public class ParameterEditor extends AbstractEditor<ReportInputParameter> {
         Map<String, String> metaClassesOptionsMap = new TreeMap<>();
         Collection<MetaClass> classes = metadata.getSession().getClasses();
         for (MetaClass clazz : classes) {
-            if (!metadata.getTools().isSystemLevel(clazz)) {
-                String caption = messages.getTools().getDetailedEntityCaption(clazz);
+            if (!metadataTools.isSystemLevel(clazz)) {
+                String caption = messageTools.getDetailedEntityCaption(clazz);
                 metaClassesOptionsMap.put(caption, clazz.getName());
             }
         }
         metaClass.setOptionsMap(metaClassesOptionsMap);
     }
 
-    @Override
-    protected boolean preCommit() {
+
+    @Subscribe
+    protected void onBeforeCommit(BeforeCommitChangesEvent event) {
         if (!(getEditedEntity().getType() == ParameterType.ENTITY && Boolean.TRUE.equals(lookup.getValue()))) {
             lookupWhere.setValue(null);
             lookupJoin.setValue(null);
         }
-        return super.preCommit();
     }
 
     protected void initDefaultValueField() {
         defaultValueLabel.setVisible(false);
         defaultValueBox.removeAll();
-        ReportInputParameter parameter = getItem();
+        ReportInputParameter parameter = getEditedEntity();
         if (canHaveDefaultValue()) {
             Field<Object> field;
             if (ParameterType.ENTITY.equals(parameter.getType()) && Boolean.TRUE.equals(parameter.getLookup())) {
@@ -340,7 +358,7 @@ public class ParameterEditor extends AbstractEditor<ReportInputParameter> {
             defaultValueBox.add(field);
             defaultValueLabel.setVisible(true);
         }
-        defaultValueBox.setEnabled(security.isEntityOpPermitted(metadata.getClassNN(ReportInputParameter.class), EntityOp.UPDATE));
+        defaultValueBox.setEnabled(security.isEntityOpPermitted(metadata.getClass(ReportInputParameter.class), EntityOp.UPDATE));
     }
 
     protected void initCurrentDateTimeField() {
@@ -350,7 +368,7 @@ public class ParameterEditor extends AbstractEditor<ReportInputParameter> {
     }
 
     protected boolean canHaveDefaultValue() {
-        ReportInputParameter parameter = getItem();
+        ReportInputParameter parameter = getEditedEntity();
         if (parameter == null) {
             return false;
         }
@@ -400,7 +418,7 @@ public class ParameterEditor extends AbstractEditor<ReportInputParameter> {
     }
 
     protected void initTransformations() {
-        ReportInputParameter parameter = getItem();
+        ReportInputParameter parameter = getEditedEntity();
         predefinedTransformation.setValue(parameter.getPredefinedTransformation() != null);
         enableControlsByTransformationType(parameter.getPredefinedTransformation() != null);
         predefinedTransformation.addValueChangeListener(e -> {
@@ -424,7 +442,7 @@ public class ParameterEditor extends AbstractEditor<ReportInputParameter> {
     }
 
     protected boolean isParameterDateOrTime() {
-        ReportInputParameter parameter = getItem();
+        ReportInputParameter parameter = getEditedEntity();
         return Optional.ofNullable(parameter)
                 .map(reportInputParameter ->
                         ParameterType.DATE.equals(parameter.getType()) ||
@@ -441,12 +459,12 @@ public class ParameterEditor extends AbstractEditor<ReportInputParameter> {
         String entityAlias = "a39";
 
         int queryPosition = -1;
-        Class javaClassForEntity = getItem().getParameterClass();
+        Class javaClassForEntity = getEditedEntity().getParameterClass();
         if (javaClassForEntity == null) {
             return new ArrayList<>();
         }
 
-        String queryStart = format("select %s from %s %s ", entityAlias, metadata.getClassNN(javaClassForEntity), entityAlias);
+        String queryStart = String.format("select %s from %s %s ", entityAlias, metadata.getClass(javaClassForEntity), entityAlias);
 
         StringBuilder queryBuilder = new StringBuilder(queryStart);
         if (StringUtils.isNotEmpty(joinStr)) {

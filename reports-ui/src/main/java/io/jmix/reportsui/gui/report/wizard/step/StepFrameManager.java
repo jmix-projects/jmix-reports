@@ -53,11 +53,11 @@ public class StepFrameManager {
     }
 
     public void setMainWindowProps() {
-        String newWindowCaption = getCurrentStepFrame().getName() + " " +
-                mainWizardFrame.formatMessage("stepNo", currentFrameIdx + 1, stepFrames.size());
-
-        Window window = mainWizardFrame.getMainWizardFrame();
-        window.setCaption(newWindowCaption);
+//        String newWindowCaption = getCurrentStepFrame().getName() + " " +
+//                mainWizardFrame..formatMessage("stepNo", currentFrameIdx + 1, stepFrames.size());
+//
+//        Window window = mainWizardFrame.getMainWizardFrame();
+//        window.setCaption(newWindowCaption);
 
         setNavigationButtonProps();
     }
@@ -119,9 +119,10 @@ public class StepFrameManager {
     protected boolean validateCurrentFrame() {
         List<String> validationErrors = getCurrentStepFrame().validateFrame();
         if (!validationErrors.isEmpty()) {
-            mainWizardFrame.getMainWizardFrame().showNotification(
-                    org.springframework.util.StringUtils.arrayToDelimitedString(validationErrors.toArray(), "<br/>"),
-                    Frame.NotificationType.TRAY_HTML);
+            //todo
+//            mainWizardFrame.getMainWizardFrame().showNotification(
+//                    org.springframework.util.StringUtils.arrayToDelimitedString(validationErrors.toArray(), "<br/>"),
+//                    Frame.NotificationType.TRAY_HTML);
             return false;
         }
         return true;

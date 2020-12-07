@@ -17,13 +17,13 @@
 package io.jmix.reports.libintegration;
 
 import com.haulmont.cuba.core.global.AppBeans;
-import com.haulmont.cuba.core.global.Metadata;
+import io.jmix.core.Metadata;
 import com.haulmont.yarg.exception.ReportFormattingException;
 import com.haulmont.yarg.formatters.factory.FormatterFactoryInput;
 import com.haulmont.yarg.formatters.impl.AbstractFormatter;
 import com.haulmont.yarg.structure.BandData;
 import io.jmix.core.FetchPlan;
-import io.jmix.core.JmixEntity;
+import io.jmix.core.Entity;
 import io.jmix.core.MessageTools;
 import io.jmix.core.MetadataTools;
 import io.jmix.core.entity.KeyValueEntity;
@@ -102,13 +102,13 @@ public class CubaTableFormatter extends AbstractFormatter {
 
             bandDataList.forEach(bandData -> {
                 Map<String, Object> data = bandData.getData();
-                final JmixEntity instance;
+                final Entity instance;
                 final String pkName;
                 final boolean pkInView;
 
                 if (data instanceof EntityMap) {
                     instance = ((EntityMap) data).getInstance();
-                    pkName = metadata.getTools().getPrimaryKeyName(metadata.getClass(instance));
+                    pkName = metadataTools.getPrimaryKeyName(metadata.getClass(instance));
                     FetchPlan view = ((EntityMap) data).getView();
                     pkInView = view != null && pkName != null && view.containsProperty(pkName);
                 } else {
@@ -202,8 +202,8 @@ public class CubaTableFormatter extends AbstractFormatter {
                 final boolean pkInView;
 
                 if (data instanceof EntityMap) {
-                    JmixEntity instance = ((EntityMap) data).getInstance();
-                    pkName = metadata.getTools().getPrimaryKeyName(metadata.getClass(instance));
+                    Entity instance = ((EntityMap) data).getInstance();
+                    pkName = metadataTools.getPrimaryKeyName(metadata.getClass(instance));
                     FetchPlan view = ((EntityMap) data).getView();
                     pkInView = view != null && pkName != null && view.containsProperty(pkName);
                 } else {
@@ -300,14 +300,14 @@ public class CubaTableFormatter extends AbstractFormatter {
     }
 
     protected void checkInstanceNameLoaded(Object value) {
-        if (!(value instanceof JmixEntity || value instanceof EntityMap))
+        if (!(value instanceof Entity || value instanceof EntityMap))
             return;
 
         if (value instanceof EntityMap)
             value = ((EntityMap) value).getInstance();
 
         try {
-            metadataTools.getInstanceName((JmixEntity) value);
+            metadataTools.getInstanceName((Entity) value);
         } catch (RuntimeException e) {
             throw new ReportFormattingException("Cannot fetch instance name for entity " + value.getClass()
                     + ". Please add all attributes used at instance name to report configuration.", e);

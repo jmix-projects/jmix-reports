@@ -15,16 +15,15 @@
  */
 package io.jmix.reports.listener;
 
-import com.haulmont.cuba.core.EntityManager;
-import com.haulmont.cuba.core.Persistence;
-import com.haulmont.cuba.core.listener.BeforeDetachEntityListener;
+import io.jmix.data.PersistenceTools;
+import io.jmix.data.listener.BeforeDetachEntityListener;
 import io.jmix.reports.ReportingApi;
 import io.jmix.reports.entity.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -37,11 +36,11 @@ public class ReportDetachListener implements BeforeDetachEntityListener<Report> 
     protected ReportingApi reportingApi;
 
     @Autowired
-    protected Persistence persistence;
+    protected PersistenceTools persistenceTools;
 
     @Override
-    public void onBeforeDetach(Report entity, EntityManager entityManager) {
-        if (persistence.getTools().isLoaded(entity, "xml") && StringUtils.isNotBlank(entity.getXml())) {
+    public void onBeforeDetach(Report entity) {
+        if (persistenceTools.isLoaded(entity, "xml") && StringUtils.isNotBlank(entity.getXml())) {
             Report reportFromXml = reportingApi.convertToReport(entity.getXml());
             entity.setBands(reportFromXml.getBands());
             entity.setInputParameters(reportFromXml.getInputParameters());

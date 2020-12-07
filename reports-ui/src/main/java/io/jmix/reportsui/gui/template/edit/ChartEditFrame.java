@@ -16,11 +16,17 @@
 
 package io.jmix.reportsui.gui.template.edit;
 
-import com.haulmont.cuba.gui.components.GroupBoxLayout;
-import com.haulmont.cuba.gui.components.SourceCodeEditor;
-import com.haulmont.cuba.gui.components.Table;
-import com.haulmont.cuba.gui.components.*;
-import com.haulmont.cuba.gui.components.actions.CreateAction;
+import com.haulmont.cuba.gui.components.LookupField;
+import io.jmix.core.DataManager;
+import io.jmix.core.Messages;
+import io.jmix.ui.Actions;
+import io.jmix.ui.Dialogs;
+import io.jmix.ui.Notifications;
+import io.jmix.ui.action.list.CreateAction;
+import io.jmix.ui.component.GroupBoxLayout;
+import io.jmix.ui.component.SourceCodeEditor;
+import io.jmix.ui.component.Table;
+import io.jmix.ui.component.*;
 import com.haulmont.cuba.gui.data.CollectionDatasource;
 import com.haulmont.cuba.gui.data.Datasource;
 import io.jmix.core.metamodel.model.MetaPropertyPath;
@@ -32,6 +38,9 @@ import io.jmix.reportsui.gui.report.run.ShowChartController;
 import io.jmix.reportsui.gui.template.edit.generator.RandomChartDataGenerator;
 import io.jmix.ui.action.ItemTrackingAction;
 import io.jmix.ui.component.*;
+import io.jmix.ui.screen.Subscribe;
+import io.jmix.ui.screen.UiController;
+import io.jmix.ui.screen.UiDescriptor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.IterableUtils;
 import org.springframework.beans.factory.BeanFactory;
@@ -42,6 +51,8 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+@UiController("report_ChartEdit.fragment")
+@UiDescriptor("chart-edit-frame.xml")
 public class ChartEditFrame extends DescriptionEditFrame {
     @Autowired
     protected Datasource<PieChartDescription> pieChartDs;
@@ -50,26 +61,35 @@ public class ChartEditFrame extends DescriptionEditFrame {
     @Autowired
     protected CollectionDatasource.Sortable<ChartSeries, UUID> seriesDs;
     @Autowired
-    protected LookupField<ChartType> type;
+    protected ComboBox<ChartType> type;
     @Autowired
     protected Table<ChartSeries> seriesTable;
     @Autowired
     protected GroupBoxLayout seriesBox;
     @Autowired
-    protected FieldGroup pieChartFieldGroup;
+    protected Form pieChartFieldGroup;
     @Autowired
-    protected FieldGroup serialChartFieldGroup;
+    protected Form serialChartFieldGroup;
     @Autowired
-    private SourceCodeEditor serialJsonConfigEditor;
+    protected SourceCodeEditor serialJsonConfigEditor;
     @Autowired
-    private SourceCodeEditor pieJsonConfigEditor;
+    protected SourceCodeEditor pieJsonConfigEditor;
     @Autowired
-    private BeanFactory beanFactory;
+    protected BeanFactory beanFactory;
+    @Autowired
+    protected Messages messages;
+    @Autowired
+    protected Notifications notifications;
+    @Autowired
+    protected Dialogs dialogs;
+    @Autowired
+    protected Actions actions;
+    @Autowired
+    protected DataManager dataManager;
 
-    @Override
+    @Subscribe
     @SuppressWarnings("IncorrectCreateEntity")
-    public void init(Map<String, Object> params) {
-        super.init(params);
+    protected void onInit(InitEvent event) {
         pieChartDs.setItem(new PieChartDescription());
         serialChartDs.setItem(new SerialChartDescription());
         type.setOptionsList(Arrays.asList(ChartType.values()));
@@ -89,15 +109,14 @@ public class ChartEditFrame extends DescriptionEditFrame {
         serialJsonConfigEditor.setVisible(false);
         pieJsonConfigEditor.setVisible(false);
 
-        seriesTable.addAction(new CreateAction(seriesTable) {
-            @Override
-            public void actionPerform(Component component) {
-                @SuppressWarnings("IncorrectCreateEntity")
-                ChartSeries chartSeries = new ChartSeries();
-                chartSeries.setOrder(seriesDs.getItems().size() + 1);
-                seriesDs.addItem(chartSeries);
-            }
+        CreateAction createAction = (CreateAction) actions.create(CreateAction.ID);
+        createAction.withHandler(handle -> {
+            ChartSeries chartSeries = dataManager.create(ChartSeries.class);
+            chartSeries.setOrder(seriesDs.getItems().size() + 1);
+            seriesDs.addItem(chartSeries);
         });
+        seriesTable.addAction(createAction);
+
         seriesTable.addAction(new ChartSeriesMoveAction(true));
         seriesTable.addAction(new ChartSeriesMoveAction(false));
 
@@ -131,9 +150,10 @@ public class ChartEditFrame extends DescriptionEditFrame {
     }
 
     protected void jsonEditorContextHelpIconClickHandler(HasContextHelp.ContextHelpIconClickEvent event) {
-        showMessageDialog(getMessage("chartEdit.jsonConfig"),
-                event.getSource().getContextHelpText(),
-                MessageType.CONFIRMATION_HTML);
+        dialogs.createMessageDialog()
+                .withCaption(messages.getMessage("chartEdit.jsonConfig"))
+                .withMessage(event.getSource().getContextHelpText())
+                .show();
     }
 
     @Override
@@ -171,19 +191,25 @@ public class ChartEditFrame extends DescriptionEditFrame {
         if (chartDescription != null && chartDescription.getType() == ChartType.SERIAL) {
             List<ChartSeries> series = ((SerialChartDescription) chartDescription).getSeries();
             if (series == null || series.size() == 0) {
-                showNotification(getMessage("validationFail.caption"),
-                        getMessage("chartEdit.seriesEmptyMsg"), NotificationType.TRAY);
+                notifications.create(Notifications.NotificationType.TRAY)
+                        .withCaption(messages.getMessage("validationFail.caption"))
+                        .withDescription(messages.getMessage("chartEdit.seriesEmptyMsg"))
+                        .show();
                 return false;
             }
             for (ChartSeries it : series) {
                 if (it.getType() == null) {
-                    showNotification(getMessage("validationFail.caption"),
-                            getMessage("chartEdit.seriesTypeNullMsg"), NotificationType.TRAY);
+                    notifications.create(Notifications.NotificationType.TRAY)
+                            .withCaption(messages.getMessage("validationFail.caption"))
+                            .withDescription(messages.getMessage("chartEdit.seriesTypeNullMsg"))
+                            .show();
                     return false;
                 }
                 if (it.getValueField() == null) {
-                    showNotification(getMessage("validationFail.caption"),
-                            getMessage("chartEdit.seriesValueFieldNullMsg"), NotificationType.TRAY);
+                    notifications.create(Notifications.NotificationType.TRAY)
+                            .withCaption(messages.getMessage("validationFail.caption"))
+                            .withDescription(messages.getMessage("chartEdit.seriesValueFieldNullMsg"))
+                            .show();
                     return false;
                 }
             }
@@ -244,8 +270,8 @@ public class ChartEditFrame extends DescriptionEditFrame {
                 .map(BandDefinition::getName)
                 .collect(Collectors.toList());
 
-        LookupField pieChartBandName = (LookupField) pieChartFieldGroup.getComponentNN("bandName");
-        LookupField serialChartBandName = (LookupField) serialChartFieldGroup.getComponentNN("bandName");
+        ComboBox pieChartBandName = (ComboBox) pieChartFieldGroup.getComponentNN("bandName");
+        ComboBox serialChartBandName = (ComboBox) serialChartFieldGroup.getComponentNN("bandName");
 
         pieChartBandName.setOptionsList(bandNames);
         serialChartBandName.setOptionsList(bandNames);
@@ -267,7 +293,7 @@ public class ChartEditFrame extends DescriptionEditFrame {
 
         ChartSeriesMoveAction(boolean up) {
             super(seriesTable, up ? "up" : "down");
-            setCaption(getMessage(up ? "generalFrame.up" : "generalFrame.down"));
+            setCaption(messages.getMessage(up ? "generalFrame.up" : "generalFrame.down"));
             this.up = up;
         }
 

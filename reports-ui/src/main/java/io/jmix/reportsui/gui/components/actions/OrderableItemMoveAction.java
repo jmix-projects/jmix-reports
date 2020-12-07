@@ -16,13 +16,13 @@
 
 package io.jmix.reportsui.gui.components.actions;
 
-import com.haulmont.cuba.core.global.AppBeans;
-import com.haulmont.cuba.core.global.Metadata;
-import com.haulmont.cuba.gui.components.ListComponent;
-import com.haulmont.cuba.gui.data.CollectionDatasource;
+import io.jmix.core.Metadata;
 import io.jmix.reports.entity.wizard.OrderableEntity;
 import io.jmix.ui.action.AbstractAction;
 import io.jmix.ui.component.Component;
+import io.jmix.ui.component.ListComponent;
+import io.jmix.ui.component.data.DataUnit;
+import io.jmix.ui.component.data.meta.ContainerDataUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nullable;
@@ -37,7 +37,7 @@ import java.util.*;
  *     <li>index recalculating algorithm if more than one item selected)</li>
  * </ul>
  */
-public class OrderableItemMoveAction<T extends ListComponent<E>, E  extends OrderableEntity> extends AbstractAction {
+public class OrderableItemMoveAction<T extends ListComponent<E>, E extends OrderableEntity> extends AbstractAction {
 
     @Autowired
     protected Metadata metadata;
@@ -47,7 +47,8 @@ public class OrderableItemMoveAction<T extends ListComponent<E>, E  extends Orde
 
     public OrderableItemMoveAction(String actionId, Direction direction, T listComponent, @Nullable String shortcut) {
         super(actionId, shortcut);
-        if (!(OrderableEntity.class.isAssignableFrom(listComponent.getDatasource().getMetaClass().getJavaClass()))) {
+        ContainerDataUnit containerDataUnit = (ContainerDataUnit) listComponent.getItems();
+        if (!(OrderableEntity.class.isAssignableFrom(containerDataUnit.getEntityMetaClass().getJavaClass()))) {
             throw new UnsupportedOperationException("List component must contain datasource with entities type of OrderableEntity for ordering");
         }
         this.direction = direction;
@@ -78,7 +79,7 @@ public class OrderableItemMoveAction<T extends ListComponent<E>, E  extends Orde
     protected void swapSingleItemWithNeighbour() {
         OrderableEntity selectedItem = listComponent.getSingleSelected();
         OrderableEntity neighbourItem = null;
-        List<OrderableEntity> allItems = new ArrayList(listComponent.getDatasource().getItems());
+        List<OrderableEntity> allItems = getItems(listComponent);
         for (ListIterator<OrderableEntity> iterator = allItems.listIterator(); iterator.hasNext(); ) {
             if (iterator.next().equals(selectedItem)) {
                 neighbourItem = getItemNeighbour(iterator);
@@ -119,12 +120,12 @@ public class OrderableItemMoveAction<T extends ListComponent<E>, E  extends Orde
     }
 
     protected void sortTableDsByItemsOrderNum() {
-        if (listComponent.getDatasource() instanceof CollectionDatasource.Sortable) {
-            CollectionDatasource.Sortable.SortInfo sortInfo = new CollectionDatasource.Sortable.SortInfo();
-            sortInfo.setOrder(CollectionDatasource.Sortable.Order.ASC);
-            sortInfo.setPropertyPath(metadata.getClass(listComponent.getSingleSelected()).getPropertyPath("orderNum"));
-            ((CollectionDatasource.Sortable) listComponent.getDatasource()).sort(new CollectionDatasource.Sortable.SortInfo[]{sortInfo});
-        }
+//        if (listComponent.getDatasource() instanceof CollectionDatasource.Sortable) {
+//            CollectionDatasource.Sortable.SortInfo sortInfo = new CollectionDatasource.Sortable.SortInfo();
+//            sortInfo.setOrder(CollectionDatasource.Sortable.Order.ASC);
+//            sortInfo.setPropertyPath(metadata.getClass(listComponent.getSingleSelected()).getPropertyPath("orderNum"));
+//            ((CollectionDatasource.Sortable) listComponent.getDatasource()).sort(new CollectionDatasource.Sortable.SortInfo[]{sortInfo});
+//        }
     }
 
     /**
@@ -133,7 +134,7 @@ public class OrderableItemMoveAction<T extends ListComponent<E>, E  extends Orde
      */
     protected void moveFewItems() {
         //System.out.println("swap-------------");
-        List<E> allItems = new ArrayList(listComponent.getDatasource().getItems());
+        List<E> allItems = getItems(listComponent);
         Set<E> selectedItems = listComponent.getSelected();
         int spreadKoef = listComponent.getSelected().size();//U can use 10 for easier debug
 
@@ -205,12 +206,24 @@ public class OrderableItemMoveAction<T extends ListComponent<E>, E  extends Orde
         return "";
     }
 
+    private List getItems(T listComponent) {
+        DataUnit dataUnit = listComponent.getItems();
+        if (dataUnit instanceof ContainerDataUnit) {
+            ContainerDataUnit containerDataUnit = (ContainerDataUnit) dataUnit;
+            return containerDataUnit.getContainer().getItems();
+        } else {
+            //todo
+            return null;
+        }
+    }
+
     /**
      * Iterate over items and set orderNum value from 1 to size()+1;
      */
     protected void normalizeEntityOrderNum() {
         long normalizedIdx = 0;
-        List<OrderableEntity> allItems = new ArrayList(listComponent.getDatasource().getItems());
+
+        List<OrderableEntity> allItems = getItems(listComponent);
         for (OrderableEntity item : allItems) {
             item.setOrderNum(++normalizedIdx); //first must to be 1
         }

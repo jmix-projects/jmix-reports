@@ -18,7 +18,7 @@ package io.jmix.reports;
 
 import io.jmix.core.FetchPlan;
 import io.jmix.core.metamodel.model.MetaClass;
-import io.jmix.core.JmixEntity;
+import io.jmix.core.Entity;
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.cuba.core.global.View;
 import io.jmix.reports.app.ParameterPrototype;
@@ -202,7 +202,7 @@ public interface ReportingApi {
      */
     ReportOutputDocument bulkPrint(Report report, String templateCode, ReportOutputType outputType, List<Map<String, Object>> paramsList);
 
-    <T extends JmixEntity> T reloadEntity(T entity, FetchPlan view);
+    <T extends Entity> T reloadEntity(T entity, FetchPlan view);
 
     MetaClass findMetaClassByDataSetEntityAlias(String alias, DataSetType dataSetType, List<ReportInputParameter> reportInputParameters);
 

@@ -16,25 +16,28 @@
 
 package io.jmix.reportsui.gui.report.run;
 
+import com.haulmont.yarg.reporting.ReportOutputDocument;
+import io.jmix.core.Messages;
 import io.jmix.core.common.util.ParamsMap;
-import com.haulmont.cuba.gui.components.*;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportOutputType;
 import io.jmix.reports.entity.ReportTemplate;
 import io.jmix.reportsui.gui.ReportGuiManager;
-import com.haulmont.yarg.reporting.ReportOutputDocument;
-
+import io.jmix.ui.Fragments;
+import io.jmix.ui.ScreenBuilders;
+import io.jmix.ui.UiComponents;
 import io.jmix.ui.WindowConfig;
-import io.jmix.ui.component.BoxLayout;
-import io.jmix.ui.component.Button;
-import io.jmix.ui.component.HBoxLayout;
+import io.jmix.ui.component.*;
+import io.jmix.ui.screen.*;
 import io.jmix.ui.theme.ThemeConstants;
-import io.jmix.ui.xml.layout.ComponentsFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-public class ShowChartController extends AbstractWindow {
+@UiController("chart_ShowChartController")
+@UiDescriptor("show-chart.xml")
+public class ShowChartController extends StandardLookup {
     public static final String JSON_CHART_SCREEN_ID = "chart$jsonChart";
 
     public static final String CHART_JSON_PARAMETER = "chartJson";
@@ -55,10 +58,10 @@ public class ShowChartController extends AbstractWindow {
     protected ThemeConstants themeConstants;
 
     @Autowired
-    protected LookupField<Report> reportLookup;
+    protected ComboBox<Report> reportLookup;
 
     @Autowired
-    protected ComponentsFactory componentsFactory;
+    protected UiComponents uiComponents;
 
     @Autowired
     protected Button printReportBtn;
@@ -72,16 +75,20 @@ public class ShowChartController extends AbstractWindow {
     @Autowired
     protected WindowConfig windowConfig;
 
+    @Autowired
+    protected Messages messages;
+
+    @Autowired
+    protected Fragments fragments;
+
     protected InputParametersFrame inputParametersFrame;
 
     protected Report report;
 
     protected String templateCode;
 
-    @Override
-    public void init(final Map<String, Object> params) {
-        super.init(params);
-
+    @Subscribe
+    protected void onInit(InitEvent event) {
         //TODO get dialog options
 //        getDialogOptions()
 //                .setWidth(themeConstants.get("cuba.gui.report.ShowChartController.width"))
@@ -128,8 +135,11 @@ public class ShowChartController extends AbstractWindow {
             );
 
             inputParametersFrame = (InputParametersFrame) openFrame(parametersFrameHolder,
-                    "report$inputParametersFrame", params);
+                    "report_inputParametersFrame", params);
 
+            inputParametersFrame = fragments.create(this, InputParametersFrame.class);
+            inputParametersFrame.set
+            parametersFrameHolder.add(inputParametersFrame.getFragment());
             reportParamsBox.setVisible(true);
         } else {
             reportParamsBox.setVisible(false);
@@ -147,8 +157,8 @@ public class ShowChartController extends AbstractWindow {
 
     protected void showDiagramStubText() {
         if (chartBox.getOwnComponents().isEmpty()) {
-            Label label = componentsFactory.createComponent(Label.class);
-            label.setValue(getMessage("showChart.caption"));
+            Label label = uiComponents.create(Label.class);
+            label.setValue(messages.getMessage("showChart.caption"));
             label.setAlignment(Alignment.MIDDLE_CENTER);
             label.setStyleName("h1");
             chartBox.add(label);
@@ -158,13 +168,14 @@ public class ShowChartController extends AbstractWindow {
     protected void showChartsNotIncluded() {
         reportLookup.setEditable(false);
         chartBox.removeAll();
-        Label label = componentsFactory.createComponent(Label.class);
-        label.setValue(getMessage("showChart.noChartComponent"));
+        Label label = uiComponents.create(Label.class);
+        label.setValue(messages.getMessage("showChart.noChartComponent"));
         label.setAlignment(Alignment.MIDDLE_CENTER);
         label.setStyleName("h1");
         chartBox.add(label);
     }
 
+    @Subscribe("printReportBtn")
     public void printReport() {
         if (inputParametersFrame != null && inputParametersFrame.getReport() != null) {
             if (validateAll()) {

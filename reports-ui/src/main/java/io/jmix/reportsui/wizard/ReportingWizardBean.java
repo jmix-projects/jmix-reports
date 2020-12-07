@@ -14,18 +14,12 @@
  * limitations under the License.
  */
 
-package io.jmix.reports.wizard;
+package io.jmix.reportsui.wizard;
 
-import io.jmix.core.ExtendedEntities;
-import io.jmix.core.FetchPlan;
-import io.jmix.core.FetchPlanProperty;
-import io.jmix.core.MetadataTools;
+import io.jmix.core.*;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.core.metamodel.model.MetaProperty;
 import com.haulmont.cuba.core.global.Configuration;
-import com.haulmont.cuba.core.global.Messages;
-import com.haulmont.cuba.core.global.Metadata;
-import com.haulmont.cuba.core.global.View;
 import io.jmix.reports.ReportingApi;
 import io.jmix.reports.ReportingBean;
 import io.jmix.reports.ReportingConfig;
@@ -49,7 +43,7 @@ import javax.persistence.Temporal;
 import java.lang.reflect.AnnotatedElement;
 import java.util.*;
 
-@Component(ReportingWizardApi.NAME)
+@Component("report_ReportingWizardApi")
 public class ReportingWizardBean implements ReportingWizardApi {
 
     public static final String ROOT_BAND_DEFINITION_NAME = "Root";
@@ -72,6 +66,10 @@ public class ReportingWizardBean implements ReportingWizardApi {
     protected DataSetFactory dataSetFactory;
     @Autowired
     protected Messages messages;
+    @Autowired
+    protected MetadataTools metadataTools;
+    @Autowired
+    protected FetchPlans fetchPlans;
 
     @Override
     public Report toReport(ReportData reportData, boolean temporary) {
@@ -111,7 +109,7 @@ public class ReportingWizardBean implements ReportingWizardApi {
             BandDefinition dataBand = createDataBand(report, rootReportBandDefinition, reportRegion.getNameForBand(), bandDefinitionPosition++);
 
             if (reportData.getReportType().isEntity()) {
-                View parameterView = createViewByReportRegions(reportData.getEntityTreeRootNode(), reportData.getReportRegions());
+                FetchPlan parameterView = createViewByReportRegions(reportData.getEntityTreeRootNode(), reportData.getReportRegions());
                 createEntityDataSet(reportData, reportRegion, dataBand, mainParameter, parameterView);
             } else {
                 createJpqlDataSet(reportData, reportRegion, dataBand);
@@ -180,13 +178,13 @@ public class ReportingWizardBean implements ReportingWizardApi {
     }
 
     protected void createEntityDataSet(ReportData reportData, ReportRegion reportRegion, BandDefinition dataBand,
-                                       ReportInputParameter mainParameter, View parameterView) {
+                                       ReportInputParameter mainParameter, FetchPlan parameterView) {
         DataSet dataSet = dataSetFactory.createEmptyDataSet(dataBand);
         dataSet.setName(messages.getMessage(getClass(), "dataSet"));
         if (ReportData.ReportType.LIST_OF_ENTITIES == reportData.getReportType()) {
             dataSet.setType(DataSetType.MULTI);
             dataSet.setListEntitiesParamName(mainParameter.getAlias());
-            dataSet.setView(parameterView);
+            dataSet.setFetchPlan(parameterView);
         } else if (ReportData.ReportType.SINGLE_ENTITY == reportData.getReportType()) {
             if (reportRegion.isTabulatedRegion()) {
                 dataSet.setType(DataSetType.MULTI);
@@ -195,7 +193,7 @@ public class ReportingWizardBean implements ReportingWizardApi {
                 dataSet.setType(DataSetType.SINGLE);
                 dataSet.setEntityParamName(mainParameter.getAlias());
             }
-            dataSet.setView(parameterView);
+            dataSet.setFetchPlan(parameterView);
         }
         dataBand.getDataSets().add(dataSet);
     }
@@ -270,15 +268,15 @@ public class ReportingWizardBean implements ReportingWizardApi {
                     ReportValueFormat rvf = new ReportValueFormat();
                     rvf.setReport(report);
                     rvf.setValueName(reportRegion.getNameForBand() + "." + regionProperty.getHierarchicalNameExceptRoot());
-                    rvf.setFormatString(messages.getMainMessage("dateTimeFormat"));
+                    rvf.setFormatString(messages.getMessage("dateTimeFormat"));
                     AnnotatedElement annotatedElement = regionProperty.getEntityTreeNode().getWrappedMetaProperty().getAnnotatedElement();
                     if (annotatedElement != null && annotatedElement.isAnnotationPresent(Temporal.class)) {
                         switch (annotatedElement.getAnnotation(Temporal.class).value()) {
                             case TIME:
-                                rvf.setFormatString(messages.getMainMessage("timeFormat"));
+                                rvf.setFormatString(messages.getMessage("timeFormat"));
                                 break;
                             case DATE:
-                                rvf.setFormatString(messages.getMainMessage("dateFormat"));
+                                rvf.setFormatString(messages.getMessage("dateFormat"));
                                 break;
                         }
                     }
@@ -304,32 +302,32 @@ public class ReportingWizardBean implements ReportingWizardApi {
     }
 
     @Override
-    public View createViewByReportRegions(EntityTreeNode entityTreeRootNode, List<ReportRegion> reportRegions) {
-        View view = new View(entityTreeRootNode.getWrappedMetaClass().getJavaClass(), false);
+    public FetchPlan createViewByReportRegions(EntityTreeNode entityTreeRootNode, List<ReportRegion> reportRegions) {
+        FetchPlanBuilder fetchPlanBuilder = fetchPlans.builder(entityTreeRootNode.getWrappedMetaClass().getJavaClass());
 
-        Map<EntityTreeNode, View> viewsForNodes = new HashMap<>();
-        viewsForNodes.put(entityTreeRootNode, view);
+        Map<EntityTreeNode, FetchPlanBuilder> viewsForNodes = new HashMap<>();
+        viewsForNodes.put(entityTreeRootNode, fetchPlanBuilder);
         for (ReportRegion reportRegion : reportRegions) {
             for (RegionProperty regionProperty : reportRegion.getRegionProperties()) {
                 EntityTreeNode entityTreeNode = regionProperty.getEntityTreeNode();
                 MetaClass metaClass = entityTreeNode.getWrappedMetaClass();
                 if (metaClass != null) {
-                    View propertyView = viewsForNodes.get(entityTreeNode);
-                    if (propertyView == null) {
-                        propertyView = new View(metaClass.getJavaClass());
-                        viewsForNodes.put(entityTreeNode, propertyView);
+                    FetchPlanBuilder propertyFetchPlanBuilder = viewsForNodes.get(entityTreeNode);
+                    if (propertyFetchPlanBuilder == null) {
+                        propertyFetchPlanBuilder = fetchPlans.builder(metaClass.getJavaClass());
+                        viewsForNodes.put(entityTreeNode, propertyFetchPlanBuilder);
                     }
 
-                    View parentView = ensureParentViewsExist(entityTreeNode, viewsForNodes);
-                    parentView.addProperty(regionProperty.getName(), propertyView);
+                    FetchPlanBuilder parentView = ensureParentViewsExist(entityTreeNode, viewsForNodes);
+                    parentView.add(regionProperty.getName(), propertyFetchPlanBuilder);
                 } else {
-                    View parentView = ensureParentViewsExist(entityTreeNode, viewsForNodes);
-                    parentView.addProperty(regionProperty.getName());
+                    FetchPlanBuilder parentView = ensureParentViewsExist(entityTreeNode, viewsForNodes);
+                    parentView.add(regionProperty.getName());
                 }
             }
         }
 
-        return view;
+        return fetchPlanBuilder.build();
     }
 
     /**
@@ -340,13 +338,13 @@ public class ReportingWizardBean implements ReportingWizardApi {
      *
      * @param entityTree             the whole entity tree model
      * @param isTabulated            determine which region will be created
-     * @param view                   by that view region will be created
+     * @param fetchPlan                   by that view region will be created
      * @param collectionPropertyName must to be non-null for a tabulated region
      * @return report region
      */
     @Override
-    public ReportRegion createReportRegionByView(EntityTree entityTree, boolean isTabulated, @Nullable FetchPlan view, @Nullable String collectionPropertyName) {
-        if (StringUtils.isNotBlank(collectionPropertyName) && view == null) {
+    public ReportRegion createReportRegionByView(EntityTree entityTree, boolean isTabulated, @Nullable FetchPlan fetchPlan, @Nullable String collectionPropertyName) {
+        if (StringUtils.isNotBlank(collectionPropertyName) && fetchPlan == null) {
             //without view we can`t correctly set rootNode for region which is necessary for tabulated regions for a
             // collection of entities (when alias contain #)
             log.warn("Detected incorrect parameters for createReportRegionByView method. View must not to be null if " +
@@ -368,8 +366,8 @@ public class ReportingWizardBean implements ReportingWizardApi {
             reportRegion.setRegionPropertiesRootNode(entityTreeRootNode);
             scalarOnly = true;
         }
-        if (view != null) {
-            iterateViewAndCreatePropertiesForRegion(scalarOnly, view, allNodesAndHierarchicalPathsMap, reportRegion.getRegionProperties(), collectionPropertyName, 0);
+        if (fetchPlan != null) {
+            iterateViewAndCreatePropertiesForRegion(scalarOnly, fetchPlan, allNodesAndHierarchicalPathsMap, reportRegion.getRegionProperties(), collectionPropertyName, 0);
         }
         return reportRegion;
     }
@@ -378,20 +376,20 @@ public class ReportingWizardBean implements ReportingWizardApi {
      * Search for view for parent node
      * If does not exists - createDataSet it and add property to parent of parent view
      */
-    protected View ensureParentViewsExist(EntityTreeNode entityTreeNode, Map<EntityTreeNode, View> viewsForNodes) {
+    protected FetchPlanBuilder ensureParentViewsExist(EntityTreeNode entityTreeNode, Map<EntityTreeNode, FetchPlanBuilder> viewsForNodes) {
         EntityTreeNode parentNode = entityTreeNode.getParent();
-        View parentView = viewsForNodes.get(parentNode);
+        FetchPlanBuilder parentFetchPlanBuilder = fetchPlans.builder(parentNode.getWrappedMetaClass().getJavaClass());
 
-        if (parentView == null && parentNode != null) {
-            parentView = new View(parentNode.getWrappedMetaClass().getJavaClass());
-            viewsForNodes.put(parentNode, parentView);
-            View parentOfParentView = ensureParentViewsExist(parentNode, viewsForNodes);
+        if (parentFetchPlanBuilder == null && parentNode != null) {
+            parentFetchPlanBuilder = fetchPlans.builder(parentNode.getWrappedMetaClass().getJavaClass());
+            viewsForNodes.put(parentNode, parentFetchPlanBuilder);
+            FetchPlanBuilder parentOfParentView = ensureParentViewsExist(parentNode, viewsForNodes);
             if (parentOfParentView != null) {
-                parentOfParentView.addProperty(parentNode.getName(), parentView);
+                parentOfParentView.add(parentNode.getName(), parentFetchPlanBuilder);
             }
         }
 
-        return parentView;
+        return parentFetchPlanBuilder;
     }
 
 
@@ -402,7 +400,7 @@ public class ReportingWizardBean implements ReportingWizardApi {
         for (FetchPlanProperty viewProperty : parentView.getProperties()) {
 
             if (scalarOnly) {
-                MetaClass metaClass = metadata.getClassNN(parentView.getEntityClass());
+                MetaClass metaClass = metadata.getClass(parentView.getEntityClass());
                 MetaProperty metaProperty = metaClass.getProperty(viewProperty.getName());
                 if (metaProperty != null && metaProperty.getRange().getCardinality().isMany()) {
                     continue;
@@ -437,8 +435,6 @@ public class ReportingWizardBean implements ReportingWizardApi {
 
     @Override
     public boolean isEntityAllowedForReportWizard(final MetaClass effectiveMetaClass) {
-        MetadataTools metadataTools = metadata.getTools();
-
         if (metadataTools.isSystemLevel(effectiveMetaClass)
                 || metadataTools.isEmbeddable(effectiveMetaClass)
                 || effectiveMetaClass.getProperties().isEmpty()) {
@@ -504,7 +500,7 @@ public class ReportingWizardBean implements ReportingWizardApi {
     protected List<String> getEffectiveEntities(List<String> entitiesList) {
         List<String> effectiveEntities = new ArrayList<>();
         for (String className : entitiesList) {
-            MetaClass clazz = metadata.getClassNN(className);
+            MetaClass clazz = metadata.getClass(className);
             effectiveEntities.add(extendedEntities.getEffectiveMetaClass(clazz).getName());
         }
         return effectiveEntities;
@@ -519,7 +515,7 @@ public class ReportingWizardBean implements ReportingWizardApi {
     }
 
     protected MetaClass getOriginalMetaClass(MetaClass metaClass) {
-        MetaClass originalMetaClass = metadata.getExtendedEntities().getOriginalMetaClass(metaClass);
+        MetaClass originalMetaClass = extendedEntities.getOriginalMetaClass(metaClass);
         if (originalMetaClass == null) {
             originalMetaClass = metaClass;
         }

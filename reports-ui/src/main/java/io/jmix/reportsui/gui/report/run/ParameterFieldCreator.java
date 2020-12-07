@@ -18,25 +18,26 @@ package io.jmix.reportsui.gui.report.run;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-import io.jmix.core.QueryTransformer;
-import io.jmix.core.QueryTransformerFactory;
-import com.haulmont.chile.core.datatypes.Datatypes;
-import io.jmix.core.metamodel.model.MetaClass;
-import com.haulmont.cuba.core.global.*;
+import com.haulmont.chile.core.datatypes.DatatypeRegistry;
+import com.haulmont.cuba.core.global.Scripting;
 import com.haulmont.cuba.gui.WindowParams;
-import com.haulmont.cuba.gui.components.*;
-import com.haulmont.cuba.gui.components.validators.DoubleValidator;
-import com.haulmont.cuba.gui.data.CollectionDatasource;
-import com.haulmont.cuba.gui.data.CollectionDatasource.RefreshMode;
-import com.haulmont.cuba.gui.data.DsBuilder;
-import com.haulmont.cuba.gui.data.impl.DatasourceImplementation;
-import com.haulmont.cuba.gui.screen.compatibility.LegacyFrame;
+import com.haulmont.cuba.gui.components.PickerField;
+import io.jmix.core.*;
+import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.reports.app.service.ReportService;
 import io.jmix.reports.entity.ParameterType;
 import io.jmix.reports.entity.ReportInputParameter;
 import io.jmix.reports.entity.ReportType;
-import io.jmix.ui.component.Component;
-import io.jmix.ui.xml.layout.ComponentsFactory;
+import io.jmix.ui.Actions;
+import io.jmix.ui.UiComponents;
+import io.jmix.ui.action.entitypicker.LookupAction;
+import io.jmix.ui.component.*;
+import io.jmix.ui.component.data.options.ContainerOptions;
+import io.jmix.ui.component.validators.DoubleValidator;
+import io.jmix.ui.model.CollectionContainer;
+import io.jmix.ui.model.CollectionLoader;
+import io.jmix.ui.model.DataComponents;
+import io.jmix.ui.screen.ScreenFragment;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +49,8 @@ public class ParameterFieldCreator {
 
     public static final String COMMON_LOOKUP_SCREEN_ID = "commonLookup";
 
-    protected ComponentsFactory componentsFactory = AppBeans.get(ComponentsFactory.class);
+    @Autowired
+    protected UiComponents uiComponents;
 
     @Autowired
     protected Messages messages;
@@ -65,7 +67,19 @@ public class ParameterFieldCreator {
     @Autowired
     protected QueryTransformerFactory queryTransformerFactory;
 
-    protected LegacyFrame frame;
+    @Autowired
+    protected DatatypeRegistry datatypeRegistry;
+
+    @Autowired
+    protected DataComponents factory;
+
+    @Autowired
+    protected FetchPlans fetchPlans;
+
+    @Autowired
+    protected Actions actions;
+
+    protected ScreenFragment frame;
 
     protected Map<ParameterType, FieldCreator> fieldCreationMapping = new ImmutableMap.Builder<ParameterType, FieldCreator>()
             .put(ParameterType.BOOLEAN, new CheckBoxCreator())
@@ -79,12 +93,12 @@ public class ParameterFieldCreator {
             .put(ParameterType.TIME, new TimeFieldCreator())
             .build();
 
-    public ParameterFieldCreator(LegacyFrame frame) {
+    public ParameterFieldCreator(ScreenFragment frame) {
         this.frame = frame;
     }
 
     public Label createLabel(ReportInputParameter parameter, Field field) {
-        Label label = componentsFactory.createComponent(Label.class);
+        Label label = uiComponents.create(Label.class);
         label.setAlignment(field instanceof TokenList ? Component.Alignment.TOP_LEFT : Component.Alignment.MIDDLE_LEFT);
         label.setWidth(Component.AUTO_SIZE);
         label.setValue(parameter.getLocName());
@@ -97,7 +111,8 @@ public class ParameterFieldCreator {
 
         field.setId("param_" + parameter.getAlias());
         field.setWidth("100%");
-        field.setFrame(frame.getWrappedFrame());
+        //field.setFrame(frame);
+//        field.setFrame(frame.getWrappedFrame());
         field.setEditable(true);
 
         field.setRequired(parameter.getRequired());
@@ -117,9 +132,9 @@ public class ParameterFieldCreator {
     protected class DateFieldCreator implements FieldCreator {
         @Override
         public Field createField(ReportInputParameter parameter) {
-            DateField dateField = componentsFactory.createComponent(DateField.class);
+            DateField dateField = uiComponents.create(DateField.class);
             dateField.setResolution(DateField.Resolution.DAY);
-            dateField.setDateFormat(messages.getMainMessage("dateFormat"));
+            dateField.setDateFormat(messages.getMessage("dateFormat"));
             if (BooleanUtils.isTrue(parameter.getDefaultDateIsCurrent())) {
                 setCurrentDateAsNow(parameter, dateField);
             }
@@ -130,9 +145,9 @@ public class ParameterFieldCreator {
     protected class DateTimeFieldCreator implements FieldCreator {
         @Override
         public Field createField(ReportInputParameter parameter) {
-            DateField dateField = componentsFactory.createComponent(DateField.class);
+            DateField dateField = uiComponents.create(DateField.class);
             dateField.setResolution(DateField.Resolution.MIN);
-            dateField.setDateFormat(messages.getMainMessage("dateTimeFormat"));
+            dateField.setDateFormat(messages.getMessage("dateTimeFormat"));
             if (BooleanUtils.isTrue(parameter.getDefaultDateIsCurrent())) {
                 setCurrentDateAsNow(parameter, dateField);
             }
@@ -144,11 +159,11 @@ public class ParameterFieldCreator {
 
         @Override
         public Field createField(ReportInputParameter parameter) {
-            Field timeField = componentsFactory.createComponent(TimeField.class);
+            Field timeField = uiComponents.create(TimeField.class);
             if (BooleanUtils.isTrue(parameter.getDefaultDateIsCurrent())) {
                 setCurrentDateAsNow(parameter, timeField);
             }
-            return componentsFactory.createComponent(TimeField.class);
+            return uiComponents.create(TimeField.class);
         }
     }
 
@@ -156,7 +171,7 @@ public class ParameterFieldCreator {
 
         @Override
         public Field createField(ReportInputParameter parameter) {
-            CheckBox checkBox = componentsFactory.createComponent(CheckBox.class);
+            CheckBox checkBox = uiComponents.create(CheckBox.class);
             checkBox.setAlignment(Component.Alignment.MIDDLE_LEFT);
             return checkBox;
         }
@@ -166,7 +181,7 @@ public class ParameterFieldCreator {
 
         @Override
         public Field createField(ReportInputParameter parameter) {
-            return componentsFactory.createComponent(TextField.class);
+            return uiComponents.create(TextField.class);
         }
     }
 
@@ -174,9 +189,9 @@ public class ParameterFieldCreator {
 
         @Override
         public Field createField(ReportInputParameter parameter) {
-            TextField textField = componentsFactory.createComponent(TextField.class);
+            TextField textField = uiComponents.create(TextField.class);
             textField.addValidator(new DoubleValidator());
-            textField.setDatatype(Datatypes.getNN(Double.class));
+            textField.setDatatype(datatypeRegistry.get(Double.class));
             return textField;
         }
     }
@@ -185,7 +200,7 @@ public class ParameterFieldCreator {
 
         @Override
         public Field createField(ReportInputParameter parameter) {
-            LookupField lookupField = componentsFactory.createComponent(LookupField.class);
+            ComboBox lookupField = uiComponents.create(ComboBox.class);
             String enumClassName = parameter.getEnumerationClass();
             if (StringUtils.isNotBlank(enumClassName)) {
                 Class enumClass = scripting.loadClass(enumClassName);
@@ -209,17 +224,27 @@ public class ParameterFieldCreator {
         @Override
         public Field createField(ReportInputParameter parameter) {
             boolean isLookup = Boolean.TRUE.equals(parameter.getLookup());
-            PickerField field;
-            MetaClass entityMetaClass = metadata.getClassNN(parameter.getEntityMetaClass());
+            EntityPicker field;
+            MetaClass entityMetaClass = metadata.getClass(parameter.getEntityMetaClass());
 
             if (isLookup) {
-                field = componentsFactory.createComponent(LookupPickerField.class);
+                field = uiComponents.create(EntityComboBox.class);
 
-                CollectionDatasource ds = DsBuilder.create()
-                        .setViewName(View.MINIMAL)
-                        .setMetaClass(entityMetaClass)
-                        .buildCollectionDatasource();
-                ds.setRefreshOnComponentValueChange(true);
+                FetchPlan fetchPlan = fetchPlans.builder(entityMetaClass.getJavaClass())
+                        .addFetchPlan(FetchPlan.BASE)
+                        .build();
+
+                CollectionContainer collectionContainer = factory.createCollectionContainer(entityMetaClass.getJavaClass());
+                collectionContainer.setFetchPlan(fetchPlan);
+
+                CollectionLoader collectionLoader = factory.createCollectionLoader();
+                collectionLoader.setContainer(collectionContainer);
+
+//                CollectionDatasource ds = DsBuilder.create()
+//                        .setViewName(View.MINIMAL)
+//                        .setMetaClass(entityMetaClass)
+//                        .buildCollectionDatasource();
+//                ds.setRefreshOnComponentValueChange(true);
 
                 String whereClause = parameter.getLookupWhere();
                 String joinClause = parameter.getLookupJoin();
@@ -231,17 +256,21 @@ public class ParameterFieldCreator {
                         queryTransformer.addJoin(joinClause);
                     }
                     query = queryTransformer.getResult();
-                    ds.setQuery(query);
+                    collectionLoader.setQuery(query);
                 }
-                ((DatasourceImplementation) ds).initialized();
-                ((LookupPickerField) field).setOptionsDatasource(ds);
+                collectionLoader.load();
+//                ((DatasourceImplementation) ds).initialized();
+                ((EntityComboBox) field).setOptionsContainer(collectionContainer);
             } else {
-                field = componentsFactory.createComponent(PickerField.class);
+                field = uiComponents.create(EntityPicker.class);
             }
             field.setMetaClass(entityMetaClass);
-            PickerField.LookupAction pickerLookupAction = field.addLookupAction();
+
+            LookupAction lookupAction = (LookupAction) actions.create(LookupAction.ID);
+
+            LookupAction pickerLookupAction = lookupAction;
             field.addAction(pickerLookupAction);
-            field.addClearAction();
+            //field.addClearAction();
 
             String parameterScreen = parameter.getScreen();
 
@@ -270,21 +299,33 @@ public class ParameterFieldCreator {
 
         @Override
         public Field createField(final ReportInputParameter parameter) {
-            TokenList tokenList = componentsFactory.createComponent(TokenList.class);
-            MetaClass entityMetaClass = metadata.getClassNN(parameter.getEntityMetaClass());
+            TokenList tokenList = uiComponents.create(TokenList.class);
+            MetaClass entityMetaClass = metadata.getClass(parameter.getEntityMetaClass());
 
-            DsBuilder builder = DsBuilder.create(frame.getDsContext());
-            CollectionDatasource cds = builder
-                    .setRefreshMode(RefreshMode.NEVER)
-                    .setId("entities_" + parameter.getAlias())
-                    .setMetaClass(entityMetaClass)
-                    .setViewName(View.LOCAL)
-                    .setAllowCommit(false)
-                    .buildCollectionDatasource();
+            CollectionContainer collectionContainer = factory.createCollectionContainer(entityMetaClass.getJavaClass());
+            FetchPlan fetchPlan = fetchPlans.builder(entityMetaClass.getJavaClass())
+                    .addFetchPlan(FetchPlan.LOCAL)
+                    .build();
 
-            cds.refresh();
+            collectionContainer.setFetchPlan(fetchPlan);
 
-            tokenList.setDatasource(cds,tokenList.getMetaProperty().getName());
+            factory.createCollectionLoader()
+                    .setContainer(collectionContainer);
+
+
+//            DsBuilder builder = DsBuilder.create(frame.getDsContext());
+//            CollectionDatasource cds = builder
+//                    .setRefreshMode(CollectionDatasource.RefreshMode.NEVER)
+//                    .setId("entities_" + parameter.getAlias())
+//                    .setMetaClass(entityMetaClass)
+//                    .setViewName(View.LOCAL)
+//                    .setAllowCommit(false)
+//                    .buildCollectionDatasource();
+//
+//            cds.refresh();
+
+
+            tokenList.setOptions(new ContainerOptions(collectionContainer));
             tokenList.setEditable(true);
             tokenList.setLookup(true);
             tokenList.setHeight("120px");

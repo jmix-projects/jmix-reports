@@ -17,7 +17,7 @@ package io.jmix.reports.entity;
 
 import io.jmix.core.entity.annotation.Listeners;
 import io.jmix.core.metamodel.annotation.Composition;
-import io.jmix.core.metamodel.annotation.ModelProperty;
+import io.jmix.core.metamodel.annotation.JmixProperty;
 import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import io.jmix.core.entity.annotation.SystemLevel;
@@ -33,7 +33,7 @@ import java.util.*;
 
 /**
  * Attention! This entity should be detached for correct work. If you do not detach it please use logic as in
- * com.haulmont.reports.listener.ReportDetachListener#onBeforeDetach(com.haulmont.reports.entity.Report, com.haulmont.cuba.core.EntityManager)
+ * com.haulmont.reports.listener.ReportDetachListener#onBeforeDetach(com.haulmont.reports.entity.Report, io.jmix.core.DataManager )
  */
 @Entity(name = "report_Report")
 @Table(name = "REPORT_REPORT")
@@ -96,19 +96,19 @@ public class Report extends StandardEntity implements com.haulmont.yarg.structur
     @Transient
     protected BandDefinition rootBandDefinition;
 
-    @Transient @ModelProperty
+    @Transient @JmixProperty
     protected Set<BandDefinition> bands = new HashSet<>();
 
-    @Transient @ModelProperty @Composition
+    @Transient @JmixProperty @Composition
     protected List<ReportInputParameter> inputParameters = new ArrayList<>();
 
-    @Transient @ModelProperty @Composition
+    @Transient @JmixProperty @Composition
     protected List<ReportValueFormat> valuesFormats = new ArrayList<>();
 
-    @Transient @ModelProperty
+    @Transient @JmixProperty
     protected List<ReportScreen> reportScreens = new ArrayList<>();
 
-    @Transient @ModelProperty
+    @Transient @JmixProperty
     protected Set<Role> roles = new HashSet<>();
 
     @Transient
@@ -118,11 +118,11 @@ public class Report extends StandardEntity implements com.haulmont.yarg.structur
     protected Boolean isTmp = Boolean.FALSE;
 
     @Transient
-    @ModelProperty
+    @JmixProperty
     protected String validationScript;
 
     @Transient
-    @ModelProperty
+    @JmixProperty
     protected Boolean validationOn = false;
 
     public Boolean getIsTmp() {
@@ -133,7 +133,7 @@ public class Report extends StandardEntity implements com.haulmont.yarg.structur
         this.isTmp = isTmp;
     }
 
-    @ModelProperty
+    @JmixProperty
     public BandDefinition getRootBandDefinition() {
         if (rootBandDefinition == null && bands != null && bands.size() > 0) {
             rootBandDefinition = (BandDefinition) CollectionUtils.find(bands, new Predicate() {
@@ -182,7 +182,7 @@ public class Report extends StandardEntity implements com.haulmont.yarg.structur
         this.reportType = reportType != null ? reportType.getId() : null;
     }
 
-    @ModelProperty
+    @JmixProperty
     public Set<Role> getRoles() {
         return roles;
     }
@@ -328,7 +328,7 @@ public class Report extends StandardEntity implements com.haulmont.yarg.structur
         this.sysTenantId = sysTenantId;
     }
 
-    @ModelProperty
+    @JmixProperty
     public String getLocName() {
         if (localeName == null) {
             //TODO Locale helper

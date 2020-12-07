@@ -20,7 +20,8 @@ import com.haulmont.cuba.core.EntityManager;
 import com.haulmont.cuba.core.Persistence;
 import com.haulmont.cuba.core.Query;
 import com.haulmont.cuba.core.Transaction;
-import io.jmix.core.JmixEntity;
+import io.jmix.core.DataManager;
+import io.jmix.core.Entity;
 import io.jmix.reports.app.EntityMap;
 import com.haulmont.yarg.exception.DataLoadingException;
 import com.haulmont.yarg.loaders.ReportDataLoader;
@@ -44,6 +45,9 @@ public class JpqlDataDataLoader extends AbstractDbDataLoader implements ReportDa
 
     @Autowired
     private BeanFactory beanFactory;
+
+    @Autowired
+    protected DataManager dataManager;
 
     private static final String QUERY_END = "%%END%%";
     private static final String ALIAS_PATTERN = "as\\s+\"?([\\w|\\d|_|\\.]+)\"?\\s*";
@@ -82,10 +86,10 @@ public class JpqlDataDataLoader extends AbstractDbDataLoader implements ReportDa
             Query select = insertParameters(trimQuery(query), storeName, parentBand, params);
             List queryResult = select.getResultList();
             tx.commit();
-            if (queryResult.size() > 0 && queryResult.get(0) instanceof JmixEntity) {
+            if (queryResult.size() > 0 && queryResult.get(0) instanceof Entity) {
                 List<Map<String, Object>> wrappedResults = new ArrayList<>();
                 for (Object theResult : queryResult) {
-                    wrappedResults.add(new EntityMap((JmixEntity) theResult,beanFactory));
+                    wrappedResults.add(new EntityMap((Entity) theResult,beanFactory));
                 }
                 return wrappedResults;
             } else {

@@ -19,24 +19,44 @@ package io.jmix.reportsui.gui.definition.edit;
 import com.haulmont.cuba.core.global.View;
 import io.jmix.core.FetchPlan;
 import io.jmix.core.FetchPlanProperty;
+import io.jmix.core.Messages;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.core.metamodel.model.MetaProperty;
 import io.jmix.reports.app.EntityTree;
 import io.jmix.reports.entity.DataSet;
 import io.jmix.reports.entity.DataSetType;
 import io.jmix.reports.entity.wizard.ReportRegion;
+import io.jmix.ui.Notifications;
+import io.jmix.ui.ScreenBuilders;
 import io.jmix.ui.action.AbstractAction;
 import io.jmix.ui.component.Component;
 import io.jmix.ui.component.Frame;
 import io.jmix.ui.component.Window;
-import io.jmix.ui.gui.OpenType;
+import io.jmix.ui.screen.CloseAction;
+import io.jmix.ui.screen.OpenMode;
+import io.jmix.ui.screen.Screen;
+import io.jmix.ui.screen.StandardCloseAction;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+@org.springframework.stereotype.Component("report_EditViewAction")
+@Scope("prototype")
 public class EditViewAction extends AbstractAction {
+
+    @Autowired
+    protected ScreenBuilders screenBuilders;
+
+    @Autowired
+    protected Notifications notifications;
+
+    @Autowired
+    protected Messages messages;
+
     protected BandDefinitionEditor bandDefinitionEditor;
 
     public EditViewAction(BandDefinitionEditor bandDefinitionEditor) {
@@ -57,9 +77,10 @@ public class EditViewAction extends AbstractAction {
 
                     if (reportRegion != null) {
                         if (reportRegion.getRegionPropertiesRootNode() == null) {
-                            bandDefinitionEditor.showNotification(
-                                    bandDefinitionEditor.formatMessage("dataSet.entityAliasInvalid",
-                                            getNameForEntityParameter(dataSet)), Frame.NotificationType.TRAY);
+                            notifications.create(Notifications.NotificationType.TRAY)
+                                    .withCaption(messages.getMessage("dataSet.entityAliasInvalid"))
+                                    .withDescription(getNameForEntityParameter(dataSet))
+                                    .show();
                             //without that root node region editor form will not initialized correctly and became empty. just return
                             return;
                         } else {
@@ -70,14 +91,27 @@ public class EditViewAction extends AbstractAction {
                             editorParams.put("scalarOnly", Boolean.TRUE);
                             editorParams.put("updateDisabled", !bandDefinitionEditor.isUpdatePermitted());
 
-                            Window.Editor regionEditor =
-                                    bandDefinitionEditor.openEditor("report$Report.regionEditor",
-                                            reportRegion, OpenType.DIALOG, editorParams, bandDefinitionEditor.dataSetsDs);
-                            regionEditor.addCloseListener(actionId -> {
-                                if (Window.COMMIT_ACTION_ID.equals(actionId)) {
-                                    dataSet.setView(reportRegionToView(entityTree, (ReportRegion) regionEditor.getItem()));
-                                }
-                            });
+                            //todo
+//                            Screen screen = screenBuilders.screen(this)
+//                                    .withScreenId("report_Report.regionEditor")
+//                                    .withOpenMode(OpenMode.DIALOG)
+//                                    .build();
+//
+//                            screen.addAfterCloseListener(afterCloseEvent -> {
+//                                if (Window.COMMIT_ACTION_ID.equals(((StandardCloseAction) afterCloseEvent.getCloseAction()).getActionId())) {
+//                                    dataSet.setFetchPlan(reportRegionToView(entityTree, (ReportRegion) screen.getItem()));
+//                                }
+//                            });
+//                            screen.show();
+//
+//                            Window.Editor regionEditor =
+//                                    bandDefinitionEditor.openEditor("report_Report.regionEditor",
+//                                            reportRegion, OpenType.DIALOG, editorParams, bandDefinitionEditor.dataSetsDs);
+//                            regionEditor.addCloseListener(actionId -> {
+//                                if (Window.COMMIT_ACTION_ID.equals(actionId)) {
+//                                    dataSet.setFetchPlan(reportRegionToView(entityTree, (ReportRegion) regionEditor.getItem()));
+//                                }
+//                            });
                         }
 
                     }
@@ -91,8 +125,9 @@ public class EditViewAction extends AbstractAction {
     protected MetaClass findMetaClassByAlias(DataSet dataSet) {
         String dataSetAlias = getNameForEntityParameter(dataSet);
         if (dataSetAlias == null) {
-            bandDefinitionEditor.showNotification(
-                    bandDefinitionEditor.formatMessage("dataSet.entityAliasNull"), Frame.NotificationType.TRAY);
+            notifications.create(Notifications.NotificationType.TRAY)
+                    .withCaption(messages.getMessage("dataSet.entityAliasNull"))
+                    .show();
             return null;
         }
         MetaClass byAliasMetaClass = bandDefinitionEditor.reportService.findMetaClassByDataSetEntityAlias(dataSetAlias, dataSet.getType(),
@@ -101,20 +136,21 @@ public class EditViewAction extends AbstractAction {
         //Lets return some value
         if (byAliasMetaClass == null) {
             //Can`t determine parameter and its metaClass by alias
-            bandDefinitionEditor.showNotification(
-                    bandDefinitionEditor.formatMessage("dataSet.entityAliasInvalid", dataSetAlias), Frame.NotificationType.TRAY);
+            notifications.create(Notifications.NotificationType.TRAY)
+                    .withCaption(messages.formatMessage("dataSet.entityAliasInvalid", dataSetAlias))
+                    .show();
             return null;
             //when byAliasMetaClass is null we return also null
         } else {
             //Detect metaclass by current view for comparison
             MetaClass viewMetaClass = null;
-            if (dataSet.getView() != null) {
-                viewMetaClass = bandDefinitionEditor.metadata.getClass(dataSet.getView().getEntityClass());
+            if (dataSet.getFetchPlan() != null) {
+                viewMetaClass = bandDefinitionEditor.metadata.getClass(dataSet.getFetchPlan().getEntityClass());
             }
             if (viewMetaClass != null && !byAliasMetaClass.getName().equals(viewMetaClass.getName())) {
-                bandDefinitionEditor.showNotification(
-                        bandDefinitionEditor.formatMessage("dataSet.entityWasChanged",
-                                byAliasMetaClass.getName()), Frame.NotificationType.TRAY);
+                notifications.create(Notifications.NotificationType.TRAY)
+                        .withCaption(messages.formatMessage("dataSet.entityWasChanged", byAliasMetaClass.getName()))
+                        .show();
             }
             return byAliasMetaClass;
         }
@@ -127,22 +163,22 @@ public class EditViewAction extends AbstractAction {
         switch (dataSet.getType()) {
             case SINGLE:
                 isTabulatedRegion = false;
-                view = dataSet.getView();
+                view = dataSet.getFetchPlan();
                 collectionPropertyName = null;
                 break;
             case MULTI:
                 isTabulatedRegion = true;
                 collectionPropertyName = StringUtils.substringAfter(dataSet.getListEntitiesParamName(), "#");
                 if (StringUtils.isBlank(collectionPropertyName) && dataSet.getListEntitiesParamName().contains("#")) {
-                    bandDefinitionEditor.showNotification(
-                            bandDefinitionEditor.formatMessage("dataSet.entityAliasInvalid",
-                                    getNameForEntityParameter(dataSet)), Frame.NotificationType.TRAY);
+                    notifications.create(Notifications.NotificationType.TRAY)
+                            .withCaption(messages.formatMessage("dataSet.entityAliasInvalid", getNameForEntityParameter(dataSet)))
+                            .show();
                     return null;
                 }
                 if (StringUtils.isNotBlank(collectionPropertyName)) {
 
-                    if (dataSet.getView() != null) {
-                        view = findSubViewByCollectionPropertyName(dataSet.getView(), collectionPropertyName);
+                    if (dataSet.getFetchPlan() != null) {
+                        view = findSubViewByCollectionPropertyName(dataSet.getFetchPlan(), collectionPropertyName);
 
                     }
                     if (view == null) {
@@ -153,14 +189,15 @@ public class EditViewAction extends AbstractAction {
                         if (metaProperty != null && metaProperty.getDomain() != null && metaProperty.getRange().getCardinality().isMany()) {
                             view = new View(metaProperty.getDomain().getJavaClass());
                         } else {
-                            bandDefinitionEditor.showNotification(
-                                    bandDefinitionEditor.formatMessage("dataSet.cantFindCollectionProperty",
-                                            collectionPropertyName, metaClass.getName()), Frame.NotificationType.TRAY);
+                            notifications.create(Notifications.NotificationType.TRAY)
+                                    .withCaption(messages.formatMessage("dataSet.cantFindCollectionProperty",
+                                            collectionPropertyName, metaClass.getName()))
+                                    .show();
                             return null;
                         }
                     }
                 } else {
-                    view = dataSet.getView();
+                    view = dataSet.getFetchPlan();
                 }
                 break;
             default:
@@ -170,7 +207,7 @@ public class EditViewAction extends AbstractAction {
                 view, collectionPropertyName);
     }
 
-    protected View reportRegionToView(EntityTree entityTree, ReportRegion reportRegion) {
+    protected FetchPlan reportRegionToView(EntityTree entityTree, ReportRegion reportRegion) {
         return bandDefinitionEditor.reportWizardService.createViewByReportRegions(entityTree.getEntityTreeRootNode(), Collections.singletonList(reportRegion));
     }
 

@@ -16,20 +16,20 @@
 
 package io.jmix.reports.entity.table;
 
-import io.jmix.core.metamodel.annotation.ModelObject;
-import io.jmix.core.metamodel.annotation.ModelProperty;
 import com.haulmont.cuba.core.entity.BaseUuidEntity;
+import io.jmix.core.metamodel.annotation.JmixEntity;
+import io.jmix.core.metamodel.annotation.JmixProperty;
 
-@ModelObject(name = "report$TemplateTableColumn")
+@JmixEntity(name = "report_TemplateTableColumn")
 public class TemplateTableColumn extends BaseUuidEntity {
 
-    @ModelProperty
+    @JmixProperty
     protected String key;
 
-    @ModelProperty
+    @JmixProperty
     protected String caption;
 
-    @ModelProperty
+    @JmixProperty
     protected Integer position;
 
     public Integer getPosition() {

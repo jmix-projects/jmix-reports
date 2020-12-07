@@ -16,7 +16,7 @@
 
 package io.jmix.reportsui.gui.report.wizard.region;
 
-import com.haulmont.cuba.gui.components.TextField;
+import io.jmix.ui.component.TextField;
 import com.haulmont.cuba.gui.data.impl.AbstractTreeDatasource;
 import io.jmix.core.common.datastruct.Node;
 import io.jmix.core.common.datastruct.Tree;

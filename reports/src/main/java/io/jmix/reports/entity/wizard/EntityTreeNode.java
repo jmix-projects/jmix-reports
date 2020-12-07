@@ -17,8 +17,8 @@
 package io.jmix.reports.entity.wizard;
 
 import io.jmix.core.metamodel.annotation.Composition;
-import io.jmix.core.metamodel.annotation.ModelObject;
-import io.jmix.core.metamodel.annotation.ModelProperty;
+import io.jmix.core.metamodel.annotation.JmixEntity;
+import io.jmix.core.metamodel.annotation.JmixProperty;
 import com.haulmont.cuba.core.entity.BaseUuidEntity;
 import io.jmix.core.entity.annotation.SystemLevel;
 import io.jmix.core.metamodel.model.MetaClass;
@@ -28,22 +28,22 @@ import javax.persistence.Transient;
 import java.util.ArrayList;
 import java.util.List;
 
-@ModelObject(name = "report$WizardReportEntityTreeNode")
+@JmixEntity(name = "report_WizardReportEntityTreeNode")
 @SystemLevel
 public class EntityTreeNode extends BaseUuidEntity {
 
     private static final long serialVersionUID = 465985155557062476L;
 
-    @ModelProperty
+    @JmixProperty
     @Transient
     protected String name;
-    @ModelProperty
+    @JmixProperty
     @Transient
     protected String localizedName;
-    @ModelProperty
+    @JmixProperty
     @Transient
     protected EntityTreeNode parent;
-    @ModelProperty
+    @JmixProperty
     @Composition
     @Transient
     protected List<EntityTreeNode> children = new ArrayList<>();
@@ -52,7 +52,7 @@ public class EntityTreeNode extends BaseUuidEntity {
     @Transient
     protected MetaProperty wrappedMetaProperty;
 
-    @ModelProperty
+    @JmixProperty
     @Transient
     public Integer getNodeDepth() {
         if (getParent() == null) {
@@ -67,7 +67,7 @@ public class EntityTreeNode extends BaseUuidEntity {
      *
      * @return
      */
-    @ModelProperty
+    @JmixProperty
     @Transient
     public Integer getNodeChildrenDepth() {
         if (getChildren().isEmpty()) {
@@ -84,7 +84,7 @@ public class EntityTreeNode extends BaseUuidEntity {
         }
     }
 
-    @ModelProperty
+    @JmixProperty
     @Transient
     public String getHierarchicalName() {
         if (getParent() == null) {
@@ -94,7 +94,7 @@ public class EntityTreeNode extends BaseUuidEntity {
         }
     }
 
-    @ModelProperty
+    @JmixProperty
     @Transient
     public String getHierarchicalLocalizedName() {
         if (getParent() == null) {
@@ -104,7 +104,7 @@ public class EntityTreeNode extends BaseUuidEntity {
         }
     }
 
-    @ModelProperty
+    @JmixProperty
     @Transient
     public String getHierarchicalNameExceptRoot() {
         if (getParent() == null) {
@@ -118,7 +118,7 @@ public class EntityTreeNode extends BaseUuidEntity {
         }
     }
 
-    @ModelProperty
+    @JmixProperty
     @Transient
     public String getHierarchicalLocalizedNameExceptRoot() {
         if (getParent() == null) {

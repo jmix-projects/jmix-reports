@@ -16,42 +16,43 @@
 
 package io.jmix.reportsui.gui.template.edit;
 
-import io.jmix.core.common.util.ParamsMap;
 import com.haulmont.cuba.core.entity.FileDescriptor;
-import com.haulmont.cuba.core.global.Metadata;
 import com.haulmont.cuba.core.global.Security;
-import com.haulmont.cuba.gui.components.*;
-import io.jmix.ui.ScreenBuilders;
-import io.jmix.ui.WindowConfig;
-import io.jmix.ui.component.BoxLayout;
-import io.jmix.ui.component.LinkButton;
-import io.jmix.ui.screen.MapScreenOptions;
 import com.haulmont.cuba.gui.upload.FileUploadingAPI;
+import io.jmix.core.Messages;
+import io.jmix.core.Metadata;
+import io.jmix.core.common.util.ParamsMap;
 import io.jmix.core.security.EntityOp;
+import io.jmix.reports.ReportPrintHelper;
 import io.jmix.reports.app.service.ReportService;
 import io.jmix.reports.entity.CustomTemplateDefinedBy;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportOutputType;
 import io.jmix.reports.entity.ReportTemplate;
-import io.jmix.reports.ReportPrintHelper;
 import io.jmix.reportsui.gui.datasource.NotPersistenceDatasource;
 import io.jmix.reportsui.gui.definition.edit.scripteditordialog.ScriptEditorDialog;
 import io.jmix.reportsui.gui.report.run.ShowChartController;
 import io.jmix.reportsui.gui.report.run.ShowPivotTableController;
-import io.jmix.ui.screen.OpenMode;
-import io.jmix.ui.screen.StandardCloseAction;
+import io.jmix.ui.Dialogs;
+import io.jmix.ui.Notifications;
+import io.jmix.ui.ScreenBuilders;
+import io.jmix.ui.WindowConfig;
+import io.jmix.ui.component.*;
+import io.jmix.ui.screen.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-
 import org.springframework.beans.factory.annotation.Autowired;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-public class TemplateEditor extends AbstractEditor<ReportTemplate> {
+@UiController("report_TemplateEditor")
+@UiDescriptor("template-edit.xml")
+public class TemplateEditor extends StandardEditor<ReportTemplate> {
 
     public static final String CUSTOM_DEFINE_BY = "customDefinedBy";
     public static final String CUSTOM = "custom";
@@ -67,7 +68,7 @@ public class TemplateEditor extends AbstractEditor<ReportTemplate> {
     protected Label templateFileLabel;
 
     @Autowired
-    protected FileUploadField templateUploadField;
+    protected FileStorageUploadField templateUploadField;
 
     @Autowired
     protected RadioButtonGroup<Boolean> isGroovyRadioButtonGroup;
@@ -88,7 +89,7 @@ public class TemplateEditor extends AbstractEditor<ReportTemplate> {
     protected Label customDefinitionLabel;
 
     @Autowired
-    protected LookupField customDefinedBy;
+    protected ComboBox customDefinedBy;
 
     @Autowired
     protected Label customDefinedByLabel;
@@ -100,7 +101,7 @@ public class TemplateEditor extends AbstractEditor<ReportTemplate> {
     protected Label alterableLabel;
 
     @Autowired
-    protected LookupField<ReportOutputType> outputType;
+    protected ComboBox<ReportOutputType> outputType;
 
     @Autowired
     protected TextField outputNamePattern;
@@ -144,32 +145,34 @@ public class TemplateEditor extends AbstractEditor<ReportTemplate> {
     @Autowired
     protected ScreenBuilders screenBuilders;
 
-    public TemplateEditor() {
-        showSaveNotification = false;
-    }
+    @Autowired
+    protected Dialogs dialogs;
 
-    @Override
-    @SuppressWarnings({"serial", "unchecked"})
-    public void init(Map<String, Object> params) {
-        super.init(params);
-        //TODO dialog options
-//        getDialogOptions()
-//                .setWidthAuto()
-//                .setResizable(true);
+    @Autowired
+    protected Messages messages;
+
+    @Autowired
+    protected Notifications notifications;
+
+    @Subscribe
+    protected void onInit(InitEvent event) {
         outputNamePattern.setContextHelpIconClickHandler(e ->
-                showMessageDialog(getMessage("template.namePatternText"), getMessage("template.namePatternTextHelp"),
-                        MessageType.CONFIRMATION_HTML
-                                .modal(false)
-                                .width(560f)));
+                dialogs.createMessageDialog()
+                        .withCaption(messages.getMessage("template.namePatternText"))
+                        .withMessage(messages.getMessage("template.namePatternTextHelp"))
+                        .withModal(false)
+                        .withWidth("560px")
+                        .show());
 
         Map<String, Boolean> groovyOptions = new HashMap<>();
-        groovyOptions.put(getMessage("template.freemarkerType"), Boolean.FALSE);
-        groovyOptions.put(getMessage("template.groovyType"), Boolean.TRUE);
+        groovyOptions.put(messages.getMessage("template.freemarkerType"), Boolean.FALSE);
+        groovyOptions.put(messages.getMessage("template.groovyType"), Boolean.TRUE);
         isGroovyRadioButtonGroup.setOptionsMap(groovyOptions);
     }
 
-    @Override
-    protected void initNewItem(ReportTemplate template) {
+    @Subscribe
+    protected void initNewItem(InitEntityEvent<ReportTemplate> event) {
+        ReportTemplate template = event.getEntity();
         if (StringUtils.isEmpty(template.getCode())) {
             Report report = template.getReport();
             if (report != null) {
@@ -181,19 +184,21 @@ public class TemplateEditor extends AbstractEditor<ReportTemplate> {
         }
     }
 
-    @Override
-    protected void postInit() {
-        super.postInit();
+    @Subscribe
+    protected void onAfterInit(AfterInitEvent event) {
         initUploadField();
         templateDs.addItemPropertyChangeListener(e -> {
-            ReportTemplate reportTemplate = getItem();
+            ReportTemplate reportTemplate = getEditedEntity();
             switch (e.getProperty()) {
                 case REPORT_OUTPUT_TYPE: {
                     ReportOutputType prevOutputType = (ReportOutputType) e.getPrevValue();
                     ReportOutputType newOutputType = (ReportOutputType) e.getValue();
                     setupVisibility(reportTemplate.getCustom(), newOutputType);
                     if (hasHtmlCsvTemplateOutput(prevOutputType) && !hasTemplateOutput(newOutputType)) {
-                        showMessageDialog(getMessage("templateEditor.warning"), getMessage("templateEditor.clearTemplateMessage"), MessageType.CONFIRMATION);
+                        dialogs.createMessageDialog()
+                                .withCaption(messages.getMessage("templateEditor.warning"))
+                                .withMessage(messages.getMessage("templateEditor.clearTemplateMessage"))
+                                .show();
                     }
                     break;
                 }
@@ -216,10 +221,9 @@ public class TemplateEditor extends AbstractEditor<ReportTemplate> {
         return CustomTemplateDefinedBy.SCRIPT == customTemplateDefinedBy;
     }
 
-    @Override
-    public void ready() {
-        super.ready();
-        ReportTemplate reportTemplate = getItem();
+    @Subscribe
+    protected void onBeforeShow(BeforeShowEvent event) {
+        ReportTemplate reportTemplate = getEditedEntity();
         initTemplateEditor(reportTemplate);
         getDescriptionEditFrames().forEach(controller -> controller.setItem(reportTemplate));
         setupVisibility(reportTemplate.getCustom(), reportTemplate.getReportOutputType());
@@ -239,7 +243,7 @@ public class TemplateEditor extends AbstractEditor<ReportTemplate> {
         return reportOutputType == ReportOutputType.CHART;
     }
 
-    protected boolean hasPdfTemplateOutput(ReportOutputType reportOutputType){
+    protected boolean hasPdfTemplateOutput(ReportOutputType reportOutputType) {
         return reportOutputType == ReportOutputType.PDF;
     }
 
@@ -250,7 +254,7 @@ public class TemplateEditor extends AbstractEditor<ReportTemplate> {
     protected void setupVisibility(boolean customEnabled, ReportOutputType reportOutputType) {
         boolean templateOutputVisibility = hasTemplateOutput(reportOutputType);
         boolean enabled = templateOutputVisibility && customEnabled;
-        boolean groovyScriptVisibility = enabled && hasScriptCustomDefinedBy(getItem().getCustomDefinedBy());
+        boolean groovyScriptVisibility = enabled && hasScriptCustomDefinedBy(getEditedEntity().getCustomDefinedBy());
 
         custom.setVisible(templateOutputVisibility);
         isCustomLabel.setVisible(templateOutputVisibility);
@@ -264,9 +268,9 @@ public class TemplateEditor extends AbstractEditor<ReportTemplate> {
         fullScreenLinkButton.setVisible(groovyScriptVisibility);
 
         customDefinedBy.setRequired(enabled);
-        customDefinedBy.setRequiredMessage(getMessage("templateEditor.customDefinedBy"));
+        customDefinedBy.setRequiredMessage(messages.getMessage("templateEditor.customDefinedBy"));
         customDefinition.setRequired(enabled);
-        customDefinition.setRequiredMessage(getMessage("templateEditor.classRequired"));
+        customDefinition.setRequiredMessage(messages.getMessage("templateEditor.classRequired"));
 
         boolean supportAlterableForTemplate = templateOutputVisibility && !enabled;
         alterable.setVisible(supportAlterableForTemplate);
@@ -284,8 +288,8 @@ public class TemplateEditor extends AbstractEditor<ReportTemplate> {
 
     protected void setupTemplateTypeVisibility(boolean visibility) {
         String extension = "";
-        if (getItem().getDocumentName() != null) {
-            extension = FilenameUtils.getExtension(getItem().getDocumentName()).toUpperCase();
+        if (getEditedEntity().getDocumentName() != null) {
+            extension = FilenameUtils.getExtension(getEditedEntity().getDocumentName()).toUpperCase();
         }
         isGroovyRadioButtonGroup.setVisible(visibility
                 && ReportOutputType.HTML.equals(ReportOutputType.getTypeFromExtension(extension)));
@@ -300,8 +304,9 @@ public class TemplateEditor extends AbstractEditor<ReportTemplate> {
                         .findFirst().orElse(null);
         if (applicableFrame != null) {
             descriptionEditBox.setVisible(!customEnabled);
-            applicableFrame.setVisible(!customEnabled);
-            applicableFrame.setItem(getItem());
+            //todo
+            //applicableFrame.setVisible(!customEnabled);
+            applicableFrame.setItem(getEditedEntity());
 
             if (!customEnabled && applicableFrame.isSupportPreview()) {
                 applicableFrame.showPreview();
@@ -312,7 +317,8 @@ public class TemplateEditor extends AbstractEditor<ReportTemplate> {
 
         for (DescriptionEditFrame frame : getDescriptionEditFrames()) {
             if (applicableFrame != frame) {
-                frame.setVisible(false);
+                //todo
+                //frame.setVisible(false);
             }
             if (applicableFrame == null) {
                 frame.hidePreview();
@@ -323,7 +329,7 @@ public class TemplateEditor extends AbstractEditor<ReportTemplate> {
 
     protected void updateOutputType() {
         if (outputType.getValue() == null) {
-            String extension = FilenameUtils.getExtension(templateUploadField.getFileDescriptor().getName()).toUpperCase();
+            String extension = FilenameUtils.getExtension(templateUploadField.getFileName()).toUpperCase();
             ReportOutputType reportOutputType = ReportOutputType.getTypeFromExtension(extension);
             if (reportOutputType != null) {
                 outputType.setValue(reportOutputType);
@@ -346,10 +352,12 @@ public class TemplateEditor extends AbstractEditor<ReportTemplate> {
 
     protected void initUploadField() {
         templateUploadField.addFileUploadErrorListener(e ->
-                showNotification(getMessage("templateEditor.uploadUnsuccess"), NotificationType.WARNING));
+                notifications.create(Notifications.NotificationType.WARNING)
+                        .withCaption(messages.getMessage("templateEditor.uploadUnsuccess"))
+                        .show());
         templateUploadField.addFileUploadSucceedListener(e -> {
             String fileName = templateUploadField.getFileName();
-            ReportTemplate reportTemplate = getItem();
+            ReportTemplate reportTemplate = getEditedEntity();
             reportTemplate.setName(fileName);
 
             File file = fileUploading.getFile(templateUploadField.getFileId());
@@ -358,16 +366,18 @@ public class TemplateEditor extends AbstractEditor<ReportTemplate> {
                 reportTemplate.setContent(data);
             } catch (IOException ex) {
                 throw new RuntimeException(
-                        String.format("An error occurred while uploading file for template [%s]", getItem().getCode()), ex);
+                        String.format("An error occurred while uploading file for template [%s]", getEditedEntity().getCode()), ex);
             }
             initTemplateEditor(reportTemplate);
             setupTemplateTypeVisibility(hasTemplateOutput(reportTemplate.getReportOutputType()));
             updateOutputType();
 
-            showNotification(getMessage("templateEditor.uploadSuccess"), NotificationType.TRAY);
+            notifications.create(Notifications.NotificationType.TRAY)
+                    .withCaption(messages.getMessage("templateEditor.uploadSuccess"))
+                    .show();
         });
 
-        ReportTemplate reportTemplate = getItem();
+        ReportTemplate reportTemplate = getEditedEntity();
         byte[] templateFile = reportTemplate.getContent();
         if (templateFile != null && !hasChartTemplateOutput(reportTemplate.getReportOutputType())) {
             templateUploadField.setContentProvider(() -> new ByteArrayInputStream(templateFile));
@@ -407,16 +417,16 @@ public class TemplateEditor extends AbstractEditor<ReportTemplate> {
         templateFileEditor.setVisible(hasHtmlCsvTemplateOutput(outputType) || hasPdfTemplateOutput(outputType));
     }
 
-    @Override
-    public boolean preCommit() {
+    @Subscribe
+    protected void onBeforeCommit(BeforeCommitChangesEvent event) {
         if (!validateTemplateFile() || !validateInputOutputFormats()) {
-            return false;
+            event.preventCommit();
         }
-        ReportTemplate reportTemplate = getItem();
+        ReportTemplate reportTemplate = getEditedEntity();
         for (DescriptionEditFrame frame : getDescriptionEditFrames()) {
             if (frame.isApplicable(reportTemplate.getReportOutputType())) {
                 if (!frame.applyChanges()) {
-                    return false;
+                    event.preventCommit();
                 }
             }
         }
@@ -435,12 +445,10 @@ public class TemplateEditor extends AbstractEditor<ReportTemplate> {
                 reportTemplate.setContent(bytes);
             }
         }
-
-        return super.preCommit();
     }
 
     protected boolean validateInputOutputFormats() {
-        ReportTemplate reportTemplate = getItem();
+        ReportTemplate reportTemplate = getEditedEntity();
         String name = reportTemplate.getName();
         if (!Boolean.TRUE.equals(reportTemplate.getCustom())
                 && hasTemplateOutput(reportTemplate.getReportOutputType())
@@ -450,7 +458,9 @@ public class TemplateEditor extends AbstractEditor<ReportTemplate> {
             ReportOutputType outputTypeValue = outputType.getValue();
             if (!ReportPrintHelper.getInputOutputTypesMapping().containsKey(inputType) ||
                     !ReportPrintHelper.getInputOutputTypesMapping().get(inputType).contains(outputTypeValue)) {
-                showNotification(getMessage("inputOutputTypesError"), NotificationType.TRAY);
+                notifications.create(Notifications.NotificationType.TRAY)
+                        .withCaption(messages.getMessage("inputOutputTypesError"))
+                        .show();
                 return false;
             }
         }
@@ -458,28 +468,30 @@ public class TemplateEditor extends AbstractEditor<ReportTemplate> {
     }
 
     protected boolean validateTemplateFile() {
-        ReportTemplate template = getItem();
+        ReportTemplate template = getEditedEntity();
         if (!Boolean.TRUE.equals(template.getCustom())
                 && hasTemplateOutput(template.getReportOutputType())
                 && template.getContent() == null) {
-            StringBuilder notification = new StringBuilder(getMessage("template.uploadTemplate"));
+            StringBuilder notification = new StringBuilder(messages.getMessage("template.uploadTemplate"));
 
             if (StringUtils.isEmpty(template.getCode())) {
-                notification.append("\n").append(getMessage("template.codeMsg"));
+                notification.append("\n").append(messages.getMessage("template.codeMsg"));
             }
 
             if (template.getOutputType() == null) {
-                notification.append("\n").append(getMessage("template.outputTypeMsg"));
+                notification.append("\n").append(messages.getMessage("template.outputTypeMsg"));
             }
 
-            showNotification(getMessage("validationFail.caption"),
-                    notification.toString(), NotificationType.TRAY);
+            notifications.create(Notifications.NotificationType.TRAY)
+                    .withCaption(messages.getMessage("validationFail.caption"))
+                    .show();
 
             return false;
         }
         return true;
     }
 
+    @Subscribe("fullScreenLinkButton")
     public void showGroovyScriptEditorDialog() {
         ScriptEditorDialog editorDialog = (ScriptEditorDialog) screenBuilders.screen(this)
                 .withScreenId("scriptEditorDialog")
@@ -493,17 +505,20 @@ public class TemplateEditor extends AbstractEditor<ReportTemplate> {
                 .build();
         editorDialog.addAfterCloseListener(actionId -> {
             StandardCloseAction closeAction = (StandardCloseAction) actionId.getCloseAction();
-            if (COMMIT_ACTION_ID.equals(closeAction.getActionId())) {
+            if (Window.COMMIT_ACTION_ID.equals(closeAction.getActionId())) {
                 customDefinition.setValue(editorDialog.getValue());
             }
         });
         editorDialog.show();
     }
 
+    @Subscribe("customDefinitionHelpLinkButton")
     public void showCustomDefinitionHelp() {
-        showMessageDialog(getMessage("templateEditor.titleHelpGroovy"), getMessage("templateEditor.textHelpGroovy"),
-                MessageType.CONFIRMATION_HTML
-                        .modal(false)
-                        .width(700f));
+        dialogs.createMessageDialog()
+                .withCaption(messages.getMessage("templateEditor.titleHelpGroovy"))
+                .withMessage(messages.getMessage("templateEditor.textHelpGroovy"))
+                .withModal(false)
+                .withWidth("700px")
+                .show();
     }
 }

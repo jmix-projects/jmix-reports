@@ -16,28 +16,17 @@
 
 package io.jmix.reportsui.gui.report.run;
 
-import com.haulmont.cuba.gui.components.GroupBoxLayout;
-import com.haulmont.cuba.gui.components.GroupTable;
-import com.haulmont.cuba.gui.components.Table;
-import com.haulmont.cuba.settings.Settings;
 import io.jmix.core.MessageTools;
+import io.jmix.core.Metadata;
 import io.jmix.core.MetadataTools;
 import io.jmix.core.common.util.ParamsMap;
-import com.haulmont.chile.core.datatypes.Datatypes;
 import io.jmix.core.entity.KeyValueEntity;
 import io.jmix.core.impl.StandardSerialization;
 import io.jmix.core.metamodel.datatype.impl.EnumClass;
 import io.jmix.core.metamodel.model.MetaProperty;
-import io.jmix.core.JmixEntity;
-import com.haulmont.cuba.core.global.Metadata;
 import io.jmix.core.metamodel.model.MetaPropertyPath;
+import io.jmix.ui.UiComponents;
 import io.jmix.ui.WindowParam;
-import com.haulmont.cuba.gui.components.*;
-import com.haulmont.cuba.gui.data.CollectionDatasource;
-import com.haulmont.cuba.gui.data.DsBuilder;
-import com.haulmont.cuba.gui.data.GroupDatasource;
-import com.haulmont.cuba.gui.data.impl.DsContextImpl;
-import com.haulmont.cuba.gui.data.impl.ValueGroupDatasourceImpl;
 import io.jmix.reports.entity.CubaTableData;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportOutputType;
@@ -45,8 +34,12 @@ import io.jmix.reports.entity.ReportTemplate;
 import io.jmix.reportsui.gui.ReportGuiManager;
 import com.haulmont.yarg.reporting.ReportOutputDocument;
 import io.jmix.ui.component.*;
+import io.jmix.ui.component.ButtonsPanel;
+import io.jmix.ui.screen.StandardLookup;
+import io.jmix.ui.screen.Subscribe;
+import io.jmix.ui.screen.UiController;
+import io.jmix.ui.screen.UiDescriptor;
 import io.jmix.ui.theme.ThemeConstants;
-import io.jmix.ui.xml.layout.ComponentsFactory;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 
@@ -56,7 +49,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class ShowReportTable extends AbstractWindow {
+@UiController("report_ShowReportTable")
+@UiDescriptor("show-report-table.xml")
+public class ShowReportTable extends StandardLookup {
     public static final String REPORT_PARAMETER = "report";
     public static final String TEMPLATE_CODE_PARAMETER = "templateCode";
     public static final String PARAMS_PARAMETER = "reportParams";
@@ -69,7 +64,7 @@ public class ShowReportTable extends AbstractWindow {
     @Autowired
     protected ThemeConstants themeConstants;
     @Autowired
-    protected ComponentsFactory componentsFactory;
+    protected UiComponents uiComponents;
     @Autowired
     protected Metadata metadata;
     @Autowired
@@ -78,7 +73,7 @@ public class ShowReportTable extends AbstractWindow {
     protected MessageTools messageTools;
 
     @Autowired
-    protected LookupField<Report> reportLookup;
+    protected ComboBox<Report> reportLookup;
     @Autowired
     protected Button printReportBtn;
     @Autowired
@@ -102,10 +97,9 @@ public class ShowReportTable extends AbstractWindow {
     protected InputParametersFrame inputParametersFrame;
     protected DsContextImpl dsContext;
 
-    @Override
-    public void init(final Map<String, Object> params) {
-        super.init(params);
-        dsContext = new DsContextImpl(getDsContext().getDataSupplier());
+    @Subscribe
+    protected void onInit(InitEvent event) {
+        //dsContext = new DsContextImpl(getDsContext().getDataSupplier());
 
         //TODO dialog options
 //        getDialogOptions()
@@ -135,13 +129,14 @@ public class ShowReportTable extends AbstractWindow {
             );
 
             inputParametersFrame = (InputParametersFrame) openFrame(parametersFrameHolder,
-                    "report$inputParametersFrame", params);
+                    "report_inputParametersFrame", params);
             reportParamsBox.setVisible(true);
         } else {
             reportParamsBox.setVisible(false);
         }
     }
 
+    @Subscribe("printReportBtn")
     public void printReport() {
         if (inputParametersFrame != null && inputParametersFrame.getReport() != null) {
             if (validateAll()) {
@@ -177,7 +172,7 @@ public class ShowReportTable extends AbstractWindow {
                 GroupDatasource dataSource = createDataSource(dataSetName, keyValueEntities, headerMap);
                 Table table = createTable(dataSetName, dataSource, headerMap);
 
-                GroupBoxLayout groupBox = componentsFactory.createComponent(GroupBoxLayout.class);
+                GroupBoxLayout groupBox = uiComponents.create(GroupBoxLayout.class);
                 groupBox.setCaption(dataSetName);
                 groupBox.add(table);
                 groupBox.expand(table);
@@ -198,7 +193,7 @@ public class ShowReportTable extends AbstractWindow {
         Set<CubaTableData.ColumnInfo> headers = headerMap.get(dataSetName);
         for (CubaTableData.ColumnInfo header : headers) {
             Class javaClass = header.getColumnClass();
-            if (JmixEntity.class.isAssignableFrom(javaClass) ||
+            if (Entity.class.isAssignableFrom(javaClass) ||
                     EnumClass.class.isAssignableFrom(javaClass) ||
                     Datatypes.get(javaClass) != null) {
                 ds.addProperty(header.getKey(), javaClass);
@@ -211,7 +206,7 @@ public class ShowReportTable extends AbstractWindow {
     }
 
     protected Table createTable(String dataSetName, GroupDatasource dataSource, Map<String, Set<CubaTableData.ColumnInfo>> headerMap) {
-        Table table = (Table) componentsFactory.createComponent(GroupTable.class);
+        Table table = uiComponents.create(GroupTable.class);
         table.setId(dataSetName + "Table");
 
         Set<CubaTableData.ColumnInfo> headers = headerMap.get(dataSetName);
@@ -229,7 +224,7 @@ public class ShowReportTable extends AbstractWindow {
 //        Button excelButton = componentsFactory.createComponent(Button.class);
 //        excelButton.setAction(excelAction);
 
-        ButtonsPanel buttonsPanel = componentsFactory.createComponent(ButtonsPanel.class);
+        ButtonsPanel buttonsPanel = uiComponents.create(ButtonsPanel.class);
         table.setButtonsPanel(buttonsPanel);
 //        table.addAction(excelAction);
 //        buttonsPanel.add(excelButton);

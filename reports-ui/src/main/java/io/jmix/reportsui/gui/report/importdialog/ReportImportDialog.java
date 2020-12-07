@@ -16,19 +16,17 @@
 
 package io.jmix.reportsui.gui.report.importdialog;
 
-import com.haulmont.cuba.gui.components.AbstractWindow;
-import com.haulmont.cuba.gui.components.CheckBox;
-import com.haulmont.cuba.gui.components.FileUploadField;
-import com.haulmont.cuba.gui.components.Label;
 import com.haulmont.cuba.gui.export.ExportFormat;
 import com.haulmont.cuba.gui.upload.FileUploadingAPI;
+import io.jmix.core.Messages;
 import io.jmix.reports.app.service.ReportService;
 import io.jmix.reports.entity.ReportImportOption;
 import io.jmix.reports.entity.ReportImportResult;
+import io.jmix.ui.Notifications;
 import io.jmix.ui.action.AbstractAction;
-import io.jmix.ui.component.Component;
-import io.jmix.ui.component.HBoxLayout;
-import io.jmix.ui.component.ValidationErrors;
+import io.jmix.ui.component.*;
+import io.jmix.ui.screen.LookupComponent;
+import io.jmix.ui.screen.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -37,12 +35,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.File;
 import java.util.EnumSet;
-import java.util.Map;
 import java.util.UUID;
 
-public class ReportImportDialog extends AbstractWindow {
+@UiController("report_ReportImport.dialog")
+@UiDescriptor("report-import-dialog.xml")
+@LookupComponent("fileUpload")
+public class ReportImportDialog extends StandardEditor {
+
     @Autowired
-    protected FileUploadField fileUpload;
+    protected FileStorageUploadField fileUpload;
     @Autowired
     protected Label fileName;
     @Autowired
@@ -53,11 +54,14 @@ public class ReportImportDialog extends AbstractWindow {
     protected ReportService reportService;
     @Autowired
     protected HBoxLayout dropZone;
+    @Autowired
+    protected Messages messages;
+    @Autowired
+    protected Notifications notifications;
 
-    @Override
-    public void init(Map<String, Object> params) {
-        super.init(params);
-        initWindowActions();
+    @Subscribe
+    public void onInit(InitEvent event) {
+        //initWindowActions();
         fileUpload.addFileUploadSucceedListener(e -> {
             fileName.setValue(fileUpload.getFileName());
         });
@@ -66,33 +70,33 @@ public class ReportImportDialog extends AbstractWindow {
         dropZone.setVisible(false);
     }
 
-    protected void initWindowActions() {
-        addAction(new AbstractAction("windowCommit") {
-            @Override
-            public void actionPerform(Component component) {
-                if (validateAll()) {
-                    importReport();
-                    close(COMMIT_ACTION_ID);
-                }
-            }
-
-            @Override
-            public String getCaption() {
-                return messages.getMainMessage("actions.Ok");
-            }
-        });
-        addAction(new AbstractAction("windowClose") {
-            @Override
-            public void actionPerform(Component component) {
-                close(CLOSE_ACTION_ID);
-            }
-
-            @Override
-            public String getCaption() {
-                return messages.getMainMessage("actions.Cancel");
-            }
-        });
-    }
+//    protected void initWindowActions() {
+//        addAction(new AbstractAction("windowCommit") {
+//            @Override
+//            public void actionPerform(Component component) {
+//                if (validateAll()) {
+//                    importReport();
+//                    close(COMMIT_ACTION_ID);
+//                }
+//            }
+//
+//            @Override
+//            public String getCaption() {
+//                return messages.getMainMessage("actions.Ok");
+//            }
+//        });
+//        addAction(new AbstractAction("windowClose") {
+//            @Override
+//            public void actionPerform(Component component) {
+//                close(CLOSE_ACTION_ID);
+//            }
+//
+//            @Override
+//            public String getCaption() {
+//                return messages.getMainMessage("actions.Cancel");
+//            }
+//        });
+//    }
 
     protected void importReport() {
         try {
@@ -101,12 +105,15 @@ public class ReportImportDialog extends AbstractWindow {
             byte[] bytes = FileUtils.readFileToByteArray(file);
             fileUploadingApi.deleteFile(fileID);
             ReportImportResult result = reportService.importReportsWithResult(bytes, getImportOptions());
-            showNotification(formatMessage("importResult",
-                    result.getCreatedReports().size(), result.getUpdatedReports().size()),
-                    NotificationType.HUMANIZED);
+
+            notifications.create(Notifications.NotificationType.HUMANIZED)
+                    .withCaption(messages.formatMessage(ReportImportDialog.class, "importResult", result.getCreatedReports().size(), result.getUpdatedReports().size()))
+                    .show();
         } catch (Exception e) {
-            String msg = getMessage("reportException.unableToImportReport");
-            showNotification(msg, e.toString(), NotificationType.ERROR);
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withCaption(messages.getMessage("reportException.unableToImportReport"))
+                    .withDescription(e.toString())
+                    .show();
         }
     }
 
@@ -118,15 +125,16 @@ public class ReportImportDialog extends AbstractWindow {
     }
 
     @Override
-    protected void postValidate(ValidationErrors errors) {
-        super.postValidate(errors);
+    protected void validateAdditionalRules(ValidationErrors errors) {
         if (fileUpload.getFileId() == null) {
-            errors.add(getMessage("reportException.noFile"));
+            errors.add(messages.getMessage("reportException.noFile"));
             return;
         }
         String extension = FilenameUtils.getExtension(fileUpload.getFileName());
         if (!StringUtils.equalsIgnoreCase(extension, ExportFormat.ZIP.getFileExt())) {
-            errors.add(formatMessage("reportException.wrongFileType", extension));
+            errors.add(messages.formatMessage("reportException.wrongFileType", extension));
         }
+
+        super.validateAdditionalRules(errors);
     }
 }

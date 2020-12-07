@@ -34,13 +34,12 @@ import java.util.List;
  *
  */
 public interface ReportingWizardApi {
-    String NAME = "report_ReportingWizardApi";
 
     Report toReport(ReportData reportData, boolean temporary);
 
-    View createViewByReportRegions(EntityTreeNode entityTreeRootNode, List<ReportRegion> reportRegions);
+    FetchPlan createViewByReportRegions(EntityTreeNode entityTreeRootNode, List<ReportRegion> reportRegions);
 
-    ReportRegion createReportRegionByView(EntityTree entityTree, boolean isTabulated, @Nullable FetchPlan view, @Nullable String collectionPropertyName);
+    ReportRegion createReportRegionByView(EntityTree entityTree, boolean isTabulated, @Nullable FetchPlan fetchPlan, @Nullable String collectionPropertyName);
 
     boolean isEntityAllowedForReportWizard(MetaClass metaClass);
 

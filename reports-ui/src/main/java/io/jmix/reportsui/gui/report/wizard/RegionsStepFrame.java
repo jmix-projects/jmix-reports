@@ -16,27 +16,32 @@
 
 package io.jmix.reportsui.gui.report.wizard;
 
-import com.haulmont.cuba.gui.components.Label;
-import com.haulmont.cuba.gui.components.Table;
 import io.jmix.reports.entity.wizard.EntityTreeNode;
 import io.jmix.reports.entity.wizard.RegionProperty;
 import io.jmix.reports.entity.wizard.ReportData.ReportType;
 import io.jmix.reports.entity.wizard.ReportRegion;
 import io.jmix.reportsui.gui.components.actions.OrderableItemMoveAction;
 import io.jmix.reportsui.gui.components.actions.OrderableItemMoveAction.Direction;
+import io.jmix.reportsui.gui.report.wizard.region.EntityTreeLookup;
+import io.jmix.reportsui.gui.report.wizard.region.RegionEditor;
 import io.jmix.reportsui.gui.report.wizard.step.StepFrame;
+import io.jmix.ui.Notifications;
 import io.jmix.ui.action.AbstractAction;
-import io.jmix.ui.action.Action;
 import io.jmix.ui.action.DialogAction;
 import io.jmix.ui.component.*;
-import io.jmix.ui.gui.OpenType;
+import io.jmix.ui.screen.MapScreenOptions;
+import io.jmix.ui.screen.OpenMode;
+import io.jmix.ui.screen.Screen;
+import io.jmix.ui.screen.StandardCloseAction;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class RegionsStepFrame extends StepFrame {
     protected static final String ADD_TABULATED_REGION_ACTION_ID = "tabulatedRegion";
@@ -71,7 +76,7 @@ public class RegionsStepFrame extends StepFrame {
         }
 
         protected void openTabulatedRegionEditor(final ReportRegion item) {
-            if (ReportType.SINGLE_ENTITY == wizard.reportTypeOptionGroup.getValue()) {
+            if (ReportType.SINGLE_ENTITY == wizard.reportTypeRadioButtonGroup.getValue()) {
                 openRegionEditorOnlyWithNestedCollections(item);
 
             } else {
@@ -83,22 +88,37 @@ public class RegionsStepFrame extends StepFrame {
             final Map<String, Object> lookupParams = new HashMap<>();
             lookupParams.put("rootEntity", wizard.getItem().getEntityTreeRootNode());
             lookupParams.put("collectionsOnly", Boolean.TRUE);
-            lookupParams.put("persistentOnly", ReportType.LIST_OF_ENTITIES_WITH_QUERY == wizard.reportTypeOptionGroup.getValue());
-            wizard.openLookup("report$ReportEntityTree.lookup", items -> {
-                if (items.size() == 1) {
-                    EntityTreeNode regionPropertiesRootNode = (EntityTreeNode) CollectionUtils.get(items, 0);
+            lookupParams.put("persistentOnly", ReportType.LIST_OF_ENTITIES_WITH_QUERY == wizard.reportTypeRadioButtonGroup.getValue());
 
-                    Map<String, Object> editorParams = new HashMap<>();
-                    editorParams.put("scalarOnly", Boolean.TRUE);
-                    editorParams.put("persistentOnly", ReportType.LIST_OF_ENTITIES_WITH_QUERY == wizard.reportTypeOptionGroup.getValue());
-                    editorParams.put("rootEntity", regionPropertiesRootNode);
-                    item.setRegionPropertiesRootNode(regionPropertiesRootNode);
+            EntityTreeLookup entityTreeLookup = wizard.screenBuilders.lookup(EntityTreeNode.class, wizard)
+                    .withScreenId("report_ReportEntityTree.lookup")
+                    .withOpenMode(OpenMode.DIALOG)
+                    .withOptions(new MapScreenOptions(lookupParams))
+                    .withSelectHandler(items -> {
+                        if (items.size() == 1) {
+                            EntityTreeNode regionPropertiesRootNode = IterableUtils.get(items, 0);
 
-                    Window.Editor regionEditor = wizard.openEditor("report$Report.regionEditor", item,
-                            OpenType.DIALOG, editorParams, wizard.reportRegionsDs);
-                    regionEditor.addCloseListener(new RegionEditorCloseListener());
-                }
-            }, OpenType.DIALOG, lookupParams);
+                            Map<String, Object> editorParams = new HashMap<>();
+                            editorParams.put("scalarOnly", Boolean.TRUE);
+                            editorParams.put("persistentOnly", ReportType.LIST_OF_ENTITIES_WITH_QUERY == wizard.reportTypeRadioButtonGroup.getValue());
+                            editorParams.put("rootEntity", regionPropertiesRootNode);
+                            item.setRegionPropertiesRootNode(regionPropertiesRootNode);
+
+                            RegionEditor regionEditor = (RegionEditor) wizard.screenBuilders.editor(ReportRegion.class, wizard)
+                                    .withScreenId("report_Region.edit")
+                                    .editEntity(item)
+                                    .withOpenMode(OpenMode.DIALOG)
+                                    .withContainer(wizard.reportRegionsDs)
+                                    .withOptions(new MapScreenOptions(editorParams))
+                                    .build();
+
+                            regionEditor.addAfterCloseListener(new RegionEditorCloseListener());
+                            regionEditor.show();
+                        }
+                    })
+                    .build();
+
+            entityTreeLookup.show();
         }
 
         protected void openRegionEditor(ReportRegion item) {
@@ -107,17 +127,25 @@ public class RegionsStepFrame extends StepFrame {
             Map<String, Object> editorParams = new HashMap<>();
             editorParams.put("rootEntity", wizard.getItem().getEntityTreeRootNode());
             editorParams.put("scalarOnly", Boolean.TRUE);
-            editorParams.put("persistentOnly", ReportType.LIST_OF_ENTITIES_WITH_QUERY == wizard.reportTypeOptionGroup.getValue());
+            editorParams.put("persistentOnly", ReportType.LIST_OF_ENTITIES_WITH_QUERY == wizard.reportTypeRadioButtonGroup.getValue());
 
-            Window.Editor regionEditor = wizard.openEditor("report$Report.regionEditor", item,
-                    OpenType.DIALOG, editorParams, wizard.reportRegionsDs);
-            regionEditor.addCloseListener(new RegionEditorCloseListener());
+            RegionEditor regionEditor = (RegionEditor) wizard.screenBuilders.editor(ReportRegion.class, wizard)
+                    .withScreenId("report_Region.edit")
+                    .editEntity(item)
+                    .withOpenMode(OpenMode.DIALOG)
+                    .withContainer(wizard.reportRegionsDs)
+                    .withOptions(new MapScreenOptions(editorParams))
+                    .build();
+
+            regionEditor.addAfterCloseListener(new RegionEditorCloseListener());
+            regionEditor.show();
         }
 
-        protected class RegionEditorCloseListener implements Window.CloseListener {
+        protected class RegionEditorCloseListener implements Consumer<Screen.AfterCloseEvent> {
             @Override
-            public void windowClosed(String actionId) {
-                if (Window.COMMIT_ACTION_ID.equals(actionId)) {
+            public void accept(Screen.AfterCloseEvent afterCloseEvent) {
+                StandardCloseAction standardCloseAction = (StandardCloseAction) afterCloseEvent.getCloseAction();
+                if (Window.COMMIT_ACTION_ID.equals(standardCloseAction.getActionId())) {
                     wizard.regionsTable.refresh();
                     wizard.setupButtonsVisibility();
                 }
@@ -157,7 +185,7 @@ public class RegionsStepFrame extends StepFrame {
         @Override
         public Component generateCell(ReportRegion entity) {
             currentReportRegionGeneratedColumn = entity;
-            BoxLayout mainLayout = wizard.componentsFactory.createComponent(VBoxLayout.class);
+            BoxLayout mainLayout = wizard.uiComponents.create(VBoxLayout.class);
             mainLayout.setWidth(WIDTH_PERCENT_100);
             mainLayout.add(createFirstTwoRowsLayout());
             mainLayout.add(createThirdRowAttrsLayout());
@@ -165,7 +193,7 @@ public class RegionsStepFrame extends StepFrame {
         }
 
         private BoxLayout createFirstTwoRowsLayout() {
-            BoxLayout firstTwoRowsLayout = wizard.componentsFactory.createComponent(HBoxLayout.class);
+            BoxLayout firstTwoRowsLayout = wizard.uiComponents.create(HBoxLayout.class);
             BoxLayout expandedAttrsLayout = createExpandedAttrsLayout();
             firstTwoRowsLayout.setWidth(WIDTH_PERCENT_100);
             firstTwoRowsLayout.add(expandedAttrsLayout);
@@ -175,7 +203,7 @@ public class RegionsStepFrame extends StepFrame {
         }
 
         private BoxLayout createExpandedAttrsLayout() {
-            BoxLayout expandedAttrsLayout = wizard.componentsFactory.createComponent(HBoxLayout.class);
+            BoxLayout expandedAttrsLayout = wizard.uiComponents.create(HBoxLayout.class);
             expandedAttrsLayout.setWidth(WIDTH_PERCENT_100);
             expandedAttrsLayout.add(createFirstRowAttrsLayout());
             expandedAttrsLayout.add(createSecondRowAttrsLayout());
@@ -183,12 +211,12 @@ public class RegionsStepFrame extends StepFrame {
         }
 
         private BoxLayout createFirstRowAttrsLayout() {
-            BoxLayout firstRowAttrsLayout = wizard.componentsFactory.createComponent(HBoxLayout.class);
+            BoxLayout firstRowAttrsLayout = wizard.uiComponents.create(HBoxLayout.class);
             firstRowAttrsLayout.setSpacing(true);
-            Label regionLbl = wizard.componentsFactory.createComponent(Label.class);
+            Label regionLbl = wizard.uiComponents.create(Label.class);
             regionLbl.setStyleName(BOLD_LABEL_STYLE);
             regionLbl.setValue(wizard.getMessage("region"));
-            Label regionValueLbl = wizard.componentsFactory.createComponent(Label.class);
+            Label regionValueLbl = wizard.uiComponents.create(Label.class);
             regionValueLbl.setValue(currentReportRegionGeneratedColumn.getName());
             regionValueLbl.setWidth(WIDTH_PERCENT_100);
             firstRowAttrsLayout.add(regionLbl);
@@ -197,12 +225,12 @@ public class RegionsStepFrame extends StepFrame {
         }
 
         private BoxLayout createSecondRowAttrsLayout() {
-            BoxLayout secondRowAttrsLayout = wizard.componentsFactory.createComponent(HBoxLayout.class);
+            BoxLayout secondRowAttrsLayout = wizard.uiComponents.create(HBoxLayout.class);
             secondRowAttrsLayout.setSpacing(true);
-            Label entityLbl = wizard.componentsFactory.createComponent(Label.class);
+            Label entityLbl = wizard.uiComponents.create(Label.class);
             entityLbl.setStyleName(BOLD_LABEL_STYLE);
             entityLbl.setValue(wizard.getMessage("entity"));
-            Label entityValueLbl = wizard.componentsFactory.createComponent(Label.class);
+            Label entityValueLbl = wizard.uiComponents.create(Label.class);
             entityValueLbl.setValue(wizard.messageTools.getEntityCaption(currentReportRegionGeneratedColumn.getRegionPropertiesRootNode().getWrappedMetaClass()));
             entityValueLbl.setWidth(WIDTH_PERCENT_100);
             secondRowAttrsLayout.add(entityLbl);
@@ -211,19 +239,19 @@ public class RegionsStepFrame extends StepFrame {
         }
 
         private BoxLayout createBtnsLayout() {
-            BoxLayout btnsLayout = wizard.componentsFactory.createComponent(HBoxLayout.class);
+            BoxLayout btnsLayout = wizard.uiComponents.create(HBoxLayout.class);
             btnsLayout.setSpacing(true);
             btnsLayout.setStyleName("on-hover-visible-layout");
             return btnsLayout;
         }
 
         private BoxLayout createThirdRowAttrsLayout() {
-            BoxLayout thirdRowAttrsLayout = wizard.componentsFactory.createComponent(HBoxLayout.class);
+            BoxLayout thirdRowAttrsLayout = wizard.uiComponents.create(HBoxLayout.class);
             thirdRowAttrsLayout.setSpacing(true);
-            Label entityLbl = wizard.componentsFactory.createComponent(Label.class);
+            Label entityLbl = wizard.uiComponents.create(Label.class);
             entityLbl.setStyleName(BOLD_LABEL_STYLE);
             entityLbl.setValue(wizard.getMessage("attributes"));
-            Button editBtn = wizard.componentsFactory.createComponent(Button.class);
+            Button editBtn = wizard.uiComponents.create(Button.class);
             editBtn.setCaption(generateAttrsBtnCaption());
             editBtn.setStyleName("link");
             editBtn.setWidth(WIDTH_PERCENT_100);
@@ -251,21 +279,18 @@ public class RegionsStepFrame extends StepFrame {
         @Override
         public void actionPerform(Component component) {
             if (wizard.regionsTable.getSingleSelected() != null) {
-                wizard.showOptionDialog(
-                        wizard.getMessage("dialogs.Confirmation"),
-                        wizard.formatMessage("deleteRegion", wizard.regionsTable.getSingleSelected().getName()),
-                        Frame.MessageType.CONFIRMATION, new Action[]{
-                                new DialogAction(DialogAction.Type.YES) {
-                                    @Override
-                                    public void actionPerform(Component component) {
-                                        wizard.reportRegionsDs.removeItem(wizard.regionsTable.getSingleSelected());
-                                        normalizeRegionPropertiesOrderNum();
-                                        wizard.regionsTable.refresh();
-                                        wizard.setupButtonsVisibility();
-                                    }
-                                },
-                                new DialogAction(DialogAction.Type.NO, Status.PRIMARY)
-                        });
+                wizard.dialogs.createOptionDialog()
+                        .withCaption(wizard.getMessage("dialogs.Confirmation"))
+                        .withMessage(wizard.formatMessage("deleteRegion", wizard.regionsTable.getSingleSelected().getName()))
+                        .withActions(
+                                new DialogAction(DialogAction.Type.YES).withHandler(e -> {
+                                    wizard.reportRegionsDs.removeItem(wizard.regionsTable.getSingleSelected());
+                                    normalizeRegionPropertiesOrderNum();
+                                    wizard.regionsTable.refresh();
+                                    wizard.setupButtonsVisibility();
+                                }),
+                                new DialogAction(DialogAction.Type.NO).withPrimary(true)
+                        ).show();
             }
         }
 
@@ -294,13 +319,17 @@ public class RegionsStepFrame extends StepFrame {
                 Map<String, Object> editorParams = new HashMap<>();
                 editorParams.put("rootEntity", wizard.regionsTable.getSingleSelected().getRegionPropertiesRootNode());
                 editorParams.put("scalarOnly", Boolean.TRUE);
-                editorParams.put("persistentOnly", ReportType.LIST_OF_ENTITIES_WITH_QUERY == wizard.reportTypeOptionGroup.getValue());
-                Window.Editor regionEditor = wizard.openEditor("report$Report.regionEditor",
-                        wizard.regionsTable.getSingleSelected(),
-                        OpenType.DIALOG,
-                        editorParams,
-                        wizard.reportRegionsDs);
-                regionEditor.addCloseListener(new RegionEditorCloseListener());
+                editorParams.put("persistentOnly", ReportType.LIST_OF_ENTITIES_WITH_QUERY == wizard.reportTypeRadioButtonGroup.getValue());
+
+                RegionEditor regionEditor = wizard.screenBuilders.editor(ReportRegion.class, wizard)
+                        .withScreenId("report_Region.edit")
+                        .editEntity(wizard.regionsTable.getSingleSelected())
+                        .withContainer(wizard.reportRegionsDs)
+                        .withOpenMode(OpenMode.DIALOG)
+                        .withOptions(new MapScreenOptions(editorParams))
+                        .build();
+                regionEditor.addAfterCloseListener(new RegionEditorCloseListener());
+                regionEditor.show();
             }
         }
 
@@ -337,7 +366,9 @@ public class RegionsStepFrame extends StepFrame {
                 @Override
                 public void actionPerform(Component component) {
                     if (wizard.getItem().getReportRegions().isEmpty()) {
-                        wizard.showNotification(wizard.getMessage("addRegionsWarn"), Frame.NotificationType.TRAY);
+                        wizard.notifications.create(Notifications.NotificationType.TRAY)
+                                .withCaption(wizard.getMessage("addRegionsWarn"))
+                                .show();
                         return;
                     }
                     wizard.lastGeneratedTmpReport = wizard.buildReport(true);
@@ -360,7 +391,7 @@ public class RegionsStepFrame extends StepFrame {
 
         private void showAddRegion() {
             if (wizard.reportRegionsDs.getItems().isEmpty()) {
-                if (((ReportType) wizard.reportTypeOptionGroup.getValue()).isList()) {
+                if (((ReportType) wizard.reportTypeRadioButtonGroup.getValue()).isList()) {
                     if (wizard.entityTreeHasSimpleAttrs) {
                         addTabulatedRegionAction.actionPerform(wizard.regionsStepFrame.getFrame());
                     }

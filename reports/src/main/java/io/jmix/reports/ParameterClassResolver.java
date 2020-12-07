@@ -18,8 +18,8 @@ package io.jmix.reports;
 
 import com.google.common.collect.ImmutableMap;
 import io.jmix.core.metamodel.model.MetaClass;
-import io.jmix.core.JmixEntity;
-import com.haulmont.cuba.core.global.Metadata;
+import io.jmix.core.Entity;
+import io.jmix.core.Metadata;
 import com.haulmont.cuba.core.global.Scripting;
 import io.jmix.reports.entity.ParameterType;
 import io.jmix.reports.entity.ReportInputParameter;
@@ -101,7 +101,7 @@ public class ParameterClassResolver {
         if (parameterType != null) {
             return parameterType;
         } else {
-            if (JmixEntity.class.isAssignableFrom(parameterClass)) {
+            if (Entity.class.isAssignableFrom(parameterClass)) {
                 return ParameterType.ENTITY;
             } else if (Collection.class.isAssignableFrom(parameterClass)) {
                 return ParameterType.ENTITY_LIST;

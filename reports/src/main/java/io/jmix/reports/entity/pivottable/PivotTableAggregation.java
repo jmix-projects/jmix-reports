@@ -16,27 +16,27 @@
 
 package io.jmix.reports.entity.pivottable;
 
-import io.jmix.core.UuidProvider;
-import io.jmix.core.metamodel.annotation.ModelObject;
-import io.jmix.core.metamodel.annotation.ModelProperty;
 import com.haulmont.cuba.core.entity.BaseUuidEntity;
 import com.haulmont.cuba.core.global.AppBeans;
 import com.haulmont.cuba.core.global.Messages;
+import io.jmix.core.UuidProvider;
+import io.jmix.core.metamodel.annotation.JmixEntity;
+import io.jmix.core.metamodel.annotation.JmixProperty;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.Lob;
 
-@ModelObject(name = "report$PivotTableAggregation")
+@JmixEntity(name = "report_PivotTableAggregation")
 public class PivotTableAggregation extends BaseUuidEntity {
 
-    @ModelProperty
+    @JmixProperty
     protected AggregationMode mode;
 
-    @ModelProperty
+    @JmixProperty
     protected String caption;
 
     @Lob
-    @ModelProperty
+    @JmixProperty
     protected String function;
 
     public PivotTableAggregation() {

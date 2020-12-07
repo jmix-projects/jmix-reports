@@ -16,27 +16,31 @@
 
 package io.jmix.reportsui.gui.report.run;
 
+import com.haulmont.cuba.gui.data.CollectionDatasource;
 import com.sun.deploy.config.ClientConfig;
+import io.jmix.core.Messages;
 import io.jmix.core.metamodel.model.MetaClass;
-import com.haulmont.cuba.core.global.UserSessionSource;
 import io.jmix.ui.WindowParam;
-import com.haulmont.cuba.gui.components.*;
 import io.jmix.ui.action.Action;
 import io.jmix.ui.action.BaseAction;
 import io.jmix.ui.action.ItemTrackingAction;
-import com.haulmont.cuba.gui.data.CollectionDatasource;
 import io.jmix.reports.app.service.ReportService;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportGroup;
 import io.jmix.reportsui.gui.ReportGuiManager;
-import io.jmix.ui.component.GridLayout;
+import io.jmix.ui.component.*;
+import io.jmix.ui.screen.*;
+import io.jmix.ui.screen.LookupComponent;
 import org.apache.commons.lang3.StringUtils;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ReportRun extends AbstractLookup {
+@UiController("report_ReportRun")
+@UiDescriptor("report-run.xml")
+@LookupComponent("reportsTable")
+public class ReportRun extends StandardLookup<Report> {
 
     protected static final String RUN_ACTION_ID = "runReport";
     public static final String META_CLASS_PARAMETER = "metaClass";
@@ -53,7 +57,7 @@ public class ReportRun extends AbstractLookup {
     protected CollectionDatasource<Report, UUID> reportDs;
 
     @Autowired
-    protected UserSessionSource userSessionSource;
+    protected UserSessions userSessionSource;
 
     @Autowired
     protected TextField<String> nameFilter;
@@ -62,7 +66,7 @@ public class ReportRun extends AbstractLookup {
     protected TextField<String> codeFilter;
 
     @Autowired
-    protected LookupField<ReportGroup> groupFilter;
+    protected ComboBox<ReportGroup> groupFilter;
 
     @Autowired
     protected DateField<Date> updatedDateFilter;
@@ -73,6 +77,9 @@ public class ReportRun extends AbstractLookup {
     @Autowired
     protected ClientConfig clientConfig;
 
+    @Autowired
+    protected Messages messages;
+
     @WindowParam(name = REPORTS_PARAMETER)
     protected List<Report> reportsParameter;
 
@@ -81,10 +88,8 @@ public class ReportRun extends AbstractLookup {
     @WindowParam(name = SCREEN_PARAMETER)
     protected String screenParameter;
 
-    @Override
-    public void init(Map<String, Object> params) {
-        super.init(params);
-
+    @Subscribe
+    protected void onInit(InitEvent event) {
         List<Report> reports = reportsParameter;
         if (reports == null) {
             reports = reportGuiManager.getAvailableReports(screenParameter, userSessionSource.getUserSession().getUser(),
@@ -100,7 +105,7 @@ public class ReportRun extends AbstractLookup {
         }
 
         Action runAction = new ItemTrackingAction(RUN_ACTION_ID)
-                .withCaption(getMessage("runReport"))
+                .withCaption(messages.getMessage("runReport"))
                 .withHandler(e -> {
                     Report report = reportsTable.getSingleSelected();
                     if (report != null) {
@@ -127,7 +132,7 @@ public class ReportRun extends AbstractLookup {
         Date dateFilterValue = updatedDateFilter.getValue();
 
         List<Report> reports =
-                reportGuiManager.getAvailableReports(screenParameter, userSessionSource.getUserSession().getUser(),
+                reportGuiManager.getAvailableReports(screenParameter, userSessionSource.getUser(),
                         metaClassParameter)
                         .stream()
                         .filter(report -> {

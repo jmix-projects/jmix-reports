@@ -16,12 +16,17 @@
 
 package io.jmix.reportsui.gui.definition.edit.scripteditordialog;
 
-import com.haulmont.cuba.gui.components.*;
+import io.jmix.core.Messages;
+import io.jmix.ui.component.*;
 import io.jmix.ui.WindowParam;
 import io.jmix.ui.action.AbstractAction;
 import io.jmix.ui.component.Component;
 import io.jmix.ui.component.HasContextHelp;
 import io.jmix.ui.component.autocomplete.Suggester;
+import io.jmix.ui.screen.Screen;
+import io.jmix.ui.screen.Subscribe;
+import io.jmix.ui.screen.UiController;
+import io.jmix.ui.screen.UiDescriptor;
 import io.jmix.ui.settings.UserSettingService;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -31,7 +36,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Map;
 import java.util.function.Consumer;
 
-public class ScriptEditorDialog extends AbstractWindow {
+@UiController("report_Editor.dialog")
+@UiDescriptor("script-editor-dialog.xml")
+public class ScriptEditorDialog extends Screen {
 
     public static final String WIDTH_SCRIPT_EDITOR_DIALOG = "reporting.widthScriptEditorDialog";
     public static final String HEIGHT_SCRIPT_EDITOR_DIALOG = "reporting.heightScriptEditorDialog";
@@ -55,16 +62,18 @@ public class ScriptEditorDialog extends AbstractWindow {
     @Autowired
     protected UserSettingService userSettingService;
 
-    @Override
-    public void init(Map<String, Object> params) {
+    @Autowired
+    protected Messages messages;
+
+    @Subscribe
+    protected void onInit(InitEvent event) {
         initEditor();
-        initActions();
         loadParameterWindow();
 
-        Object caption = params.get("caption");
-        if (ObjectUtils.isNotEmpty(caption)) {
-            setCaption(caption.toString());
-        }
+//        Object caption = params.get("caption");
+//        if (ObjectUtils.isNotEmpty(caption)) {
+//            setCaption(caption.toString());
+//        }
 
         addAfterCloseListener(afterCloseEvent -> saveParameterWindow());
     }
@@ -75,31 +84,6 @@ public class ScriptEditorDialog extends AbstractWindow {
         editor.setValue(scriptValue);
         editor.setHandleTabKey(true);
         editor.setContextHelpIconClickHandler(helpHandler);
-    }
-
-    protected void initActions() {
-        addAction(new AbstractAction("windowCommit") {
-            @Override
-            public void actionPerform(Component component) {
-                close(COMMIT_ACTION_ID);
-            }
-
-            @Override
-            public String getCaption() {
-                return messages.getMainMessage("actions.Ok");
-            }
-        });
-        addAction(new AbstractAction("windowClose") {
-            @Override
-            public void actionPerform(Component component) {
-                close(CLOSE_ACTION_ID);
-            }
-
-            @Override
-            public String getCaption() {
-                return messages.getMainMessage("actions.Cancel");
-            }
-        });
     }
 
     protected void loadParameterWindow() {

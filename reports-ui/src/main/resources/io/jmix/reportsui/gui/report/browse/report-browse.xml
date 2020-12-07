@@ -15,8 +15,7 @@
   -->
 
 <window xmlns="http://jmix.io/schema/ui/window"
-        xmlns:c="http://jmix.io/schema/ui/jpql-condition"
-        caption="msg://reportBrowser">
+        xmlns:c="http://jmix.io/schema/ui/jpql-condition">
 
     <data>
         <collection id="reportDc"
@@ -56,10 +55,10 @@
                 <popupButton id="popupCreateBtn" icon="FILE_O" caption="mainMsg://actions.Create"/>
                 <button action="table.edit"/>
                 <button action="table.remove"/>
-                <button id="copy" icon="font-icon:COPY"/>
-                <button id="import" icon="font-icon:UPLOAD" description="msg://button.import"/>
-                <button id="export" icon="font-icon:DOWNLOAD" description="msg://button.export"/>
-                <button id="runReport" icon="font-icon:ANGLE_DOUBLE_RIGHT"/>
+                <button id="copy" icon="COPY"/>
+                <button id="import" icon="UPLOAD" description="msg://button.import"/>
+                <button id="export" icon="DOWNLOAD" description="msg://button.export"/>
+                <button id="runReport" icon="ANGLE_DOUBLE_RIGHT"/>
                 <button id="executionsButton" action="table.executions"/>
             </buttonsPanel>
             <pagination/>

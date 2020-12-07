@@ -17,7 +17,7 @@
 package io.jmix.reports.libintegration;
 
 import io.jmix.core.FetchPlan;
-import io.jmix.core.JmixEntity;
+import io.jmix.core.Entity;
 import com.haulmont.cuba.core.global.View;
 import io.jmix.core.entity.EntityValues;
 import io.jmix.reports.app.EntityMap;
@@ -57,7 +57,7 @@ public class MultiEntityDataLoader extends AbstractEntityDataLoader {
         if (params.containsKey(paramName)) {
             entities = params.get(paramName);
         } else if (hasNestedCollection && params.containsKey(entityParameterName)) {
-            JmixEntity entity = (JmixEntity) params.get(entityParameterName);
+            Entity entity = (Entity) params.get(entityParameterName);
             entity = reloadEntityByDataSetView(dataSet, entity);
             if (entity != null) {
                 entities = EntityValues.getValueEx(entity,nestedCollectionName);
@@ -84,12 +84,12 @@ public class MultiEntityDataLoader extends AbstractEntityDataLoader {
             }
         }
 
-        Collection<JmixEntity> entitiesList = (Collection) entities;
+        Collection<Entity> entitiesList = (Collection) entities;
         params.put(paramName, entitiesList);
 
         List<Map<String, Object>> resultList = new ArrayList<>();
 
-        for (JmixEntity entity : entitiesList) {
+        for (Entity entity : entitiesList) {
             if (!hasNestedCollection) {
                 entity = reloadEntityByDataSetView(dataSet, entity);
             }

@@ -15,19 +15,21 @@
  */
 package io.jmix.reportsui.web.exception;
 
-import com.haulmont.cuba.core.global.Messages;
 import com.vaadin.ui.Window;
+import io.jmix.core.Messages;
 import io.jmix.reports.exception.*;
 import io.jmix.ui.AppUI;
 import io.jmix.ui.exception.AbstractUiExceptionHandler;
 import io.jmix.ui.widget.ExceptionDialog;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
 
 /**
  * Handles reporting exceptions.
  */
+@Component("report_ReportExceptionHandler")
 public class ReportExceptionHandler extends AbstractUiExceptionHandler {
 
     @Autowired

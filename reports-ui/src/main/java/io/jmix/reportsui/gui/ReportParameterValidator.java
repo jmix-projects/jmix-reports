@@ -16,14 +16,17 @@
 
 package io.jmix.reportsui.gui;
 
+import io.jmix.core.DataManager;
+import io.jmix.core.Metadata;
 import io.jmix.core.common.util.ParamsMap;
-import com.haulmont.cuba.core.global.*;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportInputParameter;
 import io.jmix.reports.exception.ReportParametersValidationException;
 import io.jmix.reports.exception.ReportingException;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.groovy.runtime.MethodClosure;
+import org.springframework.scripting.ScriptEvaluator;
+import org.springframework.scripting.support.StaticScriptSource;
 import org.springframework.stereotype.Component;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,12 +41,12 @@ public class ReportParameterValidator {
     protected Metadata metadata;
     @Autowired
     protected DataManager dataManager;
+//    @Autowired
+//    protected Security security;
     @Autowired
-    protected Security security;
-    @Autowired
-    protected Scripting scripting;
-    @Autowired
-    protected UserSessionSource userSessionSource;
+    protected ScriptEvaluator scripting;
+//    @Autowired
+//    protected UserSessionSource userSessionSource;
 
     /**
      * Checking validation for an input parameter field before running the report.
@@ -72,7 +75,7 @@ public class ReportParameterValidator {
     protected void runValidationScript(String groovyScript, Map<String, Object> scriptContext) {
         if (StringUtils.isNotBlank(groovyScript)) {
             try {
-                scripting.evaluateGroovy(groovyScript, scriptContext);
+                scripting.evaluate(new StaticScriptSource(groovyScript), scriptContext);
             } catch (ReportParametersValidationException e) {
                 throw e;
             } catch (Exception e) {
@@ -90,9 +93,11 @@ public class ReportParameterValidator {
     }
 
     protected void addCommonContext(Map<String, Object> context) {
-        context.put("userSession", userSessionSource.getUserSession());
+        //todo userSession
+//        context.put("userSession", userSessionSource.getUserSession());
         context.put("dataManager", dataManager);
-        context.put("security", security);
+        //todo security
+//        context.put("security", security);
         context.put("metadata", metadata);
         context.put("invalid", new MethodClosure(this, "invalidThrowMethod"));
     }

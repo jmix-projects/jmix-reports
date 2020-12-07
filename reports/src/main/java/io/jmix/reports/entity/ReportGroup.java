@@ -20,7 +20,7 @@ import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.cuba.core.entity.StandardEntity;
 import io.jmix.core.entity.annotation.SystemLevel;
 import io.jmix.core.metamodel.annotation.DependsOnProperties;
-import io.jmix.core.metamodel.annotation.ModelProperty;
+import io.jmix.core.metamodel.annotation.JmixProperty;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.Column;
@@ -28,7 +28,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-@Entity(name = "report$ReportGroup")
+@Entity(name = "report_ReportGroup")
 @Table(name = "REPORT_GROUP")
 @NamePattern("#getLocName|title,localeNames")
 @SuppressWarnings("unused")
@@ -84,7 +84,7 @@ public class ReportGroup extends StandardEntity {
         this.sysTenantId = sysTenantId;
     }
 
-    @ModelProperty
+    @JmixProperty
     public String getLocName() {
         if (localeName == null) {
             //TODO Locale helper
@@ -95,7 +95,7 @@ public class ReportGroup extends StandardEntity {
         return localeName;
     }
 
-    @ModelProperty
+    @JmixProperty
     @DependsOnProperties("code")
     public Boolean getSystemFlag() {
         return StringUtils.isNotEmpty(code);

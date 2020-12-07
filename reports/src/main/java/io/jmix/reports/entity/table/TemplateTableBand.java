@@ -16,24 +16,24 @@
 
 package io.jmix.reports.entity.table;
 
-import io.jmix.core.metamodel.annotation.ModelObject;
-import io.jmix.core.metamodel.annotation.ModelProperty;
 import com.haulmont.cuba.core.entity.BaseUuidEntity;
+import io.jmix.core.metamodel.annotation.JmixEntity;
+import io.jmix.core.metamodel.annotation.JmixProperty;
 
 import java.util.LinkedList;
 import java.util.List;
 
 
-@ModelObject(name = "report$TemplateTableBand")
+@JmixEntity(name = "report_TemplateTableBand")
 public class TemplateTableBand extends BaseUuidEntity {
 
-    @ModelProperty
+    @JmixProperty
     protected String bandName;
 
-    @ModelProperty
+    @JmixProperty
     protected Integer position;
 
-    @ModelProperty
+    @JmixProperty
     protected List<TemplateTableColumn> columns = new LinkedList<>();
 
     public List<TemplateTableColumn> getColumns() {

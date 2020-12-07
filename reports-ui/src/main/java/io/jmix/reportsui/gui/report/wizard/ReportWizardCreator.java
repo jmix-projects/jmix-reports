@@ -16,18 +16,10 @@
 package io.jmix.reportsui.gui.report.wizard;
 
 import com.google.common.collect.ImmutableMap;
-import com.haulmont.cuba.core.global.AppBeans;
-import com.haulmont.cuba.core.global.Metadata;
-import com.haulmont.cuba.gui.components.*;
-import com.haulmont.cuba.gui.components.GroupBoxLayout;
-import com.haulmont.cuba.gui.components.Label;
-import com.haulmont.cuba.gui.components.Table;
-import com.haulmont.cuba.gui.components.TextField;
+import com.haulmont.cuba.gui.components.OptionsGroup;
 import com.haulmont.cuba.gui.data.CollectionDatasource;
 import com.haulmont.cuba.gui.data.Datasource;
-import io.jmix.core.MessageTools;
-import io.jmix.core.MetadataTools;
-import io.jmix.core.Stores;
+import io.jmix.core.*;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.reports.app.EntityTree;
 import io.jmix.reports.app.service.ReportWizardService;
@@ -43,19 +35,30 @@ import io.jmix.reportsui.gui.ReportGuiManager;
 import io.jmix.reportsui.gui.report.wizard.step.MainWizardFrame;
 import io.jmix.reportsui.gui.report.wizard.step.StepFrame;
 import io.jmix.reportsui.gui.report.wizard.step.StepFrameManager;
+import io.jmix.ui.Dialogs;
+import io.jmix.ui.Notifications;
+import io.jmix.ui.ScreenBuilders;
+import io.jmix.ui.UiComponents;
 import io.jmix.ui.action.AbstractAction;
 import io.jmix.ui.action.Action;
 import io.jmix.ui.action.DialogAction;
 import io.jmix.ui.component.*;
+import io.jmix.ui.screen.Screen;
+import io.jmix.ui.screen.Subscribe;
+import io.jmix.ui.screen.UiController;
+import io.jmix.ui.screen.UiDescriptor;
 import io.jmix.ui.theme.ThemeConstants;
-import io.jmix.ui.xml.layout.ComponentsFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.inject.Named;
 import java.util.*;
 
-public class ReportWizardCreator extends AbstractWindow implements MainWizardFrame<AbstractWindow> {
+import static io.jmix.ui.component.Window.COMMIT_ACTION_ID;
+
+@UiController("report_ReportWizardCreator")
+@UiDescriptor("report-wizard.xml")
+public class ReportWizardCreator extends Screen implements MainWizardFrame<Screen> {
 
     @Autowired
     protected Datasource reportDataDs;
@@ -79,15 +82,19 @@ public class ReportWizardCreator extends AbstractWindow implements MainWizardFra
     protected ButtonsPanel navBtnsPanel;
     @Autowired
     protected GroupBoxLayout editAreaGroupBox;
+    @Autowired
+    protected Dialogs dialogs;
+    @Autowired
+    protected ScreenBuilders screenBuilders;
 
     @Named("detailsStep.mainFields")
-    protected FieldGroup mainFields;
+    protected Form mainFields;
     @Named("detailsStep.setQuery")
     protected Button setQueryButton;
 
-    protected OptionsGroup reportTypeOptionGroup;//this and following are set during creation
-    protected LookupField<TemplateFileType> templateFileFormat;
-    protected LookupField<MetaClass> entity;
+    protected RadioButtonGroup reportTypeRadioButtonGroup;//this and following are set during creation
+    protected ComboBox<TemplateFileType> templateFileFormat;
+    protected ComboBox<MetaClass> entity;
     protected TextField<String> reportName;
 
     @Named("regionsStep.addRegionDisabledBtn")
@@ -112,7 +119,7 @@ public class ReportWizardCreator extends AbstractWindow implements MainWizardFra
     protected BoxLayout buttonsBox;
 
     @Named("saveStep.outputFileFormat")
-    protected LookupField<ReportOutputType> outputFileFormat;
+    protected ComboBox<ReportOutputType> outputFileFormat;
     @Named("saveStep.outputFileName")
     protected TextField<String> outputFileName;
     @Named("saveStep.downloadTemplateFile")
@@ -120,10 +127,12 @@ public class ReportWizardCreator extends AbstractWindow implements MainWizardFra
     @Named("saveStep.diagramTypeLabel")
     protected Label diagramTypeLabel;
     @Named("saveStep.diagramType")
-    protected LookupField<ChartType> diagramType;
+    protected ComboBox<ChartType> diagramType;
     @Named("saveStep.chartPreviewBox")
     protected BoxLayout chartPreviewBox;
 
+    @Autowired
+    protected ExtendedEntities extendedEntities;
     @Autowired
     protected Metadata metadata;
     @Autowired
@@ -131,13 +140,17 @@ public class ReportWizardCreator extends AbstractWindow implements MainWizardFra
     @Autowired
     protected MessageTools messageTools;
     @Autowired
-    protected ComponentsFactory componentsFactory;
+    protected UiComponents uiComponents;
     @Autowired
     protected ReportWizardService reportWizardService;
     @Autowired
     protected ThemeConstants themeConstants;
     @Autowired
     protected ReportGuiManager reportGuiManager;
+    @Autowired
+    protected Messages messages;
+    @Autowired
+    protected Notifications notifications;
 
     protected StepFrame detailsStepFrame;
     protected StepFrame regionsStepFrame;
@@ -156,11 +169,9 @@ public class ReportWizardCreator extends AbstractWindow implements MainWizardFra
     protected int wizardWidth;
     protected int wizardHeight;
 
-    @Override
+    @Subscribe
     @SuppressWarnings("unchecked")
-    public void init(Map<String, Object> params) {
-        super.init(params);
-
+    public void onInit(InitEvent event) {
         reportDataDs.setItem(metadata.create(ReportData.class));
 
         wizardWidth = themeConstants.getInt("cuba.gui.report.ReportWizard.width");
@@ -194,10 +205,12 @@ public class ReportWizardCreator extends AbstractWindow implements MainWizardFra
         });
 
         outputFileName.setContextHelpIconClickHandler(e ->
-                showMessageDialog(getMessage("template.namePatternText"), getMessage("template.namePatternTextHelp"),
-                        MessageType.CONFIRMATION_HTML
-                                .modal(false)
-                                .width(560f)));
+                dialogs.createMessageDialog()
+                        .withCaption(messages.getMessage("template.namePatternText"))
+                        .withMessage(messages.getMessage("template.namePatternTextHelp"))
+                        .withModal(false)
+                        .withWidth("560px")
+                        .show());
     }
 
     protected void initMainButtons() {
@@ -205,7 +218,9 @@ public class ReportWizardCreator extends AbstractWindow implements MainWizardFra
             @Override
             public void actionPerform(Component component) {
                 if (entity.getValue() == null) {
-                    showNotification(getMessage("fillEntityMsg"), NotificationType.TRAY_HTML);
+                    notifications.create(Notifications.NotificationType.TRAY)
+                            .withCaption(messages.getMessage("fillEntityMsg"))
+                            .show();
                     return;
                 }
 
@@ -231,31 +246,31 @@ public class ReportWizardCreator extends AbstractWindow implements MainWizardFra
     }
 
     protected void initMainFields() {
-        mainFields.addCustomField("entity", (datasource, propertyId) -> {
-            LookupField lookupField = componentsFactory.createComponent(LookupField.class);
-            //TODO request focus
-//            lookupField.requestFocus();
-            entity = lookupField;
-            return lookupField;
-        });
-        mainFields.addCustomField("reportName", (datasource, propertyId) -> {
-            TextField textField = componentsFactory.createComponent(TextField.class);
-            textField.setMaxLength(255);
-            reportName = textField;
-            return textField;
-        });
-        mainFields.addCustomField("templateFileFormat", (datasource, propertyId) -> {
-            LookupField lookupField = componentsFactory.createComponent(LookupField.class);
-            templateFileFormat = lookupField;
-            return lookupField;
-        });
-        mainFields.addCustomField("reportType", (datasource, propertyId) -> {
-            OptionsGroup optionsGroup = componentsFactory.createComponent(OptionsGroup.class);
-            optionsGroup.setMultiSelect(false);
-            optionsGroup.setOrientation(OptionsGroup.Orientation.VERTICAL);
-            reportTypeOptionGroup = optionsGroup;
-            return optionsGroup;
-        });
+        //todo
+//        mainFields.addCustomField("entity", (datasource, propertyId) -> {
+//            ComboBox comboBox = uiComponents.create(ComboBox.class);
+//            //TODO request focus
+////            lookupField.requestFocus();
+//            entity = comboBox;
+//            return comboBox;
+//        });
+//        mainFields.addCustomField("reportName", (datasource, propertyId) -> {
+//            TextField textField = uiComponents.create(TextField.class);
+//            textField.setMaxLength(255);
+//            reportName = textField;
+//            return textField;
+//        });
+//        mainFields.addCustomField("templateFileFormat", (datasource, propertyId) -> {
+//            ComboBox comboBox = uiComponents.create(ComboBox.class);
+//            templateFileFormat = comboBox;
+//            return comboBox;
+//        });
+//        mainFields.addCustomField("reportType", (datasource, propertyId) -> {
+//            RadioButtonGroup radioButtonGroup = uiComponents.create(RadioButtonGroup.class);
+//            radioButtonGroup.setOrientation(OptionsGroup.Orientation.VERTICAL);
+//            reportTypeRadioButtonGroup = radioButtonGroup;
+//            return radioButtonGroup;
+//        });
     }
 
     protected void refreshFrameVisible() {
@@ -338,7 +353,7 @@ public class ReportWizardCreator extends AbstractWindow implements MainWizardFra
     }
 
     @Override
-    public AbstractWindow getMainWizardFrame() {
+    public Screen getMainWizardFrame() {
         return this;
     }
 
@@ -348,7 +363,7 @@ public class ReportWizardCreator extends AbstractWindow implements MainWizardFra
         buttonsBox.remove(addSimpleRegionBtn);
         buttonsBox.remove(addTabulatedRegionBtn);
         buttonsBox.remove(addRegionPopupBtn);
-        if (((ReportData.ReportType) reportTypeOptionGroup.getValue()).isList()) {
+        if (((ReportData.ReportType) reportTypeRadioButtonGroup.getValue()).isList()) {
             tipLabel.setValue(formatMessage("regionTabulatedMessage",
                     messages.getMessage(entity.getValue().getJavaClass(),
                             entity.getValue().getJavaClass().getSimpleName())
@@ -392,7 +407,7 @@ public class ReportWizardCreator extends AbstractWindow implements MainWizardFra
             //lets generate output report in same format as the template
             reportData.setOutputFileType(outputFileFormat.getValue());
         }
-        reportData.setReportType((ReportData.ReportType) reportTypeOptionGroup.getValue());
+        reportData.setReportType((ReportData.ReportType) reportTypeRadioButtonGroup.getValue());
         groupsDs.refresh();
         if (groupsDs.getItemIds() != null) {
             UUID id = groupsDs.getItemIds().iterator().next();
@@ -404,7 +419,9 @@ public class ReportWizardCreator extends AbstractWindow implements MainWizardFra
             byte[] templateByteArray = reportWizardService.generateTemplate(reportData, templateFileFormat.getValue());
             reportData.setTemplateContent(templateByteArray);
         } catch (TemplateGenerationException e) {
-            showNotification(getMessage("templateGenerationException"), NotificationType.WARNING);
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption(messages.getMessage("templateGenerationException"))
+                    .show();
             return null;
         }
         reportData.setTemplateFileType(templateFileFormat.getValue());
@@ -431,30 +448,29 @@ public class ReportWizardCreator extends AbstractWindow implements MainWizardFra
      * <p>
      * Confirm closing without save if regions are created
      */
-    @Override
+    //todo
+    //@Override
     public boolean preClose(String actionId) {
         if (!COMMIT_ACTION_ID.equals(actionId) && reportRegionsDs.getItems() != null) {
-            showOptionDialog(getMessage("dialogs.Confirmation"), getMessage("interruptConfirm"), MessageType.CONFIRMATION, new Action[]{
-                    new DialogAction(DialogAction.Type.YES) {
-                        @Override
-                        public void actionPerform(Component component) {
-                            ReportWizardCreator.this.close(CLOSE_ACTION_ID);
-                        }
-                    },
-                    new DialogAction(DialogAction.Type.NO, Action.Status.PRIMARY)
-            });
+            dialogs.createOptionDialog()
+                    .withCaption(messages.getMessage("dialogs.Confirmation"))
+                    .withMessage(messages.getMessage("interruptConfirm"))
+                    .withActions(
+                            new DialogAction(DialogAction.Type.YES).withHandler(e ->
+                                    ReportWizardCreator.this.close(WINDOW_CLOSE_ACTION)),
+                            new DialogAction(DialogAction.Type.NO, Action.Status.PRIMARY)
+                    );
         }
         return false;
     }
 
-    @Override
+    //todo
     public String getMessage(String key) {
-        return super.getMessage(key);
+        return ""/*super.getMessage(key)*/;
     }
 
-    @Override
     public String formatMessage(String key, Object... params) {
-        return super.formatMessage(key, params);
+        return ""/*super.formatMessage(key, params)*/;
     }
 
     protected void setCorrectReportOutputType() {

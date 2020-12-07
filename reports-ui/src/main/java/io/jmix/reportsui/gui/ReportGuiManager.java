@@ -15,16 +15,10 @@
  */
 package io.jmix.reportsui.gui;
 
-import com.haulmont.cuba.core.global.*;
 import com.haulmont.cuba.gui.WindowManager;
-import com.haulmont.cuba.gui.WindowManagerProvider;
 import com.haulmont.cuba.gui.backgroundwork.BackgroundWorkWindow;
-import com.haulmont.cuba.gui.data.DataSupplier;
-import com.haulmont.cuba.gui.export.ByteArrayDataProvider;
-import com.haulmont.cuba.gui.export.ExportDisplay;
-import com.haulmont.cuba.gui.export.ExportFormat;
 import com.haulmont.yarg.reporting.ReportOutputDocument;
-import io.jmix.core.CoreProperties;
+import io.jmix.core.*;
 import io.jmix.core.common.util.ParamsMap;
 import io.jmix.core.entity.BaseUser;
 import io.jmix.core.metamodel.model.MetaClass;
@@ -36,22 +30,20 @@ import io.jmix.reports.entity.*;
 import io.jmix.reports.exception.FailedToConnectToOpenOfficeException;
 import io.jmix.reports.exception.NoOpenOfficeFreePortsException;
 import io.jmix.reports.exception.ReportingException;
+import io.jmix.reportsui.gui.report.run.InputParametersFrame;
 import io.jmix.reportsui.gui.report.run.ShowChartController;
 import io.jmix.reportsui.gui.report.run.ShowPivotTableController;
 import io.jmix.reportsui.gui.report.run.ShowReportTable;
-import io.jmix.ui.Notifications;
-import io.jmix.ui.UiProperties;
-import io.jmix.ui.WindowConfig;
-import io.jmix.ui.WindowInfo;
+import io.jmix.ui.*;
 import io.jmix.ui.component.ComponentsHelper;
+import io.jmix.ui.component.Fragment;
 import io.jmix.ui.component.Window;
+import io.jmix.ui.download.ByteArrayDataProvider;
+import io.jmix.ui.download.DownloadFormat;
+import io.jmix.ui.download.Downloader;
 import io.jmix.ui.executor.BackgroundTask;
 import io.jmix.ui.executor.TaskLifeCycle;
-import io.jmix.ui.gui.OpenType;
-import io.jmix.ui.screen.FrameOwner;
-import io.jmix.ui.screen.Screen;
-import io.jmix.ui.screen.ScreenContext;
-import io.jmix.ui.screen.UiControllerUtils;
+import io.jmix.ui.screen.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -74,7 +66,7 @@ public class ReportGuiManager {
     protected ReportService reportService;
 
     @Autowired
-    protected DataSupplier dataService;
+    protected DataManager dataManager;
 
     @Autowired
     protected Messages messages;
@@ -97,6 +89,8 @@ public class ReportGuiManager {
     @Autowired
     protected UserSessionSource userSessionSource;
 
+    @Autowired
+    protected MetadataTools metadataTools;
 
     @Autowired
     protected UiProperties uiProperties;
@@ -105,10 +99,22 @@ public class ReportGuiManager {
     protected CoreProperties coreProperties;
 
     @Autowired
-    protected ExportDisplay exportDisplay;
+    protected Downloader downloader;
 
     @Autowired
     protected ReportingClientConfig reportingClientConfig;
+
+    @Autowired
+    protected FetchPlanRepository fetchPlanRepository;
+
+    @Autowired
+    protected FetchPlans fetchPlans;
+
+    @Autowired
+    protected ScreenBuilders screenBuilders;
+
+    @Autowired
+    protected Fragments fragments;
 
     /**
      * Open input parameters dialog if report has parameters otherwise print report
@@ -327,16 +333,17 @@ public class ReportGuiManager {
             screenParams.put(ShowChartController.TEMPLATE_CODE_PARAMETER, templateCode);
             screenParams.put(ShowChartController.PARAMS_PARAMETER, params);
 
-            WindowInfo windowInfo = windowConfig.getWindowInfo("report$showChart");
+            WindowInfo windowInfo = windowConfig.getWindowInfo("report_showChart");
 
-            if (screen != null) {
-                ScreenContext screenContext = UiControllerUtils.getScreenContext(screen);
-
-                WindowManager screens = (WindowManager) screenContext.getScreens();
-                screens.openWindow(windowInfo, OpenType.DIALOG, screenParams);
-            } else {
-                wm.openWindow(windowInfo, OpenType.DIALOG, screenParams);
-            }
+            //todo
+//            if (screen != null) {
+//                ScreenContext screenContext = UiControllerUtils.getScreenContext(screen);
+//
+//                WindowManager screens = (WindowManager) screenContext.getScreens();
+//                screens.openWindow(windowInfo, OpenType.DIALOG, screenParams);
+//            } else {
+//                wm.openWindow(windowInfo, OpenType.DIALOG, screenParams);
+//            }
         } else if (document.getReportOutputType().getId().equals(CubaReportOutputType.pivot.getId())) {
             Map<String, Object> screenParams = ParamsMap.of(
                     ShowPivotTableController.PIVOT_TABLE_DATA_PARAMETER, document.getContent(),
@@ -344,16 +351,16 @@ public class ReportGuiManager {
                     ShowPivotTableController.TEMPLATE_CODE_PARAMETER, templateCode,
                     ShowPivotTableController.PARAMS_PARAMETER, params);
 
-            WindowInfo windowInfo = windowConfig.getWindowInfo("report$showPivotTable");
-
-            if (screen != null) {
-                ScreenContext screenContext = UiControllerUtils.getScreenContext(screen);
-
-                WindowManager screens = (WindowManager) screenContext.getScreens();
-                screens.openWindow(windowInfo, OpenType.DIALOG, screenParams);
-            } else {
-                wm.openWindow(windowInfo, OpenType.DIALOG, screenParams);
-            }
+            WindowInfo windowInfo = windowConfig.getWindowInfo("report_showPivotTable");
+            //todo
+//            if (screen != null) {
+//                ScreenContext screenContext = UiControllerUtils.getScreenContext(screen);
+//
+//                WindowManager screens = (WindowManager) screenContext.getScreens();
+//                screens.openWindow(windowInfo, OpenType.DIALOG, screenParams);
+//            } else {
+//                wm.openWindow(windowInfo, OpenType.DIALOG, screenParams);
+//            }
         } else if (document.getReportOutputType().getId().equals(CubaReportOutputType.table.getId())) {
             Map<String, Object> screenParams = new HashMap<>();
             screenParams.put(ShowReportTable.TABLE_DATA_PARAMETER, document.getContent());
@@ -361,25 +368,26 @@ public class ReportGuiManager {
             screenParams.put(ShowReportTable.TEMPLATE_CODE_PARAMETER, templateCode);
             screenParams.put(ShowReportTable.PARAMS_PARAMETER, params);
 
-            WindowInfo windowInfo = windowConfig.getWindowInfo("report$showReportTable");
+            WindowInfo windowInfo = windowConfig.getWindowInfo("report_showReportTable");
 
-            if (screen != null) {
-                ScreenContext screenContext = UiControllerUtils.getScreenContext(screen);
-
-                WindowManager screens = (WindowManager) screenContext.getScreens();
-                screens.openWindow(windowInfo, OpenType.DIALOG, screenParams);
-            } else {
-                wm.openWindow(windowInfo, OpenType.DIALOG, screenParams);
-            }
+            //todo
+//            if (screen != null) {
+//                ScreenContext screenContext = UiControllerUtils.getScreenContext(screen);
+//
+//                WindowManager screens = (WindowManager) screenContext.getScreens();
+//                screens.openWindow(windowInfo, OpenType.DIALOG, screenParams);
+//            } else {
+//                wm.openWindow(windowInfo, OpenType.DIALOG, screenParams);
+//            }
         } else {
             byte[] byteArr = document.getContent();
             com.haulmont.yarg.structure.ReportOutputType finalOutputType =
                     (outputType != null) ? outputType.getOutputType() : document.getReportOutputType();
 
-            ExportFormat exportFormat = ReportPrintHelper.getExportFormat(finalOutputType);
+            DownloadFormat exportFormat = ReportPrintHelper.getExportFormat(finalOutputType);
             String documentName = isNotBlank(outputFileName) ? outputFileName : document.getDocumentName();
 
-            exportDisplay.show(new ByteArrayDataProvider(byteArr, uiProperties.getSaveExportedByteArrayDataThresholdBytes(), coreProperties.getTempDir()), documentName, exportFormat);
+            downloader.download(new ByteArrayDataProvider(byteArr, uiProperties.getSaveExportedByteArrayDataThresholdBytes(), coreProperties.getTempDir()), documentName, exportFormat);
         }
     }
 
@@ -485,18 +493,23 @@ public class ReportGuiManager {
      * @param inputValueMetaClass - meta class of report input parameter
      */
     public List<Report> getAvailableReports(@Nullable String screenId, @Nullable BaseUser user, @Nullable MetaClass inputValueMetaClass) {
-        LoadContext<Report> lc = new LoadContext<>(Report.class);
-        lc.setLoadDynamicAttributes(true);
-        lc.setView(new View(Report.class)
-                .addProperty("name")
-                .addProperty("localeNames")
-                .addProperty("description")
-                .addProperty("code")
-                .addProperty("group", metadata.getViewRepository().getView(ReportGroup.class, View.LOCAL)));
-        lc.setQueryString("select r from report$Report r where r.system <> true");
+        MetaClass metaClass = metadata.getClass(Report.class);
+        LoadContext<Report> lc = new LoadContext<>(metaClass);
+        //todo
+        //lc.setLoadDynamicAttributes(true);
+        FetchPlan fetchPlan = fetchPlans.builder(Report.class)
+                .add("name")
+                .add("localeNames")
+                .add("description")
+                .add("code")
+                .add("group", FetchPlan.LOCAL)
+                .build();
+
+        lc.setFetchPlan(fetchPlan);
+        lc.setQueryString("select r from report_Report r where r.system <> true");
         reportSecurityManager.applySecurityPolicies(lc, screenId, user);
         reportSecurityManager.applyPoliciesByEntityParameters(lc, inputValueMetaClass);
-        return dataService.loadList(lc);
+        return dataManager.loadList(lc);
     }
 
     /**
@@ -609,7 +622,7 @@ public class ReportGuiManager {
         ReportOutputDocument reportOutputDocument = reportService.bulkPrint(report, templateCode, outputType, paramsList);
         String documentName = reportOutputDocument.getDocumentName();
 
-        exportDisplay.show(new ByteArrayDataProvider(reportOutputDocument.getContent(), uiProperties.getSaveExportedByteArrayDataThresholdBytes(), coreProperties.getTempDir()), documentName, ExportFormat.ZIP);
+        downloader.download(new ByteArrayDataProvider(reportOutputDocument.getContent(), uiProperties.getSaveExportedByteArrayDataThresholdBytes(), coreProperties.getTempDir()), documentName, DownloadFormat.ZIP);
     }
 
     /**
@@ -686,7 +699,7 @@ public class ReportGuiManager {
                     @Override
                     public void done(ReportOutputDocument result) {
                         String documentName = result.getDocumentName();
-                        exportDisplay.show(new ByteArrayDataProvider(result.getContent(), uiProperties.getSaveExportedByteArrayDataThresholdBytes(), coreProperties.getTempDir()), documentName, ExportFormat.ZIP);
+                        downloader.download(new ByteArrayDataProvider(result.getContent(), uiProperties.getSaveExportedByteArrayDataThresholdBytes(), coreProperties.getTempDir()), documentName, DownloadFormat.ZIP);
                     }
                 };
 
@@ -715,7 +728,7 @@ public class ReportGuiManager {
      */
     public boolean parameterMatchesMetaClass(ReportInputParameter parameter, MetaClass metaClass) {
         if (isNotBlank(parameter.getEntityMetaClass())) {
-            MetaClass parameterMetaClass = metadata.getClassNN(parameter.getEntityMetaClass());
+            MetaClass parameterMetaClass = metadata.getClass(parameter.getEntityMetaClass());
             return (metaClass.equals(parameterMetaClass) || metaClass.getAncestors().contains(parameterMetaClass));
         } else {
             return false;
@@ -726,7 +739,7 @@ public class ReportGuiManager {
      * Defensive copy
      */
     protected Report getReportForPrinting(Report report) {
-        Report copy = metadata.getTools().copy(report);
+        Report copy = metadataTools.copy(report);
         copy.setIsTmp(report.getIsTmp());
         return copy;
     }
@@ -749,7 +762,7 @@ public class ReportGuiManager {
         WindowManager wm = (WindowManager) screenContext.getScreens();
         WindowInfo windowInfo = windowConfig.getWindowInfo("report$inputParameters");
 
-        wm.openWindow(windowInfo, OpenType.DIALOG, params);
+        wm.openWindow(windowInfo, WindowManager.OpenType.DIALOG, params);
     }
 
     protected void openReportParamsDialog(FrameOwner screen, Report report, @Nullable Map<String, Object> parameters,

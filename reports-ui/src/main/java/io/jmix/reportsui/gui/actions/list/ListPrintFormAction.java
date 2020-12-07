@@ -17,10 +17,8 @@
 package io.jmix.reportsui.gui.actions.list;
 
 import com.google.common.base.Preconditions;
-import com.haulmont.cuba.core.global.LoadContext;
-import com.haulmont.cuba.core.global.Messages;
-import com.haulmont.cuba.gui.data.CollectionDatasource;
-import com.haulmont.cuba.gui.data.Datasource;
+import io.jmix.core.LoadContext;
+import io.jmix.core.Messages;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.reports.app.ParameterPrototype;
 import io.jmix.reportsui.gui.ReportGuiManager;
@@ -36,6 +34,7 @@ import io.jmix.ui.component.ComponentsHelper;
 import io.jmix.ui.component.ListComponent;
 import io.jmix.ui.component.Window;
 import io.jmix.ui.component.data.BindingState;
+import io.jmix.ui.component.data.DataUnit;
 import io.jmix.ui.component.data.meta.ContainerDataUnit;
 import io.jmix.ui.icon.Icons;
 import io.jmix.ui.icon.JmixIcon;
@@ -53,7 +52,7 @@ import java.util.Set;
  * <p>
  * Should be defined for a list component ({@code Table}, {@code DataGrid}, etc.) in a screen XML descriptor.
  * <p>
- * The action only selects reports having an external parameter of the {@code JmixEntity} or the List of entities type
+ * The action only selects reports having an external parameter of the {@code Entity} or the List of entities type
  * and where the parameter entity type matches the entity type displayed by the list component.
  * If only one report is available as a result of selection, it is invoked immediately.
  * If several reports are available, their list is offered to the user for selection.
@@ -169,28 +168,32 @@ public class ListPrintFormAction extends AbstractPrintFormAction implements Acti
     }
 
     protected boolean isDataAvailable() {
-        if (target.getItems() instanceof ContainerDataUnit) {
+        //todo
+//        if (target.getItems() instanceof ContainerDataUnit) {
             ContainerDataUnit unit = (ContainerDataUnit) target.getItems();
             CollectionContainer container = unit.getContainer();
             return container instanceof HasLoader && unit.getState() == BindingState.ACTIVE && !container.getItems().isEmpty();
-        } else {
-            CollectionDatasource ds = ((com.haulmont.cuba.gui.components.ListComponent) target).getDatasource();
-            if (ds != null)
-                return ds.getState() == Datasource.State.VALID && ds.size() > 0;
-        }
-        return false;
+//        } else {
+//            CollectionDatasource ds = ((com.haulmont.cuba.gui.components.ListComponent) target).getDatasource();
+//            if (ds != null)
+//                return ds.getState() == Datasource.State.VALID && ds.size() > 0;
+//        }
+//        return false;
     }
 
     protected void printSelected(Set selected) {
         MetaClass metaClass;
-        if (target.getItems() instanceof ContainerDataUnit) {
+        //todo
+//        if (target.getItems() instanceof ContainerDataUnit) {
             ContainerDataUnit unit = (ContainerDataUnit) target.getItems();
             InstanceContainer container = unit.getContainer();
             metaClass = container.getEntityMetaClass();
-        } else {
-            CollectionDatasource ds = ((com.haulmont.cuba.gui.components.ListComponent) target).getDatasource();
+//        }
+
+        /*else {
+            CollectionDatasource ds = ((io.jmix.ui.component.ListComponent) target).getDatasource();
             metaClass = ds.getMetaClass();
-        }
+        }*/
         Window window = ComponentsHelper.getWindowNN(target);
         openRunReportScreen(window.getFrameOwner(), selected, metaClass);
     }
@@ -199,7 +202,8 @@ public class ListPrintFormAction extends AbstractPrintFormAction implements Acti
         MetaClass metaClass;
         LoadContext loadContext;
 
-        if (target.getItems() instanceof ContainerDataUnit) {
+        //todo
+//        if (target.getItems() instanceof ContainerDataUnit) {
             ContainerDataUnit unit = (ContainerDataUnit) target.getItems();
             CollectionContainer container = unit.getContainer();
             if (container instanceof CollectionPropertyContainer) {
@@ -211,18 +215,18 @@ public class ListPrintFormAction extends AbstractPrintFormAction implements Acti
             CollectionLoader loader = (CollectionLoader) ((HasLoader) unit.getContainer()).getLoader();
             metaClass = container.getEntityMetaClass();
             loadContext = (LoadContext) loader.createLoadContext();
-        } else {
-            CollectionDatasource ds = ((com.haulmont.cuba.gui.components.ListComponent) target).getDatasource();
-            metaClass = ds.getMetaClass();
-            loadContext = ds.getCompiledLoadContext();
-        }
+//        } else {
+//            CollectionDatasource ds = ((io.jmix.ui.component.ListComponent) target).getDatasource();
+//            metaClass = ds.getMetaClass();
+//            loadContext = ds.getCompiledLoadContext();
+//        }
 
         ParameterPrototype parameterPrototype = new ParameterPrototype(metaClass.getName());
         parameterPrototype.setMetaClassName(metaClass.getName());
         LoadContext.Query query = loadContext.getQuery();
         parameterPrototype.setQueryString(query.getQueryString());
         parameterPrototype.setQueryParams(query.getParameters());
-        parameterPrototype.setViewName(loadContext.getView().getName());
+        parameterPrototype.setViewName(loadContext.getFetchPlan().getName());
         parameterPrototype.setCondition(query.getCondition());
         parameterPrototype.setSort(query.getSort());
 

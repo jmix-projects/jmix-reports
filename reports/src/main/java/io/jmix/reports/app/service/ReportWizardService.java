@@ -17,7 +17,6 @@ package io.jmix.reports.app.service;
 
 import io.jmix.core.FetchPlan;
 import io.jmix.core.metamodel.model.MetaClass;
-import com.haulmont.cuba.core.global.View;
 import io.jmix.core.metamodel.model.MetaProperty;
 import io.jmix.reports.app.EntityTree;
 import io.jmix.reports.entity.Report;
@@ -35,7 +34,7 @@ public interface ReportWizardService {
 
     Report toReport(ReportData reportData, boolean temporary);
 
-    View createViewByReportRegions(EntityTreeNode entityTreeRootNode, List<ReportRegion> reportRegions);
+    FetchPlan createViewByReportRegions(EntityTreeNode entityTreeRootNode, List<ReportRegion> reportRegions);
 
     ReportRegion createReportRegionByView(EntityTree entityTree, boolean isTabulated, @Nullable FetchPlan view, @Nullable String collectionPropertyName);
 

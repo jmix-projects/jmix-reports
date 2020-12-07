@@ -16,15 +16,17 @@
 
 package io.jmix.reportsui.gui.group.edit;
 
-import com.haulmont.cuba.gui.components.AbstractEditor;
+import io.jmix.ui.screen.StandardEditor;
+import io.jmix.ui.screen.Subscribe;
+import io.jmix.ui.screen.UiController;
+import io.jmix.ui.screen.UiDescriptor;
 
-import java.util.Map;
+@UiController("report_ReportGroup.edit")
+@UiDescriptor("group-edit.xml")
+public class ReportGroupEditor extends StandardEditor {
 
-public class ReportGroupEditor extends AbstractEditor {
-
-    @Override
-    public void init(Map<String, Object> params) {
-        super.init(params);
+    @Subscribe
+    protected void onInit(InitEvent event) {
 //TODO fix dialog params
 //        getDialogOptions()
 //                .setResizable(false)

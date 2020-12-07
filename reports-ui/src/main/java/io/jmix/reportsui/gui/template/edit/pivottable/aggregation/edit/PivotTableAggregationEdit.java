@@ -16,53 +16,66 @@
 
 package io.jmix.reportsui.gui.template.edit.pivottable.aggregation.edit;
 
-import com.haulmont.cuba.gui.components.AbstractEditor;
-import com.haulmont.cuba.gui.components.SourceCodeEditor;
+import io.jmix.core.Messages;
 import io.jmix.reports.entity.pivottable.PivotTableAggregation;
+import io.jmix.ui.Dialogs;
 import io.jmix.ui.WindowParam;
+import io.jmix.ui.component.SourceCodeEditor;
 import io.jmix.ui.component.ValidationErrors;
+import io.jmix.ui.screen.StandardEditor;
+import io.jmix.ui.screen.Subscribe;
+import io.jmix.ui.screen.UiController;
+import io.jmix.ui.screen.UiDescriptor;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collection;
 import java.util.Objects;
 
-public class PivotTableAggregationEdit extends AbstractEditor<PivotTableAggregation> {
+@UiController("report_PivotTableAggregation.edit")
+@UiDescriptor("pivottable-aggregation-edit.xml")
+public class PivotTableAggregationEdit extends StandardEditor<PivotTableAggregation> {
 
     @WindowParam
     protected Collection<PivotTableAggregation> existingItems;
     @Autowired
     protected SourceCodeEditor sourceCodeEditor;
+    @Autowired
+    protected Dialogs dialogs;
+    @Autowired
+    protected Messages messages;
 
-    @Override
-    protected void postInit(){
-        super.postInit();
+    @Subscribe
+    protected void onAfterInit(AfterInitEvent event) {
         sourceCodeEditor.setContextHelpIconClickHandler(e ->
-                showMessageDialog(getMessage("pivotTable.functionHelpCaption"), getMessage("pivotTable.aggregationFunctionHelp"),
-                        MessageType.CONFIRMATION_HTML
-                                .modal(false)
-                                .width(560f)));
+                dialogs.createMessageDialog()
+                        .withCaption(messages.getMessage("pivotTable.functionHelpCaption"))
+                        .withMessage(messages.getMessage("pivotTable.aggregationFunctionHelp"))
+                        .withModal(false)
+                        .withWidth("560px")
+                        .show());
     }
 
-    @Override
-    protected boolean preCommit() {
-        if (super.preCommit()) {
-            PivotTableAggregation aggregation = getItem();
+    @Subscribe
+    protected void onBeforeCommit(BeforeCommitChangesEvent event) {
+        if (event.isCommitPrevented()) {
+            PivotTableAggregation aggregation = getEditedEntity();
             boolean hasMatches = existingItems.stream().
                     anyMatch(e -> !Objects.equals(aggregation, e) &&
                             Objects.equals(aggregation.getCaption(), e.getCaption()));
             if (hasMatches) {
                 ValidationErrors validationErrors = new ValidationErrors();
-                validationErrors.add(getMessage("pivotTableEdit.uniqueAggregationOptionCaption"));
-                showValidationErrors(validationErrors);
-                return false;
+                validationErrors.add(messages.getMessage("pivotTableEdit.uniqueAggregationOptionCaption"));
+                //showValidationErrors(validationErrors);
+                validateScreen();
+                event.preventCommit();
             }
-            return true;
+            event.resume();
         }
-        return false;
+        event.preventCommit();
     }
 
-    @Override
-    public boolean commit() {
-        return true;
-    }
+//    @Override
+//    public boolean commit() {
+//        return true;
+//    }
 }

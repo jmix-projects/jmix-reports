@@ -17,11 +17,12 @@
 package io.jmix.reportsui.gui.report.wizard;
 
 import com.haulmont.cuba.core.global.AppBeans;
-import io.jmix.core.CoreProperties;
-import io.jmix.core.common.util.ParamsMap;
 import com.haulmont.cuba.gui.export.ByteArrayDataProvider;
 import com.haulmont.cuba.gui.export.ExportDisplay;
 import com.haulmont.cuba.gui.export.ExportFormat;
+import io.jmix.core.CoreProperties;
+import io.jmix.core.Messages;
+import io.jmix.core.common.util.ParamsMap;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportOutputType;
 import io.jmix.reports.entity.charts.*;
@@ -29,6 +30,9 @@ import io.jmix.reports.exception.TemplateGenerationException;
 import io.jmix.reportsui.gui.report.run.ShowChartController;
 import io.jmix.reportsui.gui.report.wizard.step.StepFrame;
 import io.jmix.reportsui.gui.template.edit.generator.RandomChartDataGenerator;
+import io.jmix.ui.Dialogs;
+import io.jmix.ui.Fragments;
+import io.jmix.ui.Notifications;
 import io.jmix.ui.UiProperties;
 import io.jmix.ui.action.AbstractAction;
 import io.jmix.ui.action.Action;
@@ -45,6 +49,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+@org.springframework.stereotype.Component("report_SaveStep.fragment")
 public class SaveStepFrame extends StepFrame {
 
     @Autowired
@@ -52,6 +57,18 @@ public class SaveStepFrame extends StepFrame {
 
     @Autowired
     protected CoreProperties coreProperties;
+
+    @Autowired
+    protected Notifications notifications;
+
+    @Autowired
+    protected Dialogs dialogs;
+
+    @Autowired
+    protected Messages messages;
+
+    @Autowired
+    protected Fragments fragments;
 
     public SaveStepFrame(ReportWizardCreator wizard) {
         super(wizard, wizard.getMessage("saveReport"), "saveStep");
@@ -117,7 +134,9 @@ public class SaveStepFrame extends StepFrame {
                         exportDisplay.show(new ByteArrayDataProvider(newTemplate, uiProperties.getSaveExportedByteArrayDataThresholdBytes(), coreProperties.getTempDir()),
                                 wizard.downloadTemplateFile.getCaption(), ExportFormat.getByExtension(wizard.templateFileFormat.getValue().toString().toLowerCase()));
                     } catch (TemplateGenerationException e) {
-                        wizard.showNotification(wizard.getMessage("templateGenerationException"), Frame.NotificationType.WARNING);
+                        notifications.create(Notifications.NotificationType.WARNING)
+                                .withCaption(messages.getMessage("templateGenerationException"))
+                                .show();
                     }
                     if (newTemplate != null) {
                         wizard.lastGeneratedTemplate = newTemplate;
@@ -134,24 +153,22 @@ public class SaveStepFrame extends StepFrame {
                     try {
                         wizard.outputFileName.validate();
                     } catch (ValidationException e) {
-                        wizard.showNotification(wizard.getMessage("validationFail.caption"), e.getMessage(), Frame.NotificationType.TRAY);
+                        notifications.create(Notifications.NotificationType.TRAY)
+                                .withCaption(messages.getMessage("validationFail.caption"))
+                                .withDescription(e.getMessage())
+                                .show();
                         return;
                     }
                     if (wizard.getItem().getReportRegions().isEmpty()) {
-                        wizard.showOptionDialog(
-                                wizard.getMessage("dialogs.Confirmation"),
-                                wizard.getMessage("confirmSaveWithoutRegions"),
-                                Frame.MessageType.CONFIRMATION,
-                                new Action[]{
-                                        new DialogAction(DialogAction.Type.OK) {
-                                            @Override
-                                            public void actionPerform(Component component) {
-                                                convertToReportAndForceCloseWizard();
-                                            }
-                                        },
-                                        new DialogAction(DialogAction.Type.NO, Status.PRIMARY)
-                                });
-
+                        dialogs.createOptionDialog()
+                                .withCaption(messages.getMessage("dialogs.Confirmation"))
+                                .withMessage(messages.getMessage("confirmSaveWithoutRegions"))
+                                .withActions(
+                                        new DialogAction(DialogAction.Type.OK).withHandler(handle ->
+                                                convertToReportAndForceCloseWizard()
+                                        ),
+                                        new DialogAction(DialogAction.Type.NO)
+                                ).show();
                     } else {
                         convertToReportAndForceCloseWizard();
                     }
@@ -159,9 +176,10 @@ public class SaveStepFrame extends StepFrame {
 
                 private void convertToReportAndForceCloseWizard() {
                     Report r = wizard.buildReport(false);
-                    if (r != null) {
-                        wizard.close(Window.COMMIT_ACTION_ID); //true is ok cause it is a save btn
-                    }
+                    //todo
+//                    if (r != null) {
+//                        wizard.close(Window.COMMIT_ACTION_ID); //true is ok cause it is a save btn
+//                    }
                 }
             });
         }
@@ -180,8 +198,9 @@ public class SaveStepFrame extends StepFrame {
                 chartJson = chartToJsonConverter.convertSerialChart((SerialChartDescription) chartDescription, randomChartData);
             }
 
-            wizard.openFrame(wizard.chartPreviewBox, ShowChartController.JSON_CHART_SCREEN_ID,
-                    ParamsMap.of(ShowChartController.CHART_JSON_PARAMETER, chartJson));
+            //todo
+//            wizard.openFrame(wizard.chartPreviewBox, ShowChartController.JSON_CHART_SCREEN_ID,
+//                    ParamsMap.of(ShowChartController.CHART_JSON_PARAMETER, chartJson));
         }
     }
 

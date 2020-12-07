@@ -72,7 +72,7 @@
 
 <!--        <collectionDatasource id="groupsDs" class="com.haulmont.reports.entity.ReportGroup" view="_local">-->
 <!--            <query>-->
-<!--                <![CDATA[ select rg from report$ReportGroup rg order by rg.createTs asc ]]>-->
+<!--                <![CDATA[ select rg from report_ReportGroup rg order by rg.createTs asc ]]>-->
 <!--            </query>-->
 <!--        </collectionDatasource>-->
 

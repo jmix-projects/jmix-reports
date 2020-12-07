@@ -20,7 +20,7 @@ import com.haulmont.cuba.core.global.AppBeans;
 import com.haulmont.cuba.core.global.CommitContext;
 import com.haulmont.cuba.gui.data.impl.GenericDataSupplier;
 import io.jmix.core.EntitySet;
-import io.jmix.core.JmixEntity;
+import io.jmix.core.Entity;
 import io.jmix.reports.app.service.ReportService;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportTemplate;
@@ -29,23 +29,23 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class ReportDataSupplier extends GenericDataSupplier {
-    @Override
-    public EntitySet commit(CommitContext context) {
-        Set<JmixEntity> result = new HashSet<>();
-        ReportService reportService = AppBeans.get(ReportService.NAME, ReportService.class);
-        Report reportToStore = null;
-        for (JmixEntity entity : context.getCommitInstances()) {
-            if (entity instanceof Report) {
-                reportToStore = (Report) entity;
-            } else if (entity instanceof ReportTemplate) {
-                reportToStore = ((ReportTemplate) entity).getReport();
-            }
-        }
-
-        if (reportToStore != null) {
-            result.add(reportService.storeReportEntity(reportToStore));
-        }
-
-        return EntitySet.of(result);
-    }
+//    @Override
+//    public EntitySet commit(CommitContext context) {
+//        Set<Entity> result = new HashSet<>();
+//        ReportService reportService = AppBeans.get(ReportService.NAME, ReportService.class);
+//        Report reportToStore = null;
+//        for (Entity entity : context.getCommitInstances()) {
+//            if (entity instanceof Report) {
+//                reportToStore = (Report) entity;
+//            } else if (entity instanceof ReportTemplate) {
+//                reportToStore = ((ReportTemplate) entity).getReport();
+//            }
+//        }
+//
+//        if (reportToStore != null) {
+//            result.add(reportService.storeReportEntity(reportToStore));
+//        }
+//
+//        return EntitySet.of(result);
+//    }
 }

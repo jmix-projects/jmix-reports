@@ -23,7 +23,7 @@
             <loader id="reportsDl"/>
         </collection>
         <collection id="reportGroupsDc"
-                    class="com.haulmont.reports.entity.ReportGroup"
+                    class="io.jmix.reports.entity.ReportGroup"
                     fetchPlan="_local">
             <loader id="reportGroupsDl">
                 <query>
