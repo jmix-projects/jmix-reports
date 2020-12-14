@@ -16,8 +16,8 @@
 
 package io.jmix.reportsui.gui.definition.edit;
 
-import com.haulmont.cuba.gui.data.Datasource;
 import io.jmix.core.entity.EntityValues;
+import io.jmix.ui.model.InstanceContainer;
 
 import java.util.function.Consumer;
 
@@ -25,14 +25,14 @@ import java.util.function.Consumer;
  *
  */
 class LinkedWithPropertyNewOptionHandler implements Consumer<String> {
-    protected Datasource datasource;
+    protected InstanceContainer datasource;
     protected String fieldName;
 
-    public static LinkedWithPropertyNewOptionHandler handler(Datasource datasource, String fieldName) {
+    public static LinkedWithPropertyNewOptionHandler handler(InstanceContainer datasource, String fieldName) {
         return new LinkedWithPropertyNewOptionHandler(datasource, fieldName);
     }
 
-    public LinkedWithPropertyNewOptionHandler(Datasource datasource, String fieldName) {
+    public LinkedWithPropertyNewOptionHandler(InstanceContainer datasource, String fieldName) {
         this.datasource = datasource;
         this.fieldName = fieldName;
     }

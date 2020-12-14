@@ -9,7 +9,7 @@ import com.haulmont.yarg.formatters.factory.inline.DefaultInlinersProvider;
 
 public class JmixInlinersProvider extends DefaultInlinersProvider {
 
-    public JmixInlinersProvider(){
+    public JmixInlinersProvider() {
         super();
         addInliner(new FileStorageContentInliner());
     }

@@ -16,6 +16,8 @@
 
 package io.jmix.reportsui.gui.report.run;
 
+import com.haulmont.yarg.reporting.ReportOutputDocument;
+import io.jmix.core.Entity;
 import io.jmix.core.MessageTools;
 import io.jmix.core.Metadata;
 import io.jmix.core.MetadataTools;
@@ -25,25 +27,23 @@ import io.jmix.core.impl.StandardSerialization;
 import io.jmix.core.metamodel.datatype.impl.EnumClass;
 import io.jmix.core.metamodel.model.MetaProperty;
 import io.jmix.core.metamodel.model.MetaPropertyPath;
-import io.jmix.ui.UiComponents;
-import io.jmix.ui.WindowParam;
 import io.jmix.reports.entity.CubaTableData;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportOutputType;
 import io.jmix.reports.entity.ReportTemplate;
 import io.jmix.reportsui.gui.ReportGuiManager;
-import com.haulmont.yarg.reporting.ReportOutputDocument;
+import io.jmix.ui.Fragments;
+import io.jmix.ui.UiComponents;
+import io.jmix.ui.WindowParam;
 import io.jmix.ui.component.*;
-import io.jmix.ui.component.ButtonsPanel;
-import io.jmix.ui.screen.StandardLookup;
-import io.jmix.ui.screen.Subscribe;
-import io.jmix.ui.screen.UiController;
-import io.jmix.ui.screen.UiDescriptor;
+import io.jmix.ui.component.data.table.ContainerGroupTableItems;
+import io.jmix.ui.model.CollectionContainer;
+import io.jmix.ui.screen.*;
 import io.jmix.ui.theme.ThemeConstants;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
-
 import org.springframework.beans.factory.annotation.Autowired;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -87,6 +87,12 @@ public class ShowReportTable extends StandardLookup {
     @Autowired
     protected StandardSerialization serialization;
 
+    @Autowired
+    protected Fragments fragments;
+
+    @Autowired
+    protected ScreenValidation screenValidation;
+
     @WindowParam(name = REPORT_PARAMETER)
     protected Report report;
     @WindowParam(name = TEMPLATE_CODE_PARAMETER)
@@ -128,8 +134,12 @@ public class ShowReportTable extends StandardLookup {
                     InputParametersFrame.PARAMETERS_PARAMETER, reportParameters
             );
 
-            inputParametersFrame = (InputParametersFrame) openFrame(parametersFrameHolder,
-                    "report_inputParametersFrame", params);
+            inputParametersFrame = (InputParametersFrame) fragments.create(this,
+                    "report_inputParametersFrame",
+                    new MapScreenOptions(params))
+                    .init();
+
+            parametersFrameHolder.add(inputParametersFrame.getFragment());
             reportParamsBox.setVisible(true);
         } else {
             reportParamsBox.setVisible(false);
@@ -139,7 +149,8 @@ public class ShowReportTable extends StandardLookup {
     @Subscribe("printReportBtn")
     public void printReport() {
         if (inputParametersFrame != null && inputParametersFrame.getReport() != null) {
-            if (validateAll()) {
+            ValidationErrors validationErrors = screenValidation.validateUiComponents(getWindow());
+            if (validationErrors.isEmpty()) {
                 Map<String, Object> parameters = inputParametersFrame.collectParameters();
                 Report report = inputParametersFrame.getReport();
                 if (templateCode == null || templateCode.isEmpty())
@@ -147,6 +158,8 @@ public class ShowReportTable extends StandardLookup {
                 ReportOutputDocument reportResult = reportGuiManager.getReportResult(report, parameters, templateCode);
                 CubaTableData dto = (CubaTableData) serialization.deserialize(reportResult.getContent());
                 drawTables(dto);
+            } else {
+                screenValidation.showValidationErrors(this, validationErrors);
             }
         }
     }
@@ -169,7 +182,7 @@ public class ShowReportTable extends StandardLookup {
 
         data.forEach((dataSetName, keyValueEntities) -> {
             if (keyValueEntities != null && !keyValueEntities.isEmpty()) {
-                GroupDatasource dataSource = createDataSource(dataSetName, keyValueEntities, headerMap);
+                CollectionContainer dataSource = createDataSource(dataSetName, keyValueEntities, headerMap);
                 Table table = createTable(dataSetName, dataSource, headerMap);
 
                 GroupBoxLayout groupBox = uiComponents.create(GroupBoxLayout.class);
@@ -183,7 +196,7 @@ public class ShowReportTable extends StandardLookup {
         });
     }
 
-    protected GroupDatasource createDataSource(String dataSetName, List<KeyValueEntity> keyValueEntities, Map<String, Set<CubaTableData.ColumnInfo>> headerMap) {
+    protected CollectionContainer createDataSource(String dataSetName, List<KeyValueEntity> keyValueEntities, Map<String, Set<CubaTableData.ColumnInfo>> headerMap) {
         DsBuilder dsBuilder = DsBuilder.create(getDsContext())
                 .setId(dataSetName + "Ds")
                 .setDataSupplier(getDsContext().getDataSupplier());
@@ -205,14 +218,14 @@ public class ShowReportTable extends StandardLookup {
         return ds;
     }
 
-    protected Table createTable(String dataSetName, GroupDatasource dataSource, Map<String, Set<CubaTableData.ColumnInfo>> headerMap) {
+    protected Table createTable(String dataSetName, CollectionContainer dataSource, Map<String, Set<CubaTableData.ColumnInfo>> headerMap) {
         Table table = uiComponents.create(GroupTable.class);
         table.setId(dataSetName + "Table");
 
         Set<CubaTableData.ColumnInfo> headers = headerMap.get(dataSetName);
 
         createColumns(dataSource, table, headers);
-        table.setDatasource(dataSource);
+        table.setItems(new ContainerGroupTableItems(dataSource));
         table.setWidth("100%");
         table.setMultiSelect(true);
         table.setColumnControlVisible(false);
@@ -231,8 +244,8 @@ public class ShowReportTable extends StandardLookup {
         return table;
     }
 
-    protected void createColumns(GroupDatasource dataSource, Table table, Set<CubaTableData.ColumnInfo> headers) {
-        Collection<MetaPropertyPath> paths = metadataTools.getPropertyPaths(dataSource.getMetaClass());
+    protected void createColumns(CollectionContainer dataSource, Table table, Set<CubaTableData.ColumnInfo> headers) {
+        Collection<MetaPropertyPath> paths = metadataTools.getPropertyPaths(dataSource.getEntityMetaClass());
         for (MetaPropertyPath metaPropertyPath : paths) {
             MetaProperty property = metaPropertyPath.getMetaProperty();
             if (!property.getRange().getCardinality().isMany() && !metadataTools.isSystem(property)) {
@@ -260,13 +273,5 @@ public class ShowReportTable extends StandardLookup {
                 .filter(header -> headerKey.equals(header.getKey()))
                 .findFirst()
                 .orElse(null);
-    }
-
-    @Override
-    public void applySettings(Settings settings) {
-    }
-
-    @Override
-    public void saveSettings() {
     }
 }

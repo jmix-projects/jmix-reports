@@ -16,18 +16,12 @@
 
 package io.jmix.reportsui.gui.report.wizard;
 
-import com.haulmont.cuba.core.global.AppBeans;
-import com.haulmont.cuba.gui.export.ByteArrayDataProvider;
-import com.haulmont.cuba.gui.export.ExportDisplay;
-import com.haulmont.cuba.gui.export.ExportFormat;
 import io.jmix.core.CoreProperties;
 import io.jmix.core.Messages;
-import io.jmix.core.common.util.ParamsMap;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportOutputType;
 import io.jmix.reports.entity.charts.*;
 import io.jmix.reports.exception.TemplateGenerationException;
-import io.jmix.reportsui.gui.report.run.ShowChartController;
 import io.jmix.reportsui.gui.report.wizard.step.StepFrame;
 import io.jmix.reportsui.gui.template.edit.generator.RandomChartDataGenerator;
 import io.jmix.ui.Dialogs;
@@ -35,12 +29,12 @@ import io.jmix.ui.Fragments;
 import io.jmix.ui.Notifications;
 import io.jmix.ui.UiProperties;
 import io.jmix.ui.action.AbstractAction;
-import io.jmix.ui.action.Action;
 import io.jmix.ui.action.DialogAction;
 import io.jmix.ui.component.Component;
-import io.jmix.ui.component.Frame;
 import io.jmix.ui.component.ValidationException;
-import io.jmix.ui.component.Window;
+import io.jmix.ui.download.ByteArrayDataProvider;
+import io.jmix.ui.download.DownloadFormat;
+import io.jmix.ui.download.Downloader;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -69,6 +63,9 @@ public class SaveStepFrame extends StepFrame {
 
     @Autowired
     protected Fragments fragments;
+
+    @Autowired
+    protected Downloader downloader;
 
     public SaveStepFrame(ReportWizardCreator wizard) {
         super(wizard, wizard.getMessage("saveReport"), "saveStep");
@@ -130,9 +127,8 @@ public class SaveStepFrame extends StepFrame {
                     try {
                         wizard.getItem().setName(wizard.reportName.getValue().toString());
                         newTemplate = wizard.reportWizardService.generateTemplate(wizard.getItem(), wizard.templateFileFormat.getValue());
-                        ExportDisplay exportDisplay = AppBeans.get(ExportDisplay.NAME);
-                        exportDisplay.show(new ByteArrayDataProvider(newTemplate, uiProperties.getSaveExportedByteArrayDataThresholdBytes(), coreProperties.getTempDir()),
-                                wizard.downloadTemplateFile.getCaption(), ExportFormat.getByExtension(wizard.templateFileFormat.getValue().toString().toLowerCase()));
+                        downloader.download(new ByteArrayDataProvider(newTemplate, uiProperties.getSaveExportedByteArrayDataThresholdBytes(), coreProperties.getTempDir()),
+                                wizard.downloadTemplateFile.getCaption(), DownloadFormat.getByExtension(wizard.templateFileFormat.getValue().toString().toLowerCase()));
                     } catch (TemplateGenerationException e) {
                         notifications.create(Notifications.NotificationType.WARNING)
                                 .withCaption(messages.getMessage("templateGenerationException"))

@@ -16,9 +16,6 @@
 package io.jmix.reportsui.gui.report.wizard;
 
 import com.google.common.collect.ImmutableMap;
-import com.haulmont.cuba.gui.components.OptionsGroup;
-import com.haulmont.cuba.gui.data.CollectionDatasource;
-import com.haulmont.cuba.gui.data.Datasource;
 import io.jmix.core.*;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.reports.app.EntityTree;
@@ -43,6 +40,9 @@ import io.jmix.ui.action.AbstractAction;
 import io.jmix.ui.action.Action;
 import io.jmix.ui.action.DialogAction;
 import io.jmix.ui.component.*;
+import io.jmix.ui.model.CollectionChangeType;
+import io.jmix.ui.model.CollectionContainer;
+import io.jmix.ui.model.InstanceContainer;
 import io.jmix.ui.screen.Screen;
 import io.jmix.ui.screen.Subscribe;
 import io.jmix.ui.screen.UiController;
@@ -61,11 +61,11 @@ import static io.jmix.ui.component.Window.COMMIT_ACTION_ID;
 public class ReportWizardCreator extends Screen implements MainWizardFrame<Screen> {
 
     @Autowired
-    protected Datasource reportDataDs;
+    protected InstanceContainer<ReportData> reportDataDs;
     @Autowired
-    protected CollectionDatasource<ReportRegion, UUID> reportRegionsDs;
+    protected CollectionContainer<ReportRegion> reportRegionsDs;
     @Autowired
-    protected CollectionDatasource<ReportGroup, UUID> groupsDs;
+    protected CollectionContainer<ReportGroup> groupsDs;
     @Named("fwd")
     protected Button fwdBtn;
     @Named("regionsStep.run")
@@ -86,6 +86,8 @@ public class ReportWizardCreator extends Screen implements MainWizardFrame<Scree
     protected Dialogs dialogs;
     @Autowired
     protected ScreenBuilders screenBuilders;
+    @Autowired
+    protected DataManager dataManager;
 
     @Named("detailsStep.mainFields")
     protected Form mainFields;
@@ -191,8 +193,8 @@ public class ReportWizardCreator extends Screen implements MainWizardFrame<Scree
         tipLabel.setValue(getMessage("enterMainParameters"));
 
         reportRegionsDs.addCollectionChangeListener(e -> {
-            if (e.getOperation() == CollectionDatasource.Operation.ADD) {
-                regionsTable.setSelected((Collection) e.getItems());
+            if (e.getChangeType().equals(CollectionChangeType.ADD_ITEMS)) {
+                regionsTable.setSelected((Collection) e.getChanges());
             }
         });
 
@@ -408,9 +410,9 @@ public class ReportWizardCreator extends Screen implements MainWizardFrame<Scree
             reportData.setOutputFileType(outputFileFormat.getValue());
         }
         reportData.setReportType((ReportData.ReportType) reportTypeRadioButtonGroup.getValue());
-        groupsDs.refresh();
-        if (groupsDs.getItemIds() != null) {
-            UUID id = groupsDs.getItemIds().iterator().next();
+        //groupsDs.refresh();
+        if (!groupsDs.getItems().isEmpty()) {
+            UUID id = groupsDs.getItems().iterator().next().getId();
             reportData.setGroup(groupsDs.getItem(id));
         }
 
@@ -529,6 +531,6 @@ public class ReportWizardCreator extends Screen implements MainWizardFrame<Scree
     }
 
     public ReportData getItem() {
-        return (ReportData) reportDataDs.getItem();
+        return reportDataDs.getItem();
     }
 }

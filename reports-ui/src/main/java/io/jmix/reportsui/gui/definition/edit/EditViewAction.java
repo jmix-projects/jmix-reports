@@ -16,9 +16,9 @@
 
 package io.jmix.reportsui.gui.definition.edit;
 
-import com.haulmont.cuba.core.global.View;
 import io.jmix.core.FetchPlan;
 import io.jmix.core.FetchPlanProperty;
+import io.jmix.core.FetchPlans;
 import io.jmix.core.Messages;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.core.metamodel.model.MetaProperty;
@@ -30,12 +30,6 @@ import io.jmix.ui.Notifications;
 import io.jmix.ui.ScreenBuilders;
 import io.jmix.ui.action.AbstractAction;
 import io.jmix.ui.component.Component;
-import io.jmix.ui.component.Frame;
-import io.jmix.ui.component.Window;
-import io.jmix.ui.screen.CloseAction;
-import io.jmix.ui.screen.OpenMode;
-import io.jmix.ui.screen.Screen;
-import io.jmix.ui.screen.StandardCloseAction;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -53,6 +47,9 @@ public class EditViewAction extends AbstractAction {
 
     @Autowired
     protected Notifications notifications;
+
+    @Autowired
+    protected FetchPlans fetchPlans;
 
     @Autowired
     protected Messages messages;
@@ -131,7 +128,7 @@ public class EditViewAction extends AbstractAction {
             return null;
         }
         MetaClass byAliasMetaClass = bandDefinitionEditor.reportService.findMetaClassByDataSetEntityAlias(dataSetAlias, dataSet.getType(),
-                bandDefinitionEditor.bandDefinitionDs.getItem().getReport().getInputParameters());
+                bandDefinitionEditor.bandDefinitionDc.getItem().getReport().getInputParameters());
 
         //Lets return some value
         if (byAliasMetaClass == null) {
@@ -187,7 +184,7 @@ public class EditViewAction extends AbstractAction {
                         MetaClass metaClass = entityTree.getEntityTreeRootNode().getWrappedMetaClass();
                         MetaProperty metaProperty = metaClass.getProperty(collectionPropertyName);
                         if (metaProperty != null && metaProperty.getDomain() != null && metaProperty.getRange().getCardinality().isMany()) {
-                            view = new View(metaProperty.getDomain().getJavaClass());
+                            view = fetchPlans.builder(metaProperty.getDomain().getJavaClass()).build();
                         } else {
                             notifications.create(Notifications.NotificationType.TRAY)
                                     .withCaption(messages.formatMessage("dataSet.cantFindCollectionProperty",

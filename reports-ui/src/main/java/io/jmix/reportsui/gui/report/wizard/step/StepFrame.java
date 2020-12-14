@@ -16,14 +16,8 @@
 
 package io.jmix.reportsui.gui.report.wizard.step;
 
-import com.haulmont.cuba.core.global.AppBeans;
-import com.haulmont.cuba.core.global.Messages;
-import io.jmix.ui.component.*;
 import io.jmix.reportsui.gui.report.wizard.ReportWizardCreator;
-import io.jmix.ui.component.Component;
-import io.jmix.ui.component.Frame;
-import io.jmix.ui.component.Validatable;
-import io.jmix.ui.component.ValidationException;
+import io.jmix.ui.component.*;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;

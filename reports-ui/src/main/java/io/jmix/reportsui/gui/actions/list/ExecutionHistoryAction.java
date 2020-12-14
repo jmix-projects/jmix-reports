@@ -19,13 +19,12 @@ package io.jmix.reportsui.gui.actions.list;
 import io.jmix.core.Messages;
 import io.jmix.core.common.util.ParamsMap;
 import io.jmix.core.metamodel.model.MetaClass;
-import io.jmix.ui.action.ListAction;
 import io.jmix.reports.entity.Report;
 import io.jmix.reportsui.gui.report.history.ReportExecutionBrowser;
 import io.jmix.reportsui.gui.report.history.ReportExecutionDialog;
-
 import io.jmix.ui.ScreenBuilders;
 import io.jmix.ui.action.ActionType;
+import io.jmix.ui.action.ListAction;
 import io.jmix.ui.component.Component;
 import io.jmix.ui.component.ComponentsHelper;
 import io.jmix.ui.component.data.DataUnit;
@@ -33,6 +32,7 @@ import io.jmix.ui.component.data.meta.EntityDataUnit;
 import io.jmix.ui.meta.StudioAction;
 import io.jmix.ui.screen.*;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import java.util.ArrayList;
 import java.util.Collection;
 

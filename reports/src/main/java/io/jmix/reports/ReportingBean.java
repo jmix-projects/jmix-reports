@@ -16,29 +16,28 @@
 
 package io.jmix.reports;
 
-import io.jmix.core.EntityStates;
-import io.jmix.core.FetchPlan;
-import io.jmix.core.TimeSource;
-import io.jmix.core.metamodel.model.MetaClass;
-import io.jmix.core.DataManager ;
 import com.haulmont.cuba.core.Persistence;
 import com.haulmont.cuba.core.Transaction;
 import com.haulmont.cuba.core.app.FileStorageAPI;
-import io.jmix.core.Entity;
 import com.haulmont.cuba.core.entity.FileDescriptor;
-import com.haulmont.cuba.core.global.*;
-import io.jmix.core.security.EntityOp;
+import com.haulmont.cuba.core.global.FileStorageException;
+import com.haulmont.yarg.formatters.impl.doc.connector.NoFreePortsException;
+import com.haulmont.yarg.reporting.ReportOutputDocument;
+import com.haulmont.yarg.reporting.ReportOutputDocumentImpl;
+import com.haulmont.yarg.reporting.ReportingAPI;
+import com.haulmont.yarg.reporting.RunParams;
+import io.jmix.core.DataManager;
+import io.jmix.core.EntityStates;
+import io.jmix.core.*;
+import io.jmix.core.Metadata;
+import io.jmix.core.metamodel.model.MetaClass;
+import io.jmix.data.PersistenceHints;
 import io.jmix.reports.app.ParameterPrototype;
 import io.jmix.reports.converter.GsonConverter;
 import io.jmix.reports.converter.XStreamConverter;
 import io.jmix.reports.entity.*;
 import io.jmix.reports.exception.*;
 import io.jmix.reports.libintegration.CustomFormatter;
-import com.haulmont.yarg.formatters.impl.doc.connector.NoFreePortsException;
-import com.haulmont.yarg.reporting.ReportOutputDocument;
-import com.haulmont.yarg.reporting.ReportOutputDocumentImpl;
-import com.haulmont.yarg.reporting.ReportingAPI;
-import com.haulmont.yarg.reporting.RunParams;
 import io.jmix.security.model.Role;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Predicate;
@@ -49,10 +48,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionTemplate;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.*;
@@ -80,22 +84,22 @@ public class ReportingBean implements ReportingApi {
     protected ReportImportExportAPI reportImportExport;
     @Autowired
     protected ReportExecutionHistoryRecorder executionHistoryRecorder;
-    @Autowired
-    protected UuidSource uuidSource;
-    @Autowired
-    protected UserSessionSource userSessionSource;
+//    @Autowired
+//    protected UserSessionSource userSessionSource;
     //TODO global config
 //    @Autowired
 //    protected GlobalConfig globalConfig;
     @Autowired
     protected ReportingConfig reportingConfig;
+
     @Autowired
     protected DataManager dataManager;
+
+    @Autowired
+    protected MetadataTools metadataTools;
     //TODO Dynamic attributes manager API
 //    @Autowired
 //    protected DynamicAttributesManagerAPI dynamicAttributesManagerAPI;
-    @Autowired
-    protected ViewRepository viewRepository;
     //TODO executions
 //    @Autowired
 //    protected Executions executions;
@@ -109,8 +113,23 @@ public class ReportingBean implements ReportingApi {
     protected PrototypesLoader prototypesLoader;
 
     @Autowired
+    protected FetchPlanRepository fetchPlanRepository;
+
+    @Autowired
     protected GsonConverter gsonConverter = new GsonConverter();
+
     protected XStreamConverter xStreamConverter = new XStreamConverter();
+
+    @PersistenceContext
+    protected EntityManager em;
+
+    protected TransactionTemplate transaction;
+
+    @Autowired
+    protected void setTransactionManager(PlatformTransactionManager transactionManager) {
+        transaction = new TransactionTemplate(transactionManager);
+        transaction.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+    }
 
     //todo eude try to simplify report save logic
     @Override
@@ -119,7 +138,6 @@ public class ReportingBean implements ReportingApi {
         checkPermission(report);
         Transaction tx = persistence.createTransaction();
         try {
-            EntityManager em = persistence.getEntityManager();
             ReportTemplate defaultTemplate = report.getDefaultTemplate();
             List<ReportTemplate> loadedTemplates = report.getTemplates();
             List<ReportTemplate> savedTemplates = new ArrayList<>();
@@ -128,20 +146,26 @@ public class ReportingBean implements ReportingApi {
             report.setTemplates(null);
 
             if (report.getGroup() != null) {
-                ReportGroup existingGroup = em.find(ReportGroup.class, report.getGroup().getId(), View.MINIMAL);
+                FetchPlan fetchPlan = fetchPlanRepository.getFetchPlan(ReportGroup.class, FetchPlan.BASE);
+                ReportGroup existingGroup = em.find(ReportGroup.class, report.getGroup().getId(),
+                        PersistenceHints.builder().withFetchPlan(fetchPlan).build());
                 if (existingGroup != null) {
                     report.setGroup(existingGroup);
                 } else {
                     em.persist(report.getGroup());
                 }
             }
-            em.setSoftDeletion(false);
+            em.setProperty(PersistenceHints.SOFT_DELETION, false);
+            //em.setSoftDeletion(false);
             Report existingReport;
             List<ReportTemplate> existingTemplates = null;
             try {
-                existingReport = em.find(Report.class, report.getId(), "report.withTemplates");
+                FetchPlan fetchPlan = fetchPlanRepository.getFetchPlan(Report.class, "report.withTemplates");
+                existingReport = em.find(Report.class, report.getId(),
+                        PersistenceHints.builder().withFetchPlan(fetchPlan).build());
+                storeIndexFields(report);
+
                 if (existingReport != null) {
-                    storeIndexFields(report);
                     report.setVersion(existingReport.getVersion());
                     report = em.merge(report);
                     if (existingReport.getTemplates() != null) {
@@ -154,7 +178,6 @@ public class ReportingBean implements ReportingApi {
                     report.setDefaultTemplate(null);
                     report.setTemplates(null);
                 } else {
-                    storeIndexFields(report);
                     report.setVersion(0);
                     report = em.merge(report);
                 }
@@ -175,8 +198,8 @@ public class ReportingBean implements ReportingApi {
                         ReportTemplate existingTemplate = em.find(ReportTemplate.class, loadedTemplate.getId());
                         if (existingTemplate != null) {
                             loadedTemplate.setVersion(existingTemplate.getVersion());
-                            if (PersistenceHelper.isNew(loadedTemplate)) {
-                                PersistenceHelper.makeDetached(loadedTemplate);
+                            if (entityStates.isNew(loadedTemplate)) {
+                                entityStates.makeDetached(loadedTemplate);
                             }
                         } else {
                             loadedTemplate.setVersion(0);
@@ -187,7 +210,7 @@ public class ReportingBean implements ReportingApi {
                     }
                 }
             } finally {
-                em.setSoftDeletion(true);
+                em.setProperty(PersistenceHints.SOFT_DELETION, true);
             }
             em.flush();
 
@@ -206,8 +229,12 @@ public class ReportingBean implements ReportingApi {
             tx.end();
         }
 
-        FetchPlan reportEditView = viewRepository.findView(metadata.getClass(savedReport), "report.edit");
-        return dataManager.reload(savedReport, reportEditView, metadata.getClass(savedReport), true);
+        FetchPlan reportEditView = fetchPlanRepository.getFetchPlan(metadata.getClass(savedReport), "report.edit");
+        return dataManager.load(Id.of(savedReport))
+                .fetchPlan(reportEditView)
+                .one();
+        //TODO Dynamic attributes manager
+        //return dataManager.reload(savedReport, reportEditView, metadata.getClass(savedReport), true);
     }
 
     @Override
@@ -432,12 +459,12 @@ public class ReportingBean implements ReportingApi {
     @Override
     public Report copyReport(Report source) {
         source = reloadEntity(source, REPORT_EDIT_VIEW_NAME);
-        Report copiedReport = metadata.getTools().deepCopy(source);
-        copiedReport.setId(uuidSource.createUuid());
+        Report copiedReport = metadataTools.deepCopy(source);
+        copiedReport.setId(UuidProvider.createUuid());
         copiedReport.setName(generateReportName(source.getName()));
         copiedReport.setCode(null);
         for (ReportTemplate copiedTemplate : copiedReport.getTemplates()) {
-            copiedTemplate.setId(uuidSource.createUuid());
+            copiedTemplate.setId(UuidProvider.createUuid());
         }
 
         storeReportEntity(copiedReport);
@@ -542,14 +569,9 @@ public class ReportingBean implements ReportingApi {
             throw new ReportingException("An error occurred while saving the report to the file storage", e);
         }
 
-        Transaction tx = persistence.createTransaction();
-        try {
-            EntityManager em = persistence.getEntityManager();
+        transaction.executeWithoutResult(status -> {
             em.persist(file);
-            tx.commit();
-        } finally {
-            tx.end();
-        }
+        });
         return file;
     }
 
@@ -588,7 +610,9 @@ public class ReportingBean implements ReportingApi {
         if (entity instanceof Report && ((Report) entity).getIsTmp()) {
             return entity;
         }
-        return dataManager.reload(entity, view);
+        return (T) dataManager.load(entity.getClass())
+                .fetchPlan(view)
+                .one();
     }
 
     @Override
@@ -694,7 +718,9 @@ public class ReportingBean implements ReportingApi {
             return entity;
         }
 
-        return dataManager.reload(entity, viewName);
+        return (T) dataManager.load(entity.getClass())
+                .fetchPlan(viewName)
+                .one();
     }
 
     protected ReportTemplate getDefaultTemplate(Report report) {
@@ -705,7 +731,7 @@ public class ReportingBean implements ReportingApi {
     }
 
     protected void storeIndexFields(Report report) {
-        if (PersistenceHelper.isLoaded(report, "xml")) {
+        if (entityStates.isLoaded(report, "xml")) {
             StringBuilder entityTypes = new StringBuilder(IDX_SEPARATOR);
             if (report.getInputParameters() != null) {
                 for (ReportInputParameter parameter : report.getInputParameters()) {

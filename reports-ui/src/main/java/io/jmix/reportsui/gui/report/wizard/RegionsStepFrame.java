@@ -90,7 +90,7 @@ public class RegionsStepFrame extends StepFrame {
             lookupParams.put("collectionsOnly", Boolean.TRUE);
             lookupParams.put("persistentOnly", ReportType.LIST_OF_ENTITIES_WITH_QUERY == wizard.reportTypeRadioButtonGroup.getValue());
 
-            EntityTreeLookup entityTreeLookup = wizard.screenBuilders.lookup(EntityTreeNode.class, wizard)
+            EntityTreeLookup entityTreeLookup = (EntityTreeLookup) wizard.screenBuilders.lookup(EntityTreeNode.class, wizard)
                     .withScreenId("report_ReportEntityTree.lookup")
                     .withOpenMode(OpenMode.DIALOG)
                     .withOptions(new MapScreenOptions(lookupParams))
@@ -284,7 +284,8 @@ public class RegionsStepFrame extends StepFrame {
                         .withMessage(wizard.formatMessage("deleteRegion", wizard.regionsTable.getSingleSelected().getName()))
                         .withActions(
                                 new DialogAction(DialogAction.Type.YES).withHandler(e -> {
-                                    wizard.reportRegionsDs.removeItem(wizard.regionsTable.getSingleSelected());
+                                    //todo
+                                    //wizard.reportRegionsDs.removeItem(wizard.regionsTable.getSingleSelected());
                                     normalizeRegionPropertiesOrderNum();
                                     wizard.regionsTable.refresh();
                                     wizard.setupButtonsVisibility();
@@ -321,7 +322,7 @@ public class RegionsStepFrame extends StepFrame {
                 editorParams.put("scalarOnly", Boolean.TRUE);
                 editorParams.put("persistentOnly", ReportType.LIST_OF_ENTITIES_WITH_QUERY == wizard.reportTypeRadioButtonGroup.getValue());
 
-                RegionEditor regionEditor = wizard.screenBuilders.editor(ReportRegion.class, wizard)
+                RegionEditor regionEditor = (RegionEditor) wizard.screenBuilders.editor(ReportRegion.class, wizard)
                         .withScreenId("report_Region.edit")
                         .editEntity(wizard.regionsTable.getSingleSelected())
                         .withContainer(wizard.reportRegionsDs)

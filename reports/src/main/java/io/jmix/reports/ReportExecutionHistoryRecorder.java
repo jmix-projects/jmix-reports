@@ -5,9 +5,9 @@
 
 package io.jmix.reports;
 
+import com.haulmont.yarg.reporting.ReportOutputDocument;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportExecution;
-import com.haulmont.yarg.reporting.ReportOutputDocument;
 
 import java.util.Map;
 

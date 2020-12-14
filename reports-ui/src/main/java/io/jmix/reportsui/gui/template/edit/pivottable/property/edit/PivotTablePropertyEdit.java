@@ -20,10 +20,10 @@ import io.jmix.core.Messages;
 import io.jmix.ui.Dialogs;
 import io.jmix.ui.component.Form;
 import io.jmix.ui.component.SourceCodeEditor;
-import com.haulmont.cuba.gui.data.Datasource;
 import io.jmix.reports.entity.pivottable.PivotTableProperty;
 import io.jmix.reports.entity.pivottable.PivotTablePropertyType;
 
+import io.jmix.ui.model.InstanceContainer;
 import io.jmix.ui.screen.StandardEditor;
 import io.jmix.ui.screen.Subscribe;
 import io.jmix.ui.screen.UiController;
@@ -38,7 +38,7 @@ public class PivotTablePropertyEdit extends StandardEditor<PivotTableProperty> {
     @Autowired
     protected Form editGroup;
     @Autowired
-    protected Datasource<PivotTableProperty> propertyDs;
+    protected InstanceContainer<PivotTableProperty> propertyDc;
     @Autowired
     protected SourceCodeEditor sourceCodeEditor;
     @Autowired
@@ -49,7 +49,7 @@ public class PivotTablePropertyEdit extends StandardEditor<PivotTableProperty> {
     @Subscribe
     protected void onAfterInit(AfterInitEvent event) {
         initFunctionField();
-        propertyDs.addItemPropertyChangeListener(e -> {
+        propertyDc.addItemPropertyChangeListener(e -> {
             if ("type".equals(e.getProperty())) {
                 initFunctionField();
             }
@@ -68,9 +68,4 @@ public class PivotTablePropertyEdit extends StandardEditor<PivotTableProperty> {
         editGroup.getComponent("function")
                 .setVisible(property.getType() == PivotTablePropertyType.DERIVED);
     }
-
-//    @Override
-//    public boolean commit() {
-//        return true;
-//    }
 }

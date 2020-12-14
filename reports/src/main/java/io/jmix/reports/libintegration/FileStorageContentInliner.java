@@ -18,11 +18,12 @@ package io.jmix.reports.libintegration;
 
 import com.haulmont.cuba.core.app.FileStorageAPI;
 import com.haulmont.cuba.core.entity.FileDescriptor;
-import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.core.global.FileStorageException;
-import com.haulmont.cuba.core.global.LoadContext;
 import com.haulmont.yarg.exception.ReportFormattingException;
 import com.haulmont.yarg.formatters.impl.inline.AbstractInliner;
+import io.jmix.core.DataManager;
+import io.jmix.core.LoadContext;
+import io.jmix.core.Metadata;
 import io.jmix.core.UuidProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -32,6 +33,9 @@ import java.util.regex.Pattern;
 @Component("report_FileStorageContentInliner")
 public class FileStorageContentInliner extends AbstractInliner {
     private final static String REGULAR_EXPRESSION = "\\$\\{imageFileId:([0-9]+?)x([0-9]+?)\\}";
+
+    @Autowired
+    protected Metadata metadata;
 
     @Autowired
     protected DataManager dataManager;
@@ -53,9 +57,9 @@ public class FileStorageContentInliner extends AbstractInliner {
         try {
             FileDescriptor file;
             if (paramValue instanceof FileDescriptor) {
-                file = dataManager.load(new LoadContext<>(FileDescriptor.class).setId(((FileDescriptor) paramValue).getId()));
+                file = dataManager.load(new LoadContext(metadata.getClass(FileDescriptor.class)).setId(((FileDescriptor) paramValue).getId()));
             } else {
-                file = dataManager.load(new LoadContext<>(FileDescriptor.class).setId(UuidProvider.fromString(paramValue.toString())));
+                file = dataManager.load(new LoadContext(metadata.getClass(FileDescriptor.class)).setId(UuidProvider.fromString(paramValue.toString())));
             }
             byte[] bytes = fileStorageAPI.loadFile(file);
             return bytes;

@@ -21,7 +21,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.haulmont.cuba.core.global.Messages;
+import io.jmix.core.Messages;
 import io.jmix.ui.component.ValidationException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -38,7 +38,7 @@ public class JsonConfigValidator implements Consumer<String> {
     public static final String NAME = "cuba_JsonConfigValidator";
 
     protected static final Gson gson;
-    
+
     static {
         gson = new GsonBuilder()
                 .setPrettyPrinting()

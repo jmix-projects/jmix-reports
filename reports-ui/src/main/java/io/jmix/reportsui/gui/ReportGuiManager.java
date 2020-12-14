@@ -15,13 +15,12 @@
  */
 package io.jmix.reportsui.gui;
 
-import com.haulmont.cuba.gui.WindowManager;
 import com.haulmont.cuba.gui.backgroundwork.BackgroundWorkWindow;
 import com.haulmont.yarg.reporting.ReportOutputDocument;
 import io.jmix.core.*;
 import io.jmix.core.common.util.ParamsMap;
-import io.jmix.core.entity.BaseUser;
 import io.jmix.core.metamodel.model.MetaClass;
+import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.reports.ReportPrintHelper;
 import io.jmix.reports.ReportSecurityManager;
 import io.jmix.reports.app.ParameterPrototype;
@@ -30,13 +29,11 @@ import io.jmix.reports.entity.*;
 import io.jmix.reports.exception.FailedToConnectToOpenOfficeException;
 import io.jmix.reports.exception.NoOpenOfficeFreePortsException;
 import io.jmix.reports.exception.ReportingException;
-import io.jmix.reportsui.gui.report.run.InputParametersFrame;
 import io.jmix.reportsui.gui.report.run.ShowChartController;
 import io.jmix.reportsui.gui.report.run.ShowPivotTableController;
 import io.jmix.reportsui.gui.report.run.ShowReportTable;
 import io.jmix.ui.*;
 import io.jmix.ui.component.ComponentsHelper;
-import io.jmix.ui.component.Fragment;
 import io.jmix.ui.component.Window;
 import io.jmix.ui.download.ByteArrayDataProvider;
 import io.jmix.ui.download.DownloadFormat;
@@ -48,6 +45,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
@@ -75,19 +73,10 @@ public class ReportGuiManager {
     protected Metadata metadata;
 
     @Autowired
-    protected Configuration configuration;
-
-    @Autowired
-    protected WindowManagerProvider windowManagerProvider;
-
-    @Autowired
     protected WindowConfig windowConfig;
 
     @Autowired
     protected ReportSecurityManager reportSecurityManager;
-
-    @Autowired
-    protected UserSessionSource userSessionSource;
 
     @Autowired
     protected MetadataTools metadataTools;
@@ -115,6 +104,12 @@ public class ReportGuiManager {
 
     @Autowired
     protected Fragments fragments;
+
+    @Autowired
+    protected Screens screens;
+
+    @Autowired
+    protected CurrentAuthentication currentAuthentication;
 
     /**
      * Open input parameters dialog if report has parameters otherwise print report
@@ -324,8 +319,6 @@ public class ReportGuiManager {
                                     @Nullable String templateCode, @Nullable String outputFileName,
                                     @Nullable ReportOutputType outputType, @Nullable FrameOwner screen) {
 
-        WindowManager wm = windowManagerProvider.get();
-
         if (document.getReportOutputType().getId().equals(CubaReportOutputType.chart.getId())) {
             Map<String, Object> screenParams = new HashMap<>();
             screenParams.put(ShowChartController.CHART_JSON_PARAMETER, new String(document.getContent(), StandardCharsets.UTF_8));
@@ -333,17 +326,8 @@ public class ReportGuiManager {
             screenParams.put(ShowChartController.TEMPLATE_CODE_PARAMETER, templateCode);
             screenParams.put(ShowChartController.PARAMS_PARAMETER, params);
 
-            WindowInfo windowInfo = windowConfig.getWindowInfo("report_showChart");
-
-            //todo
-//            if (screen != null) {
-//                ScreenContext screenContext = UiControllerUtils.getScreenContext(screen);
-//
-//                WindowManager screens = (WindowManager) screenContext.getScreens();
-//                screens.openWindow(windowInfo, OpenType.DIALOG, screenParams);
-//            } else {
-//                wm.openWindow(windowInfo, OpenType.DIALOG, screenParams);
-//            }
+            Screen chartScreen = screens.create("report_showChart", OpenMode.DIALOG, new MapScreenOptions(screenParams));
+            chartScreen.show();
         } else if (document.getReportOutputType().getId().equals(CubaReportOutputType.pivot.getId())) {
             Map<String, Object> screenParams = ParamsMap.of(
                     ShowPivotTableController.PIVOT_TABLE_DATA_PARAMETER, document.getContent(),
@@ -351,34 +335,17 @@ public class ReportGuiManager {
                     ShowPivotTableController.TEMPLATE_CODE_PARAMETER, templateCode,
                     ShowPivotTableController.PARAMS_PARAMETER, params);
 
-            WindowInfo windowInfo = windowConfig.getWindowInfo("report_showPivotTable");
-            //todo
-//            if (screen != null) {
-//                ScreenContext screenContext = UiControllerUtils.getScreenContext(screen);
-//
-//                WindowManager screens = (WindowManager) screenContext.getScreens();
-//                screens.openWindow(windowInfo, OpenType.DIALOG, screenParams);
-//            } else {
-//                wm.openWindow(windowInfo, OpenType.DIALOG, screenParams);
-//            }
+            Screen pivotTableScreen = screens.create("report_showPivotTable", OpenMode.DIALOG, new MapScreenOptions(screenParams));
+            pivotTableScreen.show();
         } else if (document.getReportOutputType().getId().equals(CubaReportOutputType.table.getId())) {
-            Map<String, Object> screenParams = new HashMap<>();
-            screenParams.put(ShowReportTable.TABLE_DATA_PARAMETER, document.getContent());
-            screenParams.put(ShowReportTable.REPORT_PARAMETER, document.getReport());
-            screenParams.put(ShowReportTable.TEMPLATE_CODE_PARAMETER, templateCode);
-            screenParams.put(ShowReportTable.PARAMS_PARAMETER, params);
+            Map<String, Object> screenParams = ParamsMap.of(
+                    ShowReportTable.TABLE_DATA_PARAMETER, document.getContent(),
+                    ShowReportTable.REPORT_PARAMETER, document.getReport(),
+                    ShowReportTable.TEMPLATE_CODE_PARAMETER, templateCode,
+                    ShowReportTable.PARAMS_PARAMETER, params);
 
-            WindowInfo windowInfo = windowConfig.getWindowInfo("report_showReportTable");
-
-            //todo
-//            if (screen != null) {
-//                ScreenContext screenContext = UiControllerUtils.getScreenContext(screen);
-//
-//                WindowManager screens = (WindowManager) screenContext.getScreens();
-//                screens.openWindow(windowInfo, OpenType.DIALOG, screenParams);
-//            } else {
-//                wm.openWindow(windowInfo, OpenType.DIALOG, screenParams);
-//            }
+            Screen reportTable = screens.create("report_showReportTable", OpenMode.DIALOG, new MapScreenOptions(screenParams));
+            reportTable.show();
         } else {
             byte[] byteArr = document.getContent();
             com.haulmont.yarg.structure.ReportOutputType finalOutputType =
@@ -420,7 +387,7 @@ public class ReportGuiManager {
         Report targetReport = getReportForPrinting(report);
 
         long timeout = reportingClientConfig.getBackgroundReportProcessingTimeoutMs();
-        UUID userSessionId = userSessionSource.getUserSession().getId();
+        UUID userSessionId = currentAuthentication.getUser().getId();
 
         Screen hostScreen = UiControllerUtils.getScreen(screen);
 
@@ -492,7 +459,7 @@ public class ReportGuiManager {
      * @param user                - caller user
      * @param inputValueMetaClass - meta class of report input parameter
      */
-    public List<Report> getAvailableReports(@Nullable String screenId, @Nullable BaseUser user, @Nullable MetaClass inputValueMetaClass) {
+    public List<Report> getAvailableReports(@Nullable String screenId, @Nullable UserDetails user, @Nullable MetaClass inputValueMetaClass) {
         MetaClass metaClass = metadata.getClass(Report.class);
         LoadContext<Report> lc = new LoadContext<>(metaClass);
         //todo
@@ -756,13 +723,8 @@ public class ReportGuiManager {
                 OUTPUT_FILE_NAME_PARAMETER, outputFileName,
                 BULK_PRINT, bulkPrint
         );
-
-        ScreenContext screenContext = UiControllerUtils.getScreenContext(screen);
-
-        WindowManager wm = (WindowManager) screenContext.getScreens();
-        WindowInfo windowInfo = windowConfig.getWindowInfo("report$inputParameters");
-
-        wm.openWindow(windowInfo, WindowManager.OpenType.DIALOG, params);
+        screens.create("report_inputParameters", OpenMode.DIALOG, new MapScreenOptions(params))
+                .show();
     }
 
     protected void openReportParamsDialog(FrameOwner screen, Report report, @Nullable Map<String, Object> parameters,

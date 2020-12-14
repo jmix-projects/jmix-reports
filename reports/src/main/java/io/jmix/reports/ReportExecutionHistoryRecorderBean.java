@@ -7,15 +7,13 @@ package io.jmix.reports;
 
 import com.google.common.collect.Sets;
 import com.haulmont.cuba.core.Persistence;
-import com.haulmont.cuba.core.app.FileStorageAPI;
 import com.haulmont.cuba.core.entity.FileDescriptor;
-import com.haulmont.cuba.core.entity.contracts.Id;
-import com.haulmont.cuba.core.global.*;
 import com.haulmont.yarg.reporting.ReportOutputDocument;
 import com.haulmont.yarg.structure.ReportOutputType;
-import io.jmix.core.Entity;
-import io.jmix.core.TimeSource;
+import io.jmix.core.*;
 import io.jmix.core.security.CurrentAuthentication;
+import io.jmix.fsfilestorage.FileSystemFileStorage;
+import io.jmix.localfs.LocalFileStorage;
 import io.jmix.reports.entity.CubaReportOutputType;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportExecution;
@@ -26,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -49,7 +48,9 @@ public class ReportExecutionHistoryRecorderBean implements ReportExecutionHistor
     @Autowired
     protected Persistence persistence;
     @Autowired
-    protected FileStorageAPI fileStorageAPI;
+    protected LocalFileStorage localFileStorage;
+    @Autowired
+    protected EntityStates entityStates;
 
     @Override
     public ReportExecution startExecution(Report report, Map<String, Object> params) {
@@ -65,7 +66,7 @@ public class ReportExecutionHistoryRecorderBean implements ReportExecutionHistor
         setParametersString(execution, params);
         handleNewReportEntity(execution);
 
-        execution = dataManager.commit(execution);
+        execution = dataManager.save(execution);
         return execution;
     }
 
@@ -82,7 +83,7 @@ public class ReportExecutionHistoryRecorderBean implements ReportExecutionHistor
                     log.error("Failed to save output document", e);
                 }
             }
-            dataManager.commit(execution);
+            dataManager.save(execution);
         });
     }
 
@@ -91,7 +92,7 @@ public class ReportExecutionHistoryRecorderBean implements ReportExecutionHistor
         handleSessionExpired(() -> {
             execution.setCancelled(true);
             execution.setFinishTime(timeSource.currentTimestamp());
-            dataManager.commit(execution);
+            dataManager.save(execution);
         });
     }
 
@@ -102,7 +103,7 @@ public class ReportExecutionHistoryRecorderBean implements ReportExecutionHistor
             execution.setFinishTime(timeSource.currentTimestamp());
             execution.setErrorMessage(e.getMessage());
 
-            dataManager.commit(execution);
+            dataManager.save(execution);
         });
     }
 
@@ -125,9 +126,9 @@ public class ReportExecutionHistoryRecorderBean implements ReportExecutionHistor
         Report report = entity.getReport();
 
         // handle case when user runs report that isn't saved yet from Report Editor
-        if (PersistenceHelper.isNew(report)) {
+        if (entityStates.isNew(report)) {
             Report reloaded = dataManager.load(Id.of(report))
-                    .view(View.MINIMAL)
+                    .fetchPlan(FetchPlan.MINIMAL)
                     .optional()
                     .orElse(null);
             entity.setReport(reloaded);
@@ -153,8 +154,10 @@ public class ReportExecutionHistoryRecorderBean implements ReportExecutionHistor
         file.setExtension(ext);
         file.setSize((long) document.getContent().length);
 
-        fileStorageAPI.saveFile(file, document.getContent());
-        file = dataManager.commit(file);
+        URI uri = localFileStorage.createReference(document.getDocumentName());
+
+        localFileStorage.saveStream(uri, document.getContent());
+        file = dataManager.save(file);
         return file;
     }
 
@@ -228,7 +231,7 @@ public class ReportExecutionHistoryRecorderBean implements ReportExecutionHistor
 
             if (file != null) {
                 try {
-                    fileStorageAPI.removeFile(file);
+                    localFileStorage.removeFile(file);
                 } catch (FileStorageException e) {
                     log.error("Failed to remove document from storage " + file, e);
                 }

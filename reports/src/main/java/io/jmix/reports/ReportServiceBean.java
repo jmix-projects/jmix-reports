@@ -15,16 +15,16 @@
  */
 package io.jmix.reports;
 
-import io.jmix.core.metamodel.model.MetaClass;
 import com.haulmont.cuba.core.entity.FileDescriptor;
+import com.haulmont.yarg.reporting.ReportOutputDocument;
+import com.haulmont.yarg.util.converter.ObjectToStringConverter;
+import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.reports.app.ParameterPrototype;
 import io.jmix.reports.app.service.ReportService;
 import io.jmix.reports.entity.*;
-import com.haulmont.yarg.reporting.ReportOutputDocument;
-import com.haulmont.yarg.util.converter.ObjectToStringConverter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import java.util.*;
 
 @Service(ReportService.NAME)

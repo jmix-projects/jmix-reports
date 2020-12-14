@@ -21,7 +21,6 @@ import com.google.common.collect.ImmutableMap;
 import com.haulmont.chile.core.datatypes.DatatypeRegistry;
 import com.haulmont.cuba.core.global.Scripting;
 import com.haulmont.cuba.gui.WindowParams;
-import com.haulmont.cuba.gui.components.PickerField;
 import io.jmix.core.*;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.reports.app.service.ReportService;
@@ -33,7 +32,6 @@ import io.jmix.ui.UiComponents;
 import io.jmix.ui.action.entitypicker.LookupAction;
 import io.jmix.ui.component.*;
 import io.jmix.ui.component.data.options.ContainerOptions;
-import io.jmix.ui.component.validators.DoubleValidator;
 import io.jmix.ui.model.CollectionContainer;
 import io.jmix.ui.model.CollectionLoader;
 import io.jmix.ui.model.DataComponents;
@@ -266,9 +264,7 @@ public class ParameterFieldCreator {
             }
             field.setMetaClass(entityMetaClass);
 
-            LookupAction lookupAction = (LookupAction) actions.create(LookupAction.ID);
-
-            LookupAction pickerLookupAction = lookupAction;
+            LookupAction pickerLookupAction = (LookupAction) actions.create(LookupAction.ID);
             field.addAction(pickerLookupAction);
             //field.addClearAction();
 

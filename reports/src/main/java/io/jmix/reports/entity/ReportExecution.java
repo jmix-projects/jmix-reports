@@ -5,25 +5,34 @@
 
 package io.jmix.reports.entity;
 
+import com.haulmont.cuba.core.entity.FileDescriptor;
+import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.metamodel.annotation.DependsOnProperties;
 import io.jmix.core.metamodel.annotation.JmixProperty;
-import com.haulmont.cuba.core.entity.BaseUuidEntity;
-import com.haulmont.cuba.core.entity.Creatable;
-import com.haulmont.cuba.core.entity.FileDescriptor;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.*;
 import java.util.Date;
+import java.util.UUID;
 
 @Entity(name = "report_ReportExecution")
 @Table(name = "REPORT_EXECUTION")
-public class ReportExecution extends BaseUuidEntity implements Creatable {
+public class ReportExecution {
     private static final long serialVersionUID = -1714474379895234441L;
 
+    @Id
+    @Column(name = "ID")
+    @JmixGeneratedValue
+    protected UUID id;
+
     @Column(name = "CREATE_TS")
+    @CreatedDate
     private Date createTs;
 
     @Column(name = "CREATED_BY", length = 50)
+    @CreatedBy
     private String createdBy;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -78,22 +87,26 @@ public class ReportExecution extends BaseUuidEntity implements Creatable {
         cancelled = false;
     }
 
-    @Override
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
     public Date getCreateTs() {
         return createTs;
     }
 
-    @Override
     public void setCreateTs(Date createTs) {
         this.createTs = createTs;
     }
 
-    @Override
     public String getCreatedBy() {
         return createdBy;
     }
 
-    @Override
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
     }

@@ -15,28 +15,25 @@
  */
 package io.jmix.reportsui.gui.valueformat.edit;
 
-import io.jmix.core.*;
-import com.haulmont.cuba.core.global.Security;
-import io.jmix.ui.component.CheckBox;
-import io.jmix.ui.component.ComboBox;
-import io.jmix.ui.component.SourceCodeEditor;
-import com.haulmont.cuba.gui.data.Datasource;
-import com.haulmont.cuba.gui.data.impl.DatasourceImplementation;
+import io.jmix.core.Messages;
+import io.jmix.core.Metadata;
+import io.jmix.core.MetadataTools;
 import io.jmix.core.common.util.ParamsMap;
-import io.jmix.core.security.EntityOp;
 import io.jmix.reports.entity.ReportValueFormat;
 import io.jmix.reportsui.gui.definition.edit.scripteditordialog.ScriptEditorDialog;
+import io.jmix.security.constraint.PolicyStore;
+import io.jmix.security.constraint.SecureOperations;
 import io.jmix.ui.Dialogs;
 import io.jmix.ui.Notifications;
 import io.jmix.ui.ScreenBuilders;
 import io.jmix.ui.UiComponents;
 import io.jmix.ui.component.*;
+import io.jmix.ui.model.InstanceContainer;
 import io.jmix.ui.screen.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 import static io.jmix.ui.component.Window.COMMIT_ACTION_ID;
 
@@ -80,13 +77,16 @@ public class ValueFormatEditor extends StandardEditor<ReportValueFormat> {
     protected UiComponents componentsFactory;
 
     @Autowired
-    protected Datasource valuesFormatsDs;
+    protected InstanceContainer valuesFormatsDs;
 
     @Autowired
     protected Metadata metadata;
 
     @Autowired
-    protected Security security;
+    protected SecureOperations secureOperations;
+
+    @Autowired
+    protected PolicyStore policyStore;
 
     @Autowired
     protected Notifications notifications;
@@ -197,7 +197,7 @@ public class ValueFormatEditor extends StandardEditor<ReportValueFormat> {
 //    }
 
     public void showGroovyEditorDialog() {
-        ScriptEditorDialog editorDialog = (ScriptEditorDialog)screenBuilders.screen(this)
+        ScriptEditorDialog editorDialog = (ScriptEditorDialog) screenBuilders.screen(this)
                 .withScreenId("scriptEditorDialog")
                 .withOpenMode(OpenMode.DIALOG)
                 .withOptions(new MapScreenOptions(ParamsMap.of(

@@ -16,15 +16,22 @@
 
 package io.jmix.reports.entity.pivottable;
 
-import com.haulmont.cuba.core.entity.BaseUuidEntity;
+import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.annotation.JmixProperty;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.persistence.Id;
 import javax.persistence.Lob;
+import java.io.Serializable;
+import java.util.UUID;
 
 @JmixEntity(name = "report_PivotTableProperty")
-public class PivotTableProperty extends BaseUuidEntity {
+public class PivotTableProperty implements Serializable {
+
+    @Id
+    @JmixGeneratedValue
+    protected UUID id;
 
     @JmixProperty(mandatory = true)
     protected String name;
@@ -41,6 +48,14 @@ public class PivotTableProperty extends BaseUuidEntity {
 
     @JmixProperty
     protected PivotTablePropertyType type;
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;

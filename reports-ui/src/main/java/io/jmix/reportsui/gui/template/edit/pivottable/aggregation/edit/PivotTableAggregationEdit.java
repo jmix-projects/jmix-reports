@@ -22,10 +22,7 @@ import io.jmix.ui.Dialogs;
 import io.jmix.ui.WindowParam;
 import io.jmix.ui.component.SourceCodeEditor;
 import io.jmix.ui.component.ValidationErrors;
-import io.jmix.ui.screen.StandardEditor;
-import io.jmix.ui.screen.Subscribe;
-import io.jmix.ui.screen.UiController;
-import io.jmix.ui.screen.UiDescriptor;
+import io.jmix.ui.screen.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collection;
@@ -43,6 +40,8 @@ public class PivotTableAggregationEdit extends StandardEditor<PivotTableAggregat
     protected Dialogs dialogs;
     @Autowired
     protected Messages messages;
+    @Autowired
+    protected ScreenValidation screenValidation;
 
     @Subscribe
     protected void onAfterInit(AfterInitEvent event) {
@@ -65,17 +64,13 @@ public class PivotTableAggregationEdit extends StandardEditor<PivotTableAggregat
             if (hasMatches) {
                 ValidationErrors validationErrors = new ValidationErrors();
                 validationErrors.add(messages.getMessage("pivotTableEdit.uniqueAggregationOptionCaption"));
-                //showValidationErrors(validationErrors);
-                validateScreen();
+
+                //todo
+                screenValidation.showValidationErrors(this, validationErrors);
                 event.preventCommit();
             }
             event.resume();
         }
         event.preventCommit();
     }
-
-//    @Override
-//    public boolean commit() {
-//        return true;
-//    }
 }

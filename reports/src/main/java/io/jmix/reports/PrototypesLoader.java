@@ -16,14 +16,11 @@
 
 package io.jmix.reports;
 
-import com.haulmont.cuba.core.global.*;
-import io.jmix.core.FetchPlan;
-import io.jmix.core.FetchPlanRepository;
+import io.jmix.core.*;
 import io.jmix.core.common.util.StringHelper;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.reports.app.ParameterPrototype;
 import io.jmix.reports.exception.ReportingException;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -52,10 +49,10 @@ public class PrototypesLoader {
      */
     public List loadData(ParameterPrototype parameterPrototype) {
 
-        MetaClass metaClass = metadata.getSession().getClassNN(parameterPrototype.getMetaClassName());
+        MetaClass metaClass = metadata.getSession().getClass(parameterPrototype.getMetaClassName());
         FetchPlan queryView = fetchPlanRepository.getFetchPlan(metaClass, parameterPrototype.getViewName());
 
-        LoadContext loadContext = LoadContext.create(metaClass.getJavaClass());
+        LoadContext loadContext = new LoadContext(metaClass);
 
         LoadContext.Query query = new LoadContext.Query(parameterPrototype.getQueryString());
 
@@ -70,7 +67,7 @@ public class PrototypesLoader {
             query.setMaxResults(reportingConfig.getParameterPrototypeQueryLimit());
         }
 
-        loadContext.setView(queryView);
+        loadContext.setFetchPlan(queryView);
         loadContext.setQuery(query);
         List queryResult;
         try {

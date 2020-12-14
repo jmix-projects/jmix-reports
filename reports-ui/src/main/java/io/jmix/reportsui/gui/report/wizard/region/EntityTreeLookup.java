@@ -16,8 +16,6 @@
 
 package io.jmix.reportsui.gui.report.wizard.region;
 
-import com.haulmont.cuba.core.global.Configuration;
-import io.jmix.ui.component.*;
 import com.haulmont.cuba.gui.data.impl.AbstractTreeDatasource;
 import io.jmix.core.Messages;
 import io.jmix.reports.entity.wizard.EntityTreeNode;
@@ -26,14 +24,13 @@ import io.jmix.ui.action.AbstractAction;
 import io.jmix.ui.action.Action;
 import io.jmix.ui.component.Button;
 import io.jmix.ui.component.Component;
+import io.jmix.ui.component.TextField;
+import io.jmix.ui.component.Tree;
 import io.jmix.ui.screen.*;
-import io.jmix.ui.screen.LookupComponent;
 import org.apache.commons.lang3.StringUtils;
-
 import org.springframework.beans.factory.annotation.Autowired;
+
 import javax.inject.Named;
-import java.util.Map;
-import java.util.function.Predicate;
 
 @UiController("report_ReportEntityTree.lookup")
 @UiDescriptor("entity-tree-lookup.xml")
@@ -55,37 +52,35 @@ public class EntityTreeLookup extends StandardLookup {
     @Autowired
     protected Notifications notifications;
 
-    @Autowired
-    protected Configuration configuration;
-
     protected EntityTreeNode rootNode;
 
     @Subscribe
     protected void onInit(InitEvent event) {
-        params.put("component$reportPropertyName", reportPropertyName);
-
-        reportEntityTreeNodeDs.refresh(params);
-        rootNode = (EntityTreeNode) params.get("rootEntity");
-        entityTree.expandTree();
-
-
-        this.setLookupValidator(() -> {
-            if (entityTree.getSingleSelected() == null) {
-                notifications.create(Notifications.NotificationType.TRAY)
-                        .withCaption(messages.getMessage("selectItemForContinue"))
-                        .show();
-                return false;
-            } else {
-                if (((EntityTreeNode) entityTree.getSingleSelected()).getParent() == null) {
-                    notifications.create(Notifications.NotificationType.TRAY)
-                            .withCaption(messages.getMessage("selectNotARoot"))
-                            .show();
-
-                    return false;
-                }
-            }
-            return true;
-        });
+        //todo params
+//        params.put("component$reportPropertyName", reportPropertyName);
+//
+//        reportEntityTreeNodeDs.refresh(params);
+//        rootNode = (EntityTreeNode) params.get("rootEntity");
+//        entityTree.expandTree();
+//
+//
+//        this.setLookupValidator(() -> {
+//            if (entityTree.getSingleSelected() == null) {
+//                notifications.create(Notifications.NotificationType.TRAY)
+//                        .withCaption(messages.getMessage("selectItemForContinue"))
+//                        .show();
+//                return false;
+//            } else {
+//                if (((EntityTreeNode) entityTree.getSingleSelected()).getParent() == null) {
+//                    notifications.create(Notifications.NotificationType.TRAY)
+//                            .withCaption(messages.getMessage("selectNotARoot"))
+//                            .show();
+//
+//                    return false;
+//                }
+//            }
+//            return true;
+//        });
 
         Action search = new AbstractAction("search"/* TODO filter apply shortcut, configuration.getConfig(ClientConfig.class).getFilterApplyShortcut()*/) {
             @Override

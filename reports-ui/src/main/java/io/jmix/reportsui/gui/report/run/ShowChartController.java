@@ -24,7 +24,6 @@ import io.jmix.reports.entity.ReportOutputType;
 import io.jmix.reports.entity.ReportTemplate;
 import io.jmix.reportsui.gui.ReportGuiManager;
 import io.jmix.ui.Fragments;
-import io.jmix.ui.ScreenBuilders;
 import io.jmix.ui.UiComponents;
 import io.jmix.ui.WindowConfig;
 import io.jmix.ui.component.*;
@@ -81,6 +80,9 @@ public class ShowChartController extends StandardLookup {
     @Autowired
     protected Fragments fragments;
 
+    @Autowired
+    protected ScreenValidation screenValidation;
+
     protected InputParametersFrame inputParametersFrame;
 
     protected Report report;
@@ -94,30 +96,30 @@ public class ShowChartController extends StandardLookup {
 //                .setWidth(themeConstants.get("cuba.gui.report.ShowChartController.width"))
 //                .setHeight(themeConstants.get("cuba.gui.report.ShowChartController.height"))
 //                .setResizable(true);
-
-        String chartJson = (String) params.get(CHART_JSON_PARAMETER);
-        report = (Report) params.get(REPORT_PARAMETER);
-        templateCode = (String) params.get(TEMPLATE_CODE_PARAMETER);
-        @SuppressWarnings("unchecked")
-        Map<String, Object> reportParameters = (Map<String, Object>) params.get(PARAMS_PARAMETER);
-
-        if (!windowConfig.hasWindow(JSON_CHART_SCREEN_ID)) {
-            showChartsNotIncluded();
-            return;
-        }
-
-        if (report != null) {
-            reportSelectorBox.setVisible(false);
-
-            initFrames(chartJson, reportParameters);
-        } else {
-            showDiagramStubText();
-        }
-
-        reportLookup.addValueChangeListener(e -> {
-            report = (Report) e.getValue();
-            initFrames(null, null);
-        });
+        //todo params
+//        String chartJson = (String) params.get(CHART_JSON_PARAMETER);
+//        report = (Report) params.get(REPORT_PARAMETER);
+//        templateCode = (String) params.get(TEMPLATE_CODE_PARAMETER);
+//        @SuppressWarnings("unchecked")
+//        Map<String, Object> reportParameters = (Map<String, Object>) params.get(PARAMS_PARAMETER);
+//
+//        if (!windowConfig.hasWindow(JSON_CHART_SCREEN_ID)) {
+//            showChartsNotIncluded();
+//            return;
+//        }
+//
+//        if (report != null) {
+//            reportSelectorBox.setVisible(false);
+//
+//            initFrames(chartJson, reportParameters);
+//        } else {
+//            showDiagramStubText();
+//        }
+//
+//        reportLookup.addValueChangeListener(e -> {
+//            report = (Report) e.getValue();
+//            initFrames(null, null);
+//        });
     }
 
     protected void initFrames(String chartJson, Map<String, Object> reportParameters) {
@@ -134,11 +136,10 @@ public class ShowChartController extends StandardLookup {
                     InputParametersFrame.PARAMETERS_PARAMETER, reportParameters
             );
 
-            inputParametersFrame = (InputParametersFrame) openFrame(parametersFrameHolder,
-                    "report_inputParametersFrame", params);
-
-            inputParametersFrame = fragments.create(this, InputParametersFrame.class);
-            inputParametersFrame.set
+            fragments.create(this,
+                    "report_inputParametersFrame",
+                    new MapScreenOptions(params))
+                    .init();
             parametersFrameHolder.add(inputParametersFrame.getFragment());
             reportParamsBox.setVisible(true);
         } else {
@@ -149,7 +150,12 @@ public class ShowChartController extends StandardLookup {
     protected void openChart(String chartJson) {
         chartBox.removeAll();
         if (chartJson != null) {
-            openFrame(chartBox, JSON_CHART_SCREEN_ID, ParamsMap.of(CHART_JSON_PARAMETER, chartJson));
+            Map<String, Object> params = ParamsMap.of(
+                    CHART_JSON_PARAMETER,
+                    chartJson);
+
+            fragments.create(this, JSON_CHART_SCREEN_ID, new MapScreenOptions(params))
+                    .init();
         }
 
         showDiagramStubText();
@@ -159,7 +165,7 @@ public class ShowChartController extends StandardLookup {
         if (chartBox.getOwnComponents().isEmpty()) {
             Label label = uiComponents.create(Label.class);
             label.setValue(messages.getMessage("showChart.caption"));
-            label.setAlignment(Alignment.MIDDLE_CENTER);
+            label.setAlignment(Component.Alignment.MIDDLE_CENTER);
             label.setStyleName("h1");
             chartBox.add(label);
         }
@@ -170,7 +176,7 @@ public class ShowChartController extends StandardLookup {
         chartBox.removeAll();
         Label label = uiComponents.create(Label.class);
         label.setValue(messages.getMessage("showChart.noChartComponent"));
-        label.setAlignment(Alignment.MIDDLE_CENTER);
+        label.setAlignment(Component.Alignment.MIDDLE_CENTER);
         label.setStyleName("h1");
         chartBox.add(label);
     }
@@ -178,7 +184,8 @@ public class ShowChartController extends StandardLookup {
     @Subscribe("printReportBtn")
     public void printReport() {
         if (inputParametersFrame != null && inputParametersFrame.getReport() != null) {
-            if (validateAll()) {
+            ValidationErrors validationErrors = screenValidation.validateUiComponents(getWindow());
+            if (validationErrors.isEmpty()) {
                 Map<String, Object> parameters = inputParametersFrame.collectParameters();
                 Report report = inputParametersFrame.getReport();
 
@@ -191,6 +198,8 @@ public class ShowChartController extends StandardLookup {
 
                 ReportOutputDocument reportResult = reportGuiManager.getReportResult(report, parameters, templateCode);
                 openChart(new String(reportResult.getContent(), StandardCharsets.UTF_8));
+            } else {
+                screenValidation.showValidationErrors(this, validationErrors);
             }
         }
     }

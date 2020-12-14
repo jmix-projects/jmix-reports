@@ -28,10 +28,10 @@ import io.jmix.reports.entity.wizard.TemplateFileType;
 import io.jmix.reports.exception.TemplateGenerationException;
 import io.jmix.reportsui.wizard.template.TemplateGenerator;
 import io.jmix.reportsui.wizard.template.TemplateGeneratorApi;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nullable;
-import org.springframework.beans.factory.annotation.Autowired;
 import javax.inject.Provider;
 import java.util.List;
 

@@ -16,7 +16,7 @@
 
 package io.jmix.reportsui.gui.report.history;
 
-import com.haulmont.cuba.core.global.Messages;
+import io.jmix.core.Messages;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

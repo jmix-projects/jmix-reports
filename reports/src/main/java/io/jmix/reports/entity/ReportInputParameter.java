@@ -16,23 +16,29 @@
 package io.jmix.reports.entity;
 
 import com.haulmont.chile.core.annotations.NamePattern;
-import com.haulmont.cuba.core.entity.BaseUuidEntity;
 import com.haulmont.yarg.structure.ReportParameterWithDefaultValue;
+import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.entity.annotation.SystemLevel;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.annotation.JmixProperty;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.persistence.Id;
 import javax.persistence.Transient;
+import java.util.UUID;
 
 @JmixEntity(name = "report_ReportInputParameter")
 @SystemLevel
 @NamePattern("%s|locName")
 @SuppressWarnings("unused")
-public class ReportInputParameter extends BaseUuidEntity implements ReportParameterWithDefaultValue {
+public class ReportInputParameter implements ReportParameterWithDefaultValue {
 
     private static final long serialVersionUID = 6231014880104406246L;
+
+    @Id
+    @JmixGeneratedValue
+    protected UUID id;
 
     @JmixProperty
     protected Report report;
@@ -99,6 +105,14 @@ public class ReportInputParameter extends BaseUuidEntity implements ReportParame
 
     @Transient
     protected String localeName;
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
 
     public Report getReport() {
         return report;

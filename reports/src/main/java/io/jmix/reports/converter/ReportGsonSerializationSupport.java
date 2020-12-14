@@ -18,8 +18,8 @@ package io.jmix.reports.converter;
 
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import com.haulmont.cuba.core.global.View;
 import io.jmix.core.Entity;
+import io.jmix.core.FetchPlan;
 import io.jmix.reports.entity.DataSet;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportTemplate;
@@ -28,6 +28,7 @@ import org.springframework.beans.factory.BeanFactory;
 import java.io.IOException;
 
 public class ReportGsonSerializationSupport extends GsonSerializationSupport {
+
     public ReportGsonSerializationSupport(BeanFactory beanFactory) {
         super(beanFactory);
         exclusionPolicy = (objectClass, propertyName) ->
@@ -39,17 +40,17 @@ public class ReportGsonSerializationSupport extends GsonSerializationSupport {
     protected void writeFields(JsonWriter out, Entity entity) throws IOException {
         super.writeFields(out, entity);
         if (entity instanceof DataSet) {
-            out.name("view");
+            out.name("fetchPlan");
             out.value(gsonBuilder.create().toJson(((DataSet) entity).getFetchPlan()));
         }
     }
 
     @Override
     protected void readUnresolvedProperty(Entity entity, String propertyName, JsonReader in) throws IOException {
-        if (entity instanceof DataSet && "view".equals(propertyName)) {
+        if (entity instanceof DataSet && "fetchPlan".equals(propertyName)) {
             String viewDefinition = in.nextString();
-            View view = gsonBuilder.create().fromJson(viewDefinition, View.class);
-            ((DataSet) entity).setFetchPlan(view);
+            FetchPlan fetchPlan = gsonBuilder.create().fromJson(viewDefinition, FetchPlan.class);
+            ((DataSet) entity).setFetchPlan(fetchPlan);
         } else {
             super.readUnresolvedProperty(entity, propertyName, in);
         }

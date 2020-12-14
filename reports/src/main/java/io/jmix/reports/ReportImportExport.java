@@ -15,10 +15,7 @@
  */
 package io.jmix.reports;
 
-import com.haulmont.cuba.core.global.DataManager;
-import com.haulmont.cuba.core.global.LoadContext;
-import com.haulmont.cuba.core.global.View;
-import io.jmix.core.EntityAccessException;
+import io.jmix.core.*;
 import io.jmix.reports.converter.XStreamConverter;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportImportOption;
@@ -56,6 +53,9 @@ public class ReportImportExport implements ReportImportExportAPI, ReportImportEx
 
     @Autowired
     protected DataManager dataManager;
+
+    @Autowired
+    protected Metadata metadata;
 
     @Override
     public byte[] exportReports(Collection<Report> reports) {
@@ -293,9 +293,9 @@ public class ReportImportExport implements ReportImportExportAPI, ReportImportEx
             }
         }
 
-        Report existingReport = dataManager.load(LoadContext.create(Report.class)
+        Report existingReport = dataManager.load(new LoadContext(metadata.getClass(Report.class))
                 .setId(report.getId())
-                .setView(View.MINIMAL));
+                .setFetchPlan(FetchPlan.MINIMAL));
         report = saveReport(report);
         importResult.addImportedReport(report);
         if (existingReport != null) {
@@ -369,7 +369,9 @@ public class ReportImportExport implements ReportImportExportAPI, ReportImportEx
     }
 
     protected Report reloadReport(Report report) {
-        return dataManager.reload(report, ReportingBean.REPORT_EDIT_VIEW_NAME);
+        return dataManager.load(Id.of(report))
+                .fetchPlan(ReportingBean.REPORT_EDIT_VIEW_NAME)
+                .one();
     }
 
     protected boolean isReportsStructureFile(String name) {

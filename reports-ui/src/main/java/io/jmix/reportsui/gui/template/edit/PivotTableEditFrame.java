@@ -18,10 +18,6 @@ package io.jmix.reportsui.gui.template.edit;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
-import com.haulmont.cuba.gui.components.actions.RemoveAction;
-import com.haulmont.cuba.gui.data.CollectionDatasource;
-import com.haulmont.cuba.gui.data.Datasource;
-import com.haulmont.cuba.gui.data.GroupDatasource;
 import io.jmix.core.Messages;
 import io.jmix.core.common.util.ParamsMap;
 import io.jmix.core.entity.KeyValueEntity;
@@ -29,12 +25,14 @@ import io.jmix.reports.entity.BandDefinition;
 import io.jmix.reports.entity.ReportOutputType;
 import io.jmix.reports.entity.ReportTemplate;
 import io.jmix.reports.entity.pivottable.*;
-import io.jmix.reportsui.gui.report.run.ShowPivotTableController;
 import io.jmix.reportsui.gui.template.edit.generator.RandomPivotTableDataGenerator;
 import io.jmix.ui.Actions;
 import io.jmix.ui.action.list.CreateAction;
 import io.jmix.ui.action.list.EditAction;
+import io.jmix.ui.action.list.RemoveAction;
 import io.jmix.ui.component.*;
+import io.jmix.ui.model.CollectionContainer;
+import io.jmix.ui.model.InstanceContainer;
 import io.jmix.ui.screen.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -55,13 +53,13 @@ public class PivotTableEditFrame extends DescriptionEditFrame {
             RendererType.HEATMAP, RendererType.COL_HEATMAP, RendererType.ROW_HEATMAP);
 
     @Autowired
-    protected Datasource<PivotTableDescription> pivotTableDs;
+    protected InstanceContainer<PivotTableDescription> pivotTableDc;
 
     @Autowired
-    protected CollectionDatasource<PivotTableAggregation, UUID> aggregationsDs;
+    protected CollectionContainer<PivotTableAggregation> aggregationsDc;
 
     @Autowired
-    protected GroupDatasource<PivotTableProperty, UUID> propertyDs;
+    protected CollectionContainer<PivotTableProperty> propertyDc;
 
     @Autowired
     protected GroupTable<PivotTableProperty> propertyTable;
@@ -101,10 +99,10 @@ public class PivotTableEditFrame extends DescriptionEditFrame {
     protected void onInit(InitEvent event) {
         dataGenerator = new RandomPivotTableDataGenerator();
         PivotTableDescription description = createDefaultPivotTableDescription();
-        pivotTableDs.setItem(description);
+        pivotTableDc.setItem(description);
         initAggregationTable();
         initPropertyTable();
-        pivotTableDs.addItemPropertyChangeListener(e -> showPreview());
+        pivotTableDc.addItemPropertyChangeListener(e -> showPreview());
     }
 
     @Override
@@ -113,9 +111,9 @@ public class PivotTableEditFrame extends DescriptionEditFrame {
         setBands(reportTemplate.getReport().getBands());
         if (isApplicable(reportTemplate.getReportOutputType())) {
             if (reportTemplate.getPivotTableDescription() == null) {
-                pivotTableDs.setItem(createDefaultPivotTableDescription());
+                pivotTableDc.setItem(createDefaultPivotTableDescription());
             } else {
-                pivotTableDs.setItem(reportTemplate.getPivotTableDescription());
+                pivotTableDc.setItem(reportTemplate.getPivotTableDescription());
             }
         }
         initRendererTypes();
@@ -169,7 +167,7 @@ public class PivotTableEditFrame extends DescriptionEditFrame {
     }
 
     protected PivotTableDescription getPivotTableDescription() {
-        return pivotTableDs.getItem();
+        return pivotTableDc.getItem();
     }
 
     protected ValidationErrors validatePivotTableDescription(PivotTableDescription description) {
@@ -219,7 +217,7 @@ public class PivotTableEditFrame extends DescriptionEditFrame {
         initCustomGroups();
         initDefaultRenderer();
 
-        pivotTableDs.addItemPropertyChangeListener(e -> {
+        pivotTableDc.addItemPropertyChangeListener(e -> {
             if ("renderers".equals(e.getProperty())) {
                 PivotTableDescription description = getPivotTableDescription();
                 Set<RendererType> rendererTypes = description.getRenderers();
@@ -233,7 +231,7 @@ public class PivotTableEditFrame extends DescriptionEditFrame {
     }
 
     protected void initAggregationTable() {
-        Supplier<Map<String, Object>> paramsSupplier = () -> ParamsMap.of("existingItems", aggregationsDs.getItems());
+        Supplier<Map<String, Object>> paramsSupplier = () -> ParamsMap.of("existingItems", aggregationsDc.getItems());
 
         CreateAction createAction = actions.create(CreateAction.class);
         createAction.setScreenOptionsSupplier(paramsSupplier);
@@ -266,7 +264,7 @@ public class PivotTableEditFrame extends DescriptionEditFrame {
     }
 
     protected void initPropertyTable() {
-        propertyDs.addCollectionChangeListener(e -> {
+        propertyDc.addCollectionChangeListener(e -> {
             PivotTableDescription description = getPivotTableDescription();
             description.getAggregationProperties().clear();
             description.getColumnsProperties().clear();
@@ -308,7 +306,9 @@ public class PivotTableEditFrame extends DescriptionEditFrame {
     }
 
     protected RemoveAction createPropertyRemoveAction() {
-        return RemoveAction.create(propertyTable);
+        RemoveAction removeAction = actions.create(RemoveAction.class);
+        removeAction.setTarget(propertyTable);
+        return removeAction;
     }
 
     protected EditAction createPropertyEditAction() {

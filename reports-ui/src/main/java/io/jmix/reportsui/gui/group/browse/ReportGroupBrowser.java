@@ -16,10 +16,7 @@
 
 package io.jmix.reportsui.gui.group.browse;
 
-import com.haulmont.cuba.core.global.LoadContext;
-import io.jmix.core.DataManager;
-import io.jmix.core.Messages;
-import io.jmix.core.Metadata;
+import io.jmix.core.*;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportGroup;
 import io.jmix.ui.Notifications;
@@ -59,6 +56,9 @@ public class ReportGroupBrowser extends StandardLookup<ReportGroup> {
     @Autowired
     protected Messages messages;
 
+    @Autowired
+    protected FetchPlanRepository fetchPlanRepository;
+
     @Subscribe
     protected void onInit(InitEvent event) {
         createAction.setOpenMode(OpenMode.DIALOG);
@@ -86,10 +86,9 @@ public class ReportGroupBrowser extends StandardLookup<ReportGroup> {
                             .withCaption(messages.getMessage("unableToDeleteSystemReportGroup"))
                             .show();
                 } else {
-                    LoadContext<Report> loadContext = new LoadContext<>(Report.class);
-                    loadContext.setFetchPlan("report.view");
-                    LoadContext.Query query =
-                            new LoadContext.Query("select r from report_Report r where r.group.id = :groupId");
+                    LoadContext<Report> loadContext = new LoadContext(metadata.getClass(Report.class));
+                    loadContext.setFetchPlan(fetchPlanRepository.getFetchPlan(Report.class, "report.view"));
+                    LoadContext.Query query = new LoadContext.Query("select r from report_Report r where r.group.id = :groupId");
                     query.setMaxResults(1);
                     query.setParameter("groupId", group.getId());
                     loadContext.setQuery(query);

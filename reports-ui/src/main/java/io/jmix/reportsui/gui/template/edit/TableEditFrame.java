@@ -18,11 +18,10 @@ package io.jmix.reportsui.gui.template.edit;
 
 import io.jmix.core.Messages;
 import io.jmix.core.Metadata;
+import io.jmix.core.Sort;
 import io.jmix.ui.Notifications;
 import io.jmix.ui.action.list.RemoveAction;
 import io.jmix.ui.component.Table;
-import com.haulmont.cuba.gui.data.CollectionDatasource;
-import com.haulmont.cuba.gui.data.Datasource;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.core.metamodel.model.MetaPropertyPath;
 import io.jmix.reports.entity.ReportOutputType;
@@ -34,6 +33,8 @@ import io.jmix.ui.action.AbstractAction;
 import io.jmix.ui.action.ListAction;
 import io.jmix.ui.component.BoxLayout;
 import io.jmix.ui.component.Component;
+import io.jmix.ui.model.CollectionContainer;
+import io.jmix.ui.model.InstanceContainer;
 import io.jmix.ui.screen.Subscribe;
 import io.jmix.ui.screen.UiController;
 import io.jmix.ui.screen.UiDescriptor;
@@ -64,13 +65,13 @@ public class TableEditFrame extends DescriptionEditFrame {
     protected Table<TemplateTableColumn> columnsTable;
 
     @Autowired
-    protected CollectionDatasource.Sortable<TemplateTableBand, UUID> tableBandsDs;
+    protected CollectionContainer<TemplateTableBand> tableBandsDc;
 
     @Autowired
-    protected Datasource<TemplateTableDescription> templateTableDs;
+    protected InstanceContainer<TemplateTableDescription> templateTableDc;
 
     @Autowired
-    protected CollectionDatasource.Sortable<TemplateTableColumn, UUID> tableColumnsDs;
+    protected CollectionContainer<TemplateTableColumn> tableColumnsDc;
 
     @Autowired
     protected Messages messages;
@@ -88,15 +89,8 @@ public class TableEditFrame extends DescriptionEditFrame {
         initButtonColumnTable();
     }
 
-    protected void sortParametersByPosition(Class c, CollectionDatasource.Sortable collectionDatasource) {
-        MetaClass metaClass = metadata.getClass(c);
-        MetaPropertyPath mpp = new MetaPropertyPath(metaClass, metaClass.getProperty(POSITION));
-
-        CollectionDatasource.Sortable.SortInfo<MetaPropertyPath> sortInfo = new CollectionDatasource.Sortable.SortInfo<>();
-        sortInfo.setOrder(CollectionDatasource.Sortable.Order.ASC);
-        sortInfo.setPropertyPath(mpp);
-
-        collectionDatasource.sort(new CollectionDatasource.Sortable.SortInfo[]{sortInfo});
+    protected void sortParametersByPosition(CollectionContainer collectionContainer) {
+        collectionContainer.getSorter().sort(Sort.by(Sort.Direction.ASC, POSITION));
     }
 
     private void initButtonBandTable() {
@@ -109,10 +103,10 @@ public class TableEditFrame extends DescriptionEditFrame {
             @Override
             public void actionPerform(Component component) {
                 TemplateTableBand templateTableBand = metadata.create(TemplateTableBand.class);
-                templateTableBand.setPosition(tableBandsDs.size());
+                templateTableBand.setPosition(tableBandsDc.getItems().size());
 
-                tableBandsDs.addItem(templateTableBand);
-                tableBandsDs.commit();
+                tableBandsDc.getItems().add(templateTableBand);
+                tableBandsDc.commit();
             }
         });
 
@@ -127,7 +121,7 @@ public class TableEditFrame extends DescriptionEditFrame {
                 TemplateTableBand deletedColumn = (TemplateTableBand) selected.iterator().next();
                 int deletedPosition = deletedColumn.getPosition();
 
-                for (TemplateTableBand templateTableBand : tableBandsDs.getItems()) {
+                for (TemplateTableBand templateTableBand : tableBandsDc.getItems()) {
                     if (templateTableBand.getPosition() > deletedPosition) {
                         int currentPosition = templateTableBand.getPosition();
                         templateTableBand.setPosition(currentPosition - 1);
@@ -164,7 +158,7 @@ public class TableEditFrame extends DescriptionEditFrame {
                 if (item == null) {
                     return false;
                 }
-                return item.getPosition() < (tableBandsDs.size() - 1) && super.isApplicable();
+                return item.getPosition() < (tableBandsDc.getItems().size() - 1) && super.isApplicable();
             }
         });
     }
@@ -183,10 +177,10 @@ public class TableEditFrame extends DescriptionEditFrame {
 
                 if (selectBand != null) {
                     TemplateTableColumn item = metadata.create(TemplateTableColumn.class);
-                    item.setPosition(tableColumnsDs.size());
+                    item.setPosition(tableColumnsDc.getItems().size());
 
-                    tableColumnsDs.addItem(item);
-                    tableColumnsDs.commit();
+                    tableColumnsDc.getItems().add(item);
+                    tableColumnsDc.commit();
                 } else {
                     notifications.create(Notifications.NotificationType.HUMANIZED)
                             .withCaption(messages.getMessage("template.bandRequired"))
@@ -206,7 +200,7 @@ public class TableEditFrame extends DescriptionEditFrame {
                 TemplateTableColumn deletedColumn = (TemplateTableColumn) selected.iterator().next();
                 int deletedPosition = deletedColumn.getPosition();
 
-                for (TemplateTableColumn templateTableColumn : tableColumnsDs.getItems()) {
+                for (TemplateTableColumn templateTableColumn : tableColumnsDc.getItems()) {
                     if (templateTableColumn.getPosition() > deletedPosition) {
                         int currentPosition = templateTableColumn.getPosition();
                         templateTableColumn.setPosition(currentPosition - 1);
@@ -243,7 +237,7 @@ public class TableEditFrame extends DescriptionEditFrame {
                 if (item == null) {
                     return false;
                 }
-                return item.getPosition() < (tableColumnsDs.size() - 1) && super.isApplicable();
+                return item.getPosition() < (tableColumnsDc.getItems().size() - 1) && super.isApplicable();
             }
         });
     }
@@ -253,26 +247,26 @@ public class TableEditFrame extends DescriptionEditFrame {
         TemplateTableColumn currentColumn = columnsTable.getSingleSelected();
         int currentPosition = currentColumn.getPosition();
 
-        for (TemplateTableColumn templateTableColumn : tableColumnsDs.getItems()) {
+        for (TemplateTableColumn templateTableColumn : tableColumnsDc.getItems()) {
             if (templateTableColumn.getPosition() == (currentPosition - order)) {
                 templateTableColumn.setPosition(templateTableColumn.getPosition() + order);
             }
             currentColumn.setPosition(currentPosition - order);
         }
-        sortParametersByPosition(TemplateTableColumn.class, tableColumnsDs);
+        sortParametersByPosition(tableColumnsDc);
     }
 
     private void changeOrderBandsOfIndexes(int order) {
         TemplateTableBand currentBand = bandsTable.getSingleSelected();
         int currentPosition = currentBand.getPosition();
 
-        for (TemplateTableBand templateTableBand : tableBandsDs.getItems()) {
+        for (TemplateTableBand templateTableBand : tableBandsDc.getItems()) {
             if (templateTableBand.getPosition() == (currentPosition - order)) {
                 templateTableBand.setPosition(templateTableBand.getPosition() + order);
             }
             currentBand.setPosition(currentPosition - order);
         }
-        sortParametersByPosition(TemplateTableBand.class, tableBandsDs);
+        sortParametersByPosition(tableBandsDc);
     }
 
 
@@ -286,18 +280,18 @@ public class TableEditFrame extends DescriptionEditFrame {
         this.reportTemplate = reportTemplate;
 
         if (reportTemplate.getTemplateTableDescription() == null) {
-            templateTableDs.setItem(createDefaultTemplateTableDescription());
+            templateTableDc.setItem(createDefaultTemplateTableDescription());
         } else {
-            templateTableDs.setItem(reportTemplate.getTemplateTableDescription());
+            templateTableDc.setItem(reportTemplate.getTemplateTableDescription());
         }
 
     }
 
     @Override
     public boolean applyChanges() {
-        reportTemplate.setTemplateTableDescription(templateTableDs.getItem());
+        reportTemplate.setTemplateTableDescription(templateTableDc.getItem());
 
-        for (TemplateTableBand band : tableBandsDs.getItems()) {
+        for (TemplateTableBand band : tableBandsDc.getItems()) {
             if (band.getBandName() == null) {
                 notifications.create(Notifications.NotificationType.TRAY)
                         .withCaption(messages.getMessage("template.bandTableOrColumnTableRequired"))

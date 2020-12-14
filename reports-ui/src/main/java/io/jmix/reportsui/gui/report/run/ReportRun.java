@@ -16,10 +16,11 @@
 
 package io.jmix.reportsui.gui.report.run;
 
-import com.haulmont.cuba.gui.data.CollectionDatasource;
 import com.sun.deploy.config.ClientConfig;
 import io.jmix.core.Messages;
 import io.jmix.core.metamodel.model.MetaClass;
+import io.jmix.core.security.CurrentAuthentication;
+import io.jmix.data.AuditInfoProvider;
 import io.jmix.ui.WindowParam;
 import io.jmix.ui.action.Action;
 import io.jmix.ui.action.BaseAction;
@@ -29,6 +30,7 @@ import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportGroup;
 import io.jmix.reportsui.gui.ReportGuiManager;
 import io.jmix.ui.component.*;
+import io.jmix.ui.model.CollectionContainer;
 import io.jmix.ui.screen.*;
 import io.jmix.ui.screen.LookupComponent;
 import org.apache.commons.lang3.StringUtils;
@@ -54,10 +56,10 @@ public class ReportRun extends StandardLookup<Report> {
     protected ReportGuiManager reportGuiManager;
 
     @Autowired
-    protected CollectionDatasource<Report, UUID> reportDs;
+    protected CollectionContainer<Report> reportDc;
 
     @Autowired
-    protected UserSessions userSessionSource;
+    protected CurrentAuthentication currentAuthentication;
 
     @Autowired
     protected TextField<String> nameFilter;
@@ -92,7 +94,7 @@ public class ReportRun extends StandardLookup<Report> {
     protected void onInit(InitEvent event) {
         List<Report> reports = reportsParameter;
         if (reports == null) {
-            reports = reportGuiManager.getAvailableReports(screenParameter, userSessionSource.getUserSession().getUser(),
+            reports = reportGuiManager.getAvailableReports(screenParameter, currentAuthentication.getUser(),
                     metaClassParameter);
         }
 
@@ -101,7 +103,7 @@ public class ReportRun extends StandardLookup<Report> {
         }
 
         for (Report report : reports) {
-            reportDs.includeItem(report);
+            reportDc.includeItem(report);
         }
 
         Action runAction = new ItemTrackingAction(RUN_ACTION_ID)
@@ -132,7 +134,7 @@ public class ReportRun extends StandardLookup<Report> {
         Date dateFilterValue = updatedDateFilter.getValue();
 
         List<Report> reports =
-                reportGuiManager.getAvailableReports(screenParameter, userSessionSource.getUser(),
+                reportGuiManager.getAvailableReports(screenParameter, currentAuthentication.getUser(),
                         metaClassParameter)
                         .stream()
                         .filter(report -> {
@@ -163,9 +165,9 @@ public class ReportRun extends StandardLookup<Report> {
                         })
                         .collect(Collectors.toList());
 
-        reportDs.clear();
+        reportDc.clear();
         for (Report report : reports) {
-            reportDs.includeItem(report);
+            reportDc.includeItem(report);
         }
 
         Table.SortInfo sortInfo = reportsTable.getSortInfo();

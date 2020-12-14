@@ -34,7 +34,6 @@ import io.jmix.ui.component.ComponentsHelper;
 import io.jmix.ui.component.ListComponent;
 import io.jmix.ui.component.Window;
 import io.jmix.ui.component.data.BindingState;
-import io.jmix.ui.component.data.DataUnit;
 import io.jmix.ui.component.data.meta.ContainerDataUnit;
 import io.jmix.ui.icon.Icons;
 import io.jmix.ui.icon.JmixIcon;
@@ -170,9 +169,9 @@ public class ListPrintFormAction extends AbstractPrintFormAction implements Acti
     protected boolean isDataAvailable() {
         //todo
 //        if (target.getItems() instanceof ContainerDataUnit) {
-            ContainerDataUnit unit = (ContainerDataUnit) target.getItems();
-            CollectionContainer container = unit.getContainer();
-            return container instanceof HasLoader && unit.getState() == BindingState.ACTIVE && !container.getItems().isEmpty();
+        ContainerDataUnit unit = (ContainerDataUnit) target.getItems();
+        CollectionContainer container = unit.getContainer();
+        return container instanceof HasLoader && unit.getState() == BindingState.ACTIVE && !container.getItems().isEmpty();
 //        } else {
 //            CollectionDatasource ds = ((com.haulmont.cuba.gui.components.ListComponent) target).getDatasource();
 //            if (ds != null)
@@ -185,9 +184,9 @@ public class ListPrintFormAction extends AbstractPrintFormAction implements Acti
         MetaClass metaClass;
         //todo
 //        if (target.getItems() instanceof ContainerDataUnit) {
-            ContainerDataUnit unit = (ContainerDataUnit) target.getItems();
-            InstanceContainer container = unit.getContainer();
-            metaClass = container.getEntityMetaClass();
+        ContainerDataUnit unit = (ContainerDataUnit) target.getItems();
+        InstanceContainer container = unit.getContainer();
+        metaClass = container.getEntityMetaClass();
 //        }
 
         /*else {
@@ -204,17 +203,17 @@ public class ListPrintFormAction extends AbstractPrintFormAction implements Acti
 
         //todo
 //        if (target.getItems() instanceof ContainerDataUnit) {
-            ContainerDataUnit unit = (ContainerDataUnit) target.getItems();
-            CollectionContainer container = unit.getContainer();
-            if (container instanceof CollectionPropertyContainer) {
-                // as CollectionPropertyContainer does not have loader it always fetches all records,
-                // so print these records as selected
-                printSelected(new HashSet(container.getMutableItems()));
-                return;
-            }
-            CollectionLoader loader = (CollectionLoader) ((HasLoader) unit.getContainer()).getLoader();
-            metaClass = container.getEntityMetaClass();
-            loadContext = (LoadContext) loader.createLoadContext();
+        ContainerDataUnit unit = (ContainerDataUnit) target.getItems();
+        CollectionContainer container = unit.getContainer();
+        if (container instanceof CollectionPropertyContainer) {
+            // as CollectionPropertyContainer does not have loader it always fetches all records,
+            // so print these records as selected
+            printSelected(new HashSet(container.getMutableItems()));
+            return;
+        }
+        CollectionLoader loader = (CollectionLoader) ((HasLoader) unit.getContainer()).getLoader();
+        metaClass = container.getEntityMetaClass();
+        loadContext = (LoadContext) loader.createLoadContext();
 //        } else {
 //            CollectionDatasource ds = ((io.jmix.ui.component.ListComponent) target).getDatasource();
 //            metaClass = ds.getMetaClass();

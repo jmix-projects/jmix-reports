@@ -16,16 +16,23 @@
 
 package io.jmix.reports.entity.table;
 
-import com.haulmont.cuba.core.entity.BaseUuidEntity;
+import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.annotation.JmixProperty;
 
+import javax.persistence.Id;
+import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.UUID;
 
 
 @JmixEntity(name = "report_TemplateTableBand")
-public class TemplateTableBand extends BaseUuidEntity {
+public class TemplateTableBand implements Serializable {
+
+    @Id
+    @JmixGeneratedValue
+    protected UUID id;
 
     @JmixProperty
     protected String bandName;
@@ -35,6 +42,14 @@ public class TemplateTableBand extends BaseUuidEntity {
 
     @JmixProperty
     protected List<TemplateTableColumn> columns = new LinkedList<>();
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
 
     public List<TemplateTableColumn> getColumns() {
         return columns;

@@ -15,11 +15,7 @@
  */
 package io.jmix.reportsui.gui.definition.edit;
 
-import com.haulmont.cuba.core.global.*;
-import com.haulmont.cuba.gui.data.CollectionDatasource;
-import com.haulmont.cuba.gui.data.Datasource;
-import com.haulmont.cuba.gui.data.impl.DatasourceImplementation;
-import io.jmix.core.Stores;
+import io.jmix.core.*;
 import io.jmix.core.common.util.ParamsMap;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.core.security.EntityOp;
@@ -30,6 +26,8 @@ import io.jmix.reports.util.DataSetFactory;
 import io.jmix.reportsui.gui.ReportingClientConfig;
 import io.jmix.reportsui.gui.definition.edit.crosstab.CrossTabTableDecorator;
 import io.jmix.reportsui.gui.definition.edit.scripteditordialog.ScriptEditorDialog;
+import io.jmix.security.constraint.PolicyStore;
+import io.jmix.security.constraint.SecureOperations;
 import io.jmix.ui.Actions;
 import io.jmix.ui.Dialogs;
 import io.jmix.ui.ScreenBuilders;
@@ -42,6 +40,8 @@ import io.jmix.ui.component.autocomplete.AutoCompleteSupport;
 import io.jmix.ui.component.autocomplete.JpqlSuggestionFactory;
 import io.jmix.ui.component.autocomplete.Suggester;
 import io.jmix.ui.component.autocomplete.Suggestion;
+import io.jmix.ui.model.CollectionContainer;
+import io.jmix.ui.model.InstanceContainer;
 import io.jmix.ui.screen.*;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -56,13 +56,13 @@ import java.util.*;
 public class BandDefinitionEditor extends ScreenFragment implements Suggester {
 
     @Autowired
-    protected Datasource<BandDefinition> bandDefinitionDs;
+    protected InstanceContainer<BandDefinition> bandDefinitionDc;
     @Autowired
-    protected CollectionDatasource<DataSet, UUID> dataSetsDs;
+    protected CollectionContainer<DataSet> dataSetsDc;
     @Autowired
-    protected Datasource<Report> reportDs;
+    protected InstanceContainer<Report> reportDc;
     @Autowired
-    protected CollectionDatasource<ReportInputParameter, UUID> parametersDs;
+    protected CollectionContainer<ReportInputParameter> parametersDc;
     @Autowired
     protected Table<DataSet> dataSets;
     @Named("text")
@@ -132,9 +132,11 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
     @Autowired
     protected CrossTabTableDecorator tabOrientationTableDecorator;
     @Autowired
-    protected Configuration configuration;
+    protected FetchPlanRepository fetchPlanRepository;
     @Autowired
-    private Security security;
+    protected SecureOperations secureOperations;
+    @Autowired
+    protected PolicyStore policyStore;
     @Autowired
     protected TextArea jsonPathQueryTextAreaField;
     @Autowired
@@ -175,11 +177,11 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
     }
 
     protected String getScriptEditorDialogCaption() {
-        ReportGroup group = reportDs.getItem().getGroup();
-        String report = reportDs.getItem().getName();
+        ReportGroup group = reportDc.getItem().getGroup();
+        String report = reportDc.getItem().getName();
 
         if (ObjectUtils.isNotEmpty(group) && ObjectUtils.isNotEmpty(report)) {
-            return messages.formatMessage(getClass(), "scriptEditorDialog.captionFormat", report, bandDefinitionDs.getItem().getName());
+            return messages.formatMessage(getClass(), "scriptEditorDialog.captionFormat", report, bandDefinitionDc.getItem().getName());
         }
         return null;
     }
@@ -207,13 +209,13 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
     }
 
     public void setBandDefinition(BandDefinition bandDefinition) {
-        bandDefinitionDs.setItem(bandDefinition);
+        bandDefinitionDc.setItem(bandDefinition);
         name.setEditable((bandDefinition == null || bandDefinition.getParent() != null)
                 && isUpdatePermitted());
     }
 
-    public Datasource<BandDefinition> getBandDefinitionDs() {
-        return bandDefinitionDs;
+    public InstanceContainer<BandDefinition> getBandDefinitionDs() {
+        return bandDefinitionDc;
     }
 
 
@@ -322,12 +324,12 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
                 .withCaption("")
                 .withDescription(messages.getMessage("description.createDataSet"))
                 .withHandler(handle -> {
-                    BandDefinition selectedBand = bandDefinitionDs.getItem();
+                    BandDefinition selectedBand = bandDefinitionDc.getItem();
                     if (selectedBand != null) {
                         DataSet dataset = dataSetFactory.createEmptyDataSet(selectedBand);
                         selectedBand.getDataSets().add(dataset);
-                        dataSetsDs.addItem(dataset);
-                        dataSetsDs.setItem(dataset);
+                        dataSetsDc.getItems().add(dataset);
+                        dataSetsDc.setItem(dataset);
                         dataSets.setSelected(dataset);
                     }
                 });
@@ -344,16 +346,16 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
 //        entitiesParamLookup.setNewOptionAllowed(true);
 //        entityParamLookup.setNewOptionAllowed(true);
 //        viewNameLookup.setNewOptionAllowed(true);
-        entitiesParamLookup.setNewOptionHandler(LinkedWithPropertyNewOptionHandler.handler(dataSetsDs, "listEntitiesParamName"));
-        entityParamLookup.setNewOptionHandler(LinkedWithPropertyNewOptionHandler.handler(dataSetsDs, "entityParamName"));
-        viewNameLookup.setNewOptionHandler(LinkedWithPropertyNewOptionHandler.handler(dataSetsDs, "viewName"));
+        entitiesParamLookup.setNewOptionHandler(LinkedWithPropertyNewOptionHandler.handler(dataSetsDc, "listEntitiesParamName"));
+        entityParamLookup.setNewOptionHandler(LinkedWithPropertyNewOptionHandler.handler(dataSetsDc, "entityParamName"));
+        viewNameLookup.setNewOptionHandler(LinkedWithPropertyNewOptionHandler.handler(dataSetsDc, "viewName"));
     }
 
     protected void initParametersListeners() {
-        parametersDs.addCollectionChangeListener(e -> {
+        parametersDc.addCollectionChangeListener(e -> {
             Map<String, Object> paramAliases = new HashMap<>();
 
-            for (ReportInputParameter item : e.getDs().getItems()) {
+            for (ReportInputParameter item : e.getSource().getItems()) {
                 paramAliases.put(item.getName(), item.getAlias());
             }
             entitiesParamLookup.setOptionsMap(paramAliases);
@@ -362,11 +364,11 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
     }
 
     protected void initBandDefinitionsListeners() {
-        bandDefinitionDs.addItemChangeListener(e -> {
+        bandDefinitionDc.addItemChangeListener(e -> {
             updateRequiredIndicators(e.getItem());
             selectFirstDataSet();
         });
-        bandDefinitionDs.addItemPropertyChangeListener(e -> {
+        bandDefinitionDc.addItemPropertyChangeListener(e -> {
             if ("name".equals(e.getProperty()) && StringUtils.isBlank((String) e.getValue())) {
                 e.getItem().setName("*");
             }
@@ -374,9 +376,9 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
     }
 
     protected void initDataSetListeners() {
-        tabOrientationTableDecorator.decorate(dataSets, bandDefinitionDs);
+        tabOrientationTableDecorator.decorate(dataSets, bandDefinitionDc);
 
-        dataSetsDs.addItemChangeListener(e -> {
+        dataSetsDc.addItemChangeListener(e -> {
             if (e.getItem() != null) {
                 applyVisibilityRules(e.getItem());
 
@@ -392,7 +394,7 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
             }
         });
 
-        dataSetsDs.addItemPropertyChangeListener(e -> {
+        dataSetsDc.addItemPropertyChangeListener(e -> {
             applyVisibilityRules(e.getItem());
             if ("entityParamName".equals(e.getProperty()) || "listEntitiesParamName".equals(e.getProperty())) {
                 ReportInputParameter linkedParameter = findParameterByAlias(String.valueOf(e.getValue()));
@@ -404,7 +406,7 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
             }
 
             @SuppressWarnings("unchecked")
-            DatasourceImplementation<DataSet> implementation = (DatasourceImplementation<DataSet>) dataSetsDs;
+            DatasourceImplementation<DataSet> implementation = (DatasourceImplementation<DataSet>) dataSetsDc;
             implementation.modified(e.getItem());
         });
 
@@ -414,11 +416,11 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
     }
 
     protected boolean isUpdatePermitted() {
-        return security.isEntityOpPermitted(metadata.getClassNN(Report.class), EntityOp.UPDATE);
+        return secureOperations.isEntityUpdatePermitted(metadata.getClass(Report.class), policyStore);
     }
 
     protected void updateRequiredIndicators(BandDefinition item) {
-        boolean required = !(item == null || reportDs.getItem().getRootBandDefinition().equals(item));
+        boolean required = !(item == null || reportDc.getItem().getRootBandDefinition().equals(item));
         parentBand.setRequired(required);
         orientation.setRequired(required);
         name.setRequired(item != null);
@@ -426,7 +428,7 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
 
     @Nullable
     protected ReportInputParameter findParameterByAlias(String alias) {
-        for (ReportInputParameter reportInputParameter : parametersDs.getItems()) {
+        for (ReportInputParameter reportInputParameter : parametersDc.getItems()) {
             if (reportInputParameter.getAlias().equals(alias)) {
                 return reportInputParameter;
             }
@@ -438,13 +440,13 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
         if (reportInputParameter != null) {
             if (StringUtils.isNotBlank(reportInputParameter.getEntityMetaClass())) {
                 MetaClass parameterMetaClass = metadata.getClass(reportInputParameter.getEntityMetaClass());
-                Collection<String> viewNames = metadata.getViewRepository().getViewNames(parameterMetaClass);
+                Collection<String> viewNames = fetchPlanRepository.getFetchPlanNames(parameterMetaClass);
                 Map<String, Object> views = new HashMap<>();
                 for (String viewName : viewNames) {
                     views.put(viewName, viewName);
                 }
-                views.put(View.LOCAL, View.LOCAL);
-                views.put(View.MINIMAL, View.MINIMAL);
+                views.put(FetchPlan.LOCAL, FetchPlan.LOCAL);
+                views.put(FetchPlan.MINIMAL, FetchPlan.MINIMAL);
                 viewNameLookup.setOptionsMap(views);
                 return;
             }
@@ -559,9 +561,9 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
     }
 
     protected void selectFirstDataSet() {
-        dataSetsDs.refresh();
-        if (!dataSetsDs.getItemIds().isEmpty()) {
-            DataSet item = dataSetsDs.getItem(dataSetsDs.getItemIds().iterator().next());
+        dataSetsDc.refresh();
+        if (!dataSetsDc.getItems().isEmpty()) {
+            DataSet item = dataSetsDc.getItems().iterator().next();
             dataSets.setSelected(item);
         } else {
             dataSets.setSelected((DataSet) null);

@@ -17,12 +17,9 @@
 package io.jmix.reportsui.gui.template.edit;
 
 import com.haulmont.cuba.core.entity.FileDescriptor;
-import com.haulmont.cuba.core.global.Security;
-import com.haulmont.cuba.gui.upload.FileUploadingAPI;
 import io.jmix.core.Messages;
 import io.jmix.core.Metadata;
 import io.jmix.core.common.util.ParamsMap;
-import io.jmix.core.security.EntityOp;
 import io.jmix.reports.ReportPrintHelper;
 import io.jmix.reports.app.service.ReportService;
 import io.jmix.reports.entity.CustomTemplateDefinedBy;
@@ -33,12 +30,15 @@ import io.jmix.reportsui.gui.datasource.NotPersistenceDatasource;
 import io.jmix.reportsui.gui.definition.edit.scripteditordialog.ScriptEditorDialog;
 import io.jmix.reportsui.gui.report.run.ShowChartController;
 import io.jmix.reportsui.gui.report.run.ShowPivotTableController;
+import io.jmix.security.constraint.PolicyStore;
+import io.jmix.security.constraint.SecureOperations;
 import io.jmix.ui.Dialogs;
 import io.jmix.ui.Notifications;
 import io.jmix.ui.ScreenBuilders;
 import io.jmix.ui.WindowConfig;
 import io.jmix.ui.component.*;
 import io.jmix.ui.screen.*;
+import io.jmix.ui.upload.TemporaryStorage;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -137,10 +137,13 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
     protected Metadata metadata;
 
     @Autowired
-    protected Security security;
+    protected SecureOperations secureOperations;
 
     @Autowired
-    protected FileUploadingAPI fileUploading;
+    protected PolicyStore policyStore;
+
+    @Autowired
+    protected TemporaryStorage temporaryStorage;
 
     @Autowired
     protected ScreenBuilders screenBuilders;
@@ -360,7 +363,7 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
             ReportTemplate reportTemplate = getEditedEntity();
             reportTemplate.setName(fileName);
 
-            File file = fileUploading.getFile(templateUploadField.getFileId());
+            File file = temporaryStorage.getFile(templateUploadField.getFileId());
             try {
                 byte[] data = FileUtils.readFileToByteArray(file);
                 reportTemplate.setContent(data);
@@ -386,8 +389,8 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
             templateUploadField.setValue(fileDescriptor);
         }
 
-        boolean updatePermitted = security.isEntityOpPermitted(metadata.getClass(reportTemplate), EntityOp.UPDATE)
-                && security.isEntityAttrUpdatePermitted(metadata.getClass(reportTemplate), "content");
+        boolean updatePermitted = secureOperations.isEntityUpdatePermitted(metadata.getClass(reportTemplate), policyStore)
+                && secureOperations.isEntityAttrUpdatePermitted(metadata.getClass(reportTemplate).getPropertyPath("content"), policyStore);
 
         templateUploadField.setEditable(updatePermitted);
     }
@@ -405,7 +408,7 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
             String templateContent = new String(reportTemplate.getContent(), StandardCharsets.UTF_8);
             templateFileEditor.setValue(templateContent);
         }
-        templateFileEditor.setEditable(security.isEntityOpPermitted(metadata.getClass(reportTemplate), EntityOp.UPDATE));
+        templateFileEditor.setEditable(secureOperations.isEntityUpdatePermitted(metadata.getClass(reportTemplate), policyStore));
     }
 
     protected void visibleTemplateEditor(ReportOutputType outputType) {

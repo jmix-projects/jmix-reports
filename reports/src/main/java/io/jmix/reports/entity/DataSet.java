@@ -15,19 +15,21 @@
  */
 package io.jmix.reports.entity;
 
+import com.haulmont.yarg.structure.ReportQuery;
 import io.jmix.core.FetchPlan;
+import io.jmix.core.entity.annotation.JmixGeneratedValue;
+import io.jmix.core.entity.annotation.SystemLevel;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.annotation.JmixProperty;
-import com.haulmont.cuba.core.entity.BaseUuidEntity;
-import io.jmix.core.entity.annotation.SystemLevel;
-import com.haulmont.yarg.structure.ReportQuery;
 
+import javax.persistence.Id;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @JmixEntity(name = "report_DataSet")
 @SystemLevel
-public class DataSet extends BaseUuidEntity implements ReportQuery {
+public class DataSet implements ReportQuery {
 
     public static final String ENTITY_PARAM_NAME = "entityParamName";
     public static final String LIST_ENTITIES_PARAM_NAME = "listEntitiesParamName";
@@ -40,6 +42,9 @@ public class DataSet extends BaseUuidEntity implements ReportQuery {
     private static final long serialVersionUID = -3706206933129963303L;
 
     protected FetchPlan fetchPlan;
+    @Id
+    @JmixGeneratedValue
+    protected UUID id;
     @JmixProperty
     protected String name;
     @JmixProperty
@@ -70,6 +75,14 @@ public class DataSet extends BaseUuidEntity implements ReportQuery {
     protected String dataStore;
     @JmixProperty
     protected Boolean processTemplate;
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
 
     public FetchPlan getFetchPlan() {
         return fetchPlan;

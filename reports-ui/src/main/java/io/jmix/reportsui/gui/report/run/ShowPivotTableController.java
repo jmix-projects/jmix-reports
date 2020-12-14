@@ -28,6 +28,7 @@ import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportOutputType;
 import io.jmix.reports.entity.ReportTemplate;
 import io.jmix.reportsui.gui.ReportGuiManager;
+import io.jmix.ui.Fragments;
 import io.jmix.ui.UiComponents;
 import io.jmix.ui.WindowParam;
 import io.jmix.ui.component.*;
@@ -78,6 +79,12 @@ public class ShowPivotTableController extends StandardLookup {
 
     @Autowired
     protected Messages messages;
+
+    @Autowired
+    protected Fragments fragments;
+
+    @Autowired
+    protected ScreenValidation screenValidation;
 
     @Autowired
     protected CurrentAuthentication currentAuthentication;
@@ -137,8 +144,17 @@ public class ShowPivotTableController extends StandardLookup {
     protected void openReportParameters(Map<String, Object> reportParameters) {
         parametersFrameHolder.removeAll();
         if (report != null) {
-            Map<String, Object> params = ParamsMap.of(InputParametersFrame.REPORT_PARAMETER, report, InputParametersFrame.PARAMETERS_PARAMETER, reportParameters);
-            inputParametersFrame = (InputParametersFrame) openFrame(parametersFrameHolder, "report_inputParametersFrame", params);
+            Map<String, Object> params = ParamsMap.of(
+                    InputParametersFrame.REPORT_PARAMETER, report,
+                    InputParametersFrame.PARAMETERS_PARAMETER, reportParameters
+            );
+
+            inputParametersFrame = (InputParametersFrame) fragments.create(this,
+                    "report_inputParametersFrame",
+                    new MapScreenOptions(params))
+                    .init();
+            parametersFrameHolder.add(inputParametersFrame.getFragment());
+
             reportParamsBox.setVisible(true);
         } else {
             reportParamsBox.setVisible(false);
@@ -148,7 +164,8 @@ public class ShowPivotTableController extends StandardLookup {
     @Subscribe("printReportBtn")
     public void printReport() {
         if (inputParametersFrame != null && inputParametersFrame.getReport() != null) {
-            if (validateAll()) {
+            ValidationErrors validationErrors = screenValidation.validateUiComponents(getWindow());
+            if (validationErrors.isEmpty()) {
                 Map<String, Object> parameters = inputParametersFrame.collectParameters();
                 Report report = inputParametersFrame.getReport();
 
@@ -162,6 +179,8 @@ public class ShowPivotTableController extends StandardLookup {
                 ReportOutputDocument document = reportGuiManager.getReportResult(report, parameters, templateCode);
                 PivotTableData result = (PivotTableData) serialization.deserialize(document.getContent());
                 openPivotTable(result.getPivotTableJson(), result.getValues());
+            } else {
+                screenValidation.showValidationErrors(this, validationErrors);
             }
         }
     }
@@ -172,7 +191,12 @@ public class ShowPivotTableController extends StandardLookup {
             Map<String, Object> screenParams = ParamsMap.of(
                     "pivotTableJson", pivotTableJson,
                     "values", values);
-            openFrame(reportBox, PIVOT_TABLE_SCREEN_ID, screenParams);
+
+            Fragment fragment = fragments.create(this, PIVOT_TABLE_SCREEN_ID, new MapScreenOptions(screenParams))
+                    .init()
+                    .getFragment();
+
+            reportBox.add(fragment);
         }
         showStubText();
     }

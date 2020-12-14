@@ -16,17 +16,24 @@
 
 package io.jmix.reports.entity.charts;
 
-import com.haulmont.cuba.core.entity.BaseUuidEntity;
+import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.entity.annotation.SystemLevel;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.annotation.JmixProperty;
 
+import javax.persistence.Id;
+import java.io.Serializable;
+import java.util.UUID;
+
 @JmixEntity(name = "report_ChartSeries")
 @SystemLevel
-public class ChartSeries extends BaseUuidEntity {
+public class ChartSeries implements Serializable {
 
     private static final long serialVersionUID = -3205550424620740535L;
 
+    @Id
+    @JmixGeneratedValue
+    protected UUID id;
     @JmixProperty
     protected String name;
     @JmixProperty(mandatory = true)
@@ -37,6 +44,14 @@ public class ChartSeries extends BaseUuidEntity {
     protected String colorField;
     @JmixProperty
     protected Integer order;
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
 
     public String getName() {
         return name;

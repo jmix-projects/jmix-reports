@@ -17,17 +17,17 @@
 package io.jmix.reports;
 
 import com.google.common.collect.ImmutableMap;
-import io.jmix.core.metamodel.model.MetaClass;
+import com.haulmont.cuba.core.global.Scripting;
 import io.jmix.core.Entity;
 import io.jmix.core.Metadata;
-import com.haulmont.cuba.core.global.Scripting;
+import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.reports.entity.ParameterType;
 import io.jmix.reports.entity.ReportInputParameter;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
-import org.springframework.beans.factory.annotation.Autowired;
 import java.math.BigDecimal;
 import java.time.*;
 import java.util.Collection;

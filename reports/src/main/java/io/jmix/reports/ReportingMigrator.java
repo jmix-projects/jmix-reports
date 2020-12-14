@@ -17,8 +17,8 @@
 package io.jmix.reports;
 
 
-import com.haulmont.cuba.core.global.DataManager;
-import com.haulmont.cuba.core.global.LoadContext;
+import io.jmix.core.*;
+import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.reports.entity.Report;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -31,16 +31,27 @@ public class ReportingMigrator implements io.jmix.reports.ReportingMigratorMBean
     public static final String NAME = "reporting_ReportingMigrator";
 
     @Autowired
+    protected Metadata metadata;
+
+    @Autowired
     protected DataManager dataManager;
+
     @Autowired
     protected ReportingApi reportingApi;
+
+    @Autowired
+    protected FetchPlanRepository fetchPlanRepository;
 
     //TODO authenticated
 //    @Authenticated
     public String updateSecurityIndex() {
-        LoadContext<Report> ctx = new LoadContext<>(Report.class);
-        ctx.setLoadDynamicAttributes(true);
-        ctx.setView("report.edit");
+        MetaClass metaClass = metadata.getClass(Report.class);
+        FetchPlan fetchPlan = fetchPlanRepository.getFetchPlan(metaClass, "report.edit");
+
+        LoadContext<Report> ctx = new LoadContext(metaClass);
+        //todo dynamic
+        //ctx.setLoadDynamicAttributes(true);
+        ctx.setFetchPlan(fetchPlan);
         ctx.setQueryString("select r from report_Report r");
         List<Report> resultList = dataManager.loadList(ctx);
         for (Report report : resultList) {

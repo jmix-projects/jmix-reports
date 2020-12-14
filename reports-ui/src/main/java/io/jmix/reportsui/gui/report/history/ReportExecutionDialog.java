@@ -18,6 +18,7 @@ package io.jmix.reportsui.gui.report.history;
 
 import io.jmix.core.LoadContext;
 import io.jmix.core.metamodel.model.MetaClass;
+import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportGroup;
 import io.jmix.reportsui.gui.ReportGuiManager;
@@ -28,7 +29,6 @@ import io.jmix.ui.screen.LookupComponent;
 import io.jmix.ui.screen.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Date;
 import java.util.List;
@@ -61,6 +61,8 @@ public class ReportExecutionDialog extends StandardLookup<Report> {
     protected ComboBox<ReportGroup> filterGroup;
     @Autowired
     protected DateField<Date> filterUpdatedDate;
+    @Autowired
+    protected CurrentAuthentication currentAuthentication;
 
     @WindowParam(name = META_CLASS_PARAMETER)
     protected MetaClass metaClassParameter;
@@ -70,7 +72,7 @@ public class ReportExecutionDialog extends StandardLookup<Report> {
     @Install(to = "reportsDl", target = Target.DATA_LOADER)
     protected List<Report> reportsDlLoadDelegate(LoadContext<Report> loadContext) {
         return reportGuiManager.getAvailableReports(screenParameter,
-                SecurityContextHolder.getContext().getAuthentication().getPrincipal(),
+                currentAuthentication.getUser(),
                 metaClassParameter);
     }
 
@@ -90,7 +92,7 @@ public class ReportExecutionDialog extends StandardLookup<Report> {
 
     protected void filterReports() {
         List<Report> reports = reportGuiManager.getAvailableReports(screenParameter,
-                SecurityContextHolder.getContext().getAuthentication().getPrincipal(),
+                currentAuthentication.getUser(),
                 metaClassParameter)
                 .stream()
                 .filter(this::filterReport)

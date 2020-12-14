@@ -20,5 +20,6 @@ import io.jmix.reports.exception.TemplateGenerationException;
 
 public interface TemplateGeneratorApi {
     String NAME = "report_TemplateGenerator";
+
     byte[] generateTemplate() throws TemplateGenerationException;
 }

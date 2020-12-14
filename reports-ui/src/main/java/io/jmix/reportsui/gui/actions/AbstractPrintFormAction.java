@@ -20,6 +20,7 @@ import io.jmix.core.*;
 import io.jmix.core.common.util.ParamsMap;
 import io.jmix.core.entity.BaseUser;
 import io.jmix.core.metamodel.model.MetaClass;
+import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.reports.app.ParameterPrototype;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportInputParameter;
@@ -55,6 +56,9 @@ public abstract class AbstractPrintFormAction extends AbstractAction implements 
     @Autowired
     protected FetchPlanRepository fetchPlanRepository;
 
+    @Autowired
+    protected CurrentAuthentication currentAuthentication;
+
     protected BeforeActionPerformedHandler beforeActionPerformedHandler;
 
     protected AbstractPrintFormAction(String id) {
@@ -67,8 +71,7 @@ public abstract class AbstractPrintFormAction extends AbstractAction implements 
 
     protected void openRunReportScreen(Screen screen, Object selectedValue, MetaClass inputValueMetaClass,
                                        @Nullable String outputFileName) {
-        BaseUser user = (BaseUser) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        List<Report> reports = reportGuiManager.getAvailableReports(screen.getId(), user, inputValueMetaClass);
+        List<Report> reports = reportGuiManager.getAvailableReports(screen.getId(), currentAuthentication.getUser(), inputValueMetaClass);
 
         ScreenContext screenContext = UiControllerUtils.getScreenContext(screen);
 

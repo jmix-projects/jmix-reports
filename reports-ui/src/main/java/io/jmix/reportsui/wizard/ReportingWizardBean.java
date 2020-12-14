@@ -19,7 +19,6 @@ package io.jmix.reportsui.wizard;
 import io.jmix.core.*;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.core.metamodel.model.MetaProperty;
-import com.haulmont.cuba.core.global.Configuration;
 import io.jmix.reports.ReportingApi;
 import io.jmix.reports.ReportingBean;
 import io.jmix.reports.ReportingConfig;
@@ -33,12 +32,10 @@ import org.apache.commons.collections4.Transformer;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
-
-import org.springframework.beans.factory.annotation.Autowired;
-
 import javax.persistence.Temporal;
 import java.lang.reflect.AnnotatedElement;
 import java.util.*;
@@ -56,8 +53,6 @@ public class ReportingWizardBean implements ReportingWizardApi {
     protected Metadata metadata;
     @Autowired
     protected ReportingApi reportingApi;
-    @Autowired
-    protected Configuration configuration;
     @Autowired
     protected ReportingConfig reportingConfig;
     @Autowired
@@ -338,7 +333,7 @@ public class ReportingWizardBean implements ReportingWizardApi {
      *
      * @param entityTree             the whole entity tree model
      * @param isTabulated            determine which region will be created
-     * @param fetchPlan                   by that view region will be created
+     * @param fetchPlan              by that view region will be created
      * @param collectionPropertyName must to be non-null for a tabulated region
      * @return report region
      */

@@ -16,7 +16,7 @@
 
 package io.jmix.reportsui.gui.report.validators;
 
-import com.haulmont.cuba.core.global.Messages;
+import io.jmix.core.Messages;
 import io.jmix.ui.component.ValidationException;
 import io.jmix.ui.component.validation.AbstractValidator;
 import org.apache.commons.lang3.StringUtils;

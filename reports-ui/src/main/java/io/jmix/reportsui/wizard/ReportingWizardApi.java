@@ -19,7 +19,6 @@ package io.jmix.reportsui.wizard;
 import io.jmix.core.FetchPlan;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.core.metamodel.model.MetaProperty;
-import com.haulmont.cuba.core.global.View;
 import io.jmix.reports.app.EntityTree;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.wizard.EntityTreeNode;
@@ -31,7 +30,6 @@ import java.util.List;
 
 /**
  * API for report wizard
- *
  */
 public interface ReportingWizardApi {
 

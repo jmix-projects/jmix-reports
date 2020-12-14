@@ -22,7 +22,6 @@ import com.haulmont.yarg.formatters.impl.HtmlFormatter;
 import com.haulmont.yarg.formatters.impl.XlsxFormatter;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 public class JmixFormatterFactory extends DefaultFormatterFactory {
 
@@ -34,7 +33,7 @@ public class JmixFormatterFactory extends DefaultFormatterFactory {
     public JmixFormatterFactory() {
         super();
         FormatterCreator ftlCreator = factoryInput -> {
-            HtmlFormatter htmlFormatter = beanFactory.getBean(CubaHtmlFormatter.class,factoryInput);
+            HtmlFormatter htmlFormatter = beanFactory.getBean(CubaHtmlFormatter.class, factoryInput);
             htmlFormatter.setDefaultFormatProvider(defaultFormatProvider);
             htmlFormatter.setScripting(scripting);
             return htmlFormatter;
@@ -54,8 +53,8 @@ public class JmixFormatterFactory extends DefaultFormatterFactory {
         };
 
         formattersMap.put("docx", docxCreator);
-        formattersMap.put("chart", factoryInput -> beanFactory.getBean(ChartFormatter.class,factoryInput));
-        formattersMap.put("pivot", factoryInput -> beanFactory.getBean(PivotTableFormatter.class,factoryInput));
+        formattersMap.put("chart", factoryInput -> beanFactory.getBean(ChartFormatter.class, factoryInput));
+        formattersMap.put("pivot", factoryInput -> beanFactory.getBean(PivotTableFormatter.class, factoryInput));
 
         FormatterCreator xlsxCreator = factoryInput -> {
             XlsxFormatter xlsxFormatter = new CubaXlsxFormatter(factoryInput);

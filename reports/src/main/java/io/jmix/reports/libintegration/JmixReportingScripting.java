@@ -17,14 +17,14 @@
 package io.jmix.reports.libintegration;
 
 import com.haulmont.yarg.util.groovy.Scripting;
-
 import org.springframework.beans.factory.annotation.Autowired;
+
 import java.util.Map;
 
 public class JmixReportingScripting implements Scripting {
 
     @Autowired
-    private com.haulmont.cuba.core.global.Scripting  scripting;
+    private com.haulmont.cuba.core.global.Scripting scripting;
 
     @Override
     public <T> T evaluateGroovy(String s, Map<String, Object> stringObjectMap) {

@@ -23,7 +23,7 @@
 <!--    </dsContext>-->
 
     <data>
-        <instance id="propertyDs"
+        <instance id="propertyDc"
                   class="io.jmix.reports.entity.pivottable.PivotTableProperty">
             <loader id="propertyDl"/>
         </instance>
@@ -36,7 +36,7 @@
 
     <layout spacing="true" expand="editBox">
         <groupBox id="editBox" showAsPanel="true">
-            <fieldGroup id="editGroup" datasource="propertyDs" width="100%">
+            <fieldGroup id="editGroup" datasource="propertyDc" width="100%">
                 <column width="100%">
                     <field property="name" width="337px"/>
                     <field property="caption" width="337px"/>

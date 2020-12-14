@@ -16,18 +16,15 @@
 
 package io.jmix.reports.libintegration;
 
-import io.jmix.core.FetchPlan;
-import io.jmix.core.Entity;
-import com.haulmont.cuba.core.global.View;
-import io.jmix.core.entity.EntityValues;
-import io.jmix.reports.app.EntityMap;
-import io.jmix.reports.entity.DataSet;
 import com.haulmont.yarg.structure.BandData;
 import com.haulmont.yarg.structure.ProxyWrapper;
 import com.haulmont.yarg.structure.ReportQuery;
+import io.jmix.core.Entity;
+import io.jmix.core.FetchPlan;
+import io.jmix.core.entity.EntityValues;
+import io.jmix.reports.app.EntityMap;
+import io.jmix.reports.entity.DataSet;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -60,7 +57,7 @@ public class MultiEntityDataLoader extends AbstractEntityDataLoader {
             Entity entity = (Entity) params.get(entityParameterName);
             entity = reloadEntityByDataSetView(dataSet, entity);
             if (entity != null) {
-                entities = EntityValues.getValueEx(entity,nestedCollectionName);
+                entities = EntityValues.getValueEx(entity, nestedCollectionName);
                 if (dataSet instanceof DataSet) {
                     FetchPlan entityView = getView(entity, (DataSet) dataSet);
                     if (entityView != null && entityView.getProperty(nestedCollectionName) != null) {
@@ -96,15 +93,15 @@ public class MultiEntityDataLoader extends AbstractEntityDataLoader {
             if (dataSet instanceof DataSet) {
                 if (hasNestedCollection) {
                     if (nestedCollectionView != null) {
-                        resultList.add(new EntityMap(entity, nestedCollectionView,beanFactory));
+                        resultList.add(new EntityMap(entity, nestedCollectionView, beanFactory));
                     } else {
-                        resultList.add(new EntityMap(entity,beanFactory));
+                        resultList.add(new EntityMap(entity, beanFactory));
                     }
                 } else {
-                    resultList.add(new EntityMap(entity, getView(entity, (DataSet) dataSet),beanFactory));
+                    resultList.add(new EntityMap(entity, getView(entity, (DataSet) dataSet), beanFactory));
                 }
             } else {
-                resultList.add(new EntityMap(entity,beanFactory));
+                resultList.add(new EntityMap(entity, beanFactory));
             }
         }
         return resultList;

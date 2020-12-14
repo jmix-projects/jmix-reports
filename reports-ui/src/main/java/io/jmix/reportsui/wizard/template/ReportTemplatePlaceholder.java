@@ -16,8 +16,7 @@
 
 package io.jmix.reportsui.wizard.template;
 
-import com.haulmont.cuba.core.global.AppBeans;
-import com.haulmont.cuba.core.global.Messages;
+import io.jmix.core.Messages;
 import io.jmix.core.metamodel.model.MetaProperty;
 import io.jmix.reports.entity.wizard.RegionProperty;
 import io.jmix.reports.entity.wizard.ReportData;
@@ -80,16 +79,16 @@ public class ReportTemplatePlaceholder {
             if (temporal != null) {
                 switch (temporal.value()) {
                     case DATE:
-                        dateMask = messages.getMainMessage("dateFormat");
+                        dateMask = messages.getMessage("dateFormat");
                         break;
                     case TIME:
-                        dateMask = messages.getMainMessage("timeFormat");
+                        dateMask = messages.getMessage("timeFormat");
                         break;
                     default:
-                        dateMask = messages.getMainMessage("dateTimeFormat");
+                        dateMask = messages.getMessage("dateTimeFormat");
                 }
             } else {
-                dateMask = messages.getMainMessage("dateTimeFormat");
+                dateMask = messages.getMessage("dateTimeFormat");
             }
             String[] partsFieldName = fieldName.split("\\.");
             if (partsFieldName.length > 1) {

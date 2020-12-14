@@ -17,21 +17,21 @@
 package io.jmix.reportsrest.web.restapi.v1;
 
 import com.google.common.base.Strings;
-import com.haulmont.cuba.gui.export.ExportFormat;
+import com.haulmont.yarg.structure.ReportOutputType;
 import io.jmix.core.FileTypesHelper;
 import io.jmix.core.common.util.URLEncodeUtils;
-import com.haulmont.yarg.structure.ReportOutputType;
 import io.jmix.reports.ReportPrintHelper;
+import io.jmix.ui.download.DownloadFormat;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
@@ -57,7 +57,7 @@ public class ReportRestController {
     }
 
     @GetMapping(value = "/group/{entityId}")
-    public String loadGroup(@PathVariable String entityId){
+    public String loadGroup(@PathVariable String entityId) {
         return controllerManager.loadGroup(entityId);
     }
 
@@ -90,7 +90,7 @@ public class ReportRestController {
     }
 
     protected String getContentType(ReportOutputType outputType) {
-        ExportFormat exportFormat = ReportPrintHelper.getExportFormat(outputType);
+        DownloadFormat exportFormat = ReportPrintHelper.getExportFormat(outputType);
         return exportFormat == null ? FileTypesHelper.DEFAULT_MIME_TYPE : exportFormat.getContentType();
     }
 }

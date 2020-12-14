@@ -18,6 +18,7 @@ package io.jmix.reports.entity.wizard;
 
 import com.haulmont.cuba.core.entity.HasUuid;
 import io.jmix.core.Entity;
+import io.jmix.core.entity.EntityEntrySoftDelete;
 
 /**
  * Interface to be implemented by some entities that order display can be changed in UI.

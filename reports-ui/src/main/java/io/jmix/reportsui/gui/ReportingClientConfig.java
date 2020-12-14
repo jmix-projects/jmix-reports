@@ -22,7 +22,7 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
 
 @ConfigurationProperties(prefix = "jmix.reports.client")
 @ConstructorBinding
-public class ReportingClientConfig  {
+public class ReportingClientConfig {
 
     boolean useBackgroundReportProcessing;
 
@@ -38,11 +38,11 @@ public class ReportingClientConfig  {
         this.enableTabSymbolInDataSetEditor = enableTabSymbolInDataSetEditor;
     }
 
-    public boolean getUseBackgroundReportProcessing(){
+    public boolean getUseBackgroundReportProcessing() {
         return useBackgroundReportProcessing;
     }
 
-    public long getBackgroundReportProcessingTimeoutMs(){
+    public long getBackgroundReportProcessingTimeoutMs() {
         return backgroundReportProcessingTimeoutMs;
     }
 
@@ -50,7 +50,7 @@ public class ReportingClientConfig  {
      * @return true if Script fields in report editor should handle TAB key as \t symbol instead of focus navigation
      * @see io.jmix.reportsui.gui.definition.edit.BandDefinitionEditor
      */
-    public boolean getEnableTabSymbolInDataSetEditor(){
+    public boolean getEnableTabSymbolInDataSetEditor() {
         return enableTabSymbolInDataSetEditor;
     }
 }

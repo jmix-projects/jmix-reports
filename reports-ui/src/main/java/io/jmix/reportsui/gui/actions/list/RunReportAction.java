@@ -17,10 +17,9 @@
 package io.jmix.reportsui.gui.actions.list;
 
 import com.google.common.collect.ImmutableMap;
-import com.haulmont.cuba.core.global.BeanLocator;
-import com.haulmont.cuba.core.global.DataManager;
-import com.haulmont.cuba.core.global.Messages;
-import io.jmix.ui.action.ListAction;
+import io.jmix.core.DataManager;
+import io.jmix.core.Id;
+import io.jmix.core.Messages;
 import io.jmix.core.common.util.ParamsMap;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.reports.entity.Report;
@@ -31,6 +30,7 @@ import io.jmix.reportsui.gui.report.run.ReportRun;
 import io.jmix.ui.ScreenBuilders;
 import io.jmix.ui.action.Action;
 import io.jmix.ui.action.ActionType;
+import io.jmix.ui.action.ListAction;
 import io.jmix.ui.component.Component;
 import io.jmix.ui.component.ComponentsHelper;
 import io.jmix.ui.component.data.DataUnit;
@@ -60,8 +60,9 @@ public class RunReportAction extends ListAction implements Action.HasBeforeActio
     public static final String DEFAULT_SINGLE_ENTITY_ALIAS = "entity";
     public static final String DEFAULT_LIST_OF_ENTITIES_ALIAS = "entities";
 
-    protected BeanLocator beanLocator;
+    protected DataManager dataManager;
     protected ScreenBuilders screenBuilders;
+    protected ReportGuiManager reportGuiManager;
 
     protected BeforeActionPerformedHandler beforeActionPerformedHandler;
 
@@ -84,13 +85,18 @@ public class RunReportAction extends ListAction implements Action.HasBeforeActio
     }
 
     @Autowired
-    public void setBeanLocator(BeanLocator beanLocator) {
-        this.beanLocator = beanLocator;
+    public void setScreenBuilders(ScreenBuilders screenBuilders) {
+        this.screenBuilders = screenBuilders;
     }
 
     @Autowired
-    public void setScreenBuilders(ScreenBuilders screenBuilders) {
-        this.screenBuilders = screenBuilders;
+    public void setDataManager(DataManager dataManager) {
+        this.dataManager = dataManager;
+    }
+
+    @Autowired
+    public void setReportGuiManager(ReportGuiManager reportGuiManager) {
+        this.reportGuiManager = reportGuiManager;
     }
 
     @Override
@@ -147,10 +153,10 @@ public class RunReportAction extends ListAction implements Action.HasBeforeActio
         if (reports != null && reports.size() > 0) {
             Report report = reports.iterator().next();
 
-            DataManager dataManager = beanLocator.get(DataManager.NAME);
-            report = dataManager.reload(report, "report.edit");
+            report = dataManager.load(Id.of(report))
+                    .fetchPlan("report.edit")
+                    .one();
 
-            ReportGuiManager reportGuiManager = beanLocator.get(ReportGuiManager.class);
             if (report.getInputParameters() != null
                     && report.getInputParameters().size() > 0
                     || reportGuiManager.inputParametersRequiredByTemplates(report)) {

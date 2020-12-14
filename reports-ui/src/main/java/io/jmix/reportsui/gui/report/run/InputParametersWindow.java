@@ -17,7 +17,6 @@ package io.jmix.reportsui.gui.report.run;
 
 import com.sun.deploy.config.ClientConfig;
 import io.jmix.core.Messages;
-import io.jmix.core.common.util.Preconditions;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportInputParameter;
 import io.jmix.reports.entity.ReportTemplate;
@@ -27,17 +26,14 @@ import io.jmix.reportsui.gui.ReportParameterValidator;
 import io.jmix.ui.Notifications;
 import io.jmix.ui.action.Action;
 import io.jmix.ui.component.Button;
-import io.jmix.ui.screen.StandardLookup;
-import io.jmix.ui.screen.Subscribe;
-import io.jmix.ui.screen.UiController;
-import io.jmix.ui.screen.UiDescriptor;
+import io.jmix.ui.component.ValidationErrors;
+import io.jmix.ui.component.Window;
+import io.jmix.ui.screen.*;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collection;
 import java.util.Map;
-
-import static io.jmix.reportsui.gui.report.run.InputParametersFrame.PARAMETERS_PARAMETER;
 
 @UiController("report_InputParametersWindow")
 @UiDescriptor("input-parameters.xml")
@@ -81,28 +77,32 @@ public class InputParametersWindow extends StandardLookup {
     @Autowired
     protected Messages messages;
 
+    @Autowired
+    protected ScreenValidation screenValidation;
+
     @Subscribe
     protected void onInit(InitEvent event) {
         //noinspection unchecked
-        templateCode = (String) params.get(TEMPLATE_CODE_PARAMETER);
-        outputFileName = (String) params.get(OUTPUT_FILE_NAME_PARAMETER);
-        bulkPrint = BooleanUtils.isTrue((Boolean) params.get(BULK_PRINT));
-        inputParameter = (ReportInputParameter) params.get(INPUT_PARAMETER);
-
-        if (bulkPrint) {
-            Preconditions.checkNotNullArgument(inputParameter, String.format("%s is null for bulk print", INPUT_PARAMETER));
-            //noinspection unchecked
-            Map<String, Object> parameters = (Map<String, Object>) params.get(PARAMETERS_PARAMETER);
-            selectedEntities = (Collection) parameters.get(inputParameter.getAlias());
-        }
-
-        report = (Report) params.get(REPORT_PARAMETER);
+        //todo params
+//        templateCode = (String) params.get(TEMPLATE_CODE_PARAMETER);
+//        outputFileName = (String) params.get(OUTPUT_FILE_NAME_PARAMETER);
+//        bulkPrint = BooleanUtils.isTrue((Boolean) params.get(BULK_PRINT));
+//        inputParameter = (ReportInputParameter) params.get(INPUT_PARAMETER);
+//
+//        if (bulkPrint) {
+//            Preconditions.checkNotNullArgument(inputParameter, String.format("%s is null for bulk print", INPUT_PARAMETER));
+//            //noinspection unchecked
+//            Map<String, Object> parameters = (Map<String, Object>) params.get(PARAMETERS_PARAMETER);
+//            selectedEntities = (Collection) parameters.get(inputParameter.getAlias());
+//        }
+//
+//        report = (Report) params.get(REPORT_PARAMETER);
 
         Action printReportAction = printReportBtn.getAction();
 //TODO Commit shortcut
 //        String commitShortcut = clientConfig.getCommitShortcut();
 //        printReportAction.setShortcut(commitShortcut);
-        addAction(printReportAction);
+        //addAction(printReportAction);
     }
 
     @Subscribe
@@ -113,7 +113,8 @@ public class InputParametersWindow extends StandardLookup {
     @Subscribe("printReportBtn")
     public void printReport() {
         if (inputParametersFrame.getReport() != null) {
-            if (validateAll()) {
+            ValidationErrors validationErrors = screenValidation.validateUiComponents(getWindow());
+            if (validationErrors.isEmpty()) {
                 ReportTemplate template = inputParametersFrame.getReportTemplate();
                 if (template != null) {
                     templateCode = template.getCode();
@@ -125,14 +126,16 @@ public class InputParametersWindow extends StandardLookup {
                 } else {
                     reportGuiManager.printReport(report, parameters, templateCode, outputFileName, inputParametersFrame.getOutputType(), this);
                 }
+            } else {
+                screenValidation.showValidationErrors(this, validationErrors);
             }
         }
     }
 
-    @Override
-    public boolean validateAll() {
-        return super.validateAll() && crossValidateParameters();
-    }
+//    @Override
+//    public boolean validateAll() {
+//        return super.validateAll() && crossValidateParameters();
+//    }
 
     protected boolean crossValidateParameters() {
         boolean isValid = true;
@@ -155,6 +158,6 @@ public class InputParametersWindow extends StandardLookup {
 
     @Subscribe("cancelBtn")
     public void cancel() {
-        close(CLOSE_ACTION_ID);
+        close(new StandardCloseAction(Window.CLOSE_ACTION_ID));
     }
 }

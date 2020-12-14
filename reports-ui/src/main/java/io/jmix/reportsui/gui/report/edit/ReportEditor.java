@@ -17,53 +17,45 @@ package io.jmix.reportsui.gui.report.edit;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import io.jmix.core.*;
-import io.jmix.ui.*;
-import io.jmix.ui.action.list.CreateAction;
-import io.jmix.ui.action.list.EditAction;
-import io.jmix.ui.action.list.ExcludeAction;
-import io.jmix.ui.action.list.RemoveAction;
-import io.jmix.ui.component.FileUploadField;
-import io.jmix.ui.component.GroupBoxLayout;
-import io.jmix.ui.component.ListComponent;
-import io.jmix.ui.component.SourceCodeEditor;
-import io.jmix.ui.component.Table;
-import io.jmix.ui.component.TextArea;
-import io.jmix.ui.component.Tree;
-import io.jmix.core.common.util.ParamsMap;
-import io.jmix.core.metamodel.model.MetaClass;
-import io.jmix.ui.component.*;
-import io.jmix.core.metamodel.model.MetaPropertyPath;
-import io.jmix.ui.action.*;
-import com.haulmont.cuba.gui.data.CollectionDatasource;
-import com.haulmont.cuba.gui.data.Datasource;
 import com.haulmont.cuba.gui.data.HierarchicalDatasource;
 import com.haulmont.cuba.gui.data.impl.CollectionPropertyDatasourceImpl;
 import com.haulmont.cuba.gui.data.impl.DatasourceImpl;
 import com.haulmont.cuba.gui.data.impl.DatasourceImplementation;
 import com.haulmont.cuba.gui.data.impl.HierarchicalPropertyDatasourceImpl;
 import com.haulmont.cuba.gui.export.ByteArrayDataProvider;
-import com.haulmont.cuba.gui.export.ExportDisplay;
-import com.haulmont.cuba.gui.export.ExportFormat;
 import com.haulmont.cuba.gui.upload.FileUploadingAPI;
-import io.jmix.core.security.EntityOp;
+import com.haulmont.yarg.structure.BandOrientation;
+import io.jmix.core.*;
+import io.jmix.core.common.util.ParamsMap;
+import io.jmix.reports.ReportPrintHelper;
 import io.jmix.reports.app.service.ReportService;
 import io.jmix.reports.entity.*;
-import io.jmix.reports.ReportPrintHelper;
 import io.jmix.reportsui.gui.definition.edit.BandDefinitionEditor;
-import com.haulmont.yarg.structure.BandOrientation;
+import io.jmix.security.constraint.PolicyStore;
+import io.jmix.security.constraint.SecureOperations;
+import io.jmix.ui.*;
+import io.jmix.ui.action.AbstractAction;
+import io.jmix.ui.action.Action;
+import io.jmix.ui.action.ItemTrackingAction;
+import io.jmix.ui.action.ListAction;
+import io.jmix.ui.action.list.CreateAction;
+import io.jmix.ui.action.list.EditAction;
+import io.jmix.ui.action.list.ExcludeAction;
+import io.jmix.ui.action.list.RemoveAction;
+import io.jmix.ui.app.file.FileUploadDialog;
 import io.jmix.ui.component.*;
-import io.jmix.ui.screen.StandardEditor;
-import io.jmix.ui.screen.Subscribe;
-import io.jmix.ui.screen.UiController;
-import io.jmix.ui.screen.UiDescriptor;
+import io.jmix.ui.download.DownloadFormat;
+import io.jmix.ui.download.Downloader;
+import io.jmix.ui.model.CollectionContainer;
+import io.jmix.ui.model.InstanceContainer;
+import io.jmix.ui.screen.*;
 import io.jmix.ui.sys.ScreensHelper;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-
 import org.springframework.beans.factory.annotation.Autowired;
+
 import javax.inject.Named;
 import java.io.File;
 import java.io.IOException;
@@ -148,33 +140,33 @@ public class ReportEditor extends StandardEditor<Report> {
     protected WindowConfig windowConfig;
 
     @Autowired
-    protected Datasource<Report> reportDs;
+    protected InstanceContainer<Report> reportDc;
 
     @Autowired
-    protected CollectionDatasource<ReportGroup, UUID> groupsDs;
+    protected CollectionContainer<ReportGroup> groupsDc;
 
     @Autowired
-    protected CollectionDatasource.Sortable<ReportInputParameter, UUID> parametersDs;
+    protected CollectionContainer<ReportInputParameter> parametersDc;
 
     @Autowired
-    protected CollectionDatasource<ReportScreen, UUID> reportScreensDs;
-
-    //TODO roles ds
-    @Autowired
-    protected CollectionDatasource rolesDs;
+    protected CollectionContainer<ReportScreen> reportScreensDc;
 
     //TODO roles ds
     @Autowired
-    protected CollectionDatasource lookupRolesDs;
+    protected CollectionContainer rolesDc;
+
+    //TODO roles ds
+    @Autowired
+    protected CollectionContainer lookupRolesDc;
 
     @Autowired
-    protected CollectionDatasource<DataSet, UUID> dataSetsDs;
+    protected CollectionContainer<DataSet> dataSetsDc;
 
     @Autowired
-    protected HierarchicalDatasource<BandDefinition, UUID> treeDs;
+    protected CollectionContainer<BandDefinition> treeDc;
 
     @Autowired
-    protected CollectionDatasource<ReportTemplate, UUID> templatesDs;
+    protected CollectionContainer<ReportTemplate> templatesDc;
 
     @Autowired
     protected UiComponents uiComponents;
@@ -186,10 +178,10 @@ public class ReportEditor extends StandardEditor<Report> {
     protected ReportService reportService;
 
     @Autowired
-    protected CollectionDatasource<BandDefinition, UUID> bandsDs;
+    protected CollectionContainer<BandDefinition> bandsDc;
 
     @Autowired
-    protected CollectionDatasource<BandDefinition, UUID> availableParentBandsDs;
+    protected CollectionContainer<BandDefinition> availableParentBandsDc;
 
     @Autowired
     protected ScreensHelper screensHelper;
@@ -198,10 +190,13 @@ public class ReportEditor extends StandardEditor<Report> {
     protected Metadata metadata;
 
     @Autowired
-    protected UuidSource uuidSource;
+    protected MetadataTools metadataTools;
 
     @Autowired
-    protected Security security;
+    protected SecureOperations secureOperations;
+
+    @Autowired
+    protected PolicyStore policyStore;
 
     @Autowired
     protected Messages messages;
@@ -218,6 +213,21 @@ public class ReportEditor extends StandardEditor<Report> {
     @Autowired
     protected Dialogs dialogs;
 
+    @Autowired
+    protected EntityStates entityStates;
+
+    @Autowired
+    protected ScreenBuilders screenBuilders;
+
+    @Autowired
+    protected Screens screens;
+
+    @Autowired
+    protected Downloader downloader;
+
+    @Autowired
+    protected Actions actions;
+
     @Subscribe
     protected void initNewItem(InitEntityEvent<Report> event) {
         Report report = event.getEntity();
@@ -231,30 +241,30 @@ public class ReportEditor extends StandardEditor<Report> {
 
         rootDefinition.setReport(report);
 
-        groupsDs.refresh();
-        Collection<UUID> reportGroupIds = groupsDs.getItemIds();
-        if (reportGroupIds != null && !reportGroupIds.isEmpty()) {
-            UUID id = reportGroupIds.iterator().next();
-            report.setGroup(groupsDs.getItem(id));
+        groupsDc.refresh();
+        Collection<ReportGroup> reportGroups = groupsDc.getItems();
+        if (!reportGroups.isEmpty()) {
+            ReportGroup reportGroup = reportGroups.iterator().next();
+            report.setGroup(groupsDc.getItem(report));
         }
     }
 
     @Subscribe
     protected void onBeforeShow(BeforeShowEvent event) {
         if (!StringUtils.isEmpty(getEditedEntity().getName())) {
-            setCaption(messages.formatMessage(getClass(), "reportEditor.format", getEditedEntity().getName()));
+            getWindow().setCaption(messages.formatMessage(getClass(), "reportEditor.format", getEditedEntity().getName()));
         }
     }
 
     @Subscribe
     protected void onAfterInit(AfterInitEvent event) {
 
-        ((CollectionPropertyDatasourceImpl) treeDs).setModified(false);
-        ((DatasourceImpl) reportDs).setModified(false);
+        ((CollectionPropertyDatasourceImpl) treeDc).setModified(false);
+        ((DatasourceImpl) reportDc).setModified(false);
 
         bandTree.getDatasource().refresh();
         bandTree.expandTree();
-        bandTree.setSelected(reportDs.getItem().getRootBandDefinition());
+        bandTree.setSelected(reportDc.getItem().getRootBandDefinition());
 
         bandEditor.setBandDefinition(bandTree.getSingleSelected());
         if (bandTree.getSingleSelected() == null) {
@@ -278,32 +288,35 @@ public class ReportEditor extends StandardEditor<Report> {
     }
 
     protected void initParameters() {
-        parametersTable.addAction(
-                new CreateAction(parametersTable, OpenType.DIALOG) {
-                    @Override
-                    public Map<String, Object> getInitialValues() {
-                        Map<String, Object> params = new HashMap<>();
-                        params.put("position", parametersDs.getItemIds().size());
-                        params.put("report", getEditedEntity());
-                        return params;
-                    }
+        CreateAction createAction = (CreateAction) actions.create(CreateAction.ID);
+        createAction.setOpenMode(OpenMode.DIALOG);
+        parametersTable.addAction(createAction);
 
-                    @Override
-                    public void actionPerform(Component component) {
-                        orderParameters();
-                        super.actionPerform(component);
-                    }
-                }
-        );
+//        parametersTable.addAction(
+//                new CreateAction(parametersTable, OpenType.DIALOG) {
+//                    @Override
+//                    public Map<String, Object> getInitialValues() {
+//                        Map<String, Object> params = new HashMap<>();
+//                        params.put("position", parametersDs.getItemIds().size());
+//                        params.put("report", getEditedEntity());
+//                        return params;
+//                    }
+//
+//                    @Override
+//                    public void actionPerform(Component component) {
+//                        orderParameters();
+//                        super.actionPerform(component);
+//                    }
+//                }
+//        );
 
-        parametersTable.addAction(new RemoveAction(parametersTable, false) {
-            @Override
-            protected void afterRemove(Set selected) {
-                super.afterRemove(selected);
-                orderParameters();
-            }
-        });
-        parametersTable.addAction(new EditAction(parametersTable, OpenType.DIALOG));
+        RemoveAction removeAction = (RemoveAction) actions.create(RemoveAction.ID);
+        removeAction.setAfterActionPerformedHandler(event -> orderParameters());
+        parametersTable.addAction(removeAction);
+
+        EditAction editAction = (EditAction) actions.create(EditAction.ID);
+        editAction.setOpenMode(OpenMode.DIALOG);
+        parametersTable.addAction(editAction);
 
         paramUpButton.setAction(new ListAction("generalFrame.up") {
             @Override
@@ -334,7 +347,7 @@ public class ReportEditor extends StandardEditor<Report> {
             protected boolean isApplicable() {
                 if (target != null) {
                     ReportInputParameter item = (ReportInputParameter) target.getSingleSelected();
-                    if (item != null && parametersDs.getItem() == item) {
+                    if (item != null && parametersDc.getItem() == item) {
                         return item.getPosition() > 0 && isUpdatePermitted();
                     }
                 }
@@ -350,7 +363,7 @@ public class ReportEditor extends StandardEditor<Report> {
                 if (parameter != null) {
                     List<ReportInputParameter> inputParameters = getEditedEntity().getInputParameters();
                     int index = parameter.getPosition();
-                    if (index < parametersDs.getItemIds().size() - 1) {
+                    if (index < parametersDc.getItems().size() - 1) {
                         ReportInputParameter nextParameter = null;
                         for (ReportInputParameter _param : inputParameters) {
                             if (_param.getPosition() == index + 1) {
@@ -372,8 +385,8 @@ public class ReportEditor extends StandardEditor<Report> {
             protected boolean isApplicable() {
                 if (target != null) {
                     ReportInputParameter item = (ReportInputParameter) target.getSingleSelected();
-                    if (item != null && parametersDs.getItem() == item) {
-                        return item.getPosition() < parametersDs.size() - 1 && isUpdatePermitted();
+                    if (item != null && parametersDc.getItem() == item) {
+                        return item.getPosition() < parametersDc.getItems().size() - 1 && isUpdatePermitted();
                     }
                 }
 
@@ -384,37 +397,40 @@ public class ReportEditor extends StandardEditor<Report> {
         parametersTable.addAction(paramUpButton.getAction());
         parametersTable.addAction(paramDownButton.getAction());
 
-        parametersDs.addItemPropertyChangeListener(e -> {
+        parametersDc.addItemPropertyChangeListener(e -> {
             if ("position".equals(e.getProperty())) {
-                ((DatasourceImplementation) parametersDs).modified(e.getItem());
+                ((DatasourceImplementation) parametersDc).modified(e.getItem());
             }
         });
     }
 
     protected boolean isUpdatePermitted() {
-        return security.isEntityOpPermitted(metadata.getClassNN(Report.class), EntityOp.UPDATE);
+        return secureOperations.isEntityUpdatePermitted(metadata.getClass(Report.class), policyStore);
     }
 
     protected void sortParametersByPosition() {
-        MetaClass metaClass = metadata.getClassNN(ReportInputParameter.class);
-        MetaPropertyPath mpp = new MetaPropertyPath(metaClass, metaClass.getProperty("position"));
-
-        CollectionDatasource.Sortable.SortInfo<MetaPropertyPath> sortInfo = new CollectionDatasource.Sortable.SortInfo<>();
-        sortInfo.setOrder(CollectionDatasource.Sortable.Order.ASC);
-        sortInfo.setPropertyPath(mpp);
-
-        parametersDs.sort(new CollectionDatasource.Sortable.SortInfo[]{sortInfo});
+        parametersDc.getSorter().sort(Sort.by(Sort.Direction.ASC, "position"));
     }
 
     protected void initValuesFormats() {
-        CreateAction formatCreateAction = CreateAction.create(formatsTable, OpenType.DIALOG);
-        formatCreateAction.setInitialValuesSupplier(() ->
-                ParamsMap.of("report", getItem())
-        );
+        CreateAction formatCreateAction = (CreateAction) actions.create(CreateAction.ID);
+        formatCreateAction.setTarget(formatsTable);
+        formatCreateAction.setOpenMode(OpenMode.DIALOG);
+//        formatCreateAction.setInitialValuesSupplier(() ->
+//                ParamsMap.of("report", getItem())
+//        );
         formatsTable.addAction(formatCreateAction);
 
-        formatsTable.addAction(new RemoveAction(formatsTable, false));
-        formatsTable.addAction(new EditAction(formatsTable, OpenType.DIALOG));
+        RemoveAction removeAction = (RemoveAction) actions.create(RemoveAction.ID);
+        removeAction.setTarget(formatsTable);
+        formatsTable.addAction(removeAction);
+        //todo autocommit
+//        formatsTable.addAction(new RemoveAction(formatsTable, false));
+
+        EditAction editAction = (EditAction) actions.create(EditAction.ID);
+        editAction.setOpenMode(OpenMode.DIALOG);
+        editAction.setTarget(formatsTable);
+        formatsTable.addAction(editAction);
     }
 
     protected void initRoles() {
@@ -428,8 +444,8 @@ public class ReportEditor extends StandardEditor<Report> {
         addRoleBtn.setAction(new AbstractAction("actions.Add") {
             @Override
             public void actionPerform(Component component) {
-                if (lookupRolesDs.getItem() != null && !rolesDs.containsItem(Id.of(lookupRolesDs.getItem()).getValue())) {
-                    rolesDs.addItem(lookupRolesDs.getItem());
+                if (lookupRolesDc.getItem() != null && !rolesDc.containsItem(Id.of(lookupRolesDc.getItem()).getValue())) {
+                    rolesDc.getItems().add(lookupRolesDc.getItem());
                 }
             }
 
@@ -440,25 +456,29 @@ public class ReportEditor extends StandardEditor<Report> {
         });
     }
 
-    protected void initHelpButtons(){
+    protected void initHelpButtons() {
         localesTextField.setContextHelpIconClickHandler(e ->
                 dialogs.createMessageDialog()
-                .withCaption(messages.getMessage("localeText"))
-                .withMessage(messages.getMessage("report.localeTextHelp"))
-                .withModal(false)
-                .withWidth("600px")
-                .show());
+                        .withCaption(messages.getMessage("localeText"))
+                        .withMessage(messages.getMessage("report.localeTextHelp"))
+                        .withModal(false)
+                        .withWidth("600px")
+                        .show());
         validationScriptCodeEditor.setContextHelpIconClickHandler(e ->
                 dialogs.createMessageDialog()
-                .withCaption(messages.getMessage("validationScript"))
-                .withMessage(messages.getMessage("crossFieldValidationScriptHelp"))
-                .withModal(false)
-                .withWidth("600px")
-                .show());
+                        .withCaption(messages.getMessage("validationScript"))
+                        .withMessage(messages.getMessage("crossFieldValidationScriptHelp"))
+                        .withModal(false)
+                        .withWidth("600px")
+                        .show());
     }
 
     protected void initScreens() {
-        screenTable.addAction(new RemoveAction(screenTable, false));
+        RemoveAction removeAction = (RemoveAction) actions.create(RemoveAction.ID);
+        removeAction.setTarget(screenTable);
+        screenTable.addAction(removeAction);
+        //todo autocommit
+//        screenTable.addAction(new RemoveAction(screenTable, false));
         List<WindowInfo> windowInfoCollection = new ArrayList<>(windowConfig.getWindows());
         // sort by screenId
         screensHelper.sortWindowInfos(windowInfoCollection);
@@ -480,8 +500,7 @@ public class ReportEditor extends StandardEditor<Report> {
                     String screenId = screenIdLookup.getValue();
 
                     boolean exists = false;
-                    for (UUID id : reportScreensDs.getItemIds()) {
-                        ReportScreen item = reportScreensDs.getItem(id);
+                    for (ReportScreen item : reportScreensDc.getItems()) {
                         if (screenId.equalsIgnoreCase(item.getScreenId())) {
                             exists = true;
                             break;
@@ -492,7 +511,7 @@ public class ReportEditor extends StandardEditor<Report> {
                         ReportScreen reportScreen = metadata.create(ReportScreen.class);
                         reportScreen.setReport(getEditedEntity());
                         reportScreen.setScreenId(screenId);
-                        reportScreensDs.addItem(reportScreen);
+                        reportScreensDc.getItems().add(reportScreen);
                     }
                 }
             }
@@ -524,7 +543,7 @@ public class ReportEditor extends StandardEditor<Report> {
                         byte[] data = FileUtils.readFileToByteArray(file);
                         defaultTemplate.setContent(data);
                         defaultTemplate.setName(invisibleFileUpload.getFileName());
-                        templatesDs.modifyItem(defaultTemplate);
+                        templatesDc.modifyItem(defaultTemplate);
                     } catch (IOException e) {
                         throw new RuntimeException(String.format(
                                 "An error occurred while uploading file for template [%s]",
@@ -542,15 +561,15 @@ public class ReportEditor extends StandardEditor<Report> {
             }
         });
 
-        treeDs.addItemChangeListener(e -> {
+        treeDc.addItemChangeListener(e -> {
             bandEditor.setBandDefinition(e.getItem());
             bandEditor.setEnabled(e.getItem() != null);
-            availableParentBandsDs.clear();
+            availableParentBandsDc.clear();
             if (e.getItem() != null) {
-                for (BandDefinition bandDefinition : bandsDs.getItems()) {
+                for (BandDefinition bandDefinition : bandsDc.getItems()) {
                     if (!isChildOrEqual(e.getItem(), bandDefinition) ||
                             Objects.equals(e.getItem().getParentBandDefinition(), bandDefinition)) {
-                        availableParentBandsDs.addItem(bandDefinition);
+                        availableParentBandsDc.getItems(bandDefinition);
                     }
                 }
             }
@@ -564,7 +583,7 @@ public class ReportEditor extends StandardEditor<Report> {
                 if (e.getValue() == e.getItem()) {
                     e.getItem().setParentBandDefinition(previousParent);
                 } else {
-                    treeDs.refresh();
+                    treeDc.refresh();
                     previousParent.getChildrenBandDefinitions().remove(e.getItem());
                     parent.getChildrenBandDefinitions().add(e.getItem());
                 }
@@ -577,18 +596,19 @@ public class ReportEditor extends StandardEditor<Report> {
                     orderBandDefinitions(parent);
                 }
             }
-            treeDs.modifyItem(e.getItem());
+            treeDc.modifyItem(e.getItem());
         });
+
 
         propertiesFieldGroup.addCustomField("defaultTemplate", new FieldGroup.CustomFieldGenerator() {
             @Override
             public Component generateField(Datasource datasource, String propertyId) {
-                LookupPickerField lookupPickerField = uiComponents.create(LookupPickerField.class);
+                EntityComboBox entityComboBox = uiComponents.create(EntityComboBox.class);
 
-                lookupPickerField.setOptionsDatasource(templatesDs);
-                lookupPickerField.setDatasource(datasource, propertyId);
+                entityComboBox.setOptionsDatasource(templatesDc);
+                entityComboBox.setDatasource(datasource, propertyId);
 
-                lookupPickerField.addAction(new AbstractAction("download") {
+                entityComboBox.addAction(new AbstractAction("download") {
 
                     @Override
                     public String getDescription() {
@@ -618,10 +638,9 @@ public class ReportEditor extends StandardEditor<Report> {
                                         .withCaption(messages.getMessage("notification.fileIsNotAllowedForSpecificTypes"))
                                         .show();
                             } else {
-                                ExportDisplay exportDisplay = AppBeans.getPrototype(ExportDisplay.class);
                                 byte[] reportTemplate = defaultTemplate.getContent();
-                                exportDisplay.show(new ByteArrayDataProvider(reportTemplate, uiProperties.getSaveExportedByteArrayDataThresholdBytes(), coreProperties.getTempDir()),
-                                        defaultTemplate.getName(), ExportFormat.getByExtension(defaultTemplate.getExt()));
+                                downloader.download(new ByteArrayDataProvider(reportTemplate, uiProperties.getSaveExportedByteArrayDataThresholdBytes(), coreProperties.getTempDir()),
+                                        defaultTemplate.getName(), DownloadFormat.getByExtension(defaultTemplate.getExt()));
                             }
                         } else {
                             notifications.create(Notifications.NotificationType.HUMANIZED)
@@ -629,11 +648,11 @@ public class ReportEditor extends StandardEditor<Report> {
                                     .show();
                         }
 
-                        lookupPickerField.focus();
+                        entityComboBox.focus();
                     }
                 });
 
-                lookupPickerField.addAction(new AbstractAction("upload") {
+                entityComboBox.addAction(new AbstractAction("upload") {
                     @Override
                     public String getDescription() {
                         return messages.getMessage("description.uploadTemplate");
@@ -654,23 +673,26 @@ public class ReportEditor extends StandardEditor<Report> {
                         final ReportTemplate defaultTemplate = getEditedEntity().getDefaultTemplate();
                         if (defaultTemplate != null) {
                             if (!isTemplateWithoutFile(defaultTemplate)) {
-                                FileUploadDialog dialog = (FileUploadDialog) openWindow("fileUploadDialog", OpenType.DIALOG);
-                                dialog.addCloseListener(actionId -> {
-                                    if (COMMIT_ACTION_ID.equals(actionId)) {
-                                        File file = fileUpload.getFile(dialog.getFileId());
+                                FileUploadDialog fileUploadDialog = (FileUploadDialog) screens.create("fileUploadDialog", OpenMode.DIALOG);
+                                fileUploadDialog.addAfterCloseListener(event -> {
+                                    StandardCloseAction standardCloseAction = (StandardCloseAction) event.getCloseAction();
+                                    if (Window.COMMIT_ACTION_ID.equals(standardCloseAction.getActionId())) {
+                                        File file = fileUpload.getFile(fileUploadDialog.getFileId());
                                         try {
                                             byte[] data = FileUtils.readFileToByteArray(file);
                                             defaultTemplate.setContent(data);
-                                            defaultTemplate.setName(dialog.getFileName());
-                                            templatesDs.modifyItem(defaultTemplate);
+                                            defaultTemplate.setName(fileUploadDialog.getFileName());
+                                            templatesDc.modifyItem(defaultTemplate);
                                         } catch (IOException e) {
                                             throw new RuntimeException(String.format(
                                                     "An error occurred while uploading file for template [%s]",
                                                     defaultTemplate.getCode()));
                                         }
                                     }
-                                    lookupPickerField.focus();
+                                    entityComboBox.focus();
                                 });
+                                fileUploadDialog.show();
+
                             } else {
                                 notifications.create(Notifications.NotificationType.HUMANIZED)
                                         .withCaption(messages.getMessage("notification.fileIsNotAllowedForSpecificTypes"))
@@ -689,7 +711,7 @@ public class ReportEditor extends StandardEditor<Report> {
                     }
                 });
 
-                lookupPickerField.addAction(new AbstractAction("create") {
+                entityComboBox.addAction(new AbstractAction("create") {
 
                     @Override
                     public String getDescription() {
@@ -706,18 +728,25 @@ public class ReportEditor extends StandardEditor<Report> {
                         ReportTemplate template = metadata.create(ReportTemplate.class);
                         template.setReport(getEditedEntity());
 
-                        Editor editor = openEditor("report_ReportTemplate.edit", template, OpenType.DIALOG, templatesDs);
-                        editor.addCloseListener(actionId -> {
-                            if (COMMIT_ACTION_ID.equals(actionId)) {
+                        StandardEditor editor = (StandardEditor) screenBuilders.editor(entityComboBox)
+                                .withScreenId("report_ReportTemplate.edit")
+                                .withContainer(templatesDc)
+                                .editEntity(template)
+                                .build();
+                        editor.addAfterCloseListener(e -> {
+                            StandardCloseAction standardCloseAction = (StandardCloseAction) e.getCloseAction();
+                            if (Window.COMMIT_ACTION_ID.equals(standardCloseAction.getActionId())) {
                                 ReportTemplate item = (ReportTemplate) editor.getEditedEntity();
-                                templatesDs.addItem(item);
+                                templatesDc.getItems().add(item);
                                 getEditedEntity().setDefaultTemplate(item);
                                 //Workaround to disable button after default template setting
                                 Action defaultTemplate = templatesTable.getActionNN("defaultTemplate");
                                 defaultTemplate.refreshState();
                             }
-                            lookupPickerField.focus();
+                            entityComboBox.focus();
                         });
+
+                        editor.show();
                     }
 
                     @Override
@@ -726,7 +755,7 @@ public class ReportEditor extends StandardEditor<Report> {
                     }
                 });
 
-                lookupPickerField.addAction(new AbstractAction("edit") {
+                entityComboBox.addAction(new AbstractAction("edit") {
                     @Override
                     public String getDescription() {
                         return messages.getMessage("description.editTemplate");
@@ -741,17 +770,21 @@ public class ReportEditor extends StandardEditor<Report> {
                     public void actionPerform(Component component) {
                         ReportTemplate defaultTemplate = getEditedEntity().getDefaultTemplate();
                         if (defaultTemplate != null) {
-                            Editor editor = openEditor("report_ReportTemplate.edit",
-                                    defaultTemplate, OpenType.DIALOG, templatesDs);
-
-                            editor.addCloseListener(actionId -> {
-                                if (Window.COMMIT_ACTION_ID.equals(actionId)) {
+                            StandardEditor editor = (StandardEditor) screenBuilders.editor(entityComboBox)
+                                    .withScreenId("report_ReportTemplate.edit")
+                                    .withOpenMode(OpenMode.DIALOG)
+                                    .withContainer(templatesDc)
+                                    .build();
+                            editor.addAfterCloseListener(e -> {
+                                StandardCloseAction standardCloseAction = (StandardCloseAction) e.getCloseAction();
+                                if (Window.COMMIT_ACTION_ID.equals(standardCloseAction.getActionId())) {
                                     ReportTemplate item = (ReportTemplate) editor.getEditedEntity();
                                     getEditedEntity().setDefaultTemplate(item);
-                                    templatesDs.modifyItem(item);
+                                    templatesDc.modifyItem(item);
                                 }
-                                lookupPickerField.focus();
+                                entityComboBox.focus();
                             });
+                            editor.show();
                         } else {
                             notifications.create(Notifications.NotificationType.HUMANIZED)
                                     .withCaption(messages.getMessage("notification.defaultTemplateIsEmpty"))
@@ -765,18 +798,17 @@ public class ReportEditor extends StandardEditor<Report> {
                     }
                 });
 
-                lookupPickerField.addValueChangeListener(event -> {
+                entityComboBox.addValueChangeListener(event -> {
                     setupDropZoneForTemplate();
                 });
 
-                lookupPickerField.setEditable(isUpdatePermitted());
+                entityComboBox.setEditable(isUpdatePermitted());
 
-                return lookupPickerField;
+                return entityComboBox;
             }
         });
 
-
-        ((HierarchicalPropertyDatasourceImpl) treeDs).setSortPropertyName("position");
+        ((HierarchicalPropertyDatasourceImpl) treeDc).setSortPropertyName("position");
 
         createBandDefinitionButton.setAction(new AbstractAction("create") {
             @Override
@@ -791,7 +823,7 @@ public class ReportEditor extends StandardEditor<Report> {
 
             @Override
             public void actionPerform(Component component) {
-                BandDefinition parentDefinition = treeDs.getItem();
+                BandDefinition parentDefinition = treeDc.getItem();
                 Report report = getEditedEntity();
                 // Use root band as parent if no items selected
                 if (parentDefinition == null) {
@@ -816,9 +848,9 @@ public class ReportEditor extends StandardEditor<Report> {
                 newBandDefinition.setReport(report);
                 parentDefinition.getChildrenBandDefinitions().add(newBandDefinition);
 
-                treeDs.addItem(newBandDefinition);
+                treeDc.getItems().add(newBandDefinition);
 
-                treeDs.refresh();
+                treeDc.refresh();
                 bandTree.expandTree();
                 bandTree.setSelected(newBandDefinition);//let's try and see if it increases usability
 
@@ -845,7 +877,7 @@ public class ReportEditor extends StandardEditor<Report> {
             @Override
             protected boolean isApplicable() {
                 if (target != null) {
-                    Entity selectedItem = target.getSingleSelected();
+                    Object selectedItem = target.getSingleSelected();
                     if (selectedItem != null) {
                         return !Objects.equals(getEditedEntity().getRootBandDefinition(), selectedItem);
                     }
@@ -881,14 +913,14 @@ public class ReportEditor extends StandardEditor<Report> {
                     }
 
                     if (definition.getDataSets() != null) {
-                        treeDs.setItem(definition);
+                        treeDc.setItem(definition);
                         for (DataSet dataSet : new ArrayList<>(definition.getDataSets())) {
-                            if (PersistenceHelper.isNew(dataSet)) {
-                                dataSetsDs.removeItem(dataSet);
+                            if (entityStates.isNew(dataSet)) {
+                                dataSetsDc.removeItem(dataSet);
                             }
                         }
                     }
-                    treeDs.removeItem(definition);
+                    treeDc.removeItem(definition);
                 }
             }
         });
@@ -919,7 +951,7 @@ public class ReportEditor extends StandardEditor<Report> {
                         definitionsList.set(index, previousDefinition);
                         definitionsList.set(index - 1, definition);
 
-                        treeDs.refresh();
+                        treeDc.refresh();
                     }
                 }
             }
@@ -961,7 +993,7 @@ public class ReportEditor extends StandardEditor<Report> {
                         definitionsList.set(index, nextDefinition);
                         definitionsList.set(index + 1, definition);
 
-                        treeDs.refresh();
+                        treeDc.refresh();
                     }
                 }
             }
@@ -992,12 +1024,11 @@ public class ReportEditor extends StandardEditor<Report> {
             public void actionPerform(Component component) {
                 if (validateAll()) {
                     getEditedEntity().setIsTmp(true);
-                    Window runWindow = openWindow("report_inputParameters",
-                            OpenType.DIALOG, ParamsMap.of("report", getEditedEntity()));
+                    Map<String, Object> params = ParamsMap.of("report", getEditedEntity());
 
-                    runWindow.addCloseListener(actionId -> {
-                        bandTree.focus();
-                    });
+                    Screen screen = screens.create("report_inputParameters", OpenMode.DIALOG, new MapScreenOptions(params));
+                    screen.addAfterCloseListener(e -> bandTree.focus());
+                    screen.show();
                 }
             }
         });
@@ -1036,9 +1067,9 @@ public class ReportEditor extends StandardEditor<Report> {
     }
 
     protected void initTemplates() {
-        CreateAction templateCreateAction = CreateAction.create(templatesTable, OpenType.DIALOG);
-
-        templateCreateAction.setInitialValuesSupplier(() ->
+        CreateAction templateCreateAction = (CreateAction) actions.create(CreateAction.ID);
+        templateCreateAction.setOpenMode(OpenMode.DIALOG);
+        templateCreateAction.setInitializer(e ->
                 ParamsMap.of("report", getEditedEntity())
         );
         templateCreateAction.setAfterCommitHandler(entity -> {
@@ -1048,38 +1079,38 @@ public class ReportEditor extends StandardEditor<Report> {
                 getEditedEntity().setDefaultTemplate(reportTemplate);
             }
         });
-
         templatesTable.addAction(templateCreateAction);
 
-        templatesTable.addAction(new EditAction(templatesTable, OpenType.DIALOG) {
-            @Override
-            protected void afterCommit(Entity entity) {
-                ReportTemplate reportTemplate = (ReportTemplate) entity;
-                ReportTemplate defaultTemplate = getEditedEntity().getDefaultTemplate();
-                if (defaultTemplate != null && defaultTemplate.equals(reportTemplate)) {
-                    getEditedEntity().setDefaultTemplate(reportTemplate);
-                }
+
+        EditAction editAction = (EditAction) actions.create(EditAction.ID);
+        editAction.setOpenMode(OpenMode.DIALOG);
+        editAction.setAfterCommitHandler(event -> {
+            ReportTemplate reportTemplate = (ReportTemplate) event;
+            ReportTemplate defaultTemplate = getEditedEntity().getDefaultTemplate();
+            if (defaultTemplate != null && defaultTemplate.equals(reportTemplate)) {
+                getEditedEntity().setDefaultTemplate(reportTemplate);
             }
         });
+        templatesTable.addAction(editAction);
 
-        templatesTable.addAction(new RemoveAction(templatesTable, false) {
-            @Override
-            protected void afterRemove(Set selected) {
-                super.afterRemove(selected);
 
-                Report report = getEditedEntity();
-                ReportTemplate defaultTemplate = report.getDefaultTemplate();
-                if (defaultTemplate != null && selected.contains(defaultTemplate)) {
-                    ReportTemplate newDefaultTemplate = null;
+        RemoveAction removeAction = (RemoveAction) actions.create(RemoveAction.ID);
+        removeAction.setAfterActionPerformedHandler(event -> {
+            Set selected = (Set) event;
 
-                    if (templatesDs.getItems().size() == 1) {
-                        newDefaultTemplate = templatesDs.getItems().iterator().next();
-                    }
+            Report report = getEditedEntity();
+            ReportTemplate defaultTemplate = report.getDefaultTemplate();
+            if (defaultTemplate != null && selected.contains(defaultTemplate)) {
+                ReportTemplate newDefaultTemplate = null;
 
-                    report.setDefaultTemplate(newDefaultTemplate);
+                if (templatesDc.getItems().size() == 1) {
+                    newDefaultTemplate = templatesDc.getItems().iterator().next();
                 }
+
+                report.setDefaultTemplate(newDefaultTemplate);
             }
         });
+        templatesTable.addAction(removeAction);
 
         templatesTable.addAction(new ListAction("defaultTemplate") {
             @Override
@@ -1102,7 +1133,7 @@ public class ReportEditor extends StandardEditor<Report> {
             @Override
             protected boolean isApplicable() {
                 if (target != null) {
-                    Entity selectedItem = target.getSingleSelected();
+                    Object selectedItem = target.getSingleSelected();
                     if (selectedItem != null) {
                         return !Objects.equals(getEditedEntity().getDefaultTemplate(), selectedItem);
                     }
@@ -1122,13 +1153,13 @@ public class ReportEditor extends StandardEditor<Report> {
                 ReportTemplate template = (ReportTemplate) target.getSingleSelected();
                 if (template != null) {
 
-                    ReportTemplate copy = metadata.getTools().copy(template);
-                    copy.setId(uuidSource.createUuid());
+                    ReportTemplate copy = metadataTools.copy(template);
+                    copy.setId(UuidProvider.createUuid());
 
                     String copyNamingPattern = messages.getMessage("template.copyNamingPattern");
                     String copyCode = String.format(copyNamingPattern, StringUtils.isEmpty(copy.getCode()) ? StringUtils.EMPTY : copy.getCode());
                     //noinspection unchecked
-                    List<String> codes = (List<String>) ((ListComponent)target).getDatasource().getItems().stream()
+                    List<String> codes = (List<String>) ((ListComponent) target).getDatasource().getItems().stream()
                             .map(o -> ((ReportTemplate) o).getCode())
                             .filter(o -> !StringUtils.isEmpty((String) o))
                             .collect(Collectors.toList());
@@ -1144,7 +1175,7 @@ public class ReportEditor extends StandardEditor<Report> {
                     copy.setCode(copyCode);
 
                     //noinspection unchecked
-                    ((ListComponent)target).getDatasource().addItem(copy);
+                    ((ListComponent) target).getDatasource().addItem(copy);
                 }
             }
 
@@ -1175,22 +1206,20 @@ public class ReportEditor extends StandardEditor<Report> {
         }
     }
 
-    @Override
-    protected boolean preCommit() {
+    @Subscribe
+    protected void onBeforeCommit(BeforeCommitChangesEvent event) {
         addCommitListeners();
 
-        if (PersistenceHelper.isNew(getEditedEntity())) {
-            ((CollectionPropertyDatasourceImpl) treeDs).setModified(true);
+        if (entityStates.isNew(getEditedEntity())) {
+            ((CollectionPropertyDatasourceImpl) treeDc).setModified(true);
         }
-
-        return true;
     }
 
     protected void addCommitListeners() {
         String xml = reportService.convertToString(getEditedEntity());
         getEditedEntity().setXml(xml);
 
-        reportDs.getDsContext().addBeforeCommitListener(context -> {
+        reportDc.getDsContext().addBeforeCommitListener(context -> {
             context.getCommitInstances()
                     .removeIf(entity ->
                             !(entity instanceof Report || entity instanceof ReportTemplate)
@@ -1268,9 +1297,9 @@ public class ReportEditor extends StandardEditor<Report> {
     }
 
     protected void initValidationScriptGroupBoxCaption() {
-        setValidationScriptGroupBoxCaption(reportDs.getItem().getValidationOn());
+        setValidationScriptGroupBoxCaption(reportDc.getItem().getValidationOn());
 
-        reportDs.addItemPropertyChangeListener(e -> {
+        reportDc.addItemPropertyChangeListener(e -> {
             boolean validationOnChanged = e.getProperty().equalsIgnoreCase("validationOn");
 
             if (validationOnChanged) {

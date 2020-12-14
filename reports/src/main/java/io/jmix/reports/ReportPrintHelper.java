@@ -16,16 +16,19 @@
 
 package io.jmix.reports;
 
-import com.haulmont.cuba.gui.export.ExportFormat;
 import com.haulmont.yarg.structure.ReportOutputType;
+import io.jmix.ui.download.DownloadFormat;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static io.jmix.reports.entity.ReportOutputType.*;
 
 public class ReportPrintHelper {
 
-    private static HashMap<ReportOutputType, ExportFormat> exportFormats = new HashMap<>();
+    private static HashMap<ReportOutputType, DownloadFormat> exportFormats = new HashMap<>();
 
     private static Map<String, List<io.jmix.reports.entity.ReportOutputType>> inputOutputTypesMapping = new HashMap<>();
 
@@ -41,16 +44,16 @@ public class ReportPrintHelper {
         inputOutputTypesMapping.put("csv", Arrays.asList(CSV));
         inputOutputTypesMapping.put("jrxml", Arrays.asList(XLS, DOC, PDF, HTML, DOCX, XLSX, CSV));
         inputOutputTypesMapping.put("jasper", Arrays.asList(XLS, DOC, PDF, HTML, DOCX, XLSX, CSV));
-        exportFormats.put(ReportOutputType.xls, ExportFormat.XLS);
-        exportFormats.put(ReportOutputType.xlsx, ExportFormat.XLSX);
-        exportFormats.put(ReportOutputType.doc, ExportFormat.DOC);
-        exportFormats.put(ReportOutputType.docx, ExportFormat.DOCX);
-        exportFormats.put(ReportOutputType.pdf, ExportFormat.PDF);
-        exportFormats.put(ReportOutputType.html, ExportFormat.HTML);
-        exportFormats.put(ReportOutputType.csv, ExportFormat.CSV);
+        exportFormats.put(ReportOutputType.xls, DownloadFormat.XLS);
+        exportFormats.put(ReportOutputType.xlsx, DownloadFormat.XLSX);
+        exportFormats.put(ReportOutputType.doc, DownloadFormat.DOC);
+        exportFormats.put(ReportOutputType.docx, DownloadFormat.DOCX);
+        exportFormats.put(ReportOutputType.pdf, DownloadFormat.PDF);
+        exportFormats.put(ReportOutputType.html, DownloadFormat.HTML);
+        exportFormats.put(ReportOutputType.csv, DownloadFormat.CSV);
     }
 
-    public static ExportFormat getExportFormat(ReportOutputType outputType) {
+    public static DownloadFormat getExportFormat(ReportOutputType outputType) {
         return exportFormats.get(outputType);
     }
 

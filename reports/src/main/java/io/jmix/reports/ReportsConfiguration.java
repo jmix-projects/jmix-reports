@@ -13,10 +13,8 @@ import com.haulmont.yarg.structure.BandOrientation;
 import com.haulmont.yarg.util.groovy.Scripting;
 import io.jmix.core.CoreConfiguration;
 import io.jmix.core.CoreProperties;
-import io.jmix.core.Resources;
 import io.jmix.core.annotation.JmixModule;
 import io.jmix.reports.libintegration.*;
-import io.jmix.reports.util.DataSetFactory;
 import io.jmix.ui.UiConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
@@ -173,19 +171,19 @@ public class ReportsConfiguration {
     }
 
     @Bean("reporting_lib_DataExtractor")
-    public JmixDataExtractor dataExtractor(){
+    public JmixDataExtractor dataExtractor() {
         JmixDataExtractor jmixDataExtractor = new JmixDataExtractor(loaderFactory());
         jmixDataExtractor.setExtractionControllerFactory(extractionControllerFactory());
         return jmixDataExtractor;
     }
 
     @Bean("reporting_lib_StringConverter")
-    public JmixObjectToStringConverter objectToStringConverter(){
+    public JmixObjectToStringConverter objectToStringConverter() {
         return new JmixObjectToStringConverter();
     }
 
     @Bean("reporting_lib_Reporting")
-    public JmixReporting reporting(){
+    public JmixReporting reporting() {
         JmixReporting jmixReporting = new JmixReporting();
         jmixReporting.setLoaderFactory(loaderFactory());
         jmixReporting.setFormatterFactory(formatterFactory());
@@ -195,8 +193,6 @@ public class ReportsConfiguration {
         jmixReporting.setReportingApi(reportingApi);
         return jmixReporting;
     }
-
-
 
 
     //TODO ReportExceptionHandler

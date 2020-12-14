@@ -21,6 +21,7 @@ import io.jmix.reports.app.EntityTree;
 
 public interface EntityTreeModelBuilderApi {
     String NAME = "report_EntityTreeModelBuilder";
+
     EntityTree buildEntityTree(MetaClass metaClass);
 }
 

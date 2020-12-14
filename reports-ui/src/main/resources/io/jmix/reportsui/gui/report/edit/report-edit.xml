@@ -44,42 +44,42 @@
         <dataLoadCoordinator auto="true"/>
     </facets>
 
-<!--    <dsContext>-->
-<!--        <datasource-->
-<!--                id="reportDs"-->
-<!--                class="com.haulmont.reports.entity.Report"-->
-<!--                view="report.edit">-->
-<!--            <collectionDatasource id="parametersDs" property="inputParameters"-->
-<!--                                  datasourceClass="com.haulmont.reports.gui.datasource.InputParametersDataSource"/>-->
-<!--            <collectionDatasource id="valuesFormatsDs" property="valuesFormats"-->
-<!--                                  datasourceClass="com.haulmont.reports.gui.datasource.ValuesFormatsDataSource"/>-->
-<!--            <collectionDatasource id="rolesDs" property="roles"/>-->
-<!--            <collectionDatasource id="reportScreensDs" property="reportScreens"/>-->
-<!--            <collectionDatasource id="templatesDs" property="templates"/>-->
-<!--            <collectionDatasource id="bandsDs" property="bands"/>-->
-<!--            <hierarchicalDatasource id="treeDs" property="bands" hierarchyProperty="parentBandDefinition"-->
-<!--                                    datasourceClass="com.haulmont.reports.gui.datasource.BandsHierarchicalPropertyDatasource">-->
-<!--                <collectionDatasource id="dataSetsDs" property="dataSets"-->
-<!--                                      datasourceClass="com.haulmont.reports.gui.datasource.DatasetsDatasource"/>-->
-<!--            </hierarchicalDatasource>-->
-<!--            <collectionDatasource id="stringParametersDs"-->
-<!--                                  property="inputParameters"-->
-<!--                                  datasourceClass="com.haulmont.reports.gui.datasource.TextInputParametersDataSource"/>-->
-<!--        </datasource>-->
+    <!--    <dsContext>-->
+    <!--        <datasource-->
+    <!--                id="reportDs"-->
+    <!--                class="com.haulmont.reports.entity.Report"-->
+    <!--                view="report.edit">-->
+    <!--            <collectionDatasource id="parametersDs" property="inputParameters"-->
+    <!--                                  datasourceClass="com.haulmont.reports.gui.datasource.InputParametersDataSource"/>-->
+    <!--            <collectionDatasource id="valuesFormatsDs" property="valuesFormats"-->
+    <!--                                  datasourceClass="com.haulmont.reports.gui.datasource.ValuesFormatsDataSource"/>-->
+    <!--            <collectionDatasource id="rolesDs" property="roles"/>-->
+    <!--            <collectionDatasource id="reportScreensDs" property="reportScreens"/>-->
+    <!--            <collectionDatasource id="templatesDs" property="templates"/>-->
+    <!--            <collectionDatasource id="bandsDs" property="bands"/>-->
+    <!--            <hierarchicalDatasource id="treeDs" property="bands" hierarchyProperty="parentBandDefinition"-->
+    <!--                                    datasourceClass="com.haulmont.reports.gui.datasource.BandsHierarchicalPropertyDatasource">-->
+    <!--                <collectionDatasource id="dataSetsDs" property="dataSets"-->
+    <!--                                      datasourceClass="com.haulmont.reports.gui.datasource.DatasetsDatasource"/>-->
+    <!--            </hierarchicalDatasource>-->
+    <!--            <collectionDatasource id="stringParametersDs"-->
+    <!--                                  property="inputParameters"-->
+    <!--                                  datasourceClass="com.haulmont.reports.gui.datasource.TextInputParametersDataSource"/>-->
+    <!--        </datasource>-->
 
-<!--        <collectionDatasource id="availableParentBandsDs" class="com.haulmont.reports.entity.BandDefinition"-->
-<!--                              allowCommit="false" refreshMode="NEVER"/>-->
+    <!--        <collectionDatasource id="availableParentBandsDs" class="com.haulmont.reports.entity.BandDefinition"-->
+    <!--                              allowCommit="false" refreshMode="NEVER"/>-->
 
-<!--        <collectionDatasource id="groupsDs" class="com.haulmont.reports.entity.ReportGroup" view="_local">-->
-<!--            <query>-->
-<!--                <![CDATA[ select rg from report_ReportGroup rg order by rg.createTs asc ]]>-->
-<!--            </query>-->
-<!--        </collectionDatasource>-->
+    <!--        <collectionDatasource id="groupsDs" class="com.haulmont.reports.entity.ReportGroup" view="_local">-->
+    <!--            <query>-->
+    <!--                <![CDATA[ select rg from report_ReportGroup rg order by rg.createTs asc ]]>-->
+    <!--            </query>-->
+    <!--        </collectionDatasource>-->
 
-<!--        <collectionDatasource id="lookupRolesDs" class="com.haulmont.cuba.security.entity.Role" view="_local"-->
-<!--                              datasourceClass="com.haulmont.reports.gui.datasource.RolesDatasource">-->
-<!--        </collectionDatasource>-->
-<!--    </dsContext>-->
+    <!--        <collectionDatasource id="lookupRolesDs" class="com.haulmont.cuba.security.entity.Role" view="_local"-->
+    <!--                              datasourceClass="com.haulmont.reports.gui.datasource.RolesDatasource">-->
+    <!--        </collectionDatasource>-->
+    <!--    </dsContext>-->
     <dialogMode height="theme://cuba.gui.dialogSize.height.xlarge"
                 width="theme://cuba.gui.report.report-edit.dialogSize.width"
                 resizable="true"/>

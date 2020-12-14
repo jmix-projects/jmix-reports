@@ -17,23 +17,19 @@
 package io.jmix.reportsui.gui.definition.edit.scripteditordialog;
 
 import io.jmix.core.Messages;
-import io.jmix.ui.component.*;
 import io.jmix.ui.WindowParam;
-import io.jmix.ui.action.AbstractAction;
-import io.jmix.ui.component.Component;
 import io.jmix.ui.component.HasContextHelp;
+import io.jmix.ui.component.SourceCodeEditor;
 import io.jmix.ui.component.autocomplete.Suggester;
 import io.jmix.ui.screen.Screen;
 import io.jmix.ui.screen.Subscribe;
 import io.jmix.ui.screen.UiController;
 import io.jmix.ui.screen.UiDescriptor;
 import io.jmix.ui.settings.UserSettingService;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import java.util.Map;
+
 import java.util.function.Consumer;
 
 @UiController("report_Editor.dialog")

@@ -42,29 +42,29 @@
             <columns count="6"/>
             <rows>
                 <row>
-                    <label value="msg://report.reportRunFilterName"
+                    <label value="msg://io.jmix.reportsui.gui.report.run/report.reportRunFilterName"
                            align="MIDDLE_RIGHT"/>
                     <textField id="filterName"
                                datatype="string"
                                width="250px"/>
 
-                    <label value="msg://report.reportRunFilterCode"
+                    <label value="msg://io.jmix.reportsui.gui.report.run/report.reportRunFilterCode"
                            align="MIDDLE_RIGHT"/>
                     <textField id="filterCode"
                                width="150px"/>
 
                     <button id="applyFilterBtn"
-                            caption="msg://report.reportFilterButton"
+                            caption="msg://io.jmix.reportsui.gui.report.run/report.reportFilterButton"
                             align="BOTTOM_LEFT"
                             width="100px"/>
                 </row>
                 <row>
-                    <label value="msg://report.reportRunFilterGroup" align="MIDDLE_RIGHT"/>
+                    <label value="msg://io.jmix.reportsui.gui.report.run/report.reportRunFilterGroup" align="MIDDLE_RIGHT"/>
                     <lookupField id="filterGroup"
                                  optionsContainer="reportGroupsDc"
                                  width="250px"/>
 
-                    <label value="msg://report.reportRunFilterUpdatedDate"
+                    <label value="msg://io.jmix.reportsui.gui.report.run/report.reportRunFilterUpdatedDate"
                            align="MIDDLE_RIGHT"/>
                     <dateField id="filterUpdatedDate"
                                datatype="date"
@@ -72,7 +72,7 @@
                                width="150px"/>
 
                     <button id="clearFilterBtn"
-                            caption="msg://report.reportClearButton"
+                            caption="msg://io.jmix.reportsui.gui.report.run/report.reportClearButton"
                             align="BOTTOM_LEFT"
                             width="100px"/>
                 </row>

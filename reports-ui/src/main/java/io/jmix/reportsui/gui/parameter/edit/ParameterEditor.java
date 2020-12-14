@@ -15,22 +15,25 @@
  */
 package io.jmix.reportsui.gui.parameter.edit;
 
-import com.haulmont.cuba.core.global.Security;
-import com.haulmont.cuba.gui.data.Datasource;
 import com.haulmont.cuba.gui.data.impl.DatasourceImplementation;
-import io.jmix.core.*;
+import io.jmix.core.MessageTools;
+import io.jmix.core.Messages;
+import io.jmix.core.Metadata;
+import io.jmix.core.MetadataTools;
 import io.jmix.core.metamodel.model.MetaClass;
-import io.jmix.core.security.EntityOp;
 import io.jmix.reports.ParameterClassResolver;
 import io.jmix.reports.app.service.ReportService;
 import io.jmix.reports.entity.ParameterType;
 import io.jmix.reports.entity.PredefinedTransformation;
 import io.jmix.reports.entity.ReportInputParameter;
 import io.jmix.reportsui.gui.report.run.ParameterFieldCreator;
+import io.jmix.security.constraint.PolicyStore;
+import io.jmix.security.constraint.SecureOperations;
 import io.jmix.ui.Dialogs;
 import io.jmix.ui.component.*;
 import io.jmix.ui.component.autocomplete.JpqlSuggestionFactory;
 import io.jmix.ui.component.autocomplete.Suggestion;
+import io.jmix.ui.model.InstanceContainer;
 import io.jmix.ui.screen.Screen;
 import io.jmix.ui.screen.StandardEditor;
 import io.jmix.ui.screen.Subscribe;
@@ -116,8 +119,13 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
 
     @Autowired
     protected Metadata metadata;
+
     @Autowired
-    protected Security security;
+    protected SecureOperations secureOperations;
+
+    @Autowired
+    protected PolicyStore policyStore;
+
     @Autowired
     protected ThemeConstants themeConstants;
 
@@ -125,7 +133,7 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
     protected ReportService reportService;
 
     @Autowired
-    protected Datasource<ReportInputParameter> parameterDs;
+    protected InstanceContainer<ReportInputParameter> parameterDc;
 
     @Autowired
     protected ScreensHelper screensHelper;
@@ -231,7 +239,7 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
                 enableControlsByParamType(e.getValue())
         );
 
-        parameterDs.addItemPropertyChangeListener(e -> {
+        parameterDc.addItemPropertyChangeListener(e -> {
             boolean typeChanged = e.getProperty().equalsIgnoreCase("type");
             boolean classChanged = e.getProperty().equalsIgnoreCase("entityMetaClass")
                     || e.getProperty().equalsIgnoreCase("enumerationClass");
@@ -258,7 +266,8 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
                 initCurrentDateTimeField();
             }
 
-            ((DatasourceImplementation<ReportInputParameter>) parameterDs).modified(e.getItem());
+            //todo
+            ((DatasourceImplementation<ReportInputParameter>) parameterDc).modified(e.getItem());
         });
 
         lookup.addValueChangeListener(e -> {
@@ -358,7 +367,7 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
             defaultValueBox.add(field);
             defaultValueLabel.setVisible(true);
         }
-        defaultValueBox.setEnabled(security.isEntityOpPermitted(metadata.getClass(ReportInputParameter.class), EntityOp.UPDATE));
+        defaultValueBox.setEnabled(secureOperations.isEntityUpdatePermitted(metadata.getClass(ReportInputParameter.class), policyStore));
     }
 
     protected void initCurrentDateTimeField() {
@@ -431,7 +440,7 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
                 parameter.setPredefinedTransformation(null);
             }
         });
-        predefinedTransformation.setEditable(security.isEntityOpPermitted(ReportInputParameter.class, EntityOp.UPDATE));
+        predefinedTransformation.setEditable(secureOperations.isEntityUpdatePermitted(metadata.getClass(ReportInputParameter.class), policyStore));
     }
 
     protected void enableControlsByTransformationType(boolean hasPredefinedTransformation) {

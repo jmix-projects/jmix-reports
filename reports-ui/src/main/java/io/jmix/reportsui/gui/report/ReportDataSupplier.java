@@ -16,17 +16,7 @@
 
 package io.jmix.reportsui.gui.report;
 
-import com.haulmont.cuba.core.global.AppBeans;
-import com.haulmont.cuba.core.global.CommitContext;
 import com.haulmont.cuba.gui.data.impl.GenericDataSupplier;
-import io.jmix.core.EntitySet;
-import io.jmix.core.Entity;
-import io.jmix.reports.app.service.ReportService;
-import io.jmix.reports.entity.Report;
-import io.jmix.reports.entity.ReportTemplate;
-
-import java.util.HashSet;
-import java.util.Set;
 
 public class ReportDataSupplier extends GenericDataSupplier {
 //    @Override

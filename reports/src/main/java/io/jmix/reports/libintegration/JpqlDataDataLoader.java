@@ -20,18 +20,18 @@ import com.haulmont.cuba.core.EntityManager;
 import com.haulmont.cuba.core.Persistence;
 import com.haulmont.cuba.core.Query;
 import com.haulmont.cuba.core.Transaction;
-import io.jmix.core.DataManager;
-import io.jmix.core.Entity;
-import io.jmix.reports.app.EntityMap;
 import com.haulmont.yarg.exception.DataLoadingException;
 import com.haulmont.yarg.loaders.ReportDataLoader;
 import com.haulmont.yarg.loaders.impl.AbstractDbDataLoader;
 import com.haulmont.yarg.structure.BandData;
 import com.haulmont.yarg.structure.ReportQuery;
+import io.jmix.core.DataManager;
+import io.jmix.core.Entity;
+import io.jmix.reports.app.EntityMap;
 import org.apache.commons.lang3.StringUtils;
-
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -40,6 +40,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class JpqlDataDataLoader extends AbstractDbDataLoader implements ReportDataLoader {
+
     @Autowired
     private Persistence persistence;
 
@@ -89,7 +90,7 @@ public class JpqlDataDataLoader extends AbstractDbDataLoader implements ReportDa
             if (queryResult.size() > 0 && queryResult.get(0) instanceof Entity) {
                 List<Map<String, Object>> wrappedResults = new ArrayList<>();
                 for (Object theResult : queryResult) {
-                    wrappedResults.add(new EntityMap((Entity) theResult,beanFactory));
+                    wrappedResults.add(new EntityMap((Entity) theResult, beanFactory));
                 }
                 return wrappedResults;
             } else {

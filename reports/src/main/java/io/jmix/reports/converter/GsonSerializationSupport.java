@@ -24,7 +24,7 @@ import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 import com.haulmont.chile.core.datatypes.Datatypes;
-import com.haulmont.cuba.core.global.PersistenceHelper;
+import com.haulmont.cuba.core.global.EntityStates;
 import io.jmix.core.Entity;
 import io.jmix.core.ExtendedEntities;
 import io.jmix.core.Id;
@@ -54,6 +54,7 @@ public class GsonSerializationSupport {
 
     protected Metadata metadata;
     protected ExtendedEntities extendedEntities;
+    protected EntityStates entityStates;
 
     public interface ExclusionPolicy {
         boolean exclude(Class objectClass, String propertyName);
@@ -62,6 +63,7 @@ public class GsonSerializationSupport {
     public GsonSerializationSupport(BeanFactory beanFactory) {
         this.metadata = beanFactory.getBean(Metadata.class);
         this.extendedEntities = beanFactory.getBean(ExtendedEntities.class);
+        this.entityStates = beanFactory.getBean(EntityStates.class);
         gsonBuilder = new GsonBuilder()
                 .registerTypeHierarchyAdapter(Entity.class, new TypeAdapter<Entity>() {
                     @Override
@@ -121,7 +123,7 @@ public class GsonSerializationSupport {
         String id = in.nextString();
         MetaProperty idProperty = metaClass.getProperty("id");
         try {
-            EntityValues.setValue(entity,"id", Datatypes.getNN(idProperty.getJavaType()).parse(id));
+            EntityValues.setValue(entity, "id", Datatypes.getNN(idProperty.getJavaType()).parse(id));
         } catch (ParseException e) {
             throw new RuntimeException(
                     format("An error occurred while parsing id. Class [%s]. Value [%s].", idProperty.getJavaType(), id), e);
@@ -147,13 +149,13 @@ public class GsonSerializationSupport {
                 Range propertyRange = property.getRange();
                 if (propertyRange.isDatatype()) {
                     Object value = readSimpleProperty(in, propertyType);
-                    EntityValues.setValue(entity,propertyName, value);
+                    EntityValues.setValue(entity, propertyName, value);
                 } else if (propertyRange.isClass()) {
                     if (Entity.class.isAssignableFrom(propertyType)) {
-                        EntityValues.setValue(entity,propertyName, readEntity(in));
+                        EntityValues.setValue(entity, propertyName, readEntity(in));
                     } else if (Collection.class.isAssignableFrom(propertyType)) {
                         Collection entities = readCollection(in, propertyType);
-                        EntityValues.setValue(entity,propertyName, entities);
+                        EntityValues.setValue(entity, propertyName, entities);
                     } else {
                         in.skipValue();
                     }
@@ -161,7 +163,7 @@ public class GsonSerializationSupport {
                     String stringValue = in.nextString();
                     try {
                         Object value = propertyRange.asEnumeration().parse(stringValue);
-                        EntityValues.setValue(entity,propertyName, value);
+                        EntityValues.setValue(entity, propertyName, value);
                     } catch (ParseException e) {
                         throw new RuntimeException(
                                 format("An error occurred while parsing enum. Class [%s]. Value [%s].", propertyType, stringValue), e);
@@ -241,12 +243,12 @@ public class GsonSerializationSupport {
             if (!"id".equalsIgnoreCase(property.getName())
                     && !property.isReadOnly()
                     && !exclude(entity.getClass(), property.getName())
-                    && PersistenceHelper.isLoaded(entity, property.getName())) {
+                    && entityStates.isLoaded(entity, property.getName())) {
                 Range propertyRange = property.getRange();
                 if (propertyRange.isDatatype()) {
                     writeSimpleProperty(out, entity, property);
                 } else if (propertyRange.isClass()) {
-                    Object value = EntityValues.getValue(entity,property.getName());
+                    Object value = EntityValues.getValue(entity, property.getName());
                     if (value instanceof Entity) {
                         out.name(property.getName());
                         writeEntity(out, (Entity) value);
@@ -255,7 +257,7 @@ public class GsonSerializationSupport {
                         writeCollection(out, (Collection) value);
                     }
                 } else if (propertyRange.isEnum()) {
-                    Object value = EntityValues.getValue(entity,property.getName());
+                    Object value = EntityValues.getValue(entity, property.getName());
                     out.name(property.getName());
                     out.value(propertyRange.asEnumeration().format(value));
                 }
@@ -274,7 +276,7 @@ public class GsonSerializationSupport {
     }
 
     protected void writeSimpleProperty(JsonWriter out, Entity entity, MetaProperty property) throws IOException {
-        Object value = EntityValues.getValue(entity,property.getName());
+        Object value = EntityValues.getValue(entity, property.getName());
         if (value != null) {
             out.name(property.getName());
             Datatype datatype = Datatypes.get(property.getJavaType());

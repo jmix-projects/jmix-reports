@@ -18,8 +18,6 @@ package io.jmix.reportsui.gui.report.wizard.region;
 
 import com.haulmont.cuba.core.global.Configuration;
 import com.haulmont.cuba.gui.WindowParams;
-import com.haulmont.cuba.gui.data.CollectionDatasource;
-import com.haulmont.cuba.gui.data.Datasource;
 import com.haulmont.cuba.gui.data.impl.AbstractTreeDatasource;
 import io.jmix.core.Entity;
 import io.jmix.core.Messages;
@@ -33,6 +31,8 @@ import io.jmix.ui.action.AbstractAction;
 import io.jmix.ui.action.Action;
 import io.jmix.ui.action.ItemTrackingAction;
 import io.jmix.ui.component.*;
+import io.jmix.ui.model.CollectionContainer;
+import io.jmix.ui.model.InstanceContainer;
 import io.jmix.ui.screen.StandardEditor;
 import io.jmix.ui.screen.Subscribe;
 import io.jmix.ui.screen.UiController;
@@ -42,7 +42,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cglib.core.CollectionUtils;
 
 import javax.inject.Named;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @UiController("report_Region.edit")
 @UiDescriptor("region-edit.xml")
@@ -50,7 +53,7 @@ public class RegionEditor extends StandardEditor<ReportRegion> {
     @Named("entityTreeFrame.reportEntityTreeNodeDs")
     protected AbstractTreeDatasource reportEntityTreeNodeDs;
     @Autowired
-    protected CollectionDatasource<RegionProperty, UUID> reportRegionPropertiesTableDs;
+    protected CollectionContainer<RegionProperty> reportRegionPropertiesTableDc;
     @Named("entityTreeFrame.entityTree")
     protected Tree<EntityTreeNode> entityTree;
     @Named("entityTreeFrame.reportPropertyName")
@@ -58,7 +61,7 @@ public class RegionEditor extends StandardEditor<ReportRegion> {
     @Named("entityTreeFrame.reportPropertyNameSearchButton")
     protected Button reportPropertyNameSearchButton;
     @Autowired
-    protected Datasource reportRegionDs;
+    protected InstanceContainer reportRegionDc;
     @Autowired
     protected Button addItem;
     @Autowired
@@ -144,8 +147,8 @@ public class RegionEditor extends StandardEditor<ReportRegion> {
     }
 
     protected void initAsViewEditor() {
-        reportRegionDs.setAllowCommit(false);
-        reportRegionPropertiesTableDs.setAllowCommit(false);
+        reportRegionDc.setAllowCommit(false);
+        reportRegionPropertiesTableDc.setAllowCommit(false);
         if (isTabulated) {
             getWindow().setCaption(messages.getMessage("singleEntityDataSetViewEditor"));
         } else {
@@ -166,12 +169,12 @@ public class RegionEditor extends StandardEditor<ReportRegion> {
     }
 
     protected void addRegionPropertiesDsListener() {
-        reportRegionPropertiesTableDs.addItemChangeListener(e -> showOrHideSortBtns());
-        reportRegionPropertiesTableDs.addCollectionChangeListener(e -> showOrHideSortBtns());
+        reportRegionPropertiesTableDc.addItemChangeListener(e -> showOrHideSortBtns());
+        reportRegionPropertiesTableDc.addCollectionChangeListener(e -> showOrHideSortBtns());
     }
 
     protected void showOrHideSortBtns() {
-        if (propertiesTable.getSelected().size() == reportRegionPropertiesTableDs.getItems().size() ||
+        if (propertiesTable.getSelected().size() == reportRegionPropertiesTableDc.getItems().size() ||
                 propertiesTable.getSelected().size() == 0) {
             upItem.setEnabled(false);
             downItem.setEnabled(false);
@@ -187,7 +190,7 @@ public class RegionEditor extends StandardEditor<ReportRegion> {
             public void actionPerform(Component component) {
                 @SuppressWarnings("unchecked")
                 List<EntityTreeNode> nodesList = CollectionUtils.transform(
-                        reportRegionPropertiesTableDs.getItems(), o -> ((RegionProperty) o).getEntityTreeNode());
+                        reportRegionPropertiesTableDc.getItems(), o -> ((RegionProperty) o).getEntityTreeNode());
 
                 Set<EntityTreeNode> alreadyAddedNodes = new HashSet<>(nodesList);
 
@@ -201,8 +204,8 @@ public class RegionEditor extends StandardEditor<ReportRegion> {
                     if (!alreadyAddedNodes.contains(entityTreeNode)) {
                         RegionProperty regionProperty = metadata.create(RegionProperty.class);
                         regionProperty.setEntityTreeNode(entityTreeNode);
-                        regionProperty.setOrderNum((long) reportRegionPropertiesTableDs.getItemIds().size() + 1); //first element must be not zero cause later we do sorting by multiplying that values
-                        reportRegionPropertiesTableDs.addItem(regionProperty);
+                        regionProperty.setOrderNum((long) reportRegionPropertiesTableDc.getItems().size() + 1); //first element must be not zero cause later we do sorting by multiplying that values
+                        reportRegionPropertiesTableDc.getItems().add(regionProperty);
                         addedItems.add(regionProperty);
                     } else {
                         alreadyAdded = true;
@@ -244,7 +247,7 @@ public class RegionEditor extends StandardEditor<ReportRegion> {
             @Override
             public void actionPerform(Component component) {
                 for (Entity item : propertiesTable.getSelected()) {
-                    reportRegionPropertiesTableDs.removeItem((RegionProperty) item);
+                    reportRegionPropertiesTableDc.removeItem((RegionProperty) item);
                     normalizeRegionPropertiesOrderNum();
                 }
             }
@@ -278,15 +281,15 @@ public class RegionEditor extends StandardEditor<ReportRegion> {
 
     protected void normalizeRegionPropertiesOrderNum() {
         long normalizedIdx = 0;
-        List<RegionProperty> allItems = new ArrayList<>(reportRegionPropertiesTableDs.getItems());
+        List<RegionProperty> allItems = new ArrayList<>(reportRegionPropertiesTableDc.getItems());
         for (RegionProperty item : allItems) {
             item.setOrderNum(++normalizedIdx); //first must to be 1
         }
     }
 
     @Subscribe
-    protected void onBeforeCommit(BeforeCommitChangesEvent event){
-        if (reportRegionPropertiesTableDs.getItems().isEmpty()) {
+    protected void onBeforeCommit(BeforeCommitChangesEvent event) {
+        if (reportRegionPropertiesTableDc.getItems().isEmpty()) {
             notifications.create(Notifications.NotificationType.TRAY)
                     .withCaption(messages.getMessage("selectAtLeastOneProp"))
                     .show();

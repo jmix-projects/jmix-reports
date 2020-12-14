@@ -16,17 +16,16 @@
 
 package io.jmix.reportsui.gui.report.importdialog;
 
-import com.haulmont.cuba.gui.export.ExportFormat;
-import com.haulmont.cuba.gui.upload.FileUploadingAPI;
 import io.jmix.core.Messages;
 import io.jmix.reports.app.service.ReportService;
 import io.jmix.reports.entity.ReportImportOption;
 import io.jmix.reports.entity.ReportImportResult;
 import io.jmix.ui.Notifications;
-import io.jmix.ui.action.AbstractAction;
 import io.jmix.ui.component.*;
+import io.jmix.ui.download.DownloadFormat;
 import io.jmix.ui.screen.LookupComponent;
 import io.jmix.ui.screen.*;
+import io.jmix.ui.upload.TemporaryStorage;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -49,7 +48,7 @@ public class ReportImportDialog extends StandardEditor {
     @Autowired
     protected CheckBox importRoles;
     @Autowired
-    protected FileUploadingAPI fileUploadingApi;
+    protected TemporaryStorage temporaryStorage;
     @Autowired
     protected ReportService reportService;
     @Autowired
@@ -101,9 +100,9 @@ public class ReportImportDialog extends StandardEditor {
     protected void importReport() {
         try {
             UUID fileID = fileUpload.getFileId();
-            File file = fileUploadingApi.getFile(fileID);
+            File file = temporaryStorage.getFile(fileID);
             byte[] bytes = FileUtils.readFileToByteArray(file);
-            fileUploadingApi.deleteFile(fileID);
+            temporaryStorage.deleteFile(fileID);
             ReportImportResult result = reportService.importReportsWithResult(bytes, getImportOptions());
 
             notifications.create(Notifications.NotificationType.HUMANIZED)
@@ -131,7 +130,7 @@ public class ReportImportDialog extends StandardEditor {
             return;
         }
         String extension = FilenameUtils.getExtension(fileUpload.getFileName());
-        if (!StringUtils.equalsIgnoreCase(extension, ExportFormat.ZIP.getFileExt())) {
+        if (!StringUtils.equalsIgnoreCase(extension, DownloadFormat.ZIP.getFileExt())) {
             errors.add(messages.formatMessage("reportException.wrongFileType", extension));
         }
 

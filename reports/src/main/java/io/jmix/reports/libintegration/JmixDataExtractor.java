@@ -16,14 +16,13 @@
 
 package io.jmix.reports.libintegration;
 
-import com.haulmont.cuba.core.global.Configuration;
-import io.jmix.reports.ReportingConfig;
 import com.haulmont.yarg.loaders.factory.ReportLoaderFactory;
 import com.haulmont.yarg.reporting.DataExtractorImpl;
-
+import io.jmix.reports.ReportingConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class JmixDataExtractor extends DataExtractorImpl {
+
     @Autowired
     protected ReportingConfig reportingConfig;
 

@@ -18,25 +18,22 @@ package io.jmix.reportsui.gui.definition.edit.crosstab;
 
 import com.google.common.base.Strings;
 import io.jmix.core.Metadata;
-import com.haulmont.cuba.core.global.Security;
-import io.jmix.ui.component.Table;
-import com.haulmont.cuba.gui.data.CollectionDatasource;
-import com.haulmont.cuba.gui.data.Datasource;
-import io.jmix.core.security.EntityOp;
 import io.jmix.reports.entity.BandDefinition;
 import io.jmix.reports.entity.DataSet;
 import io.jmix.reports.entity.Orientation;
 import io.jmix.reports.entity.Report;
-import io.jmix.reportsui.gui.definition.edit.BandDefinitionEditor;
 import io.jmix.reports.util.DataSetFactory;
+import io.jmix.reportsui.gui.definition.edit.BandDefinitionEditor;
+import io.jmix.security.constraint.PolicyStore;
+import io.jmix.security.constraint.SecureOperations;
 import io.jmix.ui.UiComponents;
+import io.jmix.ui.component.Table;
 import io.jmix.ui.component.TextField;
+import io.jmix.ui.model.CollectionContainer;
+import io.jmix.ui.model.InstanceContainer;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Objects;
-import java.util.UUID;
-
-import static com.haulmont.cuba.gui.data.Datasource.State.VALID;
 
 /**
  * Class presents decorator been for add some extra behavior on report band orientation change
@@ -55,12 +52,15 @@ public class CrossTabTableDecorator {
     protected UiComponents uiComponents;
 
     @Autowired
-    protected Security security;
+    protected SecureOperations secureOperations;
+
+    @Autowired
+    protected PolicyStore policyStore;
 
     @Autowired
     protected Metadata metadata;
 
-    public void decorate(Table<DataSet> dataSets, final Datasource<BandDefinition> bandDefinitionDs) {
+    public void decorate(Table<DataSet> dataSets, final InstanceContainer<BandDefinition> bandDefinitionDs) {
         dataSets.addGeneratedColumn("name", entity -> {
             TextField textField = uiComponents.create(TextField.class);
             textField.setParent(dataSets);
@@ -100,7 +100,7 @@ public class CrossTabTableDecorator {
     }
 
     protected boolean isUpdatePermitted() {
-        return security.isEntityOpPermitted(metadata.getClass(Report.class), EntityOp.UPDATE);
+        return secureOperations.isEntityUpdatePermitted(metadata.getClass(Report.class), policyStore);
     }
 
     protected void onHorizontalSetChange(DataSet dataSet) {
@@ -112,15 +112,15 @@ public class CrossTabTableDecorator {
     }
 
 
-    protected void onTableReady(Table<DataSet> dataSets, Datasource<BandDefinition> bandDefinitionDs) {
+    protected void onTableReady(Table<DataSet> dataSets, InstanceContainer<BandDefinition> bandDefinitionDs) {
         //todo
 //        CollectionDatasource<DataSet, UUID> dataSetsDs = dataSets.getDatasource();
 //
 //        initCrossDatasets(dataSetsDs, bandDefinitionDs);
     }
 
-    protected void initCrossDatasets(CollectionDatasource<DataSet, UUID> dataSetsDs,
-                                     Datasource<BandDefinition> bandDefinitionDs) {
+    protected void initCrossDatasets(CollectionContainer<DataSet> dataSetsDs,
+                                     InstanceContainer<BandDefinition> bandDefinitionDs) {
         if (bandDefinitionDs.getItem() == null) {
             return;
         }
@@ -153,8 +153,8 @@ public class CrossTabTableDecorator {
         initListeners(dataSetsDs, bandDefinitionDs, horizontal, vertical);
     }
 
-    protected void initListeners(CollectionDatasource<DataSet, UUID> dataSetsDs,
-                                 Datasource<BandDefinition> bandDefinitionDs,
+    protected void initListeners(CollectionContainer<DataSet> dataSetsDs,
+                                 InstanceContainer<BandDefinition> bandDefinitionDs,
                                  DataSet horizontal, DataSet vertical) {
         bandDefinitionDs.addItemPropertyChangeListener(e -> {
             if ("orientation".equals(e.getProperty())) {
@@ -167,8 +167,8 @@ public class CrossTabTableDecorator {
                 }
 
                 if (Orientation.CROSS == orientation) {
-                    dataSetsDs.addItem(horizontal);
-                    dataSetsDs.addItem(vertical);
+                    dataSetsDs.getItems().add(horizontal);
+                    dataSetsDs.getItems().add(vertical);
                 }
             }
 
@@ -179,11 +179,10 @@ public class CrossTabTableDecorator {
         });
     }
 
-    protected void onOrientationChange(CollectionDatasource<DataSet, UUID> dataSetsDs, Datasource<BandDefinition> bandDefinitionDs) {
-        dataSetsDs.getItemIds().stream()
-                .map(dataSetsDs::getItem)
+    protected void onOrientationChange(CollectionContainer<DataSet> dataSetsDs, InstanceContainer<BandDefinition> bandDefinitionDs) {
+        dataSetsDs.getItems().stream()
                 .filter(Objects::nonNull)
                 .forEach(dataSetsDs::removeItem);
-        dataSetsDs.addItem(dataSetFactory.createEmptyDataSet(bandDefinitionDs.getItem()));
+        dataSetsDs.getItems().add(dataSetFactory.createEmptyDataSet(bandDefinitionDs.getItem()));
     }
 }

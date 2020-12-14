@@ -16,24 +16,29 @@
 
 package io.jmix.reports.entity.wizard;
 
-import com.haulmont.cuba.core.entity.BaseUuidEntity;
+import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.entity.annotation.SystemLevel;
 import io.jmix.core.metamodel.annotation.Composition;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.annotation.JmixProperty;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.persistence.Id;
 import javax.persistence.Transient;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @JmixEntity(name = "report_WizardReportRegion")
 @SystemLevel
-public class ReportRegion extends BaseUuidEntity implements OrderableEntity {
+public class ReportRegion implements OrderableEntity {
 
     private static final long serialVersionUID = -3122228074679382191L;
     public static final String HEADER_BAND_PREFIX = "header";
 
+    @Id
+    @JmixGeneratedValue
+    protected UUID id;
     @JmixProperty
     @Transient
     protected ReportData reportData;
@@ -136,5 +141,15 @@ public class ReportRegion extends BaseUuidEntity implements OrderableEntity {
 
     public String getBandNameFromReport() {
         return bandNameFromReport;
+    }
+
+    @Override
+    public UUID getUuid() {
+        return id;
+    }
+
+    @Override
+    public void setUuid(UUID uuid) {
+        this.id = uuid;
     }
 }

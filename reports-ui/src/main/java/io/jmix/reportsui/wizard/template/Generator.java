@@ -16,9 +16,9 @@
 
 package io.jmix.reportsui.wizard.template;
 
+import freemarker.template.TemplateException;
 import io.jmix.reports.entity.wizard.ReportData;
 import io.jmix.reports.exception.TemplateGenerationException;
-import freemarker.template.TemplateException;
 
 import java.io.IOException;
 

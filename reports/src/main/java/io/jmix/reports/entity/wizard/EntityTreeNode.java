@@ -16,23 +16,30 @@
 
 package io.jmix.reports.entity.wizard;
 
+import io.jmix.core.entity.annotation.JmixGeneratedValue;
+import io.jmix.core.entity.annotation.SystemLevel;
 import io.jmix.core.metamodel.annotation.Composition;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.annotation.JmixProperty;
-import com.haulmont.cuba.core.entity.BaseUuidEntity;
-import io.jmix.core.entity.annotation.SystemLevel;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.core.metamodel.model.MetaProperty;
 
+import javax.persistence.Id;
 import javax.persistence.Transient;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @JmixEntity(name = "report_WizardReportEntityTreeNode")
 @SystemLevel
-public class EntityTreeNode extends BaseUuidEntity {
+public class EntityTreeNode implements Serializable {
 
     private static final long serialVersionUID = 465985155557062476L;
+
+    @Id
+    @JmixGeneratedValue
+    protected UUID id;
 
     @JmixProperty
     @Transient
@@ -130,6 +137,14 @@ public class EntityTreeNode extends BaseUuidEntity {
                 return localizedName;
             }
         }
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     public String getLocalizedName() {

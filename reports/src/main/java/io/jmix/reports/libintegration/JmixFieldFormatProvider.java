@@ -15,11 +15,10 @@
  */
 package io.jmix.reports.libintegration;
 
-import com.haulmont.chile.core.datatypes.Datatypes;
-import com.haulmont.cuba.core.global.Messages;
 import com.haulmont.yarg.formatters.impl.DefaultFormatProvider;
 import io.jmix.core.InstanceNameProvider;
 import io.jmix.core.Entity;
+import io.jmix.core.Messages;
 import io.jmix.core.metamodel.datatype.Datatype;
 import io.jmix.core.security.CurrentAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;

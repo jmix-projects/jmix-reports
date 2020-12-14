@@ -32,7 +32,6 @@ import io.jmix.reports.ReportingApi;
 import io.jmix.reports.entity.ParameterType;
 import io.jmix.reports.entity.PredefinedTransformation;
 import io.jmix.reports.entity.ReportInputParameter;
-import io.jmix.ui.filter.ParametersHelper;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +41,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class JmixReporting extends Reporting {
+
     public static final String REPORT_FILE_NAME_KEY = "__REPORT_FILE_NAME";
 
     protected Scripting scripting;
@@ -137,7 +137,7 @@ public class JmixReporting extends Reporting {
     }
 
     protected String wrapValueForLike(Object value, boolean before, boolean after) {
-        return ParametersHelper.CASE_INSENSITIVE_MARKER + (before ? "%" : "") + value + (after ? "%" : "");
+        return "(?i)" + (before ? "%" : "") + value + (after ? "%" : "");
     }
 
     @Override

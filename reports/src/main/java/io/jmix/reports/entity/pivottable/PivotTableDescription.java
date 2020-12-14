@@ -17,21 +17,20 @@
 package io.jmix.reports.entity.pivottable;
 
 import com.google.gson.*;
-import com.haulmont.cuba.core.entity.BaseUuidEntity;
+import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.entity.annotation.SystemLevel;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.annotation.JmixProperty;
 
+import javax.persistence.Id;
 import javax.persistence.Lob;
+import java.io.Serializable;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @JmixEntity(name = "report_PivotTableDescription")
 @SystemLevel
-public class PivotTableDescription extends BaseUuidEntity {
+public class PivotTableDescription implements Serializable {
 
     protected final static Gson gson;
 
@@ -41,6 +40,10 @@ public class PivotTableDescription extends BaseUuidEntity {
                 .registerTypeAdapter(AggregationMode.class, new AggregationTypeAdapter())
                 .create();
     }
+
+    @Id
+    @JmixGeneratedValue
+    protected UUID id;
 
     @JmixProperty(mandatory = true)
     protected String bandName;
@@ -89,6 +92,13 @@ public class PivotTableDescription extends BaseUuidEntity {
     @JmixProperty
     protected List<String> aggregationProperties = new ArrayList<>();
 
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
 
     public String getBandName() {
         return bandName;

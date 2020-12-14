@@ -16,22 +16,27 @@
 
 package io.jmix.reports.entity.wizard;
 
-import com.haulmont.cuba.core.entity.BaseUuidEntity;
+import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.entity.annotation.SystemLevel;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.annotation.JmixProperty;
 
+import javax.persistence.Id;
 import javax.persistence.Transient;
+import java.util.UUID;
 
 /**
  * Immutable property class
  */
 @JmixEntity(name = "report_WizardReportRegionProperty")
 @SystemLevel
-public class RegionProperty extends BaseUuidEntity implements OrderableEntity {
+public class RegionProperty implements OrderableEntity {
 
     private static final long serialVersionUID = 8528946767216568803L;
 
+    @Id
+    @JmixGeneratedValue
+    protected UUID id;
     @JmixProperty
     @Transient
     protected EntityTreeNode entityTreeNode;
@@ -91,6 +96,16 @@ public class RegionProperty extends BaseUuidEntity implements OrderableEntity {
     @Transient
     public String getHierarchicalLocalizedNameExceptRoot() {
         return entityTreeNode.getHierarchicalLocalizedNameExceptRoot();
+    }
+
+    @Override
+    public UUID getUuid() {
+        return id;
+    }
+
+    @Override
+    public void setUuid(UUID uuid) {
+        this.id = uuid;
     }
 }
 

@@ -19,7 +19,6 @@ import io.jmix.core.entity.annotation.Listeners;
 import io.jmix.core.metamodel.annotation.Composition;
 import io.jmix.core.metamodel.annotation.JmixProperty;
 import com.haulmont.chile.core.annotations.NamePattern;
-import com.haulmont.cuba.core.entity.StandardEntity;
 import io.jmix.core.entity.annotation.SystemLevel;
 import com.haulmont.yarg.structure.ReportBand;
 import com.haulmont.yarg.structure.ReportFieldFormat;
@@ -96,19 +95,26 @@ public class Report extends StandardEntity implements com.haulmont.yarg.structur
     @Transient
     protected BandDefinition rootBandDefinition;
 
-    @Transient @JmixProperty
+    @Transient
+    @JmixProperty
     protected Set<BandDefinition> bands = new HashSet<>();
 
-    @Transient @JmixProperty @Composition
+    @Transient
+    @JmixProperty
+    @Composition
     protected List<ReportInputParameter> inputParameters = new ArrayList<>();
 
-    @Transient @JmixProperty @Composition
+    @Transient
+    @JmixProperty
+    @Composition
     protected List<ReportValueFormat> valuesFormats = new ArrayList<>();
 
-    @Transient @JmixProperty
+    @Transient
+    @JmixProperty
     protected List<ReportScreen> reportScreens = new ArrayList<>();
 
-    @Transient @JmixProperty
+    @Transient
+    @JmixProperty
     protected Set<Role> roles = new HashSet<>();
 
     @Transient

@@ -27,7 +27,10 @@ public interface ReportImportExportAPI {
     String NAME = "reporting_ReportImportExport";
 
     byte[] exportReports(Collection<Report> reports);
+
     Collection<Report> importReports(byte[] zipBytes);
+
     Collection<Report> importReports(byte[] zipBytes, EnumSet<ReportImportOption> importOptions);
+
     ReportImportResult importReportsWithResult(byte[] zipBytes, EnumSet<ReportImportOption> importOptions);
 }

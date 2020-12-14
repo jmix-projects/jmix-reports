@@ -16,19 +16,19 @@
 
 package io.jmix.reportsui.gui.template.edit;
 
-import com.haulmont.cuba.gui.components.LookupField;
 import io.jmix.core.DataManager;
 import io.jmix.core.Messages;
+import io.jmix.core.Sort;
+import io.jmix.core.common.util.ParamsMap;
 import io.jmix.ui.Actions;
 import io.jmix.ui.Dialogs;
+import io.jmix.ui.Fragments;
 import io.jmix.ui.Notifications;
 import io.jmix.ui.action.list.CreateAction;
 import io.jmix.ui.component.GroupBoxLayout;
 import io.jmix.ui.component.SourceCodeEditor;
 import io.jmix.ui.component.Table;
 import io.jmix.ui.component.*;
-import com.haulmont.cuba.gui.data.CollectionDatasource;
-import com.haulmont.cuba.gui.data.Datasource;
 import io.jmix.core.metamodel.model.MetaPropertyPath;
 import io.jmix.reports.entity.BandDefinition;
 import io.jmix.reports.entity.ReportOutputType;
@@ -38,6 +38,9 @@ import io.jmix.reportsui.gui.report.run.ShowChartController;
 import io.jmix.reportsui.gui.template.edit.generator.RandomChartDataGenerator;
 import io.jmix.ui.action.ItemTrackingAction;
 import io.jmix.ui.component.*;
+import io.jmix.ui.model.CollectionContainer;
+import io.jmix.ui.model.InstanceContainer;
+import io.jmix.ui.screen.MapScreenOptions;
 import io.jmix.ui.screen.Subscribe;
 import io.jmix.ui.screen.UiController;
 import io.jmix.ui.screen.UiDescriptor;
@@ -55,11 +58,12 @@ import java.util.stream.Collectors;
 @UiDescriptor("chart-edit-frame.xml")
 public class ChartEditFrame extends DescriptionEditFrame {
     @Autowired
-    protected Datasource<PieChartDescription> pieChartDs;
+    protected InstanceContainer<PieChartDescription> pieChartDc;
     @Autowired
-    protected Datasource<SerialChartDescription> serialChartDs;
+    protected InstanceContainer<SerialChartDescription> serialChartDc;
+    //todo sort
     @Autowired
-    protected CollectionDatasource.Sortable<ChartSeries, UUID> seriesDs;
+    protected CollectionContainer<ChartSeries> seriesDc;
     @Autowired
     protected ComboBox<ChartType> type;
     @Autowired
@@ -86,12 +90,14 @@ public class ChartEditFrame extends DescriptionEditFrame {
     protected Actions actions;
     @Autowired
     protected DataManager dataManager;
+    @Autowired
+    protected Fragments fragments;
 
     @Subscribe
     @SuppressWarnings("IncorrectCreateEntity")
     protected void onInit(InitEvent event) {
-        pieChartDs.setItem(new PieChartDescription());
-        serialChartDs.setItem(new SerialChartDescription());
+        pieChartDc.setItem(new PieChartDescription());
+        serialChartDc.setItem(new SerialChartDescription());
         type.setOptionsList(Arrays.asList(ChartType.values()));
 
         type.addValueChangeListener(e -> {
@@ -112,20 +118,20 @@ public class ChartEditFrame extends DescriptionEditFrame {
         CreateAction createAction = (CreateAction) actions.create(CreateAction.ID);
         createAction.withHandler(handle -> {
             ChartSeries chartSeries = dataManager.create(ChartSeries.class);
-            chartSeries.setOrder(seriesDs.getItems().size() + 1);
-            seriesDs.addItem(chartSeries);
+            chartSeries.setOrder(seriesDc.getItems().size() + 1);
+            seriesDc.getItems().add(chartSeries);
         });
         seriesTable.addAction(createAction);
 
         seriesTable.addAction(new ChartSeriesMoveAction(true));
         seriesTable.addAction(new ChartSeriesMoveAction(false));
 
-        pieChartDs.addItemPropertyChangeListener(e -> showPreview());
+        pieChartDc.addItemPropertyChangeListener(e -> showPreview());
 
-        serialChartDs.addItemPropertyChangeListener(e -> showPreview());
+        serialChartDc.addItemPropertyChangeListener(e -> showPreview());
 
-        seriesDs.addItemPropertyChangeListener(e -> showPreview());
-        seriesDs.addCollectionChangeListener(e -> {
+        seriesDc.addItemPropertyChangeListener(e -> showPreview());
+        seriesDc.addCollectionChangeListener(e -> {
             checkSeriesOrder();
             showPreview();
         });
@@ -143,9 +149,9 @@ public class ChartEditFrame extends DescriptionEditFrame {
 
     protected void codeEditorChangeListener(HasValue.ValueChangeEvent<String> event) {
         if (ChartType.SERIAL == type.getValue() && serialJsonConfigEditor.isValid()) {
-            serialChartDs.getItem().setCustomJsonConfig(event.getValue());
+            serialChartDc.getItem().setCustomJsonConfig(event.getValue());
         } else if (ChartType.PIE == type.getValue() && pieJsonConfigEditor.isValid()) {
-            pieChartDs.getItem().setCustomJsonConfig(event.getValue());
+            pieChartDc.getItem().setCustomJsonConfig(event.getValue());
         }
     }
 
@@ -221,32 +227,38 @@ public class ChartEditFrame extends DescriptionEditFrame {
         List<Map<String, Object>> data;
         String chartJson = null;
         if (ChartType.SERIAL == type.getValue()) {
-            SerialChartDescription chartDescription = serialChartDs.getItem();
+            SerialChartDescription chartDescription = serialChartDc.getItem();
             data = new RandomChartDataGenerator().generateRandomChartData(chartDescription);
             ChartToJsonConverter chartToJsonConverter = beanFactory.getBean(ChartToJsonConverter.class);
             chartJson = chartToJsonConverter.convertSerialChart(chartDescription, data);
         } else if (ChartType.PIE == type.getValue()) {
-            PieChartDescription chartDescription = pieChartDs.getItem();
+            PieChartDescription chartDescription = pieChartDc.getItem();
             data = new RandomChartDataGenerator().generateRandomChartData(chartDescription);
             ChartToJsonConverter chartToJsonConverter = beanFactory.getBean(ChartToJsonConverter.class);
             chartJson = chartToJsonConverter.convertPieChart(chartDescription, data);
         }
         chartJson = chartJson == null ? "{}" : chartJson;
-        Frame frame = openFrame(previewBox, ShowChartController.JSON_CHART_SCREEN_ID,
-                Collections.singletonMap(ShowChartController.CHART_JSON_PARAMETER, chartJson));
+
+        Map<String, Object> parmas = ParamsMap.of(ShowChartController.CHART_JSON_PARAMETER, chartJson);
+
+        Fragment fragment = fragments.create(this, ShowChartController.JSON_CHART_SCREEN_ID, new MapScreenOptions(parmas))
+                .init()
+                .getFragment();
+
         if (ChartType.SERIAL == type.getValue()) {
-            frame.setHeight("700px");
+            fragment.setHeight("700px");
         } else if (ChartType.PIE == type.getValue()) {
-            frame.setHeight("350px");
+            fragment.setHeight("350px");
         }
+        previewBox.add(fragment);
     }
 
     @Nullable
     protected AbstractChartDescription getChartDescription() {
         if (ChartType.SERIAL == type.getValue()) {
-            return serialChartDs.getItem();
+            return serialChartDc.getItem();
         } else if (ChartType.PIE == type.getValue()) {
-            return pieChartDs.getItem();
+            return pieChartDc.getItem();
         }
         return null;
     }
@@ -254,10 +266,10 @@ public class ChartEditFrame extends DescriptionEditFrame {
     protected void setChartDescription(@Nullable AbstractChartDescription chartDescription) {
         if (chartDescription != null) {
             if (ChartType.SERIAL == chartDescription.getType()) {
-                serialChartDs.setItem((SerialChartDescription) chartDescription);
+                serialChartDc.setItem((SerialChartDescription) chartDescription);
                 serialJsonConfigEditor.setValue(chartDescription.getCustomJsonConfig());
             } else if (ChartType.PIE == chartDescription.getType()) {
-                pieChartDs.setItem((PieChartDescription) chartDescription);
+                pieChartDc.setItem((PieChartDescription) chartDescription);
                 pieJsonConfigEditor.setValue(chartDescription.getCustomJsonConfig());
             }
             type.setValue(chartDescription.getType());
@@ -278,7 +290,7 @@ public class ChartEditFrame extends DescriptionEditFrame {
     }
 
     protected void checkSeriesOrder() {
-        Collection<ChartSeries> items = seriesDs.getItems();
+        Collection<ChartSeries> items = seriesDc.getItems();
         int i = 1;
         for (ChartSeries item : items) {
             if (!Objects.equals(i, item.getOrder())) {
@@ -304,7 +316,7 @@ public class ChartEditFrame extends DescriptionEditFrame {
             Integer currentOrder = selected.getOrder();
             Integer newOrder = up ? currentOrder - 1 : currentOrder + 1;
 
-            Collection<ChartSeries> items = seriesDs.getItems();
+            Collection<ChartSeries> items = seriesDc.getItems();
 
             ChartSeries changing = IterableUtils.get(items, currentOrder - 1);
             ChartSeries neighbor = IterableUtils.get(items, newOrder - 1);
@@ -321,7 +333,7 @@ public class ChartEditFrame extends DescriptionEditFrame {
                 if (!CollectionUtils.isEmpty(items) && items.size() == 1) {
                     Integer order = (IterableUtils.get(items, 0)).getOrder();
                     if (order != null) {
-                        return up ? order > 1 : order < seriesDs.size();
+                        return up ? order > 1 : order < seriesDc.getItems().size();
                     }
                 }
             }
@@ -330,9 +342,6 @@ public class ChartEditFrame extends DescriptionEditFrame {
     }
 
     protected void sortSeriesByOrder() {
-        CollectionDatasource.Sortable.SortInfo<MetaPropertyPath> sortInfo = new CollectionDatasource.Sortable.SortInfo<>();
-        sortInfo.setOrder(CollectionDatasource.Sortable.Order.ASC);
-        sortInfo.setPropertyPath(seriesDs.getMetaClass().getPropertyPath("order"));
-        seriesDs.sort(new CollectionDatasource.Sortable.SortInfo[]{sortInfo});
+        seriesDc.getSorter().sort(Sort.by(Sort.Direction.ASC, "order"));
     }
 }

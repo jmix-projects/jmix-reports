@@ -18,8 +18,8 @@ package io.jmix.reports.libintegration;
 
 import com.haulmont.cuba.core.Persistence;
 import com.haulmont.yarg.loaders.ReportParametersConverter;
-import io.jmix.core.Id;
 import io.jmix.core.Entity;
+import io.jmix.core.Id;
 import io.jmix.core.metamodel.datatype.impl.EnumClass;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;

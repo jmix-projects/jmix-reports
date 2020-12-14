@@ -16,7 +16,7 @@
 
 package io.jmix.reports.entity.wizard;
 
-import com.haulmont.cuba.core.entity.BaseUuidEntity;
+import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.entity.annotation.SystemLevel;
 import io.jmix.core.metamodel.annotation.Composition;
 import io.jmix.core.metamodel.annotation.JmixEntity;
@@ -24,15 +24,17 @@ import io.jmix.core.metamodel.annotation.JmixProperty;
 import io.jmix.reports.entity.*;
 import io.jmix.reports.entity.charts.ChartType;
 
+import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Transient;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @JmixEntity(name = "report_WizardReportData")
 @SystemLevel
-public class ReportData extends BaseUuidEntity {
+public class ReportData implements Serializable {
 
     private static final long serialVersionUID = -1649648403032678085L;
 
@@ -80,6 +82,10 @@ public class ReportData extends BaseUuidEntity {
             return entity;
         }
     }
+
+    @Id
+    @JmixGeneratedValue
+    protected UUID id;
 
     @JmixProperty
     @Transient
@@ -136,6 +142,14 @@ public class ReportData extends BaseUuidEntity {
 
     @Transient
     protected ChartType chartType = ChartType.SERIAL;
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
 
     public Report getGeneratedReport() {
         return generatedReport;

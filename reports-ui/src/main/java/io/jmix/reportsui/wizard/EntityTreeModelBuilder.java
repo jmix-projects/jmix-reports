@@ -18,8 +18,8 @@ package io.jmix.reportsui.wizard;
 
 import com.haulmont.cuba.core.entity.FileDescriptor;
 import io.jmix.core.ExtendedEntities;
-import io.jmix.core.Metadata;
 import io.jmix.core.MessageTools;
+import io.jmix.core.Metadata;
 import io.jmix.core.MetadataTools;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.core.metamodel.model.MetaProperty;

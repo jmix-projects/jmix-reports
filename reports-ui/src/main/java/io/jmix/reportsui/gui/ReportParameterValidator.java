@@ -25,11 +25,11 @@ import io.jmix.reports.exception.ReportParametersValidationException;
 import io.jmix.reports.exception.ReportingException;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.groovy.runtime.MethodClosure;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scripting.ScriptEvaluator;
 import org.springframework.scripting.support.StaticScriptSource;
 import org.springframework.stereotype.Component;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -63,8 +63,8 @@ public class ReportParameterValidator {
     /**
      * Performs cross field parameters validation before running the report.
      *
-     * @param report report instance
-     * @param reportParameters  map of parameters values taken from components
+     * @param report           report instance
+     * @param reportParameters map of parameters values taken from components
      */
     public void crossValidateParameters(Report report, Map<String, Object> reportParameters) {
         String groovyScript = report.getValidationScript();

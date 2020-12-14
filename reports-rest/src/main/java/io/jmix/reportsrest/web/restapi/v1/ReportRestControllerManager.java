@@ -19,11 +19,10 @@ package io.jmix.reportsrest.web.restapi.v1;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
-import io.jmix.core.EntityStates;
-import io.jmix.core.Entity;
+import com.haulmont.cuba.core.global.EntityLoadInfo;
+import io.jmix.core.*;
 import io.jmix.core.metamodel.model.MetaClass;
-import com.haulmont.cuba.core.global.*;
-import io.jmix.core.security.EntityOp;
+import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.reports.ParameterClassResolver;
 import io.jmix.reports.ReportSecurityManager;
 import io.jmix.reports.app.service.ReportService;
@@ -31,11 +30,13 @@ import io.jmix.reports.entity.*;
 import io.jmix.reports.exception.FailedToConnectToOpenOfficeException;
 import io.jmix.reports.exception.NoOpenOfficeFreePortsException;
 import io.jmix.reports.exception.ReportingException;
+import io.jmix.security.constraint.PolicyStore;
+import io.jmix.security.constraint.SecureOperations;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -51,27 +52,35 @@ public class ReportRestControllerManager {
     @Autowired
     protected EntityStates entityStates;
     @Autowired
-    protected Security security;
+    protected SecureOperations secureOperations;
     @Autowired
     protected ReportSecurityManager reportSecurityManager;
     @Autowired
-    protected UserSessionSource userSessionSource;
+    protected CurrentAuthentication currentAuthentication;
     @Autowired
     protected ParameterClassResolver parameterClassResolver;
+    @Autowired
+    protected PolicyStore policyStore;
+    @Autowired
+    protected FetchPlans fetchPlans;
+    @Autowired
+    protected FetchPlanRepository fetchPlanRepository;
 
     public String loadGroup(String entityId) {
-        checkCanReadEntity(metadata.getClassNN(ReportGroup.class));
+        checkCanReadEntity(metadata.getClass(ReportGroup.class));
 
-        LoadContext<ReportGroup> loadContext = new LoadContext<>(ReportGroup.class);
-        loadContext.setView(
-                new View(ReportGroup.class)
-                        .addProperty("id")
-                        .addProperty("title")
-                        .addProperty("code"))
-                .setId(getIdFromString(entityId, metadata.getClassNN(ReportGroup.class)));
+        LoadContext<ReportGroup> loadContext = new LoadContext(metadata.getClass(ReportGroup.class));
+
+        FetchPlan fetchPlan = fetchPlans.builder(ReportGroup.class)
+                .add("id")
+                .add("title")
+                .add("code")
+                .build();
+        loadContext.setFetchPlan(fetchPlan)
+                .setId(getIdFromString(entityId, metadata.getClass(ReportGroup.class)));
 
         ReportGroup group = dataManager.load(loadContext);
-        checkEntityIsNotNull(metadata.getClassNN(ReportGroup.class).getName(), entityId, group);
+        checkEntityIsNotNull(metadata.getClass(ReportGroup.class).getName(), entityId, group);
 
         GroupInfo info = new GroupInfo();
         //noinspection ConstantConditions
@@ -83,15 +92,17 @@ public class ReportRestControllerManager {
     }
 
     public String loadReportsList() {
-        checkCanReadEntity(metadata.getClassNN(Report.class));
+        checkCanReadEntity(metadata.getClass(Report.class));
 
-        LoadContext<Report> loadContext = new LoadContext<>(Report.class);
-        loadContext.setView(
-                new View(Report.class)
-                        .addProperty("id")
-                        .addProperty("name")
-                        .addProperty("code")
-                        .addProperty("group"))
+        LoadContext<Report> loadContext = new LoadContext(metadata.getClass(Report.class));
+        FetchPlan fetchPlan = fetchPlans.builder(Report.class)
+                .add("id")
+                .add("name")
+                .add("code")
+                .add("group")
+                .build();
+
+        loadContext.setFetchPlan(fetchPlan)
                 .setQueryString("select r from report_Report r where r.restAccess = true");
         reportSecurityManager.applySecurityPolicies(loadContext, null, SecurityContextHolder.getContext().getAuthentication().getPrincipal());
         List<Report> reports = dataManager.loadList(loadContext);
@@ -160,17 +171,18 @@ public class ReportRestControllerManager {
     }
 
     protected Report loadReportInternal(String entityId) {
-        checkCanReadEntity(metadata.getClassNN(Report.class));
+        checkCanReadEntity(metadata.getClass(Report.class));
 
-        LoadContext<Report> loadContext = new LoadContext<>(Report.class);
-        loadContext.setView(ReportService.MAIN_VIEW_NAME)
+        LoadContext<Report> loadContext = new LoadContext(metadata.getClass(Report.class));
+        FetchPlan fetchPlan = fetchPlanRepository.getFetchPlan(Report.class, ReportService.MAIN_VIEW_NAME);
+        loadContext.setFetchPlan(fetchPlan)
                 .setQueryString("select r from report_Report r where r.id = :id and r.restAccess = true")
                 .setParameter("id", getReportIdFromString(entityId));
         reportSecurityManager.applySecurityPolicies(loadContext, null, SecurityContextHolder.getContext().getAuthentication().getPrincipal());
 
         Report report = dataManager.load(loadContext);
 
-        checkEntityIsNotNull(metadata.getClassNN(Report.class).getName(), entityId, report);
+        checkEntityIsNotNull(metadata.getClass(Report.class).getName(), entityId, report);
         return report;
     }
 
@@ -195,26 +207,26 @@ public class ReportRestControllerManager {
         ParameterType parameterType = inputParam.getType();
         if (parameterType == ParameterType.ENTITY) {
             if (paramValue.value != null) {
-                MetaClass entityClass = metadata.getClassNN(inputParam.getEntityMetaClass());
+                MetaClass entityClass = metadata.getClass(inputParam.getEntityMetaClass());
                 checkCanReadEntity(entityClass);
                 Object entityId = getIdFromString(paramValue.value, entityClass);
                 //noinspection unchecked
-                Entity entity = dataManager.load(entityClass.getJavaClass())
-                        .view(View.MINIMAL)
+                Entity entity = (Entity) dataManager.load(entityClass.getJavaClass())
+                        .fetchPlan(FetchPlan.BASE)
                         .id(entityId).optional().orElse(null);
                 checkEntityIsNotNull(entityClass.getName(), paramValue.value, entity);
                 return entity;
             }
         } else if (parameterType == ParameterType.ENTITY_LIST) {
             if (paramValue.values != null) {
-                MetaClass entityClass = metadata.getClassNN(inputParam.getEntityMetaClass());
+                MetaClass entityClass = metadata.getClass(inputParam.getEntityMetaClass());
                 checkCanReadEntity(entityClass);
                 List<Entity> entities = new ArrayList<>();
                 for (String value : paramValue.values) {
                     Object entityId = getIdFromString(value, entityClass);
                     //noinspection unchecked
                     Entity entity = (Entity) dataManager.load(entityClass.getJavaClass())
-                            .view(View.MINIMAL)
+                            .fetchPlan(FetchPlan.BASE)
                             .id(entityId).optional().orElse(null);
                     checkEntityIsNotNull(entityClass.getName(), value, entity);
                     entities.add(entity);
@@ -308,7 +320,7 @@ public class ReportRestControllerManager {
     }
 
     protected UUID getReportIdFromString(String entityId) {
-        return (UUID) getIdFromString(entityId, metadata.getClassNN(Report.class));
+        return (UUID) getIdFromString(entityId, metadata.getClass(Report.class));
     }
 
     protected Object getIdFromString(String entityId, MetaClass metaClass) {
@@ -320,40 +332,40 @@ public class ReportRestControllerManager {
 //                } else if (BaseIntIdentityIdEntity.class.isAssignableFrom(metaClass.getJavaClass())) {
 //                    return IdProxy.of(Integer.valueOf(entityId));
 //                } else {
-                    Class<?> clazz = metaClass.getJavaClass();
-                    while (clazz != null) {
-                        Method[] methods = clazz.getDeclaredMethods();
-                        for (Method method : methods) {
-                            if (method.getName().equals("getDbGeneratedId")) {
-                                Class<?> idClass = method.getReturnType();
-                                if (Long.class.isAssignableFrom(idClass)) {
-                                    return Long.valueOf(entityId);
-                                } else if (Integer.class.isAssignableFrom(idClass)) {
-                                    return Integer.valueOf(entityId);
-                                } else if (Short.class.isAssignableFrom(idClass)) {
-                                    return Long.valueOf(entityId);
-                                } else if (UUID.class.isAssignableFrom(idClass)) {
-                                    return UUID.fromString(entityId);
-                                }
-                            }
+            Class<?> clazz = metaClass.getJavaClass();
+            while (clazz != null) {
+                Method[] methods = clazz.getDeclaredMethods();
+                for (Method method : methods) {
+                    if (method.getName().equals("getDbGeneratedId")) {
+                        Class<?> idClass = method.getReturnType();
+                        if (Long.class.isAssignableFrom(idClass)) {
+                            return Long.valueOf(entityId);
+                        } else if (Integer.class.isAssignableFrom(idClass)) {
+                            return Integer.valueOf(entityId);
+                        } else if (Short.class.isAssignableFrom(idClass)) {
+                            return Long.valueOf(entityId);
+                        } else if (UUID.class.isAssignableFrom(idClass)) {
+                            return UUID.fromString(entityId);
                         }
-                        clazz = clazz.getSuperclass();
-//                    }
+                    }
                 }
+                clazz = clazz.getSuperclass();
+//                    }
+            }
 //                throw new UnsupportedOperationException("Unsupported ID type in entity " + metaClass.getName());
 //            } else {
-                //noinspection unchecked
-                Method getIdMethod = metaClass.getJavaClass().getMethod("getId");
-                Class<?> idClass = getIdMethod.getReturnType();
-                if (UUID.class.isAssignableFrom(idClass)) {
-                    return UUID.fromString(entityId);
-                } else if (Integer.class.isAssignableFrom(idClass)) {
-                    return Integer.valueOf(entityId);
-                } else if (Long.class.isAssignableFrom(idClass)) {
-                    return Long.valueOf(entityId);
-                } else {
-                    return entityId;
-                }
+            //noinspection unchecked
+            Method getIdMethod = metaClass.getJavaClass().getMethod("getId");
+            Class<?> idClass = getIdMethod.getReturnType();
+            if (UUID.class.isAssignableFrom(idClass)) {
+                return UUID.fromString(entityId);
+            } else if (Integer.class.isAssignableFrom(idClass)) {
+                return Integer.valueOf(entityId);
+            } else if (Long.class.isAssignableFrom(idClass)) {
+                return Long.valueOf(entityId);
+            } else {
+                return entityId;
+            }
 //            }
         } catch (Exception e) {
             throw new RestAPIException("Invalid entity ID",
@@ -364,7 +376,7 @@ public class ReportRestControllerManager {
     }
 
     protected void checkCanReadEntity(MetaClass metaClass) {
-        if (!security.isEntityOpPermitted(metaClass, EntityOp.READ)) {
+        if (!secureOperations.isEntityReadPermitted(metaClass, policyStore)) {
             throw new RestAPIException("Reading forbidden",
                     String.format("Reading of the %s is forbidden", metaClass.getName()),
                     HttpStatus.FORBIDDEN);
@@ -383,7 +395,7 @@ public class ReportRestControllerManager {
         if (reportTemplate != null) {
             ReportOutputType outputType = reportTemplate.getReportOutputType();
             if (outputType == ReportOutputType.CHART || outputType == ReportOutputType.TABLE
-                || outputType == ReportOutputType.PIVOT_TABLE) {
+                    || outputType == ReportOutputType.PIVOT_TABLE) {
                 throw new RestAPIException("Run report error",
                         String.format("%s report output type is not supported by Reporting REST API", outputType.toString()),
                         HttpStatus.BAD_REQUEST);
