@@ -17,19 +17,28 @@
 package io.jmix.reportsui.gui.report.history;
 
 
+import io.jmix.core.CoreProperties;
+import io.jmix.localfs.LocalFileStorage;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportExecution;
+import io.jmix.ui.UiProperties;
 import io.jmix.ui.WindowParam;
 import io.jmix.ui.action.BaseAction;
 import io.jmix.ui.component.Component;
 import io.jmix.ui.component.Table;
+import io.jmix.ui.download.ByteArrayDataProvider;
+import io.jmix.ui.download.DownloadFormat;
 import io.jmix.ui.download.Downloader;
 import io.jmix.ui.icon.JmixIcon;
 import io.jmix.ui.model.CollectionLoader;
 import io.jmix.ui.screen.*;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.CollectionUtils;
 
+import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -49,6 +58,12 @@ public class ReportExecutionBrowser extends StandardLookup<ReportExecution> {
     protected Downloader downloader;
     @Autowired
     protected SecondsToTextFormatter durationFormatter;
+    @Autowired
+    protected LocalFileStorage localFileStorage;
+    @Autowired
+    protected UiProperties uiProperties;
+    @Autowired
+    protected CoreProperties coreProperties;
 
     @WindowParam(name = REPORTS_PARAMETER)
     protected List<Report> filterByReports;
@@ -109,7 +124,7 @@ public class ReportExecutionBrowser extends StandardLookup<ReportExecution> {
                 return false;
             }
             ReportExecution execution = executionsTable.getSingleSelected();
-            return execution != null && execution.getOutputDocument() != null;
+            return execution != null && execution.getFileUri() != null;
         }
 
         @Override
@@ -125,8 +140,17 @@ public class ReportExecutionBrowser extends StandardLookup<ReportExecution> {
         @Override
         public void actionPerform(Component component) {
             ReportExecution execution = executionsTable.getSingleSelected();
-            if (execution != null && execution.getOutputDocument() != null) {
-                downloader.download(execution.getOutputDocument());
+            if (execution != null && execution.getFileUri() != null) {
+                URI uri = execution.getFileUri();
+                String fileName = localFileStorage.getFileName(uri);
+                try {
+                    downloader.download(new ByteArrayDataProvider(
+                            IOUtils.toByteArray(uri),
+                            uiProperties.getSaveExportedByteArrayDataThresholdBytes(),
+                            coreProperties.getTempDir()), DownloadFormat.getByExtension(FilenameUtils.getExtension(fileName)));
+                } catch (IOException e) {
+                    new RuntimeException(e);
+                }
             }
         }
     }

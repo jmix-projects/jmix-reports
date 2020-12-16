@@ -16,7 +16,6 @@
 
 package io.jmix.reportsui.gui.template.edit;
 
-import com.haulmont.cuba.core.entity.FileDescriptor;
 import io.jmix.core.Messages;
 import io.jmix.core.Metadata;
 import io.jmix.core.common.util.ParamsMap;
@@ -26,7 +25,6 @@ import io.jmix.reports.entity.CustomTemplateDefinedBy;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportOutputType;
 import io.jmix.reports.entity.ReportTemplate;
-import io.jmix.reportsui.gui.datasource.NotPersistenceDatasource;
 import io.jmix.reportsui.gui.definition.edit.scripteditordialog.ScriptEditorDialog;
 import io.jmix.reportsui.gui.report.run.ShowChartController;
 import io.jmix.reportsui.gui.report.run.ShowPivotTableController;
@@ -37,6 +35,7 @@ import io.jmix.ui.Notifications;
 import io.jmix.ui.ScreenBuilders;
 import io.jmix.ui.WindowConfig;
 import io.jmix.ui.component.*;
+import io.jmix.ui.model.CollectionContainer;
 import io.jmix.ui.screen.*;
 import io.jmix.ui.upload.TemporaryStorage;
 import org.apache.commons.io.FileUtils;
@@ -119,7 +118,7 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
     protected TableEditFrame tableEdit;
 
     @Autowired
-    protected NotPersistenceDatasource<ReportTemplate> templateDs;
+    protected CollectionContainer<ReportTemplate> templateDc;
 
     @Autowired
     protected BoxLayout descriptionEditBox;
@@ -190,7 +189,7 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
     @Subscribe
     protected void onAfterInit(AfterInitEvent event) {
         initUploadField();
-        templateDs.addItemPropertyChangeListener(e -> {
+        templateDc.addItemPropertyChangeListener(e -> {
             ReportTemplate reportTemplate = getEditedEntity();
             switch (e.getProperty()) {
                 case REPORT_OUTPUT_TYPE: {
@@ -384,9 +383,10 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
         byte[] templateFile = reportTemplate.getContent();
         if (templateFile != null && !hasChartTemplateOutput(reportTemplate.getReportOutputType())) {
             templateUploadField.setContentProvider(() -> new ByteArrayInputStream(templateFile));
-            FileDescriptor fileDescriptor = metadata.create(FileDescriptor.class);
-            fileDescriptor.setName(reportTemplate.getName());
-            templateUploadField.setValue(fileDescriptor);
+
+            temporaryStorage.saveFile(templateFile);
+            //todo
+            //templateUploadField.setValue(fileDescriptor);
         }
 
         boolean updatePermitted = secureOperations.isEntityUpdatePermitted(metadata.getClass(reportTemplate), policyStore)

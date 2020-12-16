@@ -159,8 +159,8 @@ public class ValueFormatEditor extends StandardEditor<ReportValueFormat> {
         });
 
         //noinspection unchecked
-        valuesFormatsDs.addItemPropertyChangeListener(e ->
-                ((DatasourceImplementation) valuesFormatsDs).modified(e.getItem()));
+//        valuesFormatsDs.addItemPropertyChangeListener(e ->
+//                ((DatasourceImplementation) valuesFormatsDs).modified(e.getItem()));
     }
 
     protected boolean isClickTrueGroovyScript(Boolean visible, Boolean prevVisible, Boolean userOriginated) {
@@ -169,20 +169,20 @@ public class ValueFormatEditor extends StandardEditor<ReportValueFormat> {
 
     protected void addFormatItem(String caption) {
         //noinspection unchecked
-        Map<String, String> optionsMap =
-                new HashMap<>((Map<? extends String, ? extends String>) formatField.getOptionsMap());
-        optionsMap.put(caption, caption);
-
-        formatField.setOptionsMap(optionsMap);
+//        Map<String, String> optionsMap =
+//                new HashMap<>((Map<? extends String, ? extends String>) formatField.getOptionsMap());
+//        optionsMap.put(caption, caption);
+//
+//        formatField.setOptionsMap(optionsMap);
     }
 
     @Subscribe
     protected void onAfterInit(AfterInitEvent event) {
         String value = formatField.getValue();
         if (value != null) {
-            if (!formatField.getOptionsMap().containsValue(value) && Boolean.FALSE.equals(groovyCheckBox.isChecked())) {
-                addFormatItem(value);
-            }
+//            if (!formatField.getOptions().containsValue(value) && Boolean.FALSE.equals(groovyCheckBox.isChecked())) {
+//                addFormatItem(value);
+//            }
             formatField.setValue(value);
         }
     }

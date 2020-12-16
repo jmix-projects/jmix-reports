@@ -16,10 +16,9 @@
 package io.jmix.reports.libintegration;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.haulmont.cuba.core.global.Configuration;
-import com.haulmont.cuba.core.global.Scripting;
 import com.haulmont.yarg.formatters.CustomReport;
 import com.haulmont.yarg.structure.BandData;
+import io.jmix.core.ClassManager;
 import io.jmix.core.CoreProperties;
 import io.jmix.reports.ReportingConfig;
 import io.jmix.reports.entity.CustomTemplateDefinedBy;
@@ -33,6 +32,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.scripting.ScriptEvaluator;
+import org.springframework.scripting.support.ResourceScriptSource;
+import org.springframework.scripting.support.StaticScriptSource;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
@@ -51,10 +54,10 @@ public class CustomFormatter implements CustomReport {
     private static final Logger log = LoggerFactory.getLogger(CustomFormatter.class);
 
     @Autowired
-    protected Scripting scripting;
+    protected ScriptEvaluator scriptEvaluator;
 
     @Autowired
-    protected Configuration configuration;
+    protected ClassManager classManager;
 
     @Autowired
     protected ReportingConfig reportingConfig;
@@ -105,7 +108,7 @@ public class CustomFormatter implements CustomReport {
     }
 
     protected byte[] generateReportWithClass(BandData rootBand, String customDefinition) {
-        Class clazz = scripting.loadClassNN(customDefinition);
+        Class clazz = classManager.loadClass(customDefinition);
         try {
             CustomReport customReport = (CustomReport) clazz.newInstance();
             return customReport.createReport(report, rootBand, params);
@@ -128,9 +131,9 @@ public class CustomFormatter implements CustomReport {
         scriptParams.put(ROOT_BAND, rootBand);
 
         if (Pattern.matches(PATH_GROOVY_FILE, customDefinition)) {
-            result = scripting.runGroovyScript(customDefinition, scriptParams);
+            result = scriptEvaluator.evaluate(new ResourceScriptSource(new ClassPathResource(customDefinition)), scriptParams);
         } else {
-            result = scripting.evaluateGroovy(customDefinition, scriptParams);
+            result = scriptEvaluator.evaluate(new StaticScriptSource(customDefinition), scriptParams);
         }
 
         if (result instanceof byte[]) {
@@ -156,7 +159,7 @@ public class CustomFormatter implements CustomReport {
 
         convertedParams.put(ROOT_BAND, rootBand);
 
-        String url = scripting.evaluateGroovy("return \"" + customDefinition + "\"", convertedParams).toString();
+        String url = scriptEvaluator.evaluate(new StaticScriptSource("return \"" + customDefinition + "\""), convertedParams).toString();
 
         try {
             Future<byte[]> future = executor.submit(() ->

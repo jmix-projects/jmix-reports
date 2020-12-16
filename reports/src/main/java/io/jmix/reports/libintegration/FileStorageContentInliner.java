@@ -16,18 +16,17 @@
 
 package io.jmix.reports.libintegration;
 
-import com.haulmont.cuba.core.app.FileStorageAPI;
-import com.haulmont.cuba.core.entity.FileDescriptor;
-import com.haulmont.cuba.core.global.FileStorageException;
 import com.haulmont.yarg.exception.ReportFormattingException;
 import com.haulmont.yarg.formatters.impl.inline.AbstractInliner;
 import io.jmix.core.DataManager;
-import io.jmix.core.LoadContext;
 import io.jmix.core.Metadata;
-import io.jmix.core.UuidProvider;
+import io.jmix.localfs.LocalFileStorage;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.net.URI;
 import java.util.regex.Pattern;
 
 @Component("report_FileStorageContentInliner")
@@ -41,7 +40,7 @@ public class FileStorageContentInliner extends AbstractInliner {
     protected DataManager dataManager;
 
     @Autowired
-    protected FileStorageAPI fileStorageAPI;
+    protected LocalFileStorage localFileStorage;
 
     public FileStorageContentInliner() {
         tagPattern = Pattern.compile(REGULAR_EXPRESSION, Pattern.CASE_INSENSITIVE);
@@ -55,15 +54,16 @@ public class FileStorageContentInliner extends AbstractInliner {
     @Override
     protected byte[] getContent(Object paramValue) {
         try {
-            FileDescriptor file;
-            if (paramValue instanceof FileDescriptor) {
-                file = dataManager.load(new LoadContext(metadata.getClass(FileDescriptor.class)).setId(((FileDescriptor) paramValue).getId()));
-            } else {
-                file = dataManager.load(new LoadContext(metadata.getClass(FileDescriptor.class)).setId(UuidProvider.fromString(paramValue.toString())));
-            }
-            byte[] bytes = fileStorageAPI.loadFile(file);
+            //todo image format
+            URI uri = null;
+//            if (paramValue instanceof FileDescriptor) {
+//                file = dataManager.load(new LoadContext(metadata.getClass(FileDescriptor.class)).setId(((FileDescriptor) paramValue).getId()));
+//            } else {
+//                file = dataManager.load(new LoadContext(metadata.getClass(FileDescriptor.class)).setId(UuidProvider.fromString(paramValue.toString())));
+//            }
+            byte[] bytes = IOUtils.toByteArray(localFileStorage.openStream(uri));
             return bytes;
-        } catch (FileStorageException e) {
+        } catch (IOException e) {
             throw new ReportFormattingException(String.format("Unable to get image from file storage. File id [%s]", paramValue), e);
         }
     }

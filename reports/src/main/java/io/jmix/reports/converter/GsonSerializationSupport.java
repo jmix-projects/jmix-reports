@@ -23,15 +23,11 @@ import com.google.gson.TypeAdapterFactory;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
-import com.haulmont.chile.core.datatypes.Datatypes;
-import com.haulmont.cuba.core.global.EntityStates;
-import io.jmix.core.Entity;
-import io.jmix.core.ExtendedEntities;
-import io.jmix.core.Id;
-import io.jmix.core.Metadata;
+import io.jmix.core.*;
 import io.jmix.core.common.util.ReflectionHelper;
 import io.jmix.core.entity.EntityValues;
 import io.jmix.core.metamodel.datatype.Datatype;
+import io.jmix.core.metamodel.datatype.DatatypeRegistry;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.core.metamodel.model.MetaProperty;
 import io.jmix.core.metamodel.model.Range;
@@ -55,6 +51,7 @@ public class GsonSerializationSupport {
     protected Metadata metadata;
     protected ExtendedEntities extendedEntities;
     protected EntityStates entityStates;
+    protected DatatypeRegistry datatypeRegistry;
 
     public interface ExclusionPolicy {
         boolean exclude(Class objectClass, String propertyName);
@@ -64,6 +61,7 @@ public class GsonSerializationSupport {
         this.metadata = beanFactory.getBean(Metadata.class);
         this.extendedEntities = beanFactory.getBean(ExtendedEntities.class);
         this.entityStates = beanFactory.getBean(EntityStates.class);
+        this.datatypeRegistry = beanFactory.getBean(DatatypeRegistry.class);
         gsonBuilder = new GsonBuilder()
                 .registerTypeHierarchyAdapter(Entity.class, new TypeAdapter<Entity>() {
                     @Override
@@ -123,7 +121,7 @@ public class GsonSerializationSupport {
         String id = in.nextString();
         MetaProperty idProperty = metaClass.getProperty("id");
         try {
-            EntityValues.setValue(entity, "id", Datatypes.getNN(idProperty.getJavaType()).parse(id));
+            EntityValues.setValue(entity, "id", datatypeRegistry.find(idProperty.getJavaType()).parse(id));
         } catch (ParseException e) {
             throw new RuntimeException(
                     format("An error occurred while parsing id. Class [%s]. Value [%s].", idProperty.getJavaType(), id), e);
@@ -183,7 +181,7 @@ public class GsonSerializationSupport {
         String value = in.nextString();
         Object parsedValue = null;
         try {
-            Datatype<?> datatype = Datatypes.get(propertyType);
+            Datatype<?> datatype = datatypeRegistry.find(propertyType);
             if (datatype != null) {
                 parsedValue = datatype.parse(value);
             }
@@ -217,7 +215,7 @@ public class GsonSerializationSupport {
     protected void writeEntity(JsonWriter out, Entity entity) throws IOException {
         out.beginObject();
         MetaClass metaClass = metadata.getClass(entity);
-        Datatype idType = Datatypes.getNN(metaClass.getProperty("id").getJavaType());
+        Datatype idType = datatypeRegistry.find(metaClass.getProperty("id").getJavaType());
         Object id = Id.of(entity).getValue();
         if (processedObjects.containsKey(id)) {
             out.name("metaClass");
@@ -279,7 +277,7 @@ public class GsonSerializationSupport {
         Object value = EntityValues.getValue(entity, property.getName());
         if (value != null) {
             out.name(property.getName());
-            Datatype datatype = Datatypes.get(property.getJavaType());
+            Datatype datatype = datatypeRegistry.find(property.getJavaType());
             if (datatype != null) {
                 out.value(datatype.format(value));
             } else {

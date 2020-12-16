@@ -20,6 +20,7 @@ import io.jmix.core.InstanceNameProvider;
 import io.jmix.core.Entity;
 import io.jmix.core.Messages;
 import io.jmix.core.metamodel.datatype.Datatype;
+import io.jmix.core.metamodel.datatype.DatatypeRegistry;
 import io.jmix.core.security.CurrentAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -34,10 +35,13 @@ public class JmixFieldFormatProvider implements DefaultFormatProvider {
     @Autowired
     protected InstanceNameProvider instanceNameProvider;
 
+    @Autowired
+    protected DatatypeRegistry datatypeRegistry;
+
     @Override
     public String format(Object o) {
         if (o != null) {
-            Datatype datatype = Datatypes.get(o.getClass());
+            Datatype datatype = datatypeRegistry.find(o.getClass());
             if (datatype != null) {
                 if (currentAuthentication.isSet()) {
                     return datatype.format(o, currentAuthentication.getLocale());

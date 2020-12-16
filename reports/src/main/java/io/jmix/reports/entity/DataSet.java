@@ -27,7 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-@JmixEntity(name = "report_DataSet")
+@JmixEntity(name = "report_DataSet", annotatedPropertiesOnly = true)
 @SystemLevel
 public class DataSet implements ReportQuery {
 

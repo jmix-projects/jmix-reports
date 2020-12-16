@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@JmixEntity(name = "report_WizardReportData")
+@JmixEntity(name = "report_WizardReportData", annotatedPropertiesOnly = true)
 @SystemLevel
 public class ReportData implements Serializable {
 

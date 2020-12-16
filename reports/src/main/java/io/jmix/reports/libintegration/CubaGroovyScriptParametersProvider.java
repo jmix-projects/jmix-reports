@@ -16,15 +16,15 @@
 
 package io.jmix.reports.libintegration;
 
-import com.haulmont.cuba.core.Persistence;
-import com.haulmont.cuba.core.Transaction;
-import com.haulmont.cuba.core.TransactionParams;
-import com.haulmont.cuba.core.global.Security;
-import com.haulmont.cuba.core.global.UserSessionSource;
+//import com.haulmont.cuba.core.Persistence;
+//import com.haulmont.cuba.core.Transaction;
+//import com.haulmont.cuba.core.TransactionParams;
+//import com.haulmont.cuba.core.global.Security;
+//import com.haulmont.cuba.core.global.UserSessionSource;
+
 import com.haulmont.yarg.exception.ValidationException;
 import com.haulmont.yarg.structure.BandData;
 import com.haulmont.yarg.structure.ReportQuery;
-import groovy.lang.Closure;
 import io.jmix.core.DataManager;
 import io.jmix.core.Metadata;
 import io.jmix.core.TimeSource;
@@ -46,8 +46,8 @@ public class CubaGroovyScriptParametersProvider implements GroovyScriptParameter
     @Autowired
     protected SessionData sessionData;
 
-    @Autowired
-    protected Persistence persistence;
+//    @Autowired
+//    protected Persistence persistence;
 
     @Autowired
     protected Metadata metadata;
@@ -55,11 +55,11 @@ public class CubaGroovyScriptParametersProvider implements GroovyScriptParameter
     @Autowired
     protected DataManager dataManager;
 
-    @Autowired
-    protected UserSessionSource sessionSource;
-
-    @Autowired
-    protected Security security;
+//    @Autowired
+//    protected UserSessionSource sessionSource;
+//
+//    @Autowired
+//    protected Security security;
 
     @Autowired
     protected TimeSource timeSource;
@@ -71,14 +71,14 @@ public class CubaGroovyScriptParametersProvider implements GroovyScriptParameter
         scriptParams.put("reportQuery", reportQuery);
         scriptParams.put("parentBand", parentBand);
         scriptParams.put("params", reportParameters);
-        scriptParams.put("persistence", persistence);
+//        scriptParams.put("persistence", persistence);
         scriptParams.put("metadata", metadata);
         scriptParams.put("dataManager", dataManager);
-        scriptParams.put("security", security);
+//        scriptParams.put("security", security);
         scriptParams.put("timeSource", timeSource);
         scriptParams.put("userSession", sessionData.getHttpSession());
         scriptParams.put("sessionData", sessionData);
-        scriptParams.put("transactional", new MethodClosure(this, "transactional"));
+//        scriptParams.put("transactional", new MethodClosure(this, "transactional"));
         scriptParams.put("validationException", new MethodClosure(this, "validationException"));
 
         return scriptParams;
@@ -88,18 +88,18 @@ public class CubaGroovyScriptParametersProvider implements GroovyScriptParameter
         throw new ValidationException(message);
     }
 
-    protected void transactional(Closure closure) {
-        Transaction tx;
-        if (!persistence.isInTransaction() && reportingConfig.getUseReadOnlyTransactionForGroovy()) {
-            tx = persistence.createTransaction(new TransactionParams().setReadOnly(true));
-        } else {
-            tx = persistence.getTransaction();
-        }
-        try {
-            closure.call(persistence.getEntityManager());
-            tx.commit();
-        } finally {
-            tx.end();
-        }
-    }
+//    protected void transactional(Closure closure) {
+//        Transaction tx;
+//        if (!persistence.isInTransaction() && reportingConfig.getUseReadOnlyTransactionForGroovy()) {
+//            tx = persistence.createTransaction(new TransactionParams().setReadOnly(true));
+//        } else {
+//            tx = persistence.getTransaction();
+//        }
+//        try {
+//            closure.call(persistence.getEntityManager());
+//            tx.commit();
+//        } finally {
+//            tx.end();
+//        }
+//    }
 }

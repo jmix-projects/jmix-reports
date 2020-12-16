@@ -17,7 +17,7 @@
 package io.jmix.reports;
 
 import com.google.common.collect.ImmutableMap;
-import com.haulmont.cuba.core.global.Scripting;
+import io.jmix.core.ClassManager;
 import io.jmix.core.Entity;
 import io.jmix.core.Metadata;
 import io.jmix.core.metamodel.model.MetaClass;
@@ -65,7 +65,7 @@ public class ParameterClassResolver {
             .build();
 
     @Autowired
-    protected Scripting scripting;
+    protected ClassManager classManager;
 
     @Autowired
     protected Metadata metadata;
@@ -83,7 +83,7 @@ public class ParameterClassResolver {
                 }
             } else if (parameter.getType() == ParameterType.ENUMERATION) {
                 if (StringUtils.isNotBlank(parameter.getEnumerationClass())) {
-                    return scripting.loadClass(parameter.getEnumerationClass());
+                    return classManager.loadClass(parameter.getEnumerationClass());
                 }
             }
         }

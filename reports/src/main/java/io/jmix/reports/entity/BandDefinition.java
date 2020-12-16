@@ -15,12 +15,12 @@
  */
 package io.jmix.reports.entity;
 
-import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.yarg.structure.BandOrientation;
 import com.haulmont.yarg.structure.ReportBand;
 import com.haulmont.yarg.structure.ReportQuery;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.entity.annotation.SystemLevel;
+import io.jmix.core.metamodel.annotation.InstanceName;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.annotation.JmixProperty;
 
@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.UUID;
 
 @JmixEntity(name = "report_BandDefinition")
-@NamePattern("%s|name")
 @SystemLevel
 public class BandDefinition implements ReportBand {
 
@@ -40,6 +39,7 @@ public class BandDefinition implements ReportBand {
     @JmixGeneratedValue
     protected UUID id;
 
+    @InstanceName
     @JmixProperty
     protected String name;
 

@@ -15,17 +15,24 @@
  */
 package io.jmix.reports.entity;
 
-import io.jmix.core.entity.annotation.Listeners;
-import io.jmix.core.metamodel.annotation.Composition;
-import io.jmix.core.metamodel.annotation.JmixProperty;
-import com.haulmont.chile.core.annotations.NamePattern;
-import io.jmix.core.entity.annotation.SystemLevel;
 import com.haulmont.yarg.structure.ReportBand;
 import com.haulmont.yarg.structure.ReportFieldFormat;
+import io.jmix.core.annotation.DeletedBy;
+import io.jmix.core.annotation.DeletedDate;
+import io.jmix.core.entity.annotation.JmixGeneratedValue;
+import io.jmix.core.entity.annotation.Listeners;
+import io.jmix.core.entity.annotation.SystemLevel;
+import io.jmix.core.metamodel.annotation.Composition;
+import io.jmix.core.metamodel.annotation.JmixEntity;
+import io.jmix.core.metamodel.annotation.JmixProperty;
 import io.jmix.security.model.Role;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Predicate;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.annotation.LastModifiedDate;
 
 import javax.persistence.*;
 import java.util.*;
@@ -36,11 +43,46 @@ import java.util.*;
  */
 @Entity(name = "report_Report")
 @Table(name = "REPORT_REPORT")
-@NamePattern("%s|locName,name,localeNames")
+//todo namepattern
+//@NamePattern("%s|locName,name,localeNames")
 @Listeners("report_ReportDetachListener")
+@JmixEntity(annotatedPropertiesOnly = true)
 @SuppressWarnings("unused")
-public class Report extends StandardEntity implements com.haulmont.yarg.structure.Report {
+public class Report implements com.haulmont.yarg.structure.Report, io.jmix.core.Entity {
     private static final long serialVersionUID = -2817764915661205093L;
+
+    @JmixGeneratedValue
+    @Id
+    @Column(name = "ID", nullable = false)
+    private UUID id;
+
+    @Version
+    @Column(name = "VERSION", nullable = false)
+    private Integer version;
+
+    @CreatedDate
+    @Column(name = "CREATE_TS")
+    private Date createTs;
+
+    @CreatedBy
+    @Column(name = "CREATED_BY", length = 50)
+    private String createdBy;
+
+    @LastModifiedDate
+    @Column(name = "UPDATE_TS")
+    private Date updateTs;
+
+    @LastModifiedBy
+    @Column(name = "UPDATED_BY", length = 50)
+    private String updatedBy;
+
+    @DeletedDate
+    @Column(name = "DELETE_TS")
+    private Date deleteTs;
+
+    @DeletedBy
+    @Column(name = "DELETED_BY", length = 50)
+    private String deletedBy;
 
     @Column(name = "NAME", length = 255, nullable = false, unique = true)
     protected String name;
@@ -113,9 +155,9 @@ public class Report extends StandardEntity implements com.haulmont.yarg.structur
     @JmixProperty
     protected List<ReportScreen> reportScreens = new ArrayList<>();
 
-    @Transient
-    @JmixProperty
-    protected Set<Role> roles = new HashSet<>();
+//    @Transient
+//    @JmixProperty
+//    protected Set<Role> roles = new HashSet<>();
 
     @Transient
     protected String localeName;
@@ -153,6 +195,70 @@ public class Report extends StandardEntity implements com.haulmont.yarg.structur
         return rootBandDefinition;
     }
 
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public Integer getVersion() {
+        return version;
+    }
+
+    public void setVersion(Integer version) {
+        this.version = version;
+    }
+
+    public Date getCreateTs() {
+        return createTs;
+    }
+
+    public void setCreateTs(Date createTs) {
+        this.createTs = createTs;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public Date getUpdateTs() {
+        return updateTs;
+    }
+
+    public void setUpdateTs(Date updateTs) {
+        this.updateTs = updateTs;
+    }
+
+    public String getUpdatedBy() {
+        return updatedBy;
+    }
+
+    public void setUpdatedBy(String updatedBy) {
+        this.updatedBy = updatedBy;
+    }
+
+    public Date getDeleteTs() {
+        return deleteTs;
+    }
+
+    public void setDeleteTs(Date deleteTs) {
+        this.deleteTs = deleteTs;
+    }
+
+    public String getDeletedBy() {
+        return deletedBy;
+    }
+
+    public void setDeletedBy(String deletedBy) {
+        this.deletedBy = deletedBy;
+    }
+
     @Override
     public String getName() {
         return name;
@@ -188,15 +294,15 @@ public class Report extends StandardEntity implements com.haulmont.yarg.structur
         this.reportType = reportType != null ? reportType.getId() : null;
     }
 
-    @JmixProperty
-    public Set<Role> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(Set<Role> roles) {
-        if (roles == null) roles = Collections.emptySet();
-        this.roles = roles;
-    }
+//    @JmixProperty
+//    public Set<Role> getRoles() {
+//        return roles;
+//    }
+//
+//    public void setRoles(Set<Role> roles) {
+//        if (roles == null) roles = Collections.emptySet();
+//        this.roles = roles;
+//    }
 
     public List<ReportScreen> getReportScreens() {
         return reportScreens;

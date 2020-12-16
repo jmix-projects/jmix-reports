@@ -18,13 +18,13 @@
         caption="msg://templateEditor"
         focusComponent="code">
 
-    <dsContext>
-        <datasource
-                id="templateDs"
-                class="io.jmix.reports.entity.ReportTemplate"
-                view="template.edit"
-                datasourceClass="com.haulmont.reports.gui.datasource.NotPersistenceDatasource"/>
-    </dsContext>
+<!--    <dsContext>-->
+<!--        <datasource-->
+<!--                id="templateDs"-->
+<!--                class="io.jmix.reports.entity.ReportTemplate"-->
+<!--                view="template.edit"-->
+<!--                datasourceClass="com.haulmont.reports.gui.datasource.NotPersistenceDatasource"/>-->
+<!--    </dsContext>-->
 
     <data>
         <instance id="templateDc"

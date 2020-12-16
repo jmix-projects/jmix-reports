@@ -19,7 +19,6 @@ package io.jmix.reportsui.gui.report.run;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.haulmont.chile.core.datatypes.DatatypeRegistry;
-import com.haulmont.cuba.core.global.Scripting;
 import com.haulmont.cuba.gui.WindowParams;
 import io.jmix.core.*;
 import io.jmix.core.metamodel.model.MetaClass;
@@ -57,7 +56,7 @@ public class ParameterFieldCreator {
     protected Metadata metadata;
 
     @Autowired
-    protected Scripting scripting;
+    protected ClassManager classManager;
 
     @Autowired
     protected ReportService reportService;
@@ -97,7 +96,7 @@ public class ParameterFieldCreator {
 
     public Label createLabel(ReportInputParameter parameter, Field field) {
         Label label = uiComponents.create(Label.class);
-        label.setAlignment(field instanceof TokenList ? Component.Alignment.TOP_LEFT : Component.Alignment.MIDDLE_LEFT);
+        label.setAlignment(field instanceof TagPicker ? Component.Alignment.TOP_LEFT : Component.Alignment.MIDDLE_LEFT);
         label.setWidth(Component.AUTO_SIZE);
         label.setValue(parameter.getLocName());
         return label;
@@ -188,7 +187,8 @@ public class ParameterFieldCreator {
         @Override
         public Field createField(ReportInputParameter parameter) {
             TextField textField = uiComponents.create(TextField.class);
-            textField.addValidator(new DoubleValidator());
+            //todo
+            //textField.addValidator(new DoubleValidator());
             textField.setDatatype(datatypeRegistry.get(Double.class));
             return textField;
         }
@@ -201,7 +201,7 @@ public class ParameterFieldCreator {
             ComboBox lookupField = uiComponents.create(ComboBox.class);
             String enumClassName = parameter.getEnumerationClass();
             if (StringUtils.isNotBlank(enumClassName)) {
-                Class enumClass = scripting.loadClass(enumClassName);
+                Class enumClass = classManager.loadClass(enumClassName);
 
                 if (enumClass != null) {
                     Object[] constants = enumClass.getEnumConstants();
@@ -229,7 +229,7 @@ public class ParameterFieldCreator {
                 field = uiComponents.create(EntityComboBox.class);
 
                 FetchPlan fetchPlan = fetchPlans.builder(entityMetaClass.getJavaClass())
-                        .addFetchPlan(FetchPlan.BASE)
+                        .addFetchPlan(FetchPlan.INSTANCE_NAME)
                         .build();
 
                 CollectionContainer collectionContainer = factory.createCollectionContainer(entityMetaClass.getJavaClass());
@@ -271,10 +271,10 @@ public class ParameterFieldCreator {
             String parameterScreen = parameter.getScreen();
 
             if (StringUtils.isNotEmpty(parameterScreen)) {
-                pickerLookupAction.setLookupScreen(parameterScreen);
-                pickerLookupAction.setLookupScreenParams(Collections.emptyMap());
+                pickerLookupAction.setScreenId(parameterScreen);
+                pickerLookupAction.setScreenOptionsSupplier(() -> Collections.emptyMap());
             } else {
-                pickerLookupAction.setLookupScreen(COMMON_LOOKUP_SCREEN_ID);
+                pickerLookupAction.setScreenId(COMMON_LOOKUP_SCREEN_ID);
 
                 Map<String, Object> params = new HashMap<>();
                 //TODO class parameter
@@ -284,7 +284,7 @@ public class ParameterFieldCreator {
                     WindowParams.MULTI_SELECT.set(params, false);
                 }
 
-                pickerLookupAction.setLookupScreenParams(params);
+                pickerLookupAction.setScreenOptionsSupplier(() -> params);
             }
 
             return field;
@@ -295,7 +295,7 @@ public class ParameterFieldCreator {
 
         @Override
         public Field createField(final ReportInputParameter parameter) {
-            TokenList tokenList = uiComponents.create(TokenList.class);
+            TagPicker tagPicker = uiComponents.create(TagPicker.class);
             MetaClass entityMetaClass = metadata.getClass(parameter.getEntityMetaClass());
 
             CollectionContainer collectionContainer = factory.createCollectionContainer(entityMetaClass.getJavaClass());
@@ -321,27 +321,27 @@ public class ParameterFieldCreator {
 //            cds.refresh();
 
 
-            tokenList.setOptions(new ContainerOptions(collectionContainer));
-            tokenList.setEditable(true);
-            tokenList.setLookup(true);
-            tokenList.setHeight("120px");
+            tagPicker.setOptions(new ContainerOptions(collectionContainer));
+            tagPicker.setEditable(true);
+//            tagPicker.setLookup(true);
+            tagPicker.setHeight("120px");
 
             String screen = parameter.getScreen();
 
             if (StringUtils.isNotEmpty(screen)) {
-                tokenList.setLookupScreen(screen);
-                tokenList.setLookupScreenParams(Collections.emptyMap());
+//                tagPicker.setLookupScreen(screen);
+//                tagPicker.setLookupScreenParams(Collections.emptyMap());
             } else {
-                tokenList.setLookupScreen("commonLookup");
+                //tagPicker.setLookupScreen("commonLookup");
                 //TODO class parameter
 //                tokenList.setLookupScreenParams(ParamsMap.of(CLASS_PARAMETER, entityMetaClass));
             }
 
-            tokenList.setAddButtonCaption(messages.getMessage(TokenList.class, "actions.Select"));
-            tokenList.setInline(true);
-            tokenList.setSimple(true);
+//            tagPicker.setAddButtonCaption(messages.getMessage(TagPicker.class, "actions.Select"));
+//            tagPicker.setInline(true);
+//            tagPicker.setSimple(true);
 
-            return tokenList;
+            return tagPicker;
         }
     }
 }

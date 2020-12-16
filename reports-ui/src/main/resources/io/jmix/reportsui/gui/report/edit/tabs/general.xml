@@ -69,7 +69,7 @@
                             <button id="down" icon="font-icon:CARET_DOWN"/>
                         </buttonsPanel>
 
-                        <tree id="serviceTree" width="100%" height="100%" dataContainer="treeDc">
+                        <tree id="serviceTree" width="100%" height="100%" dataContainer="bandsDc" hierarchyProperty="parentBandDefinition">
 <!--                            <treechildren datasource="treeDs" captionProperty="name"/>-->
                         </tree>
                     </groupBox>

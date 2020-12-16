@@ -34,7 +34,7 @@ dependencies {
     api 'io.jmix.security:jmix-security'
     api 'io.jmix.dynattr:jmix-dynattr'
     api 'io.jmix.dynattr:jmix-dynattr-ui'
-    api 'io.jmix.fsfilestorage:jmix-fsfilestorage'
+    api 'io.jmix.localfs:jmix-localfs'
 
     implementation 'com.google.code.gson:gson'
     implementation ('com.haulmont.yarg:yarg-api:2.2.5') {

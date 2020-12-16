@@ -21,6 +21,7 @@ import io.jmix.core.entity.annotation.SystemLevel;
 import io.jmix.core.metamodel.annotation.Composition;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.annotation.JmixProperty;
+import io.jmix.core.metamodel.model.MetaClass;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.Id;
@@ -120,7 +121,8 @@ public class ReportRegion implements OrderableEntity {
     @JmixProperty
     @Transient
     public String getNameForBand() {
-        return StringUtils.isEmpty(bandNameFromReport) ? getRegionPropertiesRootNode().getWrappedMetaClass().getJavaClass().getSimpleName() +
+        MetaClass wrapperMetaClass = getRegionPropertiesRootNode().getWrappedMetaClass();
+        return StringUtils.isEmpty(bandNameFromReport) ? wrapperMetaClass.getJavaClass().getSimpleName() +
                 (isTabulatedRegion() ? "s" : "") +
                 (getReportData().getReportRegions().size() == 1 ? "" : getOrderNum().toString()) : bandNameFromReport;
     }
@@ -143,13 +145,11 @@ public class ReportRegion implements OrderableEntity {
         return bandNameFromReport;
     }
 
-    @Override
-    public UUID getUuid() {
+    public UUID getId() {
         return id;
     }
 
-    @Override
-    public void setUuid(UUID uuid) {
-        this.id = uuid;
+    public void setId(UUID id) {
+        this.id = id;
     }
 }

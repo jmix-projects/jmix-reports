@@ -17,7 +17,6 @@
 package io.jmix.reportsui.gui.report.wizard.region;
 
 import com.haulmont.cuba.core.global.Configuration;
-import com.haulmont.cuba.gui.WindowParams;
 import com.haulmont.cuba.gui.data.impl.AbstractTreeDatasource;
 import io.jmix.core.Entity;
 import io.jmix.core.Messages;
@@ -91,26 +90,26 @@ public class RegionEditor extends StandardEditor<ReportRegion> {
 
     @Subscribe
     protected void onInit(InitEvent event) {
-        updatePermission = !Boolean.TRUE.equals(params.get("updateDisabled"));
-        isTabulated = ((ReportRegion) WindowParams.ITEM.getEntity(params)).getIsTabulatedRegion();
-        asViewEditor = BooleanUtils.isTrue((Boolean) params.get("asViewEditor"));
-        params.put("component$reportPropertyName", reportPropertyName);
-        reportEntityTreeNodeDs.refresh(params);
-        //TODO add disallowing of classes selection in tree
-        rootNode = (EntityTreeNode) params.get("rootEntity");
-        if (!asViewEditor) {
-            if (isTabulated) {
-                setTabulatedRegionEditorCaption(((EntityTreeNode) (params.get("rootEntity"))).getName());
-            } else {
-                setSimpleRegionEditorCaption();
-            }
-        }
-        String group = isTabulated
-                ? "selectEntityPropertiesForTableArea"
-                : "selectEntityProperties";
-        tipLabel.setValue(messages.formatMessage(group, rootNode.getLocalizedName()));
-        tipLabel.setHtmlEnabled(true);
-        initComponents();
+//        updatePermission = !Boolean.TRUE.equals(params.get("updateDisabled"));
+//        isTabulated = ((ReportRegion) WindowParams.ITEM.getEntity(params)).getIsTabulatedRegion();
+//        asViewEditor = BooleanUtils.isTrue((Boolean) params.get("asViewEditor"));
+//        params.put("component$reportPropertyName", reportPropertyName);
+//        reportEntityTreeNodeDs.refresh(params);
+//        //TODO add disallowing of classes selection in tree
+//        rootNode = (EntityTreeNode) params.get("rootEntity");
+//        if (!asViewEditor) {
+//            if (isTabulated) {
+//                setTabulatedRegionEditorCaption(((EntityTreeNode) (params.get("rootEntity"))).getName());
+//            } else {
+//                setSimpleRegionEditorCaption();
+//            }
+//        }
+//        String group = isTabulated
+//                ? "selectEntityPropertiesForTableArea"
+//                : "selectEntityProperties";
+//        tipLabel.setValue(messages.formatMessage(group, rootNode.getLocalizedName()));
+//        tipLabel.setHtmlEnabled(true);
+//        initComponents();
     }
 
     protected void initComponents() {
@@ -122,7 +121,7 @@ public class RegionEditor extends StandardEditor<ReportRegion> {
             initAsViewEditor();
         }
         entityTree.setSelectionMode(Tree.SelectionMode.MULTI);
-        entityTree.expand(rootNode.getId());
+//        entityTree.expand(rootNode.getId());
 
         Action search = new AbstractAction("search"/*TODO client config, configuration.getConfig(ClientConfig.class).getFilterApplyShortcut()*/) {
             @Override
@@ -130,7 +129,7 @@ public class RegionEditor extends StandardEditor<ReportRegion> {
                 reportEntityTreeNodeDs.refresh();
                 if (!reportEntityTreeNodeDs.getItemIds().isEmpty()) {
                     entityTree.collapseTree();
-                    entityTree.expand(rootNode.getId());
+//                    entityTree.expand(rootNode.getId());
                 } else {
                     notifications.create(Notifications.NotificationType.HUMANIZED)
                             .withCaption(messages.getMessage("valueNotFound"))
@@ -147,8 +146,8 @@ public class RegionEditor extends StandardEditor<ReportRegion> {
     }
 
     protected void initAsViewEditor() {
-        reportRegionDc.setAllowCommit(false);
-        reportRegionPropertiesTableDc.setAllowCommit(false);
+//        reportRegionDc.setAllowCommit(false);
+//        reportRegionPropertiesTableDc.setAllowCommit(false);
         if (isTabulated) {
             getWindow().setCaption(messages.getMessage("singleEntityDataSetViewEditor"));
         } else {
@@ -247,7 +246,7 @@ public class RegionEditor extends StandardEditor<ReportRegion> {
             @Override
             public void actionPerform(Component component) {
                 for (Entity item : propertiesTable.getSelected()) {
-                    reportRegionPropertiesTableDc.removeItem((RegionProperty) item);
+//                    reportRegionPropertiesTableDc.removeItem((RegionProperty) item);
                     normalizeRegionPropertiesOrderNum();
                 }
             }

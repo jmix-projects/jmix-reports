@@ -87,8 +87,9 @@ public class EntityTreeModelBuilder implements EntityTreeModelBuilderApi {
             return parentEntityTreeNode;
         }
         MetaClass fileDescriptorMetaClass = metadata.getClass(FileDescriptor.class);
-        for (MetaProperty metaProperty : parentEntityTreeNode.getWrappedMetaClass().getProperties()) {
-            if (!reportingWizardApi.isPropertyAllowedForReportWizard(parentEntityTreeNode.getWrappedMetaClass(), metaProperty)) {
+        MetaClass wrappedMetaClass = parentEntityTreeNode.getWrappedMetaClass();
+        for (MetaProperty metaProperty : wrappedMetaClass.getProperties()) {
+            if (!reportingWizardApi.isPropertyAllowedForReportWizard(wrappedMetaClass, metaProperty)) {
                 continue;
             }
             if (metaProperty.getRange().isClass()) {
@@ -102,8 +103,8 @@ public class EntityTreeModelBuilder implements EntityTreeModelBuilderApi {
                     newParentModelNode.setName(metaProperty.getName());
                     //newParentModelNode.setLocalizedName(messageTools.getEntityCaption(effectiveMetaClass));
                     newParentModelNode.setLocalizedName(
-                            StringUtils.isEmpty(messageTools.getPropertyCaption(parentEntityTreeNode.getWrappedMetaClass(), metaProperty.getName())) ?
-                                    metaProperty.getName() : messageTools.getPropertyCaption(parentEntityTreeNode.getWrappedMetaClass(), metaProperty.getName())
+                            StringUtils.isEmpty(messageTools.getPropertyCaption(wrappedMetaClass, metaProperty.getName())) ?
+                                    metaProperty.getName() : messageTools.getPropertyCaption(wrappedMetaClass, metaProperty.getName())
                     );
                     newParentModelNode.setWrappedMetaClass(effectiveMetaClass);
                     newParentModelNode.setWrappedMetaProperty(metaProperty);
@@ -134,8 +135,8 @@ public class EntityTreeModelBuilder implements EntityTreeModelBuilderApi {
                 EntityTreeNode child = metadata.create(EntityTreeNode.class);
                 child.setName(metaProperty.getName());
                 child.setLocalizedName(StringUtils.isEmpty(messageTools.
-                        getPropertyCaption(parentEntityTreeNode.getWrappedMetaClass(), metaProperty.getName())) ?
-                        metaProperty.getName() : messageTools.getPropertyCaption(parentEntityTreeNode.getWrappedMetaClass(), metaProperty.getName()));
+                        getPropertyCaption(wrappedMetaClass, metaProperty.getName())) ?
+                        metaProperty.getName() : messageTools.getPropertyCaption(wrappedMetaClass, metaProperty.getName()));
                 child.setWrappedMetaProperty(metaProperty);
                 child.setParent(parentEntityTreeNode);
                 parentEntityTreeNode.getChildren().add(child);
@@ -147,12 +148,13 @@ public class EntityTreeModelBuilder implements EntityTreeModelBuilderApi {
     }
 
     private String getTreeNodeInfo(EntityTreeNode parentEntityTreeNode) {
+        MetaClass wrappedMetaClass = parentEntityTreeNode.getWrappedMetaClass();
         if (parentEntityTreeNode.getWrappedMetaProperty() != null) {
-            return (parentEntityTreeNode.getWrappedMetaProperty().getDomain().getName().equals(parentEntityTreeNode.getWrappedMetaClass().getName()) ?
+            return (parentEntityTreeNode.getWrappedMetaProperty().getDomain().getName().equals(wrappedMetaClass.getName()) ?
                     "" : parentEntityTreeNode.getWrappedMetaProperty().getDomain() + ".") +
-                    parentEntityTreeNode.getWrappedMetaClass().getName() + " isMany:" + parentEntityTreeNode.getWrappedMetaProperty().getRange().getCardinality().isMany();
+                    wrappedMetaClass.getName() + " isMany:" + parentEntityTreeNode.getWrappedMetaProperty().getRange().getCardinality().isMany();
         } else {
-            return parentEntityTreeNode.getWrappedMetaClass().getName() + " isMany:false";
+            return wrappedMetaClass.getName() + " isMany:false";
         }
     }
 }

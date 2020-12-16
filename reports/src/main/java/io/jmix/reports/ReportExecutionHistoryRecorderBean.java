@@ -6,24 +6,24 @@
 package io.jmix.reports;
 
 import com.google.common.collect.Sets;
-import com.haulmont.cuba.core.Persistence;
-import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.yarg.reporting.ReportOutputDocument;
 import com.haulmont.yarg.structure.ReportOutputType;
 import io.jmix.core.*;
 import io.jmix.core.security.CurrentAuthentication;
-import io.jmix.fsfilestorage.FileSystemFileStorage;
 import io.jmix.localfs.LocalFileStorage;
 import io.jmix.reports.entity.CubaReportOutputType;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportExecution;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import java.io.ByteArrayInputStream;
 import java.net.URI;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -46,7 +46,9 @@ public class ReportExecutionHistoryRecorderBean implements ReportExecutionHistor
     @Autowired
     protected ReportingConfig reportingConfig;
     @Autowired
-    protected Persistence persistence;
+    protected TransactionTemplate transaction;
+    @PersistenceContext
+    protected EntityManager entityManager;
     @Autowired
     protected LocalFileStorage localFileStorage;
     @Autowired
@@ -77,8 +79,8 @@ public class ReportExecutionHistoryRecorderBean implements ReportExecutionHistor
             execution.setFinishTime(timeSource.currentTimestamp());
             if (shouldSaveDocument(execution, document)) {
                 try {
-                    FileDescriptor documentFile = saveDocument(document);
-                    execution.setOutputDocument(documentFile);
+                    URI reference = saveDocument(document);
+                    execution.setFileUri(reference);
                 } catch (FileStorageException e) {
                     log.error("Failed to save output document", e);
                 }
@@ -128,7 +130,7 @@ public class ReportExecutionHistoryRecorderBean implements ReportExecutionHistor
         // handle case when user runs report that isn't saved yet from Report Editor
         if (entityStates.isNew(report)) {
             Report reloaded = dataManager.load(Id.of(report))
-                    .fetchPlan(FetchPlan.MINIMAL)
+                    .fetchPlan(FetchPlan.INSTANCE_NAME)
                     .optional()
                     .orElse(null);
             entity.setReport(reloaded);
@@ -146,19 +148,10 @@ public class ReportExecutionHistoryRecorderBean implements ReportExecutionHistor
         return reportingConfig.isSaveOutputDocumentsToHistory() && !outputTypesWithoutDocument.contains(type.getId());
     }
 
-    protected FileDescriptor saveDocument(ReportOutputDocument document) throws FileStorageException {
-        String ext = FilenameUtils.getExtension(document.getDocumentName());
-        FileDescriptor file = metadata.create(FileDescriptor.class);
-        file.setCreateDate(timeSource.currentTimestamp());
-        file.setName(document.getDocumentName());
-        file.setExtension(ext);
-        file.setSize((long) document.getContent().length);
-
-        URI uri = localFileStorage.createReference(document.getDocumentName());
-
-        localFileStorage.saveStream(uri, document.getContent());
-        file = dataManager.save(file);
-        return file;
+    protected URI saveDocument(ReportOutputDocument document) throws FileStorageException {
+        URI reference = localFileStorage.createReference(document.getDocumentName());
+        localFileStorage.saveStream(reference, new ByteArrayInputStream(document.getContent()));
+        return reference;
     }
 
     /**
@@ -199,43 +192,36 @@ public class ReportExecutionHistoryRecorderBean implements ReportExecutionHistor
         Date borderDate = DateUtils.addDays(timeSource.currentTimestamp(), -historyCleanupMaxDays);
         log.debug("Deleting report executions older than {}", borderDate);
 
-        List<UUID> fileIds = new ArrayList<>();
+        List<URI> paths = new ArrayList<>();
 
-        int deleted = persistence.callInTransaction(em -> {
-            List<UUID> ids = em.createQuery("select e.outputDocument.id from report_ReportExecution e"
-                    + " where e.outputDocument is not null and e.startTime < :borderDate", UUID.class)
+        int deleted = transaction.execute(status -> {
+            List<URI> ids = entityManager.createQuery("select e.pathDocument from report_ReportExecution e"
+                    + " where e.pathDocument is not null and e.startTime < :borderDate", URI.class)
                     .setParameter("borderDate", borderDate)
                     .getResultList();
-            fileIds.addAll(ids);
+            paths.addAll(ids);
 
-            em.setSoftDeletion(false);
-            return em.createQuery("delete from report_ReportExecution e where e.startTime < :borderDate")
+            //todo
+            //entityManager.setSoftDeletion(false);
+            return entityManager.createQuery("delete from report_ReportExecution e where e.startTime < :borderDate")
                     .setParameter("borderDate", borderDate)
                     .executeUpdate();
         });
 
-        deleteFileDescriptorsAndFiles(fileIds);
+        deleteFileAndFiles(paths);
         return deleted;
     }
 
-    private void deleteFileDescriptorsAndFiles(List<UUID> fileIds) {
-        if (!fileIds.isEmpty()) {
-            log.debug("Deleting {} output document files", fileIds.size());
+    private void deleteFileAndFiles(List<URI> paths) {
+        if (!paths.isEmpty()) {
+            log.debug("Deleting {} output document files", paths.size());
         }
 
-        for (UUID fileId : fileIds) {
-            FileDescriptor file = dataManager.load(FileDescriptor.class)
-                    .id(fileId)
-                    .optional()
-                    .orElse(null);
-
-            if (file != null) {
-                try {
-                    localFileStorage.removeFile(file);
-                } catch (FileStorageException e) {
-                    log.error("Failed to remove document from storage " + file, e);
-                }
-                dataManager.remove(file);
+        for (URI path : paths) {
+            try {
+                localFileStorage.removeFile(path);
+            } catch (FileStorageException e) {
+                log.error("Failed to remove document from storage " + path, e);
             }
         }
     }
@@ -263,28 +249,28 @@ public class ReportExecutionHistoryRecorderBean implements ReportExecutionHistor
     }
 
     private int deleteForOneReport(UUID reportId, int maxItemsPerReport) {
-        List<UUID> fileIds = new ArrayList<>();
-        int deleted = persistence.callInTransaction(em -> {
-            em.setSoftDeletion(false);
+        List<URI> paths = new ArrayList<>();
+        int deleted = transaction.execute(status -> {
+            //em.setSoftDeletion(false);
             int rows = 0;
-            Date borderStartTime = em.createQuery(
+            Date borderStartTime = entityManager.createQuery(
                     "select e.startTime from report_ReportExecution e"
                             + " where e.report.id = :reportId"
                             + " order by e.startTime desc", Date.class)
                     .setParameter("reportId", reportId)
                     .setFirstResult(maxItemsPerReport)
                     .setMaxResults(1)
-                    .getFirstResult();
+                    .getSingleResult();
 
             if (borderStartTime != null) {
-                List<UUID> ids = em.createQuery("select e.outputDocument.id from report_ReportExecution e"
-                        + " where e.outputDocument is not null and e.report.id = :reportId and e.startTime <= :borderTime", UUID.class)
+                List<URI> ids = entityManager.createQuery("select e.pathDocument from report_ReportExecution e"
+                        + " where e.outputDocument is not null and e.report.id = :reportId and e.startTime <= :borderTime", URI.class)
                         .setParameter("reportId", reportId)
                         .setParameter("borderTime", borderStartTime)
                         .getResultList();
-                fileIds.addAll(ids);
+                paths.addAll(ids);
 
-                rows = em.createQuery("delete from report_ReportExecution e"
+                rows = entityManager.createQuery("delete from report_ReportExecution e"
                         + " where e.report.id = :reportId and e.startTime <= :borderTime")
                         .setParameter("reportId", reportId)
                         .setParameter("borderTime", borderStartTime)
@@ -292,7 +278,7 @@ public class ReportExecutionHistoryRecorderBean implements ReportExecutionHistor
             }
             return rows;
         });
-        deleteFileDescriptorsAndFiles(fileIds);
+        deleteFileAndFiles(paths);
         return deleted;
     }
 }

@@ -206,7 +206,9 @@ public class ReportingWizardBean implements ReportingWizardApi {
         ReportInputParameter reportInputParameter = createParameter(report, 1);
 
         reportInputParameter.setName(reportData.getEntityTreeRootNode().getLocalizedName());
-        reportInputParameter.setEntityMetaClass(reportData.getEntityTreeRootNode().getWrappedMetaClass().getName());
+        MetaClass wrapperMetaClass = reportData.getEntityTreeRootNode().getWrappedMetaClass();
+
+        reportInputParameter.setEntityMetaClass(wrapperMetaClass.getName());
         if (ReportData.ReportType.LIST_OF_ENTITIES == reportData.getReportType()) {
             reportInputParameter.setType(ParameterType.ENTITY_LIST);
             reportInputParameter.setAlias(DEFAULT_LIST_OF_ENTITIES_ALIAS);
@@ -298,7 +300,8 @@ public class ReportingWizardBean implements ReportingWizardApi {
 
     @Override
     public FetchPlan createViewByReportRegions(EntityTreeNode entityTreeRootNode, List<ReportRegion> reportRegions) {
-        FetchPlanBuilder fetchPlanBuilder = fetchPlans.builder(entityTreeRootNode.getWrappedMetaClass().getJavaClass());
+        MetaClass rootWrapperMetaClass = entityTreeRootNode.getWrappedMetaClass();
+        FetchPlanBuilder fetchPlanBuilder = fetchPlans.builder(rootWrapperMetaClass.getJavaClass());
 
         Map<EntityTreeNode, FetchPlanBuilder> viewsForNodes = new HashMap<>();
         viewsForNodes.put(entityTreeRootNode, fetchPlanBuilder);
@@ -373,10 +376,12 @@ public class ReportingWizardBean implements ReportingWizardApi {
      */
     protected FetchPlanBuilder ensureParentViewsExist(EntityTreeNode entityTreeNode, Map<EntityTreeNode, FetchPlanBuilder> viewsForNodes) {
         EntityTreeNode parentNode = entityTreeNode.getParent();
-        FetchPlanBuilder parentFetchPlanBuilder = fetchPlans.builder(parentNode.getWrappedMetaClass().getJavaClass());
+        MetaClass wrapperMetaClass = parentNode.getWrappedMetaClass();
+
+        FetchPlanBuilder parentFetchPlanBuilder = fetchPlans.builder(wrapperMetaClass.getJavaClass());
 
         if (parentFetchPlanBuilder == null && parentNode != null) {
-            parentFetchPlanBuilder = fetchPlans.builder(parentNode.getWrappedMetaClass().getJavaClass());
+            parentFetchPlanBuilder = fetchPlans.builder(wrapperMetaClass.getJavaClass());
             viewsForNodes.put(parentNode, parentFetchPlanBuilder);
             FetchPlanBuilder parentOfParentView = ensureParentViewsExist(parentNode, viewsForNodes);
             if (parentOfParentView != null) {

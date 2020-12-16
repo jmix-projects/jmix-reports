@@ -28,7 +28,6 @@ import io.jmix.ui.action.Action;
 import io.jmix.ui.action.DialogAction;
 import io.jmix.ui.component.Component;
 import io.jmix.ui.component.HasValue;
-import io.jmix.ui.filter.Op;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
@@ -215,7 +214,7 @@ public class DetailsStepFrame extends StepFrame {
 //                conditionsTree = fakeFilterSupport.createFakeConditionsTree(filter, filterEntity);
 //            }
 
-            List<Op> hideOperations = Collections.singletonList(Op.DATE_INTERVAL);
+//            List<Op> hideOperations = Collections.singletonList(Op.DATE_INTERVAL);
 
             Map<String, Object> params = new HashMap<>();
 //            params.put("filterEntity", filterEntity);
@@ -223,7 +222,7 @@ public class DetailsStepFrame extends StepFrame {
 //            params.put("conditionsTree", conditionsTree);
             params.put("useShortConditionForm", true);
             params.put("showConditionHiddenOption", true);
-            params.put("hideOperations", hideOperations);
+//            params.put("hideOperations", hideOperations);
 
             //FilterEditor filterEditor = (FilterEditor) wizard.openWindow("filterEditor", OpenType.DIALOG, params);
 

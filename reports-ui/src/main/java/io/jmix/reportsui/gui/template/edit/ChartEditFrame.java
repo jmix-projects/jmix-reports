@@ -16,6 +16,7 @@
 
 package io.jmix.reportsui.gui.template.edit;
 
+import elemental.json.Json;
 import io.jmix.core.DataManager;
 import io.jmix.core.Messages;
 import io.jmix.core.Sort;
@@ -38,6 +39,8 @@ import io.jmix.reportsui.gui.report.run.ShowChartController;
 import io.jmix.reportsui.gui.template.edit.generator.RandomChartDataGenerator;
 import io.jmix.ui.action.ItemTrackingAction;
 import io.jmix.ui.component.*;
+import io.jmix.ui.component.validation.AbstractValidator;
+import io.jmix.ui.component.validation.Validator;
 import io.jmix.ui.model.CollectionContainer;
 import io.jmix.ui.model.InstanceContainer;
 import io.jmix.ui.screen.MapScreenOptions;
@@ -48,6 +51,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.IterableUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -139,7 +143,7 @@ public class ChartEditFrame extends DescriptionEditFrame {
         serialJsonConfigEditor.addValueChangeListener(this::codeEditorChangeListener);
         pieJsonConfigEditor.addValueChangeListener(this::codeEditorChangeListener);
 
-        Consumer<String> validator = beanFactory.getBean(JsonConfigValidator.class, getMessagesPack());
+        Validator<String> validator = beanFactory.getBean(JsonConfigValidator.class, this);
         serialJsonConfigEditor.addValidator(validator);
         pieJsonConfigEditor.addValidator(validator);
 

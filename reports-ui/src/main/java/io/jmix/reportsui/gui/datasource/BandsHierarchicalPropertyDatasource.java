@@ -17,24 +17,20 @@
 package io.jmix.reportsui.gui.datasource;
 
 import io.jmix.core.Entity;
-import com.haulmont.cuba.gui.data.impl.HierarchicalPropertyDatasourceImpl;
 
-import java.util.Collection;
-import java.util.Set;
-
-public class BandsHierarchicalPropertyDatasource<T extends Entity, K> extends HierarchicalPropertyDatasourceImpl<T, K> {
-    @Override
-    public void committed(Set<Entity> entities) {
-        super.committed(entities);
-        if (State.VALID.equals(masterDs.getState())) {
-            Collection<T> collection = getCollection();
-            if (item != null && collection != null) {
-                for (T entity : collection) {
-                    if (entity.equals(item)) {
-                        item = entity;
-                    }
-                }
-            }
-        }
-    }
+public class BandsHierarchicalPropertyDatasource<T extends Entity, K> /*extends HierarchicalPropertyDatasourceImpl<T, K> */ {
+//    @Override
+//    public void committed(Set<Entity> entities) {
+//        super.committed(entities);
+//        if (State.VALID.equals(masterDs.getState())) {
+//            Collection<T> collection = getCollection();
+//            if (item != null && collection != null) {
+//                for (T entity : collection) {
+//                    if (entity.equals(item)) {
+//                        item = entity;
+//                    }
+//                }
+//            }
+//        }
+//    }
 }

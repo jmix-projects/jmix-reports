@@ -101,7 +101,7 @@ public class ShowReportTable extends StandardLookup {
     protected Map<String, Object> reportParameters;
 
     protected InputParametersFrame inputParametersFrame;
-    protected DsContextImpl dsContext;
+//    protected DsContextImpl dsContext;
 
     @Subscribe
     protected void onInit(InitEvent event) {
@@ -115,8 +115,8 @@ public class ShowReportTable extends StandardLookup {
 
         if (report != null) {
             reportSelectorBox.setVisible(false);
-            CubaTableData dto = (CubaTableData) serialization.deserialize((byte[]) params.get(TABLE_DATA_PARAMETER));
-            drawTables(dto);
+//            CubaTableData dto = (CubaTableData) serialization.deserialize((byte[]) params.get(TABLE_DATA_PARAMETER));
+//            drawTables(dto);
             openReportParameters(reportParameters);
         }
         reportLookup.addValueChangeListener(e -> {
@@ -182,8 +182,8 @@ public class ShowReportTable extends StandardLookup {
 
         data.forEach((dataSetName, keyValueEntities) -> {
             if (keyValueEntities != null && !keyValueEntities.isEmpty()) {
-                CollectionContainer dataSource = createDataSource(dataSetName, keyValueEntities, headerMap);
-                Table table = createTable(dataSetName, dataSource, headerMap);
+//                CollectionContainer dataSource = createDataSource(dataSetName, keyValueEntities, headerMap);
+                Table table = createTable(dataSetName, null, headerMap);
 
                 GroupBoxLayout groupBox = uiComponents.create(GroupBoxLayout.class);
                 groupBox.setCaption(dataSetName);
@@ -196,27 +196,27 @@ public class ShowReportTable extends StandardLookup {
         });
     }
 
-    protected CollectionContainer createDataSource(String dataSetName, List<KeyValueEntity> keyValueEntities, Map<String, Set<CubaTableData.ColumnInfo>> headerMap) {
-        DsBuilder dsBuilder = DsBuilder.create(getDsContext())
-                .setId(dataSetName + "Ds")
-                .setDataSupplier(getDsContext().getDataSupplier());
-        ValueGroupDatasourceImpl ds = dsBuilder.buildValuesGroupDatasource();
-        ds.setRefreshMode(CollectionDatasource.RefreshMode.NEVER);
-
-        Set<CubaTableData.ColumnInfo> headers = headerMap.get(dataSetName);
-        for (CubaTableData.ColumnInfo header : headers) {
-            Class javaClass = header.getColumnClass();
-            if (Entity.class.isAssignableFrom(javaClass) ||
-                    EnumClass.class.isAssignableFrom(javaClass) ||
-                    Datatypes.get(javaClass) != null) {
-                ds.addProperty(header.getKey(), javaClass);
-            }
-        }
-
-        dsContext.register(ds);
-        keyValueEntities.forEach(ds::includeItem);
-        return ds;
-    }
+//    protected CollectionContainer createDataSource(String dataSetName, List<KeyValueEntity> keyValueEntities, Map<String, Set<CubaTableData.ColumnInfo>> headerMap) {
+//        DsBuilder dsBuilder = DsBuilder.create(getDsContext())
+//                .setId(dataSetName + "Ds")
+//                .setDataSupplier(getDsContext().getDataSupplier());
+//        ValueGroupDatasourceImpl ds = dsBuilder.buildValuesGroupDatasource();
+//        ds.setRefreshMode(CollectionDatasource.RefreshMode.NEVER);
+//
+//        Set<CubaTableData.ColumnInfo> headers = headerMap.get(dataSetName);
+//        for (CubaTableData.ColumnInfo header : headers) {
+//            Class javaClass = header.getColumnClass();
+//            if (Entity.class.isAssignableFrom(javaClass) ||
+//                    EnumClass.class.isAssignableFrom(javaClass) ||
+//                    Datatypes.get(javaClass) != null) {
+//                ds.addProperty(header.getKey(), javaClass);
+//            }
+//        }
+//
+//        dsContext.register(ds);
+//        keyValueEntities.forEach(ds::includeItem);
+//        return ds;
+//    }
 
     protected Table createTable(String dataSetName, CollectionContainer dataSource, Map<String, Set<CubaTableData.ColumnInfo>> headerMap) {
         Table table = uiComponents.create(GroupTable.class);

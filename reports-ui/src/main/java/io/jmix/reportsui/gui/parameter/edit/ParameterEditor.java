@@ -267,7 +267,7 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
             }
 
             //todo
-            ((DatasourceImplementation<ReportInputParameter>) parameterDc).modified(e.getItem());
+            //((DatasourceImplementation<ReportInputParameter>) parameterDc).modified(e.getItem());
         });
 
         lookup.addValueChangeListener(e -> {

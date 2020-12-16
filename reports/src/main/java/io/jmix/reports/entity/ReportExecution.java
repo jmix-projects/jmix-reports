@@ -5,20 +5,22 @@
 
 package io.jmix.reports.entity;
 
-import com.haulmont.cuba.core.entity.FileDescriptor;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.metamodel.annotation.DependsOnProperties;
+import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.annotation.JmixProperty;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.*;
+import java.net.URI;
 import java.util.Date;
 import java.util.UUID;
 
 @Entity(name = "report_ReportExecution")
 @Table(name = "REPORT_EXECUTION")
+@JmixEntity
 public class ReportExecution {
     private static final long serialVersionUID = -1714474379895234441L;
 
@@ -66,9 +68,8 @@ public class ReportExecution {
     @Column(name = "CANCELLED")
     private Boolean cancelled;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "OUTPUT_DOCUMENT_ID")
-    private FileDescriptor outputDocument;
+    @Column(name = "FILE_URI")
+    private URI fileUri;
 
     @Column(name = "PARAMS")
     @Lob
@@ -175,12 +176,12 @@ public class ReportExecution {
         this.cancelled = cancelled;
     }
 
-    public FileDescriptor getOutputDocument() {
-        return outputDocument;
+    public URI getFileUri() {
+        return fileUri;
     }
 
-    public void setOutputDocument(FileDescriptor outputDocument) {
-        this.outputDocument = outputDocument;
+    public void setFileUri(URI fileUri) {
+        this.fileUri = fileUri;
     }
 
     public String getParams() {

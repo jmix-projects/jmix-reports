@@ -16,16 +16,11 @@
 
 package io.jmix.reports.libintegration;
 
-import com.haulmont.cuba.core.global.AppBeans;
-import io.jmix.core.Metadata;
 import com.haulmont.yarg.exception.ReportFormattingException;
 import com.haulmont.yarg.formatters.factory.FormatterFactoryInput;
 import com.haulmont.yarg.formatters.impl.AbstractFormatter;
 import com.haulmont.yarg.structure.BandData;
-import io.jmix.core.FetchPlan;
-import io.jmix.core.Entity;
-import io.jmix.core.MessageTools;
-import io.jmix.core.MetadataTools;
+import io.jmix.core.*;
 import io.jmix.core.entity.KeyValueEntity;
 import io.jmix.core.impl.StandardSerialization;
 import io.jmix.reports.app.EntityMap;

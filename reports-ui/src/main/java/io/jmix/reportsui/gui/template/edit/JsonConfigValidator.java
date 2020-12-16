@@ -23,17 +23,15 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import io.jmix.core.Messages;
 import io.jmix.ui.component.ValidationException;
+import io.jmix.ui.component.validation.AbstractValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Nullable;
-import java.util.function.Consumer;
-
 @Scope(BeanDefinition.SCOPE_PROTOTYPE)
 @Component(JsonConfigValidator.NAME)
-public class JsonConfigValidator implements Consumer<String> {
+public class JsonConfigValidator extends AbstractValidator<String> {
 
     public static final String NAME = "cuba_JsonConfigValidator";
 
@@ -45,11 +43,11 @@ public class JsonConfigValidator implements Consumer<String> {
                 .create();
     }
 
-    protected String messagePack;
+    protected Class caller;
     protected Messages messages;
 
-    public JsonConfigValidator(String messagePack) {
-        this.messagePack = messagePack;
+    public JsonConfigValidator(Class caller) {
+        this.caller = caller;
     }
 
     @Autowired
@@ -58,12 +56,12 @@ public class JsonConfigValidator implements Consumer<String> {
     }
 
     @Override
-    public void accept(@Nullable String s) throws ValidationException {
+    public void accept(String s) {
         if (!Strings.isNullOrEmpty(s)) {
             try {
                 gson.fromJson(s, JsonObject.class);
             } catch (JsonParseException e) {
-                throw new ValidationException(messages.getMessage(messagePack, "chartEdit.invalidJson"));
+                throw new ValidationException(messages.getMessage(caller, "chartEdit.invalidJson"));
             }
         }
     }

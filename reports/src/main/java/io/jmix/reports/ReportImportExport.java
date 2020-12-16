@@ -31,9 +31,9 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -94,7 +94,7 @@ public class ReportImportExport implements ReportImportExportAPI, ReportImportEx
         return new ArrayList<>(importResult.getImportedReports());
     }
 
-    public ReportImportResult importReportsWithResult(byte[] zipBytes, EnumSet<ReportImportOption> importOptions){
+    public ReportImportResult importReportsWithResult(byte[] zipBytes, EnumSet<ReportImportOption> importOptions) {
         log.info("Import started...");
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(zipBytes);
         ZipArchiveInputStream archiveReader = new ZipArchiveInputStream(byteArrayInputStream);
@@ -283,19 +283,21 @@ public class ReportImportExport implements ReportImportExportAPI, ReportImportEx
                     } catch (EntityAccessException e) {
                         //Do nothing
                     }
-                    if (dbReport != null) {
-                        report.setRoles(dbReport.getRoles());
-                    } else {
-                        report.setRoles(Collections.emptySet());
-                    }
+//                    if (dbReport != null) {
+//                        report.setRoles(dbReport.getRoles());
+//                    } else {
+//                        report.setRoles(Collections.emptySet());
+//                    }
                     report.setXml(reportingApi.convertToString(report));
                 }
             }
         }
 
-        Report existingReport = dataManager.load(new LoadContext(metadata.getClass(Report.class))
-                .setId(report.getId())
-                .setFetchPlan(FetchPlan.MINIMAL));
+        Report existingReport = dataManager.load(Report.class)
+                .id(report.getId())
+                .fetchPlan(FetchPlan.INSTANCE_NAME)
+                .one();
+
         report = saveReport(report);
         importResult.addImportedReport(report);
         if (existingReport != null) {

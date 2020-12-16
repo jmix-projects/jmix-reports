@@ -18,20 +18,15 @@ package io.jmix.reports;
 
 import com.haulmont.cuba.core.Persistence;
 import com.haulmont.cuba.core.Transaction;
-import com.haulmont.cuba.core.app.FileStorageAPI;
-import com.haulmont.cuba.core.entity.FileDescriptor;
-import com.haulmont.cuba.core.global.FileStorageException;
 import com.haulmont.yarg.formatters.impl.doc.connector.NoFreePortsException;
 import com.haulmont.yarg.reporting.ReportOutputDocument;
 import com.haulmont.yarg.reporting.ReportOutputDocumentImpl;
 import com.haulmont.yarg.reporting.ReportingAPI;
 import com.haulmont.yarg.reporting.RunParams;
-import io.jmix.core.DataManager;
-import io.jmix.core.EntityStates;
 import io.jmix.core.*;
-import io.jmix.core.Metadata;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.data.PersistenceHints;
+import io.jmix.localfs.LocalFileStorage;
 import io.jmix.reports.app.ParameterPrototype;
 import io.jmix.reports.converter.GsonConverter;
 import io.jmix.reports.converter.XStreamConverter;
@@ -51,14 +46,14 @@ import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.util.*;
 import java.util.zip.CRC32;
 
@@ -71,11 +66,11 @@ public class ReportingBean implements ReportingApi {
     protected static final String IDX_SEPARATOR = ",";
 
     @Autowired
-    protected Persistence persistence;
+    protected TransactionTemplate transaction;
     @Autowired
     protected Metadata metadata;
     @Autowired
-    protected FileStorageAPI fileStorageAPI;
+    protected LocalFileStorage localFileStorage;
     @Autowired
     protected TimeSource timeSource;
     @Autowired
@@ -84,7 +79,7 @@ public class ReportingBean implements ReportingApi {
     protected ReportImportExportAPI reportImportExport;
     @Autowired
     protected ReportExecutionHistoryRecorder executionHistoryRecorder;
-//    @Autowired
+    //    @Autowired
 //    protected UserSessionSource userSessionSource;
     //TODO global config
 //    @Autowired
@@ -123,13 +118,9 @@ public class ReportingBean implements ReportingApi {
     @PersistenceContext
     protected EntityManager em;
 
-    protected TransactionTemplate transaction;
-
     @Autowired
-    protected void setTransactionManager(PlatformTransactionManager transactionManager) {
-        transaction = new TransactionTemplate(transactionManager);
-        transaction.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-    }
+    protected Persistence persistence;
+
 
     //todo eude try to simplify report save logic
     @Override
@@ -146,7 +137,7 @@ public class ReportingBean implements ReportingApi {
             report.setTemplates(null);
 
             if (report.getGroup() != null) {
-                FetchPlan fetchPlan = fetchPlanRepository.getFetchPlan(ReportGroup.class, FetchPlan.BASE);
+                FetchPlan fetchPlan = fetchPlanRepository.getFetchPlan(ReportGroup.class, FetchPlan.INSTANCE_NAME);
                 ReportGroup existingGroup = em.find(ReportGroup.class, report.getGroup().getId(),
                         PersistenceHints.builder().withFetchPlan(fetchPlan).build());
                 if (existingGroup != null) {
@@ -513,23 +504,23 @@ public class ReportingBean implements ReportingApi {
     }
 
     @Override
-    public FileDescriptor createAndSaveReport(Report report, Map<String, Object> params, String fileName) {
+    public URI createAndSaveReport(Report report, Map<String, Object> params, String fileName) {
         report = reloadEntity(report, REPORT_EDIT_VIEW_NAME);
         ReportTemplate template = getDefaultTemplate(report);
         return createAndSaveReport(report, template, params, fileName);
     }
 
     @Override
-    public FileDescriptor createAndSaveReport(Report report, String templateCode,
-                                              Map<String, Object> params, String fileName) {
+    public URI createAndSaveReport(Report report, String templateCode,
+                                   Map<String, Object> params, String fileName) {
         report = reloadEntity(report, REPORT_EDIT_VIEW_NAME);
         ReportTemplate template = report.getTemplateByCode(templateCode);
         return createAndSaveReport(report, template, params, fileName);
     }
 
     @Override
-    public FileDescriptor createAndSaveReport(Report report, ReportTemplate template,
-                                              Map<String, Object> params, String fileName) {
+    public URI createAndSaveReport(Report report, ReportTemplate template,
+                                   Map<String, Object> params, String fileName) {
         report = reloadEntity(report, REPORT_EDIT_VIEW_NAME);
         ReportRunParams reportRunParams = new ReportRunParams()
                 .setReport(report)
@@ -540,14 +531,14 @@ public class ReportingBean implements ReportingApi {
     }
 
     @Override
-    public FileDescriptor createAndSaveReport(ReportRunParams reportRunParams) {
+    public URI createAndSaveReport(ReportRunParams reportRunParams) {
         Report report = reportRunParams.getReport();
         report = reloadEntity(report, REPORT_EDIT_VIEW_NAME);
         reportRunParams.setReport(report);
         return createAndSaveReportDocument(reportRunParams);
     }
 
-    protected FileDescriptor createAndSaveReportDocument(ReportRunParams reportRunParams) {
+    protected URI createAndSaveReportDocument(ReportRunParams reportRunParams) {
         ReportOutputDocument reportOutputDocument = createReportDocument(reportRunParams);
         byte[] reportData = reportOutputDocument.getContent();
         String documentName = reportOutputDocument.getDocumentName();
@@ -556,23 +547,14 @@ public class ReportingBean implements ReportingApi {
         return saveReport(reportData, documentName, ext);
     }
 
-    protected FileDescriptor saveReport(byte[] reportData, String fileName, String ext) {
-        FileDescriptor file = metadata.create(FileDescriptor.class);
-        file.setCreateDate(timeSource.currentTimestamp());
-        file.setName(fileName + "." + ext);
-        file.setExtension(ext);
-        file.setSize((long) reportData.length);
+    protected URI saveReport(byte[] reportData, String fileName, String ext) {
+        URI reference = localFileStorage.createReference(fileName + "." + ext);
+        localFileStorage.saveStream(reference, new ByteArrayInputStream(reportData));
 
-        try {
-            fileStorageAPI.saveFile(file, reportData);
-        } catch (FileStorageException e) {
-            throw new ReportingException("An error occurred while saving the report to the file storage", e);
-        }
-
-        transaction.executeWithoutResult(status -> {
-            em.persist(file);
-        });
-        return file;
+//        transaction.executeWithoutResult(status -> {
+//            em.persist(file);
+//        });
+        return reference;
     }
 
     @Override
@@ -753,9 +735,9 @@ public class ReportingBean implements ReportingApi {
             report.setScreensIdx(screens.length() > 1 ? screens.toString() : null);
 
             StringBuilder roles = new StringBuilder(IDX_SEPARATOR);
-            if (report.getRoles() != null) {
+//            if (report.getRoles() != null) {
 
-                for (Role role : report.getRoles()) {
+//                for (Role role : report.getRoles()) {
                     //TODO predefined
 //                    if (role.isPredefined()) {
 //                        roles.append(role.getName())
@@ -764,8 +746,8 @@ public class ReportingBean implements ReportingApi {
 //                        roles.append(role.getId().toString())
 //                                .append(IDX_SEPARATOR);
 //                    }
-                }
-            }
+//                }
+//            }
             report.setRolesIdx(roles.length() > 1 ? roles.toString() : null);
         }
     }

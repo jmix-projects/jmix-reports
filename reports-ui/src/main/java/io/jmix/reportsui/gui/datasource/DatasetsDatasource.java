@@ -16,51 +16,50 @@
 package io.jmix.reportsui.gui.datasource;
 
 import io.jmix.core.Entity;
-import com.haulmont.cuba.gui.data.impl.CollectionPropertyDatasourceImpl;
 import io.jmix.reports.entity.BandDefinition;
 import io.jmix.reports.entity.DataSet;
 import io.jmix.reports.entity.Report;
 
 import java.util.*;
 
-public class DatasetsDatasource extends CollectionPropertyDatasourceImpl<DataSet, UUID> {
+public class DatasetsDatasource /*extends CollectionPropertyDatasourceImpl<DataSet, UUID>*/ {
 
-    @Override
-    public void committed(Set<Entity> entities) {
-        if (!State.VALID.equals(masterDs.getState()))
-            return;
-        Collection<DataSet> collection = getCollection();
-        if (collection != null) {
-            for (Entity entity : entities) {
-                if (entity instanceof Report) {
-                    for (BandDefinition definition : ((Report) entity).getBands()) {
-                        if (definition.equals(masterDs.getItem())) {
-                            for (DataSet dataset : definition.getDataSets()) {
-                                for (DataSet item : new ArrayList<>(collection)) {
-                                    if (item.equals(dataset)) {
-                                        if (collection instanceof List) {
-                                            List list = (List) collection;
-                                            list.set(list.indexOf(item), dataset);
-                                        } else if (collection instanceof Set) {
-                                            Set set = (Set) collection;
-                                            set.remove(item);
-                                            set.add(dataset);
-                                        }
-
-                                        attachListener(dataset);
-                                        if (dataset.equals(this.item)) {
-                                            this.item = dataset;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        modified = false;
-        clearCommitLists();
-    }
+//    @Override
+//    public void committed(Set<Entity> entities) {
+//        if (!State.VALID.equals(masterDs.getState()))
+//            return;
+//        Collection<DataSet> collection = getCollection();
+//        if (collection != null) {
+//            for (Entity entity : entities) {
+//                if (entity instanceof Report) {
+//                    for (BandDefinition definition : ((Report) entity).getBands()) {
+//                        if (definition.equals(masterDs.getItem())) {
+//                            for (DataSet dataset : definition.getDataSets()) {
+//                                for (DataSet item : new ArrayList<>(collection)) {
+//                                    if (item.equals(dataset)) {
+//                                        if (collection instanceof List) {
+//                                            List list = (List) collection;
+//                                            list.set(list.indexOf(item), dataset);
+//                                        } else if (collection instanceof Set) {
+//                                            Set set = (Set) collection;
+//                                            set.remove(item);
+//                                            set.add(dataset);
+//                                        }
+//
+//                                        attachListener(dataset);
+//                                        if (dataset.equals(this.item)) {
+//                                            this.item = dataset;
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//
+//        modified = false;
+//        clearCommitLists();
+//    }
 }

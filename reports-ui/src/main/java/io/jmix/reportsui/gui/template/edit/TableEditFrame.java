@@ -106,29 +106,29 @@ public class TableEditFrame extends DescriptionEditFrame {
                 templateTableBand.setPosition(tableBandsDc.getItems().size());
 
                 tableBandsDc.getItems().add(templateTableBand);
-                tableBandsDc.commit();
+//                tableBandsDc.commit();
             }
         });
 
-        bandsTable.addAction(new RemoveAction(bandsTable, false, "remove") {
-            @Override
-            public String getCaption() {
-                return "";
-            }
-
-            @Override
-            protected void afterRemove(Set selected) {
-                TemplateTableBand deletedColumn = (TemplateTableBand) selected.iterator().next();
-                int deletedPosition = deletedColumn.getPosition();
-
-                for (TemplateTableBand templateTableBand : tableBandsDc.getItems()) {
-                    if (templateTableBand.getPosition() > deletedPosition) {
-                        int currentPosition = templateTableBand.getPosition();
-                        templateTableBand.setPosition(currentPosition - 1);
-                    }
-                }
-            }
-        });
+//        bandsTable.addAction(new RemoveAction(bandsTable, false, "remove") {
+//            @Override
+//            public String getCaption() {
+//                return "";
+//            }
+//
+////            @Override
+//            protected void afterRemove(Set selected) {
+//                TemplateTableBand deletedColumn = (TemplateTableBand) selected.iterator().next();
+//                int deletedPosition = deletedColumn.getPosition();
+//
+//                for (TemplateTableBand templateTableBand : tableBandsDc.getItems()) {
+//                    if (templateTableBand.getPosition() > deletedPosition) {
+//                        int currentPosition = templateTableBand.getPosition();
+//                        templateTableBand.setPosition(currentPosition - 1);
+//                    }
+//                }
+//            }
+//        });
 
         bandsTable.addAction(new ListAction("up") {
             @Override
@@ -180,7 +180,7 @@ public class TableEditFrame extends DescriptionEditFrame {
                     item.setPosition(tableColumnsDc.getItems().size());
 
                     tableColumnsDc.getItems().add(item);
-                    tableColumnsDc.commit();
+//                    tableColumnsDc.commit();
                 } else {
                     notifications.create(Notifications.NotificationType.HUMANIZED)
                             .withCaption(messages.getMessage("template.bandRequired"))
@@ -189,25 +189,25 @@ public class TableEditFrame extends DescriptionEditFrame {
             }
         });
 
-        columnsTable.addAction(new RemoveAction(columnsTable, false, "remove") {
-            @Override
-            public String getCaption() {
-                return "";
-            }
-
-            @Override
-            protected void afterRemove(Set selected) {
-                TemplateTableColumn deletedColumn = (TemplateTableColumn) selected.iterator().next();
-                int deletedPosition = deletedColumn.getPosition();
-
-                for (TemplateTableColumn templateTableColumn : tableColumnsDc.getItems()) {
-                    if (templateTableColumn.getPosition() > deletedPosition) {
-                        int currentPosition = templateTableColumn.getPosition();
-                        templateTableColumn.setPosition(currentPosition - 1);
-                    }
-                }
-            }
-        });
+//        columnsTable.addAction(new RemoveAction(columnsTable, false, "remove") {
+//            @Override
+//            public String getCaption() {
+//                return "";
+//            }
+//
+//            @Override
+//            protected void afterRemove(Set selected) {
+//                TemplateTableColumn deletedColumn = (TemplateTableColumn) selected.iterator().next();
+//                int deletedPosition = deletedColumn.getPosition();
+//
+//                for (TemplateTableColumn templateTableColumn : tableColumnsDc.getItems()) {
+//                    if (templateTableColumn.getPosition() > deletedPosition) {
+//                        int currentPosition = templateTableColumn.getPosition();
+//                        templateTableColumn.setPosition(currentPosition - 1);
+//                    }
+//                }
+//            }
+//        });
 
         columnsTable.addAction(new ListAction("up") {
             @Override

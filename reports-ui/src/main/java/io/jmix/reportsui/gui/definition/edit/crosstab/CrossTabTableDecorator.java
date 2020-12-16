@@ -180,9 +180,10 @@ public class CrossTabTableDecorator {
     }
 
     protected void onOrientationChange(CollectionContainer<DataSet> dataSetsDs, InstanceContainer<BandDefinition> bandDefinitionDs) {
-        dataSetsDs.getItems().stream()
-                .filter(Objects::nonNull)
-                .forEach(dataSetsDs::removeItem);
+        //todo
+        //        dataSetsDs.getItems().stream()
+//                .filter(Objects::nonNull)
+//                .forEach(dataSetsDs::removeItem);
         dataSetsDs.getItems().add(dataSetFactory.createEmptyDataSet(bandDefinitionDs.getItem()));
     }
 }

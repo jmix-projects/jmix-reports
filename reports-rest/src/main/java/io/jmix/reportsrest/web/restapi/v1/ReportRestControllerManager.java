@@ -19,10 +19,8 @@ package io.jmix.reportsrest.web.restapi.v1;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
-import com.haulmont.cuba.core.global.EntityLoadInfo;
 import io.jmix.core.*;
 import io.jmix.core.metamodel.model.MetaClass;
-import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.reports.ParameterClassResolver;
 import io.jmix.reports.ReportSecurityManager;
 import io.jmix.reports.app.service.ReportService;
@@ -55,8 +53,6 @@ public class ReportRestControllerManager {
     protected SecureOperations secureOperations;
     @Autowired
     protected ReportSecurityManager reportSecurityManager;
-    @Autowired
-    protected CurrentAuthentication currentAuthentication;
     @Autowired
     protected ParameterClassResolver parameterClassResolver;
     @Autowired
@@ -212,7 +208,7 @@ public class ReportRestControllerManager {
                 Object entityId = getIdFromString(paramValue.value, entityClass);
                 //noinspection unchecked
                 Entity entity = (Entity) dataManager.load(entityClass.getJavaClass())
-                        .fetchPlan(FetchPlan.BASE)
+                        .fetchPlan(FetchPlan.INSTANCE_NAME)
                         .id(entityId).optional().orElse(null);
                 checkEntityIsNotNull(entityClass.getName(), paramValue.value, entity);
                 return entity;
@@ -226,7 +222,7 @@ public class ReportRestControllerManager {
                     Object entityId = getIdFromString(value, entityClass);
                     //noinspection unchecked
                     Entity entity = (Entity) dataManager.load(entityClass.getJavaClass())
-                            .fetchPlan(FetchPlan.BASE)
+                            .fetchPlan(FetchPlan.INSTANCE_NAME)
                             .id(entityId).optional().orElse(null);
                     checkEntityIsNotNull(entityClass.getName(), value, entity);
                     entities.add(entity);
@@ -308,8 +304,9 @@ public class ReportRestControllerManager {
     protected String transformDefaultValue(ReportInputParameter parameter) {
         switch (parameter.getType()) {
             case ENTITY:
-                EntityLoadInfo info = EntityLoadInfo.parse(parameter.getDefaultValue());
-                if (info != null) return info.getId().toString();
+                //todo
+//                EntityLoadInfo info = EntityLoadInfo.parse(parameter.getDefaultValue());
+//                if (info != null) return info.getId().toString();
                 break;
             case DATE:
             case TIME:

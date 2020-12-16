@@ -405,9 +405,9 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
                 applyVisibilityRulesForType(e.getItem());
             }
 
-            @SuppressWarnings("unchecked")
-            DatasourceImplementation<DataSet> implementation = (DatasourceImplementation<DataSet>) dataSetsDc;
-            implementation.modified(e.getItem());
+//            @SuppressWarnings("unchecked")
+//            DatasourceImplementation<DataSet> implementation = (DatasourceImplementation<DataSet>) dataSetsDc;
+//            implementation.modified(e.getItem());
         });
 
         dataSetScriptField.resetEditHistory();
@@ -446,7 +446,7 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
                     views.put(viewName, viewName);
                 }
                 views.put(FetchPlan.LOCAL, FetchPlan.LOCAL);
-                views.put(FetchPlan.MINIMAL, FetchPlan.MINIMAL);
+                views.put(FetchPlan.INSTANCE_NAME, FetchPlan.INSTANCE_NAME);
                 viewNameLookup.setOptionsMap(views);
                 return;
             }
@@ -561,7 +561,7 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
     }
 
     protected void selectFirstDataSet() {
-        dataSetsDc.refresh();
+//        dataSetsDc.refresh();
         if (!dataSetsDc.getItems().isEmpty()) {
             DataSet item = dataSetsDc.getItems().iterator().next();
             dataSets.setSelected(item);

@@ -94,39 +94,39 @@ public class InputParametersFrame extends ScreenFragment {
 
     @Subscribe
     public void onInit(InitEvent event) {
-        report = (Report) params.get(REPORT_PARAMETER);
-        if (report != null && !report.getIsTmp()) {
-            report = dataManager.load(Id.of(report))
-                    .fetchPlan(ReportService.MAIN_VIEW_NAME)
-                    .one();
-        }
-        //noinspection unchecked
-        parameters = (Map<String, Object>) params.get(PARAMETERS_PARAMETER);
-        if (parameters == null) {
-            parameters = Collections.emptyMap();
-        }
-        bulkPrint = BooleanUtils.isTrue((Boolean) params.get(BULK_PRINT));
-        inputParameter = (ReportInputParameter) params.get(INPUT_PARAMETER);
-
-        if (report != null) {
-            if (CollectionUtils.isNotEmpty(report.getInputParameters())) {
-                parametersGrid.setRows(report.getInputParameters().size() + 2);
-                int currentGridRow = 2;
-                for (ReportInputParameter parameter : report.getInputParameters()) {
-                    if (bulkPrint && Objects.equals(inputParameter, parameter)) {
-                        continue;
-                    }
-                    createComponent(parameter, currentGridRow, BooleanUtils.isNotTrue(parameter.getHidden()));
-                    currentGridRow++;
-                }
-            }
-            if (report.getTemplates() != null && report.getTemplates().size() > 1) {
-                if (!report.getIsTmp()) {
-                    templateReportsDl.setParameter("reportId", report.getId());
-                    templateReportsDl.load();
-                }
-            }
-        }
+//        report = (Report) params.get(REPORT_PARAMETER);
+//        if (report != null && !report.getIsTmp()) {
+//            report = dataManager.load(Id.of(report))
+//                    .fetchPlan(ReportService.MAIN_VIEW_NAME)
+//                    .one();
+//        }
+//        //noinspection unchecked
+//        parameters = (Map<String, Object>) params.get(PARAMETERS_PARAMETER);
+//        if (parameters == null) {
+//            parameters = Collections.emptyMap();
+//        }
+//        bulkPrint = BooleanUtils.isTrue((Boolean) params.get(BULK_PRINT));
+//        inputParameter = (ReportInputParameter) params.get(INPUT_PARAMETER);
+//
+//        if (report != null) {
+//            if (CollectionUtils.isNotEmpty(report.getInputParameters())) {
+//                parametersGrid.setRows(report.getInputParameters().size() + 2);
+//                int currentGridRow = 2;
+//                for (ReportInputParameter parameter : report.getInputParameters()) {
+//                    if (bulkPrint && Objects.equals(inputParameter, parameter)) {
+//                        continue;
+//                    }
+//                    createComponent(parameter, currentGridRow, BooleanUtils.isNotTrue(parameter.getHidden()));
+//                    currentGridRow++;
+//                }
+//            }
+//            if (report.getTemplates() != null && report.getTemplates().size() > 1) {
+//                if (!report.getIsTmp()) {
+//                    templateReportsDl.setParameter("reportId", report.getId());
+//                    templateReportsDl.load();
+//                }
+//            }
+//        }
     }
 
     public Map<String, Object> collectParameters() {
@@ -152,7 +152,7 @@ public class InputParametersFrame extends ScreenFragment {
             }
         }
 
-        if (!(field instanceof TokenList)) {
+        if (!(field instanceof TagPicker)) {
             field.setValue(value);
         } else {
 //            CollectionDatasource datasource = (CollectionDatasource) field.getDatasource();

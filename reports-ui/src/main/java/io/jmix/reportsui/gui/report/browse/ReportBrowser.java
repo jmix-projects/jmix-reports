@@ -16,9 +16,9 @@
 package io.jmix.reportsui.gui.report.browse;
 
 import io.jmix.core.*;
+import io.jmix.core.accesscontext.CrudEntityContext;
 import io.jmix.core.common.util.ParamsMap;
 import io.jmix.core.metamodel.model.MetaClass;
-import io.jmix.data.accesscontext.CrudEntityContext;
 import io.jmix.reports.app.service.ReportService;
 import io.jmix.reports.entity.Report;
 import io.jmix.reportsui.gui.ReportGuiManager;

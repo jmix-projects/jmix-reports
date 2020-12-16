@@ -15,7 +15,6 @@
  */
 package io.jmix.reports;
 
-import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.yarg.reporting.ReportOutputDocument;
 import com.haulmont.yarg.util.converter.ObjectToStringConverter;
 import io.jmix.core.metamodel.model.MetaClass;
@@ -25,6 +24,7 @@ import io.jmix.reports.entity.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.net.URI;
 import java.util.*;
 
 @Service(ReportService.NAME)
@@ -67,20 +67,20 @@ public class ReportServiceBean implements ReportService {
     }
 
     @Override
-    public FileDescriptor createAndSaveReport(Report report,
-                                              Map<String, Object> params, String fileName) {
+    public URI createAndSaveReport(Report report,
+                                   Map<String, Object> params, String fileName) {
         return reportingApi.createAndSaveReport(report, params, fileName);
     }
 
     @Override
-    public FileDescriptor createAndSaveReport(Report report, String templateCode,
-                                              Map<String, Object> params, String fileName) {
+    public URI createAndSaveReport(Report report, String templateCode,
+                                   Map<String, Object> params, String fileName) {
         return reportingApi.createAndSaveReport(report, templateCode, params, fileName);
     }
 
     @Override
-    public FileDescriptor createAndSaveReport(Report report, ReportTemplate template,
-                                              Map<String, Object> params, String fileName) {
+    public URI createAndSaveReport(Report report, ReportTemplate template,
+                                   Map<String, Object> params, String fileName) {
         return reportingApi.createAndSaveReport(report, template, params, fileName);
     }
 

@@ -98,14 +98,12 @@ public class RegionProperty implements OrderableEntity {
         return entityTreeNode.getHierarchicalLocalizedNameExceptRoot();
     }
 
-    @Override
-    public UUID getUuid() {
+    public UUID getId() {
         return id;
     }
 
-    @Override
-    public void setUuid(UUID uuid) {
-        this.id = uuid;
+    public void setId(UUID id) {
+        this.id = id;
     }
 }
 

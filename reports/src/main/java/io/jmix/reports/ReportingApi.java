@@ -24,6 +24,7 @@ import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.reports.app.ParameterPrototype;
 import io.jmix.reports.entity.*;
 
+import java.net.URI;
 import java.util.*;
 
 /**
@@ -107,7 +108,7 @@ public interface ReportingApi {
      * @param fileName output file name
      * @return FileDescriptor instance pointing to the report output
      */
-    FileDescriptor createAndSaveReport(Report report,
+    URI createAndSaveReport(Report report,
                                        Map<String, Object> params, String fileName);
 
     /**
@@ -119,7 +120,7 @@ public interface ReportingApi {
      * @param fileName     output file name
      * @return FileDescriptor instance pointing to the report output
      */
-    FileDescriptor createAndSaveReport(Report report, String templateCode,
+    URI createAndSaveReport(Report report, String templateCode,
                                        Map<String, Object> params, String fileName);
 
     /**
@@ -131,7 +132,7 @@ public interface ReportingApi {
      * @param fileName output file name
      * @return FileDescriptor instance pointing to the report output
      */
-    FileDescriptor createAndSaveReport(Report report, ReportTemplate template,
+    URI createAndSaveReport(Report report, ReportTemplate template,
                                        Map<String, Object> params, String fileName);
 
     /**
@@ -140,7 +141,7 @@ public interface ReportingApi {
      * @param reportRunParams all report parameters in a single POJO
      * @return FileDescriptor instance pointing to the report output
      */
-    FileDescriptor createAndSaveReport(ReportRunParams reportRunParams);
+    URI createAndSaveReport(ReportRunParams reportRunParams);
 
     /**
      * Exports all reports and their templates into one zip archive. Each report is exported into a separate zip

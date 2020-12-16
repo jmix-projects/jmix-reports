@@ -15,12 +15,12 @@
  */
 package io.jmix.reports.app.service;
 
-import com.haulmont.cuba.core.entity.FileDescriptor;
+import com.haulmont.yarg.reporting.ReportOutputDocument;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.reports.app.ParameterPrototype;
-import com.haulmont.yarg.reporting.ReportOutputDocument;
 import io.jmix.reports.entity.*;
 
+import java.net.URI;
 import java.util.*;
 
 public interface ReportService {
@@ -50,8 +50,8 @@ public interface ReportService {
     /**
      * Generates a report.
      *
-     * @param report entity instance defining the report
-     * @param params report parameters
+     * @param report     entity instance defining the report
+     * @param params     report parameters
      * @param outputType desired report output type
      * @return report output
      */
@@ -60,9 +60,9 @@ public interface ReportService {
     /**
      * Generates a report.
      *
-     * @param report entity instance defining the report
+     * @param report       entity instance defining the report
      * @param templateCode code of a template to use
-     * @param params report parameters
+     * @param params       report parameters
      * @return report output
      */
     ReportOutputDocument createReport(Report report, String templateCode, Map<String, Object> params);
@@ -70,10 +70,10 @@ public interface ReportService {
     /**
      * Generates a report.
      *
-     * @param report entity instance defining the report
+     * @param report       entity instance defining the report
      * @param templateCode code of a template to use
-     * @param params report parameters
-     * @param outputType desired report output type
+     * @param params       report parameters
+     * @param outputType   desired report output type
      * @return report output
      */
     ReportOutputDocument createReport(Report report, String templateCode, Map<String, Object> params, ReportOutputType outputType);
@@ -81,9 +81,9 @@ public interface ReportService {
     /**
      * Generates a report.
      *
-     * @param report entity instance defining the report
+     * @param report   entity instance defining the report
      * @param template template to use
-     * @param params report parameters
+     * @param params   report parameters
      * @return report output
      */
     ReportOutputDocument createReport(Report report, ReportTemplate template, Map<String, Object> params);
@@ -91,34 +91,34 @@ public interface ReportService {
     /**
      * Generates a report and saves its output to the file storage.
      *
-     * @param report entity instance defining the report
-     * @param params report parameters
+     * @param report   entity instance defining the report
+     * @param params   report parameters
      * @param fileName output file name
      * @return FileDescriptor instance pointing to the report output
      */
-    FileDescriptor createAndSaveReport(Report report, Map<String, Object> params, String fileName);
+    URI createAndSaveReport(Report report, Map<String, Object> params, String fileName);
 
     /**
      * Generates a report and saves its output to the file storage.
      *
-     * @param report entity instance defining the report
+     * @param report       entity instance defining the report
      * @param templateCode code of a template to use
-     * @param params report parameters
-     * @param fileName output file name
+     * @param params       report parameters
+     * @param fileName     output file name
      * @return FileDescriptor instance pointing to the report output
      */
-    FileDescriptor createAndSaveReport(Report report, String templateCode, Map<String, Object> params, String fileName);
+    URI createAndSaveReport(Report report, String templateCode, Map<String, Object> params, String fileName);
 
     /**
      * Generates a report and saves its output to the file storage.
      *
-     * @param report entity instance defining the report
+     * @param report   entity instance defining the report
      * @param template template to use
-     * @param params report parameters
+     * @param params   report parameters
      * @param fileName output file name
      * @return FileDescriptor instance pointing to the report output
      */
-    FileDescriptor createAndSaveReport(Report report, ReportTemplate template, Map<String, Object> params, String fileName);
+    URI createAndSaveReport(Report report, ReportTemplate template, Map<String, Object> params, String fileName);
 
     /**
      * Exports all reports and their templates into one zip archive. Each report is exported into a separate zip
@@ -148,7 +148,7 @@ public interface ReportService {
     /**
      * Imports reports from ZIP archive. Archive file format is described in exportReports method.
      *
-     * @param zipBytes ZIP archive as a byte array.
+     * @param zipBytes      ZIP archive as a byte array.
      * @param importOptions - report import options
      * @return Collection of imported reports.
      */
@@ -157,7 +157,7 @@ public interface ReportService {
     /**
      * Imports reports from ZIP archive. Archive file format is described in exportReports method.
      *
-     * @param zipBytes ZIP archive as a byte array.
+     * @param zipBytes      ZIP archive as a byte array.
      * @param importOptions report - import options
      * @return import result - collection of updated, created reports
      */
@@ -189,8 +189,9 @@ public interface ReportService {
 
     /**
      * Cancel report execution
+     *
      * @param userSessionId - user session that started report execution
-     * @param reportId - identifier of executed report
+     * @param reportId      - identifier of executed report
      */
     void cancelReportExecution(UUID userSessionId, UUID reportId);
 

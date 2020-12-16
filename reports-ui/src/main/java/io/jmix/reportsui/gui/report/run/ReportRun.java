@@ -16,7 +16,6 @@
 
 package io.jmix.reportsui.gui.report.run;
 
-import com.sun.deploy.config.ClientConfig;
 import io.jmix.core.Messages;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.core.security.CurrentAuthentication;
@@ -77,9 +76,6 @@ public class ReportRun extends StandardLookup<Report> {
     protected GridLayout gridFilter;
 
     @Autowired
-    protected ClientConfig clientConfig;
-
-    @Autowired
     protected Messages messages;
 
     @WindowParam(name = REPORTS_PARAMETER)
@@ -103,7 +99,7 @@ public class ReportRun extends StandardLookup<Report> {
         }
 
         for (Report report : reports) {
-            reportDc.includeItem(report);
+//            reportDc.includeItem(report);
         }
 
         Action runAction = new ItemTrackingAction(RUN_ACTION_ID)
@@ -111,7 +107,7 @@ public class ReportRun extends StandardLookup<Report> {
                 .withHandler(e -> {
                     Report report = reportsTable.getSingleSelected();
                     if (report != null) {
-                        report = getDsContext().getDataSupplier().reload(report, ReportService.MAIN_VIEW_NAME);
+//                        report = getDsContext().getDataSupplier().reload(report, ReportService.MAIN_VIEW_NAME);
                         reportGuiManager.runReport(report, ReportRun.this);
                     }
                 });
@@ -119,12 +115,12 @@ public class ReportRun extends StandardLookup<Report> {
         reportsTable.addAction(runAction);
         reportsTable.setItemClickAction(runAction);
 
-        addAction(new BaseAction("applyFilter")
+//        addAction(new BaseAction("applyFilter")
                 //TODO filter apply shortcut
 //                .withShortcut(clientConfig.getFilterApplyShortcut())
-                .withHandler(e -> {
-                    filterReports();
-                }));
+//                .withHandler(e -> {
+//                    filterReports();
+//                }));
     }
 
     public void filterReports() {
@@ -165,10 +161,10 @@ public class ReportRun extends StandardLookup<Report> {
                         })
                         .collect(Collectors.toList());
 
-        reportDc.clear();
-        for (Report report : reports) {
-            reportDc.includeItem(report);
-        }
+//        reportDc.clear();
+//        for (Report report : reports) {
+//            reportDc.includeItem(report);
+//        }
 
         Table.SortInfo sortInfo = reportsTable.getSortInfo();
         if (sortInfo != null) {

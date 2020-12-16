@@ -16,6 +16,7 @@
 
 package io.jmix.reportsui.gui.report.wizard;
 
+import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.reports.entity.wizard.EntityTreeNode;
 import io.jmix.reports.entity.wizard.RegionProperty;
 import io.jmix.reports.entity.wizard.ReportData.ReportType;
@@ -231,7 +232,9 @@ public class RegionsStepFrame extends StepFrame {
             entityLbl.setStyleName(BOLD_LABEL_STYLE);
             entityLbl.setValue(wizard.getMessage("entity"));
             Label entityValueLbl = wizard.uiComponents.create(Label.class);
-            entityValueLbl.setValue(wizard.messageTools.getEntityCaption(currentReportRegionGeneratedColumn.getRegionPropertiesRootNode().getWrappedMetaClass()));
+            MetaClass wrapperMetaClass = currentReportRegionGeneratedColumn.getRegionPropertiesRootNode().getWrappedMetaClass();
+
+            entityValueLbl.setValue(wizard.messageTools.getEntityCaption(wrapperMetaClass));
             entityValueLbl.setWidth(WIDTH_PERCENT_100);
             secondRowAttrsLayout.add(entityLbl);
             secondRowAttrsLayout.add(entityValueLbl);

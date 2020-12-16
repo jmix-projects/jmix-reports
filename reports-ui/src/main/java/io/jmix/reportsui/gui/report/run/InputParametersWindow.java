@@ -15,7 +15,6 @@
  */
 package io.jmix.reportsui.gui.report.run;
 
-import com.sun.deploy.config.ClientConfig;
 import io.jmix.core.Messages;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportInputParameter;
@@ -58,9 +57,6 @@ public class InputParametersWindow extends StandardLookup {
 
     @Autowired
     protected ReportGuiManager reportGuiManager;
-
-    @Autowired
-    protected ClientConfig clientConfig;
 
     @Autowired
     protected Button printReportBtn;

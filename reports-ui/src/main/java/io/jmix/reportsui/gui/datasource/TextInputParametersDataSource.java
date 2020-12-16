@@ -16,20 +16,12 @@
 
 package io.jmix.reportsui.gui.datasource;
 
-import com.haulmont.cuba.gui.data.impl.CollectionPropertyDatasourceImpl;
-import io.jmix.reports.entity.ParameterType;
-import io.jmix.reports.entity.ReportInputParameter;
+public class TextInputParametersDataSource /*extends CollectionPropertyDatasourceImpl<ReportInputParameter, UUID>*/ {
 
-import java.util.Collection;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-public class TextInputParametersDataSource extends CollectionPropertyDatasourceImpl<ReportInputParameter, UUID> {
-
-    @Override
-    protected Collection<ReportInputParameter> getCollection() {
-        return super.getCollection().stream()
-                .filter(reportInputParameter -> reportInputParameter.getType().equals(ParameterType.TEXT))
-                .collect(Collectors.toList());
-    }
+//    @Override
+//    protected Collection<ReportInputParameter> getCollection() {
+//        return super.getCollection().stream()
+//                .filter(reportInputParameter -> reportInputParameter.getType().equals(ParameterType.TEXT))
+//                .collect(Collectors.toList());
+//    }
 }

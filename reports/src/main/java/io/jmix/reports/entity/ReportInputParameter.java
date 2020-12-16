@@ -15,10 +15,10 @@
  */
 package io.jmix.reports.entity;
 
-import com.haulmont.chile.core.annotations.NamePattern;
 import com.haulmont.yarg.structure.ReportParameterWithDefaultValue;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.entity.annotation.SystemLevel;
+import io.jmix.core.metamodel.annotation.InstanceName;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.annotation.JmixProperty;
 import org.apache.commons.lang3.ObjectUtils;
@@ -30,7 +30,8 @@ import java.util.UUID;
 
 @JmixEntity(name = "report_ReportInputParameter")
 @SystemLevel
-@NamePattern("%s|locName")
+//todo namepattern
+//@NamePattern("%s|locName")
 @SuppressWarnings("unused")
 public class ReportInputParameter implements ReportParameterWithDefaultValue {
 
@@ -103,6 +104,7 @@ public class ReportInputParameter implements ReportParameterWithDefaultValue {
     @JmixProperty
     protected Boolean defaultDateIsCurrent = false;
 
+    @InstanceName
     @Transient
     protected String localeName;
 

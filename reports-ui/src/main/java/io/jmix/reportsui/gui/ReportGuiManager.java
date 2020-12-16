@@ -387,7 +387,8 @@ public class ReportGuiManager {
         Report targetReport = getReportForPrinting(report);
 
         long timeout = reportingClientConfig.getBackgroundReportProcessingTimeoutMs();
-        UUID userSessionId = currentAuthentication.getUser().getId();
+        //TODO executions
+        //UUID userSessionId = currentAuthentication.getUser().getId();
 
         Screen hostScreen = UiControllerUtils.getScreen(screen);
 
@@ -442,7 +443,8 @@ public class ReportGuiManager {
                     @Override
                     public void canceled() {
                         super.canceled();
-                        reportService.cancelReportExecution(userSessionId, report.getId());
+                        //todo
+                        //reportService.cancelReportExecution(userSessionId, report.getId());
                     }
                 };
 

@@ -16,27 +16,19 @@
 
 package io.jmix.reportsui.gui.datasource;
 
-import io.jmix.core.Entity;
-import com.haulmont.cuba.gui.data.impl.CollectionPropertyDatasourceImpl;
-import io.jmix.reports.entity.ReportInputParameter;
-
-import java.util.Collection;
-import java.util.Set;
-import java.util.UUID;
-
-public class InputParametersDataSource extends CollectionPropertyDatasourceImpl<ReportInputParameter, UUID> {
-    @Override
-    public void committed(Set<Entity> entities) {
-        super.committed(entities);
-        if (State.VALID.equals(masterDs.getState())) {
-            Collection<ReportInputParameter> collection = getCollection();
-            if (item != null && collection != null) {
-                for (ReportInputParameter entity : collection) {
-                    if (entity.equals(item)) {
-                        item = entity;
-                    }
-                }
-            }
-        }
-    }
+public class InputParametersDataSource /*extends CollectionPropertyDatasourceImpl<ReportInputParameter, UUID>*/ {
+//    @Override
+//    public void committed(Set<Entity> entities) {
+//        super.committed(entities);
+//        if (State.VALID.equals(masterDs.getState())) {
+//            Collection<ReportInputParameter> collection = getCollection();
+//            if (item != null && collection != null) {
+//                for (ReportInputParameter entity : collection) {
+//                    if (entity.equals(item)) {
+//                        item = entity;
+//                    }
+//                }
+//            }
+//        }
+//    }
 }

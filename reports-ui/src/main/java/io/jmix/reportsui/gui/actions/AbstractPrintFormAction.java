@@ -18,7 +18,6 @@ package io.jmix.reportsui.gui.actions;
 
 import io.jmix.core.*;
 import io.jmix.core.common.util.ParamsMap;
-import io.jmix.core.entity.BaseUser;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.reports.app.ParameterPrototype;
@@ -34,7 +33,6 @@ import io.jmix.ui.action.Action;
 import io.jmix.ui.screen.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import javax.annotation.Nullable;
 import java.util.List;
