@@ -17,14 +17,12 @@
 package io.jmix.reportsui.gui.report.run;
 
 import com.haulmont.yarg.reporting.ReportOutputDocument;
-import io.jmix.core.Entity;
 import io.jmix.core.MessageTools;
 import io.jmix.core.Metadata;
 import io.jmix.core.MetadataTools;
 import io.jmix.core.common.util.ParamsMap;
 import io.jmix.core.entity.KeyValueEntity;
 import io.jmix.core.impl.StandardSerialization;
-import io.jmix.core.metamodel.datatype.impl.EnumClass;
 import io.jmix.core.metamodel.model.MetaProperty;
 import io.jmix.core.metamodel.model.MetaPropertyPath;
 import io.jmix.reports.entity.CubaTableData;
@@ -249,21 +247,17 @@ public class ShowReportTable extends StandardLookup {
         for (MetaPropertyPath metaPropertyPath : paths) {
             MetaProperty property = metaPropertyPath.getMetaProperty();
             if (!property.getRange().getCardinality().isMany() && !metadataTools.isSystem(property)) {
-                Table.Column column = new Table.Column(metaPropertyPath);
-
                 String propertyName = property.getName();
 
                 CubaTableData.ColumnInfo columnInfo = getColumnInfo(propertyName, headers);
-                column.setCaption(columnInfo.getCaption());
-                column.setType(metaPropertyPath.getRangeJavaClass());
 
                 Element element = DocumentHelper.createElement("column");
+                Table.Column column = columnInfo.getPosition() == null
+                        ? table.addColumn(metaPropertyPath)
+                        : table.addColumn(metaPropertyPath, columnInfo.getPosition());
+
                 column.setXmlDescriptor(element);
-                if (columnInfo.getPosition() == null) {
-                    table.addColumn(column);
-                } else {
-                    table.addColumn(column, columnInfo.getPosition());
-                }
+                column.setCaption(columnInfo.getCaption());
             }
         }
     }

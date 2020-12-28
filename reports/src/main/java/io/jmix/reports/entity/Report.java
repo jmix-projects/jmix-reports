@@ -46,7 +46,7 @@ import java.util.*;
 //todo namepattern
 //@NamePattern("%s|locName,name,localeNames")
 @Listeners("report_ReportDetachListener")
-@JmixEntity(annotatedPropertiesOnly = true)
+@JmixEntity
 @SuppressWarnings("unused")
 public class Report implements com.haulmont.yarg.structure.Report, io.jmix.core.Entity {
     private static final long serialVersionUID = -2817764915661205093L;

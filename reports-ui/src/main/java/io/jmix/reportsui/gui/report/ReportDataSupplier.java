@@ -16,9 +16,7 @@
 
 package io.jmix.reportsui.gui.report;
 
-import com.haulmont.cuba.gui.data.impl.GenericDataSupplier;
-
-public class ReportDataSupplier extends GenericDataSupplier {
+public class ReportDataSupplier /*extends GenericDataSupplier */ {
 //    @Override
 //    public EntitySet commit(CommitContext context) {
 //        Set<Entity> result = new HashSet<>();

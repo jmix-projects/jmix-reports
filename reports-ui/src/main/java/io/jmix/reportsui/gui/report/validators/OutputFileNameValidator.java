@@ -22,10 +22,13 @@ import io.jmix.ui.component.ValidationException;
 import io.jmix.ui.component.validation.AbstractValidator;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 
 @Component("report_OutputFileNameValidator")
+@Scope(BeanDefinition.SCOPE_PROTOTYPE)
 public class OutputFileNameValidator extends AbstractValidator<String> {
 
     @Autowired

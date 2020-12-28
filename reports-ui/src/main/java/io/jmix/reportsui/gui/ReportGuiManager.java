@@ -15,12 +15,11 @@
  */
 package io.jmix.reportsui.gui;
 
-import com.haulmont.cuba.gui.backgroundwork.BackgroundWorkWindow;
 import com.haulmont.yarg.reporting.ReportOutputDocument;
+import com.vaadin.spring.annotation.UIScope;
 import io.jmix.core.*;
 import io.jmix.core.common.util.ParamsMap;
 import io.jmix.core.metamodel.model.MetaClass;
-import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.reports.ReportPrintHelper;
 import io.jmix.reports.ReportSecurityManager;
 import io.jmix.reports.app.ParameterPrototype;
@@ -57,6 +56,7 @@ import static io.jmix.reportsui.gui.report.run.InputParametersFrame.PARAMETERS_P
 import static io.jmix.reportsui.gui.report.run.InputParametersWindow.*;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+@UIScope
 @Component("cuba_ReportGuiManager")
 public class ReportGuiManager {
 
@@ -71,9 +71,6 @@ public class ReportGuiManager {
 
     @Autowired
     protected Metadata metadata;
-
-    @Autowired
-    protected WindowConfig windowConfig;
 
     @Autowired
     protected ReportSecurityManager reportSecurityManager;
@@ -94,22 +91,16 @@ public class ReportGuiManager {
     protected ReportingClientConfig reportingClientConfig;
 
     @Autowired
-    protected FetchPlanRepository fetchPlanRepository;
-
-    @Autowired
     protected FetchPlans fetchPlans;
 
     @Autowired
     protected ScreenBuilders screenBuilders;
 
     @Autowired
-    protected Fragments fragments;
-
-    @Autowired
     protected Screens screens;
 
     @Autowired
-    protected CurrentAuthentication currentAuthentication;
+    protected Dialogs dialogs;
 
     /**
      * Open input parameters dialog if report has parameters otherwise print report
@@ -392,12 +383,12 @@ public class ReportGuiManager {
 
         Screen hostScreen = UiControllerUtils.getScreen(screen);
 
-        BackgroundTask<Void, ReportOutputDocument> task =
-                new BackgroundTask<Void, ReportOutputDocument>(timeout, TimeUnit.MILLISECONDS, hostScreen) {
+        BackgroundTask<Integer, ReportOutputDocument> task =
+                new BackgroundTask<Integer, ReportOutputDocument>(timeout, TimeUnit.MILLISECONDS, hostScreen) {
 
                     @SuppressWarnings("UnnecessaryLocalVariable")
                     @Override
-                    public ReportOutputDocument run(TaskLifeCycle<Void> taskLifeCycle) {
+                    public ReportOutputDocument run(TaskLifeCycle<Integer> taskLifeCycle) {
                         ReportOutputDocument result = getReportResult(targetReport, params, templateCode, outputType);
                         return result;
                     }
@@ -451,7 +442,11 @@ public class ReportGuiManager {
         String caption = messages.getMessage(ReportGuiManager.class, "runReportBackgroundTitle");
         String description = messages.getMessage(ReportGuiManager.class, "runReportBackgroundMessage");
 
-        BackgroundWorkWindow.show(task, caption, description, true);
+        dialogs.createBackgroundWorkDialog(task.getOwnerScreen(), task)
+                .withCancelAllowed(true)
+                .withCaption(caption)
+                .withMessage(description)
+                .show();
     }
 
     /**
@@ -656,11 +651,11 @@ public class ReportGuiManager {
 
         Screen hostScreen = UiControllerUtils.getScreen(screen);
 
-        BackgroundTask<Void, ReportOutputDocument> task =
-                new BackgroundTask<Void, ReportOutputDocument>(timeout, TimeUnit.MILLISECONDS, hostScreen) {
+        BackgroundTask<Integer, ReportOutputDocument> task =
+                new BackgroundTask<Integer, ReportOutputDocument>(timeout, TimeUnit.MILLISECONDS, hostScreen) {
                     @SuppressWarnings("UnnecessaryLocalVariable")
                     @Override
-                    public ReportOutputDocument run(TaskLifeCycle<Void> taskLifeCycle) {
+                    public ReportOutputDocument run(TaskLifeCycle<Integer> taskLifeCycle) {
                         ReportOutputDocument result = reportService.bulkPrint(targetReport, templateCode, outputType, paramsList);
                         return result;
                     }
@@ -675,7 +670,11 @@ public class ReportGuiManager {
         String caption = messages.getMessage(getClass(), "runReportBackgroundTitle");
         String description = messages.getMessage(getClass(), "runReportBackgroundMessage");
 
-        BackgroundWorkWindow.show(task, caption, description, true);
+        dialogs.createBackgroundWorkDialog(task.getOwnerScreen(), task)
+                .withCancelAllowed(true)
+                .withCaption(caption)
+                .withMessage(description)
+                .show();
     }
 
     /**

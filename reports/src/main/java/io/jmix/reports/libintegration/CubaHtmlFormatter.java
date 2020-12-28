@@ -16,8 +16,6 @@
 
 package io.jmix.reports.libintegration;
 
-import com.haulmont.cuba.core.app.FileStorageAPI;
-import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.yarg.exception.ReportFormattingException;
 import com.haulmont.yarg.formatters.factory.FormatterFactoryInput;
 import com.haulmont.yarg.formatters.impl.HtmlFormatter;
@@ -30,7 +28,9 @@ import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateScalarModel;
 import io.jmix.core.*;
+import io.jmix.localfs.LocalFileStorage;
 import io.jmix.reports.ReportingConfig;
+import io.jmix.ui.upload.TemporaryStorage;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -45,6 +45,7 @@ import org.xhtmlrenderer.resource.ImageResource;
 
 import java.io.*;
 import java.lang.reflect.Field;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
@@ -75,7 +76,9 @@ public class CubaHtmlFormatter extends HtmlFormatter {
     @Autowired
     protected Metadata metadata;
     @Autowired
-    protected FileStorageAPI storageAPI;
+    protected LocalFileStorage localFileStorage;
+    @Autowired
+    protected TemporaryStorage temporaryStorage;
 
     public CubaHtmlFormatter(FormatterFactoryInput formatterFactoryInput) {
         super(formatterFactoryInput);
@@ -224,23 +227,27 @@ public class CubaHtmlFormatter extends HtmlFormatter {
         @Override
         protected InputStream resolveAndOpenStream(String uri) {
             if (StringUtils.startsWith(uri, FS_PROTOCOL_PREFIX)) {
+                //todo path to file
                 String uuidString = StringUtils.substring(uri, FS_PROTOCOL_PREFIX.length());
 
-                LoadContext<FileDescriptor> loadContext = new LoadContext(metadata.getClass(FileDescriptor.class));
-                loadContext.setFetchPlan(fetchPlanRepository.getFetchPlan(FileDescriptor.class, FetchPlan.LOCAL));
-
                 UUID id = UUID.fromString(uuidString);
-                loadContext.setId(id);
+                URI uriFile = temporaryStorage.getFile(id).toURI();
 
-                FileDescriptor fd = dataManager.load(loadContext);
-                if (fd == null) {
-                    throw new ReportFormattingException(
-                            format("File with id [%s] has not been found in file storage", id));
-                }
+//                LoadContext<FileDescriptor> loadContext = new LoadContext(metadata.getClass(FileDescriptor.class));
+//                loadContext.setFetchPlan(fetchPlanRepository.getFetchPlan(FileDescriptor.class, FetchPlan.LOCAL));
+//
+//                UUID id = UUID.fromString(uuidString);
+//                loadContext.setId(id);
+//
+//                FileDescriptor fd = dataManager.load(loadContext);
+//                if (fd == null) {
+//                    throw new ReportFormattingException(
+//                            format("File with id [%s] has not been found in file storage", id));
+//                }
 
                 try {
-                    return storageAPI.openStream(fd);
-                } catch (FileStorageException | com.haulmont.cuba.core.global.FileStorageException e) {
+                    return localFileStorage.openStream(uriFile);
+                } catch (FileStorageException e) {
                     throw wrapWithReportingException(
                             format("An error occurred while loading file with id [%s] from file storage", id), e);
                 }

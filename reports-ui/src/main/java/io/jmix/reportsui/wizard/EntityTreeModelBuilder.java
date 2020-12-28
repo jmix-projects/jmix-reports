@@ -16,7 +16,6 @@
 
 package io.jmix.reportsui.wizard;
 
-import com.haulmont.cuba.core.entity.FileDescriptor;
 import io.jmix.core.ExtendedEntities;
 import io.jmix.core.MessageTools;
 import io.jmix.core.Metadata;
@@ -86,7 +85,7 @@ public class EntityTreeModelBuilder implements EntityTreeModelBuilderApi {
         if (depth > getEntityTreeModelMaxDeep()) {
             return parentEntityTreeNode;
         }
-        MetaClass fileDescriptorMetaClass = metadata.getClass(FileDescriptor.class);
+//        MetaClass fileDescriptorMetaClass = metadata.getClass(FileDescriptor.class);
         MetaClass wrappedMetaClass = parentEntityTreeNode.getWrappedMetaClass();
         for (MetaProperty metaProperty : wrappedMetaClass.getProperties()) {
             if (!reportingWizardApi.isPropertyAllowedForReportWizard(wrappedMetaClass, metaProperty)) {
@@ -97,7 +96,7 @@ public class EntityTreeModelBuilder implements EntityTreeModelBuilderApi {
                 MetaClass effectiveMetaClass = extendedEntities.getEffectiveMetaClass(metaClass);
                 //does we need to do security checks here? no
 
-                if (fileDescriptorMetaClass.equals(effectiveMetaClass) || !metadataTools.isSystemLevel(effectiveMetaClass) && !metadataTools.isSystemLevel(metaProperty)) {
+                if (/*fileDescriptorMetaClass.equals(effectiveMetaClass) ||*/  !metadataTools.isSystemLevel(effectiveMetaClass) && !metadataTools.isSystemLevel(metaProperty)) {
                     int newDepth = depth + 1;
                     EntityTreeNode newParentModelNode = metadata.create(EntityTreeNode.class);
                     newParentModelNode.setName(metaProperty.getName());

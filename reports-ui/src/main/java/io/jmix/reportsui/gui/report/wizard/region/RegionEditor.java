@@ -16,8 +16,6 @@
 
 package io.jmix.reportsui.gui.report.wizard.region;
 
-import com.haulmont.cuba.core.global.Configuration;
-import com.haulmont.cuba.gui.data.impl.AbstractTreeDatasource;
 import io.jmix.core.Entity;
 import io.jmix.core.Messages;
 import io.jmix.core.Metadata;
@@ -49,8 +47,8 @@ import java.util.Set;
 @UiController("report_Region.edit")
 @UiDescriptor("region-edit.xml")
 public class RegionEditor extends StandardEditor<ReportRegion> {
-    @Named("entityTreeFrame.reportEntityTreeNodeDs")
-    protected AbstractTreeDatasource reportEntityTreeNodeDs;
+//    @Named("entityTreeFrame.reportEntityTreeNodeDs")
+//    protected AbstractTreeDatasource reportEntityTreeNodeDs;
     @Autowired
     protected CollectionContainer<RegionProperty> reportRegionPropertiesTableDc;
     @Named("entityTreeFrame.entityTree")
@@ -75,8 +73,6 @@ public class RegionEditor extends StandardEditor<ReportRegion> {
     protected Label tipLabel;
     @Autowired
     protected Metadata metadata;
-    @Autowired
-    protected Configuration configuration;
     @Autowired
     protected Messages messages;
     @Autowired
@@ -126,15 +122,15 @@ public class RegionEditor extends StandardEditor<ReportRegion> {
         Action search = new AbstractAction("search"/*TODO client config, configuration.getConfig(ClientConfig.class).getFilterApplyShortcut()*/) {
             @Override
             public void actionPerform(Component component) {
-                reportEntityTreeNodeDs.refresh();
-                if (!reportEntityTreeNodeDs.getItemIds().isEmpty()) {
-                    entityTree.collapseTree();
+//                reportEntityTreeNodeDs.refresh();
+//                if (!reportEntityTreeNodeDs.getItemIds().isEmpty()) {
+//                    entityTree.collapseTree();
 //                    entityTree.expand(rootNode.getId());
-                } else {
-                    notifications.create(Notifications.NotificationType.HUMANIZED)
-                            .withCaption(messages.getMessage("valueNotFound"))
-                            .show();
-                }
+//                } else {
+//                    notifications.create(Notifications.NotificationType.HUMANIZED)
+//                            .withCaption(messages.getMessage("valueNotFound"))
+//                            .show();
+//                }
             }
 
             @Override

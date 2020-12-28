@@ -28,7 +28,7 @@
     </data>
 
     <layout spacing="true">
-        <grid id="parametersGrid" spacing="true" width="100%">
+        <gridLayout id="parametersGrid" spacing="true" width="100%">
             <columns>
                 <column/>
                 <column flex="1"/>
@@ -36,16 +36,16 @@
             <rows>
                 <row>
                     <label id="templateLbl" value="msg://caption.reportTemplate" align="MIDDLE_LEFT" visible="false"/>
-                    <lookupField id="templateField" dataContainer="templateReportsDc" width="400" visible="false"/>
+                    <comboBox id="templateField" dataContainer="templateReportsDc" width="400" visible="false"/>
                 </row>
                 <row>
                     <label id="outputTypeLbl" value="msg://caption.reportOutputType" align="MIDDLE_LEFT"
                            visible="false"/>
-                    <lookupField id="outputTypeField" width="400" visible="false"/>
+                    <comboBox id="outputTypeField" width="400" visible="false"/>
                 </row>
                 <row>
                 </row>
             </rows>
-        </grid>
+        </gridLayout>
     </layout>
 </window>

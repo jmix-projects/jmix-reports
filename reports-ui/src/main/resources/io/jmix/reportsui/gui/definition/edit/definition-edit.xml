@@ -14,19 +14,26 @@
   ~ limitations under the License.
   -->
 
-<window xmlns="http://jmix.io/schema/ui/window">
+<fragment xmlns="http://jmix.io/schema/ui/fragment">
 
-<!--    <dsContext>-->
-<!--        <datasource-->
-<!--                id="bandDefinitionDs"-->
-<!--                class="com.haulmont.reports.entity.BandDefinition"-->
-<!--                datasourceClass="com.haulmont.reports.gui.datasource.NotPersistenceDatasource">-->
-<!--        </datasource>-->
-<!--    </dsContext>-->
+    <!--    <dsContext>-->
+    <!--        <datasource-->
+    <!--                id="bandDefinitionDc"-->
+    <!--                class="com.haulmont.reports.entity.BandDefinition"-->
+    <!--                datasourceClass="com.haulmont.reports.gui.datasource.NotPersistenceDatasource">-->
+    <!--        </datasource>-->
+    <!--    </dsContext>-->
 
     <data>
-        <instance id="bandDefinitionDc"
-                  class="io.jmix.reports.entity.BandDefinition"/>
+        <instance id="bandsDc"
+                  class="io.jmix.reports.entity.BandDefinition" provided="true"/>
+
+        <instance id="reportDc"
+                  class="io.jmix.reports.entity.Report" provided="true">
+            <collection id="parametersDc" property="inputParameters" provided="true"/>
+        </instance>
+
+        <collection id="dataSetDc" class="io.jmix.reports.entity.DataSet"/>
     </data>
 
     <assign name="width" value="150"/>
@@ -35,20 +42,20 @@
     <layout expand="split" spacing="true">
         <hbox spacing="true" id="propertiesBox">
             <label value="msg://definition.name" align="MIDDLE_LEFT"/>
-            <textField id="name" datasource="bandDefinitionDs" property="name" width="${width}">
+            <textField id="name" dataContainer="bandsDc" property="name" width="${width}">
                 <validator class="io.jmix.reportsui.gui.report.validators.ReportBandNameValidator"/>
             </textField>
             <label value="msg://definition.orientation" align="MIDDLE_LEFT"/>
-            <lookupField id="orientation" datasource="bandDefinitionDs" property="orientation" width="${width}"/>
+            <comboBox id="orientation" dataContainer="bandsDc" property="orientation" width="${width}"/>
             <label value="msg://definition.parentBand" align="MIDDLE_LEFT"/>
-            <lookupField id="parentBand" datasource="bandDefinitionDs" optionsDatasource="availableParentBandsDs"
-                         property="parentBandDefinition" width="${width}"/>
+            <comboBox id="parentBand" dataContainer="bandsDc" optionsDatasource="availableParentBandsDs"
+                      property="parentBandDefinition" width="${width}"/>
         </hbox>
 
         <split id="split" orientation="horizontal" pos="40" width="100%">
             <vbox margin="false;true;false;false" width="100%" height="100%">
                 <table id="dataSets" editable="true" width="100%" height="100%" columnControlVisible="false"
-                       reorderingAllowed="false" presentations="false">
+                       reorderingAllowed="false" presentations="false" dataContainer="dataSetDc">
                     <buttonsPanel>
                         <button action="dataSets.create" icon="PLUS"/>
                         <button action="dataSets.remove" icon="REMOVE"/>
@@ -57,7 +64,6 @@
                         <column id="name" caption="msg://dataSet.name" editable="true"/>
                         <column id="type" caption="msg://dataSet.type" editable="true" required="true"/>
                     </columns>
-                    <rows datasource="dataSetsDs"/>
                 </table>
             </vbox>
             <!-- Split -->
@@ -71,25 +77,26 @@
                                     align="MIDDLE_RIGHT"
                                     caption="msg://dataSet.fullScreen"/>
                     </hbox>
-                    <sourceCodeEditor id="text" datasource="dataSetsDs" property="text"
+                    <sourceCodeEditor id="text" dataContainer="dataSetDc" property="text"
                                       mode="Text" width="100%"/>
 
                     <hbox id="textParamsBox" spacing="true">
                         <textField id="linkParameterName" width="${width}"
-                                   datasource="dataSetsDs"
+                                   dataContainer="dataSetDc"
                                    property="linkParameterName"
                                    caption="msg://dataSet.linkParameterName"/>
-                        <lookupField id="dataStore" width="${width}"
-                                     datasource="dataSetsDs"
-                                     property="dataStore"
-                                     caption="msg://dataSet.dataStore"/>
+
+                        <comboBox id="dataStore" width="${width}"
+                                  dataContainer="dataSetDc"
+                                  property="dataStore"
+                                  caption="msg://dataSet.dataStore"/>
                     </hbox>
                     <checkBox id="processTemplate"
-                              datasource="dataSetsDs"
+                              dataContainer="dataSetDc"
                               property="processTemplate"
                               caption="msg://dataSet.processTemplate"/>
                 </vbox>
-                <grid id="commonEntityGrid" spacing="true" width="100%">
+                <gridLayout id="commonEntityGrid" spacing="true" width="100%">
                     <columns>
                         <column flex="1"/>
                         <column flex="1"/>
@@ -97,13 +104,13 @@
                     <rows>
                         <row>
                             <label id="entitiesParamLabel" align="MIDDLE_LEFT" value="msg://dataSet.entitiesParamName"/>
-                            <lookupField id="entitiesParamLookup" datasource="dataSetsDs"
-                                         property="listEntitiesParamName"/>
+                            <comboBox id="entitiesParamLookup" dataContainer="dataSetDc"
+                                      property="listEntitiesParamName"/>
                         </row>
                         <row>
                             <label id="entityParamLabel" align="MIDDLE_LEFT" value="msg://dataSet.entityParamName"/>
-                            <lookupField id="entityParamLookup" width="${width}" datasource="dataSetsDs"
-                                         property="entityParamName"/>
+                            <comboBox id="entityParamLookup" width="${width}" dataContainer="dataSetDc"
+                                      property="entityParamName"/>
                         </row>
                         <row>
                             <button id="viewEditButton" caption="msg://dataSet.editView"/>
@@ -111,25 +118,25 @@
                         </row>
                         <row>
                             <label id="viewNameLabel" value="msg://dataSet.viewName"/>
-                            <lookupField id="viewNameLookup" datasource="dataSetsDs" property="viewName"
-                                         width="${width}"/>
+                            <comboBox id="viewNameLookup" dataContainer="dataSetDc" property="viewName"
+                                      width="${width}"/>
                         </row>
                         <row>
-                            <checkBox id="useExistingViewCheckbox" datasource="dataSetsDs"
+                            <checkBox id="useExistingViewCheckbox" dataContainer="dataSetDc"
                                       property="useExistingView" caption="msg://dataSet.useExistingView"/>
                             <label id="checkboxEmptyElement"/>
                         </row>
                     </rows>
-                </grid>
+                </gridLayout>
                 <vbox id="jsonDataSetTypeVBox" spacing="true" height="100%">
                     <label value="msg://dataSet.jsonSourceType"/>
-                    <lookupField id="jsonSourceTypeField"
-                                 datasource="dataSetsDs"
-                                 property="jsonSourceType"
-                                 width="${width}"/>
+                    <comboBox id="jsonSourceTypeField"
+                              dataContainer="dataSetDc"
+                              property="jsonSourceType"
+                              width="${width}"/>
                     <label id="jsonPathQueryLabel" value="msg://dataSet.jsonPathQuery"/>
                     <textArea id="jsonPathQueryTextAreaField" rows="3"
-                              datasource="dataSetsDs"
+                              dataContainer="dataSetDc"
                               property="jsonPathQuery"
                               required="true"
                               width="100%"
@@ -145,28 +152,28 @@
                                         caption="msg://dataSet.fullScreen"/>
                         </hbox>
                         <sourceCodeEditor id="jsonGroovyCodeEditor" width="100%"
-                                          datasource="dataSetsDs"
+                                          dataContainer="dataSetDc"
                                           property="jsonSourceText"
                                           mode="Groovy"/>
                     </vbox>
                     <vbox id="jsonSourceURLVBox" spacing="true" expand="jsonSourceURLTextArea">
                         <label value="msg://dataSet.urlJsonSource"/>
                         <textArea id="jsonSourceURLTextArea" width="100%"
-                                  datasource="dataSetsDs"
+                                  dataContainer="dataSetDc"
                                   property="jsonSourceText" required="true"
                                   requiredMessage="msg://dataSet.urlJsonSourceMessage"/>
                     </vbox>
                     <vbox id="jsonSourceParameterCodeVBox" spacing="true">
                         <label value="msg://dataSet.jsonParameter"/>
-                        <lookupField id="jsonQueryParameterField"
-                                     datasource="dataSetsDs"
-                                     optionsDatasource="stringParametersDs"
-                                     property="jsonSourceInputParameter"
-                                     nullOptionVisible="false"/>
+                        <comboBox id="jsonQueryParameterField"
+                                  dataContainer="dataSetDc"
+                                  optionsDatasource="stringParametersDs"
+                                  property="jsonSourceInputParameter"
+                                  nullOptionVisible="false"/>
                     </vbox>
                 </vbox>
                 <label id="spacer"/>
             </vbox>
         </split>
     </layout>
-</window>
+</fragment>

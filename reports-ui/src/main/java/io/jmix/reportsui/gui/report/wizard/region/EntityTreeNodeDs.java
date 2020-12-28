@@ -16,13 +16,16 @@
 
 package io.jmix.reportsui.gui.report.wizard.region;
 
-import io.jmix.ui.component.TextField;
-import com.haulmont.cuba.gui.data.impl.AbstractTreeDatasource;
+import io.jmix.core.MetadataTools;
 import io.jmix.core.common.datastruct.Node;
 import io.jmix.core.common.datastruct.Tree;
+import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.reports.entity.wizard.EntityTreeNode;
+import io.jmix.ui.component.TextField;
+import io.jmix.ui.model.impl.CollectionContainerImpl;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.text.Collator;
 import java.util.*;
@@ -30,18 +33,25 @@ import java.util.*;
 /**
  * Build Tree using rootEntity as root Node
  */
-public class EntityTreeNodeDs extends AbstractTreeDatasource<EntityTreeNode, UUID> {
+public class EntityTreeNodeDs extends CollectionContainerImpl<EntityTreeNode> {
     protected boolean collectionsOnly;
     protected boolean scalarOnly;
     protected boolean persistentOnly;
     protected boolean showRoot;
+
+    @Autowired
+    protected MetadataTools metadataTools;
 
     protected Comparator<EntityTreeNode> nodeComparator = (o1, o2) -> {
         Collator collator = Collator.getInstance();
         return collator.compare(o1.getHierarchicalLocalizedNameExceptRoot(), o2.getHierarchicalLocalizedNameExceptRoot());
     };
 
-    @Override
+    public EntityTreeNodeDs(MetaClass metaClass) {
+        super(metaClass);
+    }
+
+    //    @Override
     protected Tree<EntityTreeNode> loadTree(Map<String, Object> params) {
         collectionsOnly = isTreeForCollectionsOnly(params);
         scalarOnly = isTreeForScalarOnly(params);
@@ -90,7 +100,7 @@ public class EntityTreeNodeDs extends AbstractTreeDatasource<EntityTreeNode, UUI
                 continue;
             }
 
-            if (metadata.getTools().isSystemLevel(child.getWrappedMetaProperty())) {
+            if (metadataTools.isSystemLevel(child.getWrappedMetaProperty())) {
                 continue;
             }
 
@@ -106,7 +116,7 @@ public class EntityTreeNodeDs extends AbstractTreeDatasource<EntityTreeNode, UUI
                 continue;
             }
 
-            if (persistentOnly && !metadata.getTools().isPersistent(child.getWrappedMetaProperty())) {
+            if (persistentOnly && !metadataTools.isPersistent(child.getWrappedMetaProperty())) {
                 continue;
             }
 

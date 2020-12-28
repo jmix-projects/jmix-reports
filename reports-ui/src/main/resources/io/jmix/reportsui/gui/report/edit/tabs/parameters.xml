@@ -14,7 +14,16 @@
   ~ limitations under the License.
   -->
 
-<window xmlns="http://jmix.io/schema/ui/window">
+<fragment xmlns="http://jmix.io/schema/ui/fragment">
+
+    <data>
+        <instance id="reportDc"
+                  class="io.jmix.reports.entity.Report"
+                  provided="true">
+            <collection id="parametersDc" property="inputParameters" provided="true"/>
+        </instance>
+    </data>
+
     <layout margin="true" spacing="true" expand="inputParametersTable">
         <label value="msg://report.parameters" stylename="h2"/>
         <table id="inputParametersTable" sortable="false" width="100%"
@@ -52,4 +61,4 @@
             </vbox>
         </groupBox>
     </layout>
-</window>
+</fragment>

@@ -18,7 +18,7 @@
         messagesPack="io.jmix.reportsui.gui.report.wizard">
     <layout expand="props" width="100%">
         <vbox id="props" expand="chartPreviewBox">
-            <grid spacing="true" width="100%">
+            <gridLayout spacing="true" width="100%">
                 <columns>
                     <column flex="0"/>
                     <column flex="1"/>
@@ -39,15 +39,15 @@
                     </row>
                     <row>
                         <label value="msg://outputFileFormat" align="MIDDLE_LEFT"/>
-                        <lookupField id="outputFileFormat" required="true" width="100%"
+                        <comboBox id="outputFileFormat" required="true" width="100%"
                                      description="msg://outputFileTypeHintMsg"/>
                     </row>
                     <row>
                         <label id="diagramTypeLabel" value="msg://diagramType" visible="false" align="MIDDLE_LEFT"/>
-                        <lookupField id="diagramType" required="true" width="100%" visible="false"/>
+                        <comboBox id="diagramType" required="true" width="100%" visible="false"/>
                     </row>
                 </rows>
-            </grid>
+            </gridLayout>
             <vbox id="chartPreviewBox" visible="false">
             </vbox>
         </vbox>

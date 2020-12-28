@@ -90,7 +90,8 @@ public class InputParametersFrame extends ScreenFragment {
 
     protected HashMap<String, Field> parameterComponents = new HashMap<>();
 
-    protected ParameterFieldCreator parameterFieldCreator = new ParameterFieldCreator(this);
+    @Autowired
+    protected ParameterFieldCreator parameterFieldCreator;
 
     @Subscribe
     public void onInit(InitEvent event) {

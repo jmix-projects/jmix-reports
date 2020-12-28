@@ -34,7 +34,7 @@
     <layout expand="chartBox">
         <hbox id="reportSelectorBox" spacing="true">
             <label id="reportLookupLabel" align="MIDDLE_CENTER" value="msg://caption.reportForChart"/>
-            <lookupField id="reportLookup" optionsContainer="reportsDc" width="400px"/>
+            <comboBox id="reportLookup" optionsContainer="reportsDc" width="400px"/>
         </hbox>
 
         <groupBox id="reportParamsBox" collapsable="true" collapsed="false" visible="false"

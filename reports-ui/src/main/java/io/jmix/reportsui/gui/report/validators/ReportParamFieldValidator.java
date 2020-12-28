@@ -23,9 +23,12 @@ import io.jmix.reportsui.gui.ReportParameterValidator;
 import io.jmix.ui.component.ValidationException;
 import io.jmix.ui.component.validation.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 @Component("report_ReportParamFieldValidator")
+@Scope(BeanDefinition.SCOPE_PROTOTYPE)
 public class ReportParamFieldValidator implements Validator {
 
     @Autowired

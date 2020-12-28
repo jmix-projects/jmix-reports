@@ -16,7 +16,6 @@
 
 package io.jmix.reports;
 
-import com.haulmont.cuba.core.entity.FileDescriptor;
 import com.haulmont.yarg.reporting.ReportOutputDocument;
 import io.jmix.core.Entity;
 import io.jmix.core.FetchPlan;
@@ -121,7 +120,7 @@ public interface ReportingApi {
      * @return FileDescriptor instance pointing to the report output
      */
     URI createAndSaveReport(Report report, String templateCode,
-                                       Map<String, Object> params, String fileName);
+                            Map<String, Object> params, String fileName);
 
     /**
      * Generates a report and saves its output to the file storage.
@@ -133,7 +132,7 @@ public interface ReportingApi {
      * @return FileDescriptor instance pointing to the report output
      */
     URI createAndSaveReport(Report report, ReportTemplate template,
-                                       Map<String, Object> params, String fileName);
+                            Map<String, Object> params, String fileName);
 
     /**
      * Generates a report and saves its output to the file storage.

@@ -41,7 +41,7 @@
             <form id="pivotTableGroup" datasource="pivotTableDs" width="${width}">
                 <column fieldCaptionWidth="${caption-width}" width="100%">
                     <field id="bandName">
-                        <lookupField datasource="pivotTableDs"
+                        <comboBox datasource="pivotTableDs"
                                      property="bandName"
                                      required="true"/>
                     </field>
@@ -72,7 +72,7 @@
                             <button action="aggregationsTable.create"/>
                             <button action="aggregationsTable.edit"/>
                             <button action="aggregationsTable.remove"/>
-                            <lookupField id="defaultAggregation"
+                            <comboBox id="defaultAggregation"
                                          optionsDatasource="aggregationsDs"
                                          inputPrompt="msg://pivotTable.defaultAggregation"
                                          datasource="pivotTableDs" property="defaultAggregation"

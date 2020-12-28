@@ -18,9 +18,8 @@ package io.jmix.reportsui.gui.report.run;
 
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
-import com.haulmont.chile.core.datatypes.DatatypeRegistry;
-import com.haulmont.cuba.gui.WindowParams;
 import io.jmix.core.*;
+import io.jmix.core.metamodel.datatype.DatatypeRegistry;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.reports.app.service.ReportService;
 import io.jmix.reports.entity.ParameterType;
@@ -34,6 +33,7 @@ import io.jmix.ui.component.data.options.ContainerOptions;
 import io.jmix.ui.model.CollectionContainer;
 import io.jmix.ui.model.CollectionLoader;
 import io.jmix.ui.model.DataComponents;
+import io.jmix.ui.screen.Screen;
 import io.jmix.ui.screen.ScreenFragment;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -76,7 +76,7 @@ public class ParameterFieldCreator {
     @Autowired
     protected Actions actions;
 
-    protected ScreenFragment frame;
+//    protected ScreenFragment frame;
 
     protected Map<ParameterType, FieldCreator> fieldCreationMapping = new ImmutableMap.Builder<ParameterType, FieldCreator>()
             .put(ParameterType.BOOLEAN, new CheckBoxCreator())
@@ -90,9 +90,9 @@ public class ParameterFieldCreator {
             .put(ParameterType.TIME, new TimeFieldCreator())
             .build();
 
-    public ParameterFieldCreator(ScreenFragment frame) {
-        this.frame = frame;
-    }
+//    public ParameterFieldCreator(ScreenFragment frame) {
+//        this.frame = frame;
+//    }
 
     public Label createLabel(ReportInputParameter parameter, Field field) {
         Label label = uiComponents.create(Label.class);
@@ -281,7 +281,7 @@ public class ParameterFieldCreator {
 //                params.put(CLASS_PARAMETER, entityMetaClass);
 
                 if (parameter.getReport().getReportType() == ReportType.SIMPLE) {
-                    WindowParams.MULTI_SELECT.set(params, false);
+                    //WindowParams.MULTI_SELECT.set(params, false);
                 }
 
                 pickerLookupAction.setScreenOptionsSupplier(() -> params);

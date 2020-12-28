@@ -27,7 +27,7 @@
     <layout spacing="true">
         <tabSheet id="tabsheet" width="100%">
             <tab id="optionsTab" caption="msg://parameters.optionsTab" margin="true">
-                <grid spacing="true" width="100%">
+                <gridLayout spacing="true" width="100%">
                     <columns>
                         <column/>
                         <column flex="1"/>
@@ -47,7 +47,7 @@
                         </row>
                         <row>
                             <label value="msg://parameters.type" align="MIDDLE_LEFT"/>
-                            <lookupField id="type" dataContainer="parameterDc" property="type" required="true"
+                            <comboBox id="type" dataContainer="parameterDc" property="type" required="true"
                                          textInputAllowed="false"
                                          width="100%" requiredMessage="msg://parameters.typeMsg"/>
                         </row>
@@ -66,19 +66,19 @@
                         </row>
                         <row>
                             <label id="metaClassLabel" value="msg://parameters.metaClass" align="MIDDLE_LEFT"/>
-                            <lookupField id="metaClass" width="100%" dataContainer="parameterDc"
+                            <comboBox id="metaClass" width="100%" dataContainer="parameterDc"
                                          property="entityMetaClass"
                                          requiredMessage="msg://parameters.requiredMetaClass" required="true"/>
                         </row>
                         <row>
                             <label id="enumerationLabel" value="msg://parameters.enum" align="MIDDLE_LEFT"/>
-                            <lookupField id="enumeration" width="100%" dataContainer="parameterDc"
+                            <comboBox id="enumeration" width="100%" dataContainer="parameterDc"
                                          property="enumerationClass"
                                          requiredMessage="msg://parameters.requiredEnumClass" required="true"/>
                         </row>
                         <row>
                             <label id="screenLabel" value="msg://parameters.screen" align="MIDDLE_LEFT"/>
-                            <lookupField id="screen" width="100%" dataContainer="parameterDc" property="screen"/>
+                            <comboBox id="screen" width="100%" dataContainer="parameterDc" property="screen"/>
                         </row>
                         <row>
                             <label id="defaultValueLabel" value="msg://parameters.defaultValue" align="MIDDLE_LEFT"/>
@@ -91,14 +91,14 @@
                                       property="defaultDateIsCurrent"/>
                         </row>
                     </rows>
-                </grid>
+                </gridLayout>
             </tab>
             <tab id="localesTab" caption="msg://parameters.localesTab" margin="true">
                 <textArea id="localeTextField" dataContainer="parameterDc" property="localeNames"
                           width="100%" height="240px"/>
             </tab>
             <tab id="processParamTab" caption="msg://parameters.transformationTab" margin="true" spacing="true">
-                <grid id="predefinedTransformationBox" spacing="true">
+                <gridLayout id="predefinedTransformationBox" spacing="true">
                     <columns count="2"/>
                     <rows>
                         <row>
@@ -107,17 +107,17 @@
                         </row>
                         <row>
                             <label id="wildcardsLabel" value="msg://parameters.wildcards" align="MIDDLE_LEFT"/>
-                            <lookupField id="wildcards" dataContainer="parameterDc" property="predefinedTransformation"
+                            <comboBox id="wildcards" dataContainer="parameterDc" property="predefinedTransformation"
                                          width="200px"/>
                         </row>
                     </rows>
-                </grid>
+                </gridLayout>
                 <label id="transformationScriptLabel" value="msg://parameters.groovyScript"/>
                 <sourceCodeEditor id="transformationScript" dataContainer="parameterDc" property="transformationScript"
                                   mode="Groovy" width="100%" height="240px"/>
             </tab>
             <tab id="validationTab" caption="msg://parameters.validationTab" margin="true" spacing="true">
-                <grid id="includeValidationBox" spacing="true">
+                <gridLayout id="includeValidationBox" spacing="true">
                     <columns count="2"/>
                     <rows>
                         <row>
@@ -125,13 +125,13 @@
                             <checkBox id="includeValidation" dataContainer="parameterDc" property="validationOn"/>
                         </row>
                     </rows>
-                </grid>
+                </gridLayout>
                 <label id="validationScriptLabel" value="msg://parameters.groovyScript"/>
                 <sourceCodeEditor id="validationScript" dataContainer="parameterDc" property="validationScript"
                                   mode="Groovy" width="100%" height="240px"/>
             </tab>
             <tab id="lookupSettingsTab" caption="msg://parameters.lookupSettingsTab" margin="true" spacing="true">
-                <grid id="lookupSettingsBox" spacing="true" width="100%">
+                <gridLayout id="lookupSettingsBox" spacing="true" width="100%">
                     <columns>
                         <column/>
                         <column flex="1"/>
@@ -156,7 +156,7 @@
                                               width="100%"/>
                         </row>
                     </rows>
-                </grid>
+                </gridLayout>
             </tab>
         </tabSheet>
         <hbox spacing="true" stylename="c-edit-window-actions">

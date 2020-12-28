@@ -39,7 +39,7 @@
     <layout spacing="true" expand="createTemplateFields">
         <hbox id="createTemplateFields" width="100%" spacing="true" expand="previewBox">
             <vbox id="vBox" spacing="true" width="AUTO">
-                <grid id="grid" spacing="true">
+                <gridLayout id="grid" spacing="true">
                     <columns>
                         <column id="column1"/>
                         <column id="column2" flex="1"/>
@@ -64,7 +64,7 @@
                         </row>
                         <row id="row4">
                             <label id="outputTypeLabel" value="msg://template.outputType" align="MIDDLE_LEFT"/>
-                            <lookupField id="outputType" datasource="templateDs"
+                            <comboBox id="outputType" datasource="templateDs"
                                          textInputAllowed="false"
                                          nullOptionVisible="true"
                                          property="reportOutputType"
@@ -98,7 +98,7 @@
                         <row id="row9">
                             <label id="customDefinedByLabel" value="msg://template.customDefinedBy"
                                    align="MIDDLE_LEFT"/>
-                            <lookupField id="customDefinedBy" datasource="templateDs" property="customDefinedBy"
+                            <comboBox id="customDefinedBy" datasource="templateDs" property="customDefinedBy"
                                          width="${width}"/>
                         </row>
                         <row id="row10">
@@ -116,7 +116,7 @@
                             </vbox>
                         </row>
                     </rows>
-                </grid>
+                </gridLayout>
                 <hbox id="descriptionEditBox">
                     <fragment id="chartEdit" screen="report_ChartEdit.fragment" visible="false" width="100%"/>
                     <fragment id="pivotTableEdit" screen="report_PivotTableEdit.fragment" visible="false" width="100%"/>

@@ -24,14 +24,16 @@
             <loader/>
             <collection id="parametersDc" property="inputParameters"/>
             <collection id="valuesFormatsDc" property="valuesFormats"/>
-            <collection id="rolesDc" property="roles"/>
+            <!--            <collection id="rolesDc" property="roles"/>-->
             <collection id="reportScreensDc" property="reportScreens"/>
             <collection id="templatesDc" property="templates"/>
-            <collection id="bandsDc" property="bands"/>
+            <collection id="bandsDc" property="bands">
+                <collection id="dataSetDc" property="dataSets"/>
+            </collection>
             <collection id="stringParametersDc" property="inputParameters"/>
         </instance>
 
-        <collection id="availableParentBandsDc" class="io.jmix.reports.entity.BandDefinition" provided="true"/>
+        <collection id="availableParentBandsDc" class="io.jmix.reports.entity.BandDefinition"/>
         <collection id="groupsDc" class="io.jmix.reports.entity.ReportGroup">
             <loader id="groupsDl">
                 <query>
@@ -39,6 +41,10 @@
                 </query>
             </loader>
         </collection>
+<!--        <collection id="lookupRolesDs"-->
+<!--                    class="com.haulmont.cuba.security.entity.Role"-->
+<!--                    fetchPlan="_local">-->
+<!--        </collection>-->
     </data>
     <facets>
         <dataLoadCoordinator auto="true"/>
@@ -85,29 +91,26 @@
                 resizable="true"/>
     <layout expand="tabsheet" spacing="true">
         <tabSheet id="tabsheet" width="100%">
-            <tab id="generalTab" caption="msg://generalTab">
-                <frame src="/io/jmix/reportsui/gui/report/edit/tabs/general.xml" id="generalFrame" width="100%"
-                       height="100%"/>
+            <tab id="generalTab" expand="generalFragment" caption="msg://generalTab">
+                <fragment screen="report_ReportEditGeneral.fragment" id="generalFragment"/>
             </tab>
             <tab id="parametersAndFormatsTab" caption="msg://parametersAndFormatsTab">
                 <hbox width="100%" height="100%" spacing="true" margin="false;true;true;true">
-                    <frame src="/io/jmix/reportsui/gui/report/edit/tabs/parameters.xml" id="parametersFrame"
-                           height="100%" width="100%"/>
-                    <frame src="/io/jmix/reportsui/gui/report/edit/tabs/formats.xml" id="formatsFrame" height="100%"
-                           width="100%"/>
+                    <fragment screen="report_ReportEditParameters.fragment" id="parametersFragment"
+                              height="100%" width="100%"/>
+                    <fragment screen="report_ReportEditFormats.fragment" id="formatsFragment" height="100%"
+                              width="100%"/>
                 </hbox>
             </tab>
             <tab id="templatesTab" caption="msg://templatesTab">
-                <frame src="/io/jmix/reportsui/gui/report/edit/tabs/templates.xml" id="templatesFrame" width="100%"
-                       height="100%"/>
+                <fragment screen="report_ReportEditTemplates.fragment" id="templatesFragment" width="100%"
+                          height="100%"/>
             </tab>
             <tab id="securityTab" caption="msg://securityTab">
-                <frame src="/io/jmix/reportsui/gui/report/edit/tabs/security.xml" id="securityFrame" width="100%"
-                       height="100%"/>
+                <fragment screen="report_ReportEditSecurity.fragment" id="securityFragment" width="100%" height="100%"/>
             </tab>
             <tab id="localesTab" caption="msg://localesTab">
-                <frame src="/io/jmix/reportsui/gui/report/edit/tabs/locales.xml" id="localesFrame" width="100%"
-                       height="100%"/>
+                <fragment screen="report_ReportEditLocales.fragment" id="localesFragment" width="100%" height="100%"/>
             </tab>
         </tabSheet>
         <hbox spacing="true">

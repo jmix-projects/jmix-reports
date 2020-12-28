@@ -15,7 +15,6 @@
  */
 package io.jmix.reportsui.gui.parameter.edit;
 
-import com.haulmont.cuba.gui.data.impl.DatasourceImplementation;
 import io.jmix.core.MessageTools;
 import io.jmix.core.Messages;
 import io.jmix.core.Metadata;

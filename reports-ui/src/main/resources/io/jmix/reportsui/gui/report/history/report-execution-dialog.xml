@@ -38,7 +38,7 @@
                 resizable="true"/>
 
     <layout expand="reportsTable" spacing="true">
-        <grid id="gridFilter" spacing="true">
+        <gridLayout id="gridFilter" spacing="true">
             <columns count="6"/>
             <rows>
                 <row>
@@ -60,7 +60,7 @@
                 </row>
                 <row>
                     <label value="msg://io.jmix.reportsui.gui.report.run/report.reportRunFilterGroup" align="MIDDLE_RIGHT"/>
-                    <lookupField id="filterGroup"
+                    <comboBox id="filterGroup"
                                  optionsContainer="reportGroupsDc"
                                  width="250px"/>
 
@@ -77,7 +77,7 @@
                             width="100px"/>
                 </row>
             </rows>
-        </grid>
+        </gridLayout>
 
         <groupTable id="reportsTable"
                     dataContainer="reportsDc"

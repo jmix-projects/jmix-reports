@@ -47,7 +47,7 @@
     <layout expand="tablesVBoxLayout">
         <hbox id="reportSelectorBox" spacing="true">
             <label id="reportLookupLabel" align="MIDDLE_CENTER" value="msg://caption.reportForTable"/>
-            <lookupField id="reportLookup" optionsDatasource="reportsDs" width="400px"/>
+            <comboBox id="reportLookup" optionsDatasource="reportsDs" width="400px"/>
         </hbox>
 
         <groupBox id="reportParamsBox" collapsable="true" collapsed="false" visible="false"

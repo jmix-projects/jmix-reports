@@ -56,9 +56,9 @@ import java.util.*;
 public class BandDefinitionEditor extends ScreenFragment implements Suggester {
 
     @Autowired
-    protected InstanceContainer<BandDefinition> bandDefinitionDc;
+    protected InstanceContainer<BandDefinition> bandsDc;
     @Autowired
-    protected CollectionContainer<DataSet> dataSetsDc;
+    protected CollectionContainer<DataSet> dataSetDc;
     @Autowired
     protected InstanceContainer<Report> reportDc;
     @Autowired
@@ -181,7 +181,7 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
         String report = reportDc.getItem().getName();
 
         if (ObjectUtils.isNotEmpty(group) && ObjectUtils.isNotEmpty(report)) {
-            return messages.formatMessage(getClass(), "scriptEditorDialog.captionFormat", report, bandDefinitionDc.getItem().getName());
+            return messages.formatMessage(getClass(), "scriptEditorDialog.captionFormat", report, bandsDc.getItem().getName());
         }
         return null;
     }
@@ -209,13 +209,13 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
     }
 
     public void setBandDefinition(BandDefinition bandDefinition) {
-        bandDefinitionDc.setItem(bandDefinition);
+        bandsDc.setItem(bandDefinition);
         name.setEditable((bandDefinition == null || bandDefinition.getParent() != null)
                 && isUpdatePermitted());
     }
 
     public InstanceContainer<BandDefinition> getBandDefinitionDs() {
-        return bandDefinitionDc;
+        return bandsDc;
     }
 
 
@@ -324,12 +324,12 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
                 .withCaption("")
                 .withDescription(messages.getMessage("description.createDataSet"))
                 .withHandler(handle -> {
-                    BandDefinition selectedBand = bandDefinitionDc.getItem();
+                    BandDefinition selectedBand = bandsDc.getItem();
                     if (selectedBand != null) {
                         DataSet dataset = dataSetFactory.createEmptyDataSet(selectedBand);
                         selectedBand.getDataSets().add(dataset);
-                        dataSetsDc.getItems().add(dataset);
-                        dataSetsDc.setItem(dataset);
+                        dataSetDc.getItems().add(dataset);
+                        dataSetDc.setItem(dataset);
                         dataSets.setSelected(dataset);
                     }
                 });
@@ -346,9 +346,9 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
 //        entitiesParamLookup.setNewOptionAllowed(true);
 //        entityParamLookup.setNewOptionAllowed(true);
 //        viewNameLookup.setNewOptionAllowed(true);
-        entitiesParamLookup.setNewOptionHandler(LinkedWithPropertyNewOptionHandler.handler(dataSetsDc, "listEntitiesParamName"));
-        entityParamLookup.setNewOptionHandler(LinkedWithPropertyNewOptionHandler.handler(dataSetsDc, "entityParamName"));
-        viewNameLookup.setNewOptionHandler(LinkedWithPropertyNewOptionHandler.handler(dataSetsDc, "viewName"));
+        entitiesParamLookup.setNewOptionHandler(LinkedWithPropertyNewOptionHandler.handler(dataSetDc, "listEntitiesParamName"));
+        entityParamLookup.setNewOptionHandler(LinkedWithPropertyNewOptionHandler.handler(dataSetDc, "entityParamName"));
+        viewNameLookup.setNewOptionHandler(LinkedWithPropertyNewOptionHandler.handler(dataSetDc, "viewName"));
     }
 
     protected void initParametersListeners() {
@@ -364,11 +364,11 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
     }
 
     protected void initBandDefinitionsListeners() {
-        bandDefinitionDc.addItemChangeListener(e -> {
+        bandsDc.addItemChangeListener(e -> {
             updateRequiredIndicators(e.getItem());
             selectFirstDataSet();
         });
-        bandDefinitionDc.addItemPropertyChangeListener(e -> {
+        bandsDc.addItemPropertyChangeListener(e -> {
             if ("name".equals(e.getProperty()) && StringUtils.isBlank((String) e.getValue())) {
                 e.getItem().setName("*");
             }
@@ -376,9 +376,9 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
     }
 
     protected void initDataSetListeners() {
-        tabOrientationTableDecorator.decorate(dataSets, bandDefinitionDc);
+        tabOrientationTableDecorator.decorate(dataSets, bandsDc);
 
-        dataSetsDc.addItemChangeListener(e -> {
+        dataSetDc.addItemChangeListener(e -> {
             if (e.getItem() != null) {
                 applyVisibilityRules(e.getItem());
 
@@ -394,7 +394,7 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
             }
         });
 
-        dataSetsDc.addItemPropertyChangeListener(e -> {
+        dataSetDc.addItemPropertyChangeListener(e -> {
             applyVisibilityRules(e.getItem());
             if ("entityParamName".equals(e.getProperty()) || "listEntitiesParamName".equals(e.getProperty())) {
                 ReportInputParameter linkedParameter = findParameterByAlias(String.valueOf(e.getValue()));
@@ -406,7 +406,7 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
             }
 
 //            @SuppressWarnings("unchecked")
-//            DatasourceImplementation<DataSet> implementation = (DatasourceImplementation<DataSet>) dataSetsDc;
+//            DatasourceImplementation<DataSet> implementation = (DatasourceImplementation<DataSet>) dataSetDc;
 //            implementation.modified(e.getItem());
         });
 
@@ -561,9 +561,9 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
     }
 
     protected void selectFirstDataSet() {
-//        dataSetsDc.refresh();
-        if (!dataSetsDc.getItems().isEmpty()) {
-            DataSet item = dataSetsDc.getItems().iterator().next();
+//        dataSetDc.refresh();
+        if (!dataSetDc.getItems().isEmpty()) {
+            DataSet item = dataSetDc.getItems().iterator().next();
             dataSets.setSelected(item);
         } else {
             dataSets.setSelected((DataSet) null);

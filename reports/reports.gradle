@@ -25,17 +25,19 @@ dependencies {
 
     api 'io.jmix.core:jmix-core'
     api 'io.jmix.data:jmix-data'
-    api 'io.jmix.cuba:jmix-cuba'
     api 'io.jmix.rest:jmix-rest'
+    api 'io.jmix.ui:jmix-ui'
     api 'io.jmix.security:jmix-security'
-    api 'io.jmix.dynattr:jmix-dynattr'
+//    api 'io.jmix.dynattr:jmix-dynattr'
     api 'io.jmix.localfs:jmix-localfs'
 
+    api 'com.thoughtworks.xstream:xstream:1.4.13'
+
     implementation 'com.google.code.gson:gson'
-    implementation ('com.haulmont.yarg:yarg-api:2.2.5') {
+    implementation('com.haulmont.yarg:yarg-api:2.2.5') {
         exclude group: 'org.codehaus.groovy', module: 'groovy-all'
     }
-    implementation ('com.haulmont.yarg:yarg:2.2.5') {
+    implementation('com.haulmont.yarg:yarg:2.2.5') {
         exclude group: 'org.codehaus.groovy', module: 'groovy-all'
         exclude group: 'commons-dbcp', module: 'commons-dbcp'
     }

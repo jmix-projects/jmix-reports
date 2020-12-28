@@ -128,7 +128,7 @@ public class EditViewAction extends AbstractAction {
             return null;
         }
         MetaClass byAliasMetaClass = bandDefinitionEditor.reportService.findMetaClassByDataSetEntityAlias(dataSetAlias, dataSet.getType(),
-                bandDefinitionEditor.bandDefinitionDc.getItem().getReport().getInputParameters());
+                bandDefinitionEditor.bandsDc.getItem().getReport().getInputParameters());
 
         //Lets return some value
         if (byAliasMetaClass == null) {

@@ -30,7 +30,7 @@ dependencies {
     api 'io.jmix.ui:jmix-ui-data'
     api 'io.jmix.rest:jmix-rest'
     api 'io.jmix.security:jmix-security'
-    api 'io.jmix.dynattr:jmix-dynattr'
+//    api 'io.jmix.dynattr:jmix-dynattr'
     api 'io.jmix.localfs:jmix-localfs'
 
     implementation 'com.google.code.gson:gson'

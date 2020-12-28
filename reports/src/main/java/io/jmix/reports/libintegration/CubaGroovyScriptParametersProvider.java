@@ -43,8 +43,8 @@ public class CubaGroovyScriptParametersProvider implements GroovyScriptParameter
     @Autowired
     protected ReportingConfig reportingConfig;
 
-    @Autowired
-    protected SessionData sessionData;
+//    @Autowired
+//    protected SessionData sessionData;
 
 //    @Autowired
 //    protected Persistence persistence;
@@ -76,8 +76,8 @@ public class CubaGroovyScriptParametersProvider implements GroovyScriptParameter
         scriptParams.put("dataManager", dataManager);
 //        scriptParams.put("security", security);
         scriptParams.put("timeSource", timeSource);
-        scriptParams.put("userSession", sessionData.getHttpSession());
-        scriptParams.put("sessionData", sessionData);
+//        scriptParams.put("userSession", sessionData.getHttpSession());
+//        scriptParams.put("sessionData", sessionData);
 //        scriptParams.put("transactional", new MethodClosure(this, "transactional"));
         scriptParams.put("validationException", new MethodClosure(this, "validationException"));
 

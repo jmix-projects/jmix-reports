@@ -18,9 +18,8 @@ import io.jmix.reports.libintegration.*;
 import io.jmix.ui.UiConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.annotation.*;
-import org.springframework.scripting.ScriptEvaluator;
-import org.springframework.scripting.support.StandardScriptEvaluator;
 
 import javax.sql.DataSource;
 import java.nio.file.Paths;
@@ -29,6 +28,7 @@ import java.util.Map;
 
 @Configuration
 @ComponentScan
+@ConfigurationPropertiesScan
 @JmixModule(dependsOn = {CoreConfiguration.class, UiConfiguration.class})
 @PropertySource(name = "io.jmix.reports", value = "classpath:/io/jmix/reports/module.properties")
 public class ReportsConfiguration {

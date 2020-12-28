@@ -14,29 +14,32 @@
   ~ limitations under the License.
   -->
 
-<window xmlns="http://jmix.io/schema/ui/window">
+<fragment xmlns="http://jmix.io/schema/ui/fragment">
 
-    <assign name="width" value="250"/>
-    <assign name="widthBig" value="265"/>
-    <assign name="widthTemplate" value="380"/>
+    <data>
+        <instance id="reportDc" class="io.jmix.reports.entity.Report"
+                  provided="true">
+            <collection id="bandsDc" property="bands" provided="true"/>
+            <collection id="parametersDc" property="inputParameters" provided="true"/>
+        </instance>
+    </data>
 
     <layout expand="bands" spacing="true" margin="true;true;false;true">
-        <hbox id="reportFields" spacing="true" width="100%" expand="spacer">
-            <form id="propertiesFieldGroup" dataContainer="reportDc" width="AUTO">
+        <hbox id="reportFields" spacing="true">
+            <form id="propertiesFieldGroup" dataContainer="reportDc">
                 <column>
-                    <textField id="name" required="true" property="name" requiredMessage="msg://report.nameMsg" width="${widthTemplate}"/>
-                    <entityComboBox id="defaultTemplate" required="true" width="${widthTemplate}"/>
+                    <textField id="name" required="true" property="name" requiredMessage="msg://report.nameMsg"/>
+                    <entityComboBox id="defaultTemplate" property="defaultTemplate" required="true"/>
                 </column>
                 <column>
-                    <comboBox id="group" required="true" dataContainer="groupsDc"
-                              requiredMessage="msg://report.reportTypeMsg" width="${width}"/>
-                    <textField id="code" property="code" width="${width}"/>
+                    <comboBox id="group" required="true" property="group" requiredMessage="msg://report.reportTypeMsg"/>
+                    <textField id="code" property="code"/>
                 </column>
             </form>
 
-            <form id="descriptionFieldGroup" dataContainer="reportDc" width="AUTO">
+            <form id="descriptionFieldGroup" dataContainer="reportDc">
                 <column>
-                    <textArea id="description" width="${widthBig}" rows="3"/>
+                    <textArea id="description" property="description" rows="3"/>
                 </column>
             </form>
 
@@ -45,11 +48,11 @@
                 <rows>
                     <row>
                         <label value="msg://report.restAccess"/>
-                        <checkBox datasource="reportDc" property="restAccess"/>
+                        <checkBox dataContainer="reportDc" property="restAccess"/>
                     </row>
                     <row>
                         <label value="msg://report.system"/>
-                        <checkBox datasource="reportDc" property="system"/>
+                        <checkBox dataContainer="reportDc" property="system"/>
                     </row>
                 </rows>
             </gridLayout>
@@ -57,32 +60,33 @@
             <label id="spacer"/>
         </hbox>
 
-        <vbox id="bands" width="100%" height="100%">
+        <vbox id="bands" width="100%">
             <split orientation="horizontal" id="hSplit" pos="30" width="100%" height="100%">
-                <vbox id="treeVBox" margin="false;true;false;false" width="100%" height="100%">
-                    <groupBox id="treeBox" expand="serviceTree" height="100%" width="100%" spacing="true"
+                <vbox id="treeVBox" expand="treeBox" margin="false;true;false;false" width="100%" height="100%">
+                    <groupBox id="treeBox" expand="serviceTree" width="100%" spacing="true"
                               caption="msg://report.bands">
                         <buttonsPanel>
                             <button id="createBandDefinition" icon="font-icon:PLUS"/>
-                            <button id="removeBandDefinition"/>
+                            <button id="removeBandDefinition" icon="font-icon:REMOVE"/>
                             <button id="up" icon="font-icon:CARET_UP"/>
                             <button id="down" icon="font-icon:CARET_DOWN"/>
                         </buttonsPanel>
 
-                        <tree id="serviceTree" width="100%" height="100%" dataContainer="bandsDc" hierarchyProperty="parentBandDefinition">
-<!--                            <treechildren datasource="treeDs" captionProperty="name"/>-->
+                        <tree id="serviceTree" width="100%" dataContainer="bandsDc"
+                              hierarchyProperty="parentBandDefinition">
+                            <!--                            <treechildren datasource="treeDs" captionProperty="name"/>-->
                         </tree>
                     </groupBox>
                 </vbox>
                 <!-- Split -->
-                <vbox id="bandDetailsVBox" margin="false;false;false;true" width="100%" height="100%">
-                    <groupBox id="bandDetailsBox" height="100%" width="100%" caption="msg://report.bandDetails">
-                        <frame src="/io/jmix/reportsui/gui/definition/edit/definition-edit.xml" id="bandEditor"
-                               width="100%"
-                               height="100%"/>
+                <vbox id="bandDetailsVBox" expand="bandDetailsBox" margin="false;false;false;true" width="100%" height="100%">
+                    <groupBox id="bandDetailsBox" width="100%" caption="msg://report.bandDetails">
+                        <fragment screen="report_BandDefinitionEditor.fragment" id="bandEditor"
+                                  width="100%"
+                                  height="100%"/>
                     </groupBox>
                 </vbox>
             </split>
         </vbox>
     </layout>
-</window>
+</fragment>

@@ -14,7 +14,15 @@
   ~ limitations under the License.
   -->
 
-<window xmlns="http://jmix.io/schema/ui/window">
+<fragment xmlns="http://jmix.io/schema/ui/fragment">
+
+    <data>
+        <instance id="reportDc"
+                  class="io.jmix.reports.entity.Report" provided="true">
+            <collection id="templatesDc" property="templates" provided="true"/>
+        </instance>
+    </data>
+
     <layout expand="templatesTable" spacing="true" margin="true">
         <label value="msg://report.templates" stylename="h2"/>
         <table id="templatesTable" sortable="false" width="100%" dataContainer="templatesDc"
@@ -35,4 +43,4 @@
             </columns>
         </table>
     </layout>
-</window>
+</fragment>

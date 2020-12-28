@@ -16,10 +16,6 @@
 
 package io.jmix.reports.libintegration;
 
-import com.haulmont.cuba.core.EntityManager;
-import com.haulmont.cuba.core.Persistence;
-import com.haulmont.cuba.core.Query;
-import com.haulmont.cuba.core.Transaction;
 import com.haulmont.yarg.exception.DataLoadingException;
 import com.haulmont.yarg.loaders.ReportDataLoader;
 import com.haulmont.yarg.loaders.impl.AbstractDbDataLoader;
@@ -31,7 +27,11 @@ import io.jmix.reports.app.EntityMap;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -42,13 +42,16 @@ import java.util.regex.Pattern;
 public class JpqlDataDataLoader extends AbstractDbDataLoader implements ReportDataLoader {
 
     @Autowired
-    private Persistence persistence;
+    protected TransactionTemplate transaction;
 
     @Autowired
     private BeanFactory beanFactory;
 
     @Autowired
     protected DataManager dataManager;
+
+    @PersistenceContext
+    protected EntityManager entityManager;
 
     private static final String QUERY_END = "%%END%%";
     private static final String ALIAS_PATTERN = "as\\s+\"?([\\w|\\d|_|\\.]+)\"?\\s*";
@@ -74,7 +77,9 @@ public class JpqlDataDataLoader extends AbstractDbDataLoader implements ReportDa
         if (StringUtils.isBlank(query)) {
             return Collections.emptyList();
         }
-        try (Transaction tx = persistence.createTransaction(storeName)) {
+        try {
+            //todo
+//            transaction.executeWithoutResult(status -> {
             if (Boolean.TRUE.equals(reportQuery.getProcessTemplate())) {
                 query = processQueryTemplate(query, parentBand, params);
             }
@@ -86,7 +91,6 @@ public class JpqlDataDataLoader extends AbstractDbDataLoader implements ReportDa
 
             Query select = insertParameters(trimQuery(query), storeName, parentBand, params);
             List queryResult = select.getResultList();
-            tx.commit();
             if (queryResult.size() > 0 && queryResult.get(0) instanceof Entity) {
                 List<Map<String, Object>> wrappedResults = new ArrayList<>();
                 for (Object theResult : queryResult) {
@@ -96,6 +100,7 @@ public class JpqlDataDataLoader extends AbstractDbDataLoader implements ReportDa
             } else {
                 return fillOutputData(queryResult, outputParameters);
             }
+//            });
         } catch (Throwable e) {
             throw new DataLoadingException(String.format("An error occurred while loading data for data set [%s]", reportQuery.getName()), e);
         }
@@ -105,8 +110,7 @@ public class JpqlDataDataLoader extends AbstractDbDataLoader implements ReportDa
         QueryPack pack = prepareQuery(query, parentBand, params);
 
         boolean inserted = pack.getParams().length > 0;
-        EntityManager em = persistence.getEntityManager(storeName);
-        Query select = em.createQuery(pack.getQuery());
+        Query select = entityManager.createQuery(pack.getQuery());
         if (inserted) {
             //insert parameters to their position
             for (QueryParameter queryParameter : pack.getParams()) {

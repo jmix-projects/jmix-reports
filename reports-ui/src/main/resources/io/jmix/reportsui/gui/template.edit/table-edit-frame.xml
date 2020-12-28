@@ -35,7 +35,7 @@
 
     <layout spacing="true">
         <groupBox id="groupBox" width="610px" caption="msg://template.tableParameters">
-            <grid id="grid" width="100%" spacing="true">
+            <gridLayout id="grid" width="100%" spacing="true">
                 <columns>
                     <column id="column1"/>
                     <column id="column2" flex="1"/>
@@ -71,7 +71,7 @@
                         </table>
                     </row>
                 </rows>
-            </grid>
+            </gridLayout>
         </groupBox>
     </layout>
 </window>

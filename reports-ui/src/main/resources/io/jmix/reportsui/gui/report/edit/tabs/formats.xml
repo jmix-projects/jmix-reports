@@ -14,7 +14,12 @@
   ~ limitations under the License.
   -->
 
-<window xmlns="http://jmix.io/schema/ui/window">
+<fragment xmlns="http://jmix.io/schema/ui/fragment">
+
+    <data>
+        <collection id="valuesFormatsDc" class="io.jmix.reports.entity.ReportValueFormat" provided="true"/>
+    </data>
+
     <layout margin="true" spacing="true" expand="valuesFormatsTable">
         <label value="msg://report.valuesFormats" stylename="h2"/>
         <table id="valuesFormatsTable" sortable="true" width="100%"
@@ -36,4 +41,4 @@
             </columns>
         </table>
     </layout>
-</window>
+</fragment>

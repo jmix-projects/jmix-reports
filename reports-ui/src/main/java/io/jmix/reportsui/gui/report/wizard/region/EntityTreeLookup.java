@@ -16,7 +16,6 @@
 
 package io.jmix.reportsui.gui.report.wizard.region;
 
-import com.haulmont.cuba.gui.data.impl.AbstractTreeDatasource;
 import io.jmix.core.Messages;
 import io.jmix.reports.entity.wizard.EntityTreeNode;
 import io.jmix.ui.Notifications;
@@ -27,7 +26,6 @@ import io.jmix.ui.component.Component;
 import io.jmix.ui.component.TextField;
 import io.jmix.ui.component.Tree;
 import io.jmix.ui.screen.*;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.inject.Named;
@@ -37,8 +35,8 @@ import javax.inject.Named;
 @LookupComponent("entityTreeFrame.entityTree")
 public class EntityTreeLookup extends StandardLookup {
 
-    @Named("entityTreeFrame.reportEntityTreeNodeDs")
-    protected AbstractTreeDatasource reportEntityTreeNodeDs;
+    //    @Named("entityTreeFrame.reportEntityTreeNodeDs")
+//    protected AbstractTreeDatasource reportEntityTreeNodeDs;
     @Named("entityTreeFrame.entityTree")
     protected Tree entityTree;
     @Named("entityTreeFrame.reportPropertyName")
@@ -85,18 +83,18 @@ public class EntityTreeLookup extends StandardLookup {
         Action search = new AbstractAction("search"/* TODO filter apply shortcut, configuration.getConfig(ClientConfig.class).getFilterApplyShortcut()*/) {
             @Override
             public void actionPerform(Component component) {
-                reportEntityTreeNodeDs.refresh();
-                if (!reportEntityTreeNodeDs.getItemIds().isEmpty()) {
-                    if (StringUtils.isEmpty(reportPropertyName.getValue())) {
-                        entityTree.collapseTree();
-                        entityTree.expand(rootNode.getId());
-                    } else
-                        entityTree.expandTree();
-                } else {
-                    notifications.create(Notifications.NotificationType.HUMANIZED)
-                            .withCaption(messages.getMessage("valueNotFound"))
-                            .show();
-                }
+//                reportEntityTreeNodeDs.refresh();
+//                if (!reportEntityTreeNodeDs.getItemIds().isEmpty()) {
+//                    if (StringUtils.isEmpty(reportPropertyName.getValue())) {
+//                        entityTree.collapseTree();
+//                        entityTree.expand(rootNode.getId());
+//                    } else
+//                        entityTree.expandTree();
+//                } else {
+                notifications.create(Notifications.NotificationType.HUMANIZED)
+                        .withCaption(messages.getMessage("valueNotFound"))
+                        .show();
+//                }
             }
 
             @Override

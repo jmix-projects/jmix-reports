@@ -41,19 +41,19 @@
     <assign name="typeCaptionWidth" value="195px"/>
 
     <layout spacing="true">
-        <grid width="AUTO" spacing="true">
+        <gridLayout width="AUTO" spacing="true">
             <columns count="2"/>
             <rows>
                 <row>
                     <label value="msg://AbstractChartDescription.type"
                            align="MIDDLE_LEFT" width="${typeCaptionWidth}"/>
-                    <lookupField id="type" width="${width}" required="true" align="MIDDLE_RIGHT"/>
+                    <comboBox id="type" width="${width}" required="true" align="MIDDLE_RIGHT"/>
                 </row>
                 <row>
                     <form id="pieChartFieldGroup" datasource="pieChartDs" colspan="2">
                         <column width="${width}" fieldCaptionWidth="${captionWidth}">
                             <field id="bandName">
-                                <lookupField property="bandName"
+                                <comboBox property="bandName"
                                              datasource="pieChartDs"/>
                             </field>
                             <field id="titleField"/>
@@ -68,7 +68,7 @@
                     <form id="serialChartFieldGroup" datasource="serialChartDs" colspan="2">
                         <column width="${width}" fieldCaptionWidth="${captionWidth}">
                             <field id="bandName">
-                                <lookupField property="bandName"
+                                <comboBox property="bandName"
                                              datasource="serialChartDs"/>
                             </field>
                             <field id="categoryField"/>
@@ -128,6 +128,6 @@
                     </groupBox>
                 </row>
             </rows>
-        </grid>
+        </gridLayout>
     </layout>
 </window>

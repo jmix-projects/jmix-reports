@@ -34,7 +34,7 @@
     <layout expand="reportBox">
         <hbox id="reportSelectorBox" spacing="true">
             <label id="reportLookupLabel" align="MIDDLE_CENTER" value="msg://caption.reportForPivotTable"/>
-            <lookupField id="reportLookup" dataContainer="reportsDc" property="name" width="400px"/>
+            <comboBox id="reportLookup" dataContainer="reportsDc" property="name" width="400px"/>
         </hbox>
         <groupBox id="reportParamsBox" collapsable="true" collapsed="false" visible="false"
                   caption="msg://caption.reportParameters" spacing="true">

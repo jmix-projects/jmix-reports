@@ -44,7 +44,7 @@
     <dialogMode width="800px" height="480px" resizable="true"/>
 
     <layout expand="reportsTable" spacing="true">
-        <grid id="gridFilter" spacing="true">
+        <gridLayout id="gridFilter" spacing="true">
             <columns count="6"/>
             <rows>
                 <row>
@@ -62,7 +62,7 @@
                 </row>
                 <row>
                     <label value="msg://report.reportRunFilterGroup" align="MIDDLE_RIGHT"/>
-                    <lookupField id="groupFilter" optionsDatasource="reportGroupsDc" width="250px"/>
+                    <comboBox id="groupFilter" optionsDatasource="reportGroupsDc" width="250px"/>
 
                     <label value="msg://report.reportRunFilterUpdatedDate" align="MIDDLE_RIGHT"/>
                     <dateField id="updatedDateFilter" resolution="DAY" width="150px"/>
@@ -74,7 +74,7 @@
                             width="100px"/>
                 </row>
             </rows>
-        </grid>
+        </gridLayout>
 
         <groupTable id="reportsTable"
                     editable="false"

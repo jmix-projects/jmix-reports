@@ -67,7 +67,7 @@ public class DetailsStepFrame extends StepFrame {
                         @Override
                         public void actionPerform(Component component) {
                             wizard.getItem().getReportRegions().clear();
-                            wizard.regionsTable.refresh(); //for web6
+//                            wizard.regionsTable.refresh(); //for web6
                             wizard.needUpdateEntityModel = true;
                             wizard.entity.setValue((MetaClass) newValue);
 
@@ -90,7 +90,7 @@ public class DetailsStepFrame extends StepFrame {
                         @Override
                         public void actionPerform(Component component) {
                             wizard.getItem().getReportRegions().clear();
-                            wizard.regionsTable.refresh(); //for web6
+//                            wizard.regionsTable.refresh(); //for web6
                             wizard.reportTypeRadioButtonGroup.setValue(newValue);
                         }
                     }));

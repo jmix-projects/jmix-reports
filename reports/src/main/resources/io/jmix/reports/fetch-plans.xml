@@ -37,15 +37,15 @@
         <property name="code"/>
         <property name="description"/>
         <property name="reportType"/>
-        <property name="group" fetchPlan="_minimal"/>
+        <property name="group" fetchPlan="_instance_name"/>
     </fetchPlan>
 
-    <fetchPlan entity="report_Report" name="report.withTemplates" extends="_minimal">
-        <property name="templates" fetchPlan="_minimal"/>
+    <fetchPlan entity="report_Report" name="report.withTemplates" extends="_instance_name">
+        <property name="templates" fetchPlan="_instance_name"/>
     </fetchPlan>
 
     <fetchPlan entity="report_ReportExecution" name="reportExecution.browse" extends="_local">
         <property name="user" fetchPlan="_minimal"/>
-        <property name="outputDocument" fetchPlan="_minimal"/>
+        <property name="fileUri" fetchPlan="_minimal"/>
     </fetchPlan>
 </fetchPlans>

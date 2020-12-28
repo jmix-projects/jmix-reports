@@ -16,11 +16,11 @@
 
 package io.jmix.reports.libintegration;
 
-import com.haulmont.cuba.core.Persistence;
 import com.haulmont.yarg.loaders.ReportParametersConverter;
 import io.jmix.core.Entity;
 import io.jmix.core.Id;
 import io.jmix.core.metamodel.datatype.impl.EnumClass;
+import io.jmix.data.persistence.DbmsSpecifics;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +32,7 @@ import java.util.List;
 public class SqlParametersConverter implements ReportParametersConverter {
 
     @Autowired
-    protected Persistence persistence;
+    protected DbmsSpecifics dbmsSpecifics;
 
     @Override
     public <T> T convert(Object input) {
@@ -75,6 +75,6 @@ public class SqlParametersConverter implements ReportParametersConverter {
     }
 
     private Object dbSpecificConvert(Object object) {
-        return persistence.getDbTypeConverter().getSqlObject(object);
+        return dbmsSpecifics.getDbTypeConverter().getSqlObject(object);
     }
 }

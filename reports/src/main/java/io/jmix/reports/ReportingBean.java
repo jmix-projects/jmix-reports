@@ -16,8 +16,6 @@
 
 package io.jmix.reports;
 
-import com.haulmont.cuba.core.Persistence;
-import com.haulmont.cuba.core.Transaction;
 import com.haulmont.yarg.formatters.impl.doc.connector.NoFreePortsException;
 import com.haulmont.yarg.reporting.ReportOutputDocument;
 import com.haulmont.yarg.reporting.ReportOutputDocumentImpl;
@@ -33,7 +31,6 @@ import io.jmix.reports.converter.XStreamConverter;
 import io.jmix.reports.entity.*;
 import io.jmix.reports.exception.*;
 import io.jmix.reports.libintegration.CustomFormatter;
-import io.jmix.security.model.Role;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Predicate;
 import org.apache.commons.compress.archivers.ArchiveEntry;
@@ -118,107 +115,104 @@ public class ReportingBean implements ReportingApi {
     @PersistenceContext
     protected EntityManager em;
 
-    @Autowired
-    protected Persistence persistence;
-
 
     //todo eude try to simplify report save logic
     @Override
     public Report storeReportEntity(Report report) {
         Report savedReport = null;
         checkPermission(report);
-        Transaction tx = persistence.createTransaction();
-        try {
-            ReportTemplate defaultTemplate = report.getDefaultTemplate();
-            List<ReportTemplate> loadedTemplates = report.getTemplates();
-            List<ReportTemplate> savedTemplates = new ArrayList<>();
+//        Transaction tx = persistence.createTransaction();
+//        try {
+        ReportTemplate defaultTemplate = report.getDefaultTemplate();
+        List<ReportTemplate> loadedTemplates = report.getTemplates();
+        List<ReportTemplate> savedTemplates = new ArrayList<>();
 
-            report.setDefaultTemplate(null);
-            report.setTemplates(null);
+        report.setDefaultTemplate(null);
+        report.setTemplates(null);
 
-            if (report.getGroup() != null) {
-                FetchPlan fetchPlan = fetchPlanRepository.getFetchPlan(ReportGroup.class, FetchPlan.INSTANCE_NAME);
-                ReportGroup existingGroup = em.find(ReportGroup.class, report.getGroup().getId(),
-                        PersistenceHints.builder().withFetchPlan(fetchPlan).build());
-                if (existingGroup != null) {
-                    report.setGroup(existingGroup);
-                } else {
-                    em.persist(report.getGroup());
-                }
+        if (report.getGroup() != null) {
+            FetchPlan fetchPlan = fetchPlanRepository.getFetchPlan(ReportGroup.class, FetchPlan.INSTANCE_NAME);
+            ReportGroup existingGroup = em.find(ReportGroup.class, report.getGroup().getId(),
+                    PersistenceHints.builder().withFetchPlan(fetchPlan).build());
+            if (existingGroup != null) {
+                report.setGroup(existingGroup);
+            } else {
+                em.persist(report.getGroup());
             }
-            em.setProperty(PersistenceHints.SOFT_DELETION, false);
-            //em.setSoftDeletion(false);
-            Report existingReport;
-            List<ReportTemplate> existingTemplates = null;
-            try {
-                FetchPlan fetchPlan = fetchPlanRepository.getFetchPlan(Report.class, "report.withTemplates");
-                existingReport = em.find(Report.class, report.getId(),
-                        PersistenceHints.builder().withFetchPlan(fetchPlan).build());
-                storeIndexFields(report);
+        }
+        em.setProperty(PersistenceHints.SOFT_DELETION, false);
+        //em.setSoftDeletion(false);
+        Report existingReport;
+        List<ReportTemplate> existingTemplates = null;
+        try {
+            FetchPlan fetchPlan = fetchPlanRepository.getFetchPlan(Report.class, "report.withTemplates");
+            existingReport = em.find(Report.class, report.getId(),
+                    PersistenceHints.builder().withFetchPlan(fetchPlan).build());
+            storeIndexFields(report);
 
-                if (existingReport != null) {
-                    report.setVersion(existingReport.getVersion());
-                    report = em.merge(report);
-                    if (existingReport.getTemplates() != null) {
-                        existingTemplates = existingReport.getTemplates();
-                    }
-                    if (existingReport.getDeleteTs() != null) {
-                        existingReport.setDeleteTs(null);
-                        existingReport.setDeletedBy(null);
-                    }
-                    report.setDefaultTemplate(null);
-                    report.setTemplates(null);
-                } else {
-                    report.setVersion(0);
-                    report = em.merge(report);
+            if (existingReport != null) {
+                report.setVersion(existingReport.getVersion());
+                report = em.merge(report);
+                if (existingReport.getTemplates() != null) {
+                    existingTemplates = existingReport.getTemplates();
                 }
+                if (existingReport.getDeleteTs() != null) {
+                    existingReport.setDeleteTs(null);
+                    existingReport.setDeletedBy(null);
+                }
+                report.setDefaultTemplate(null);
+                report.setTemplates(null);
+            } else {
+                report.setVersion(0);
+                report = em.merge(report);
+            }
 
-                //TODO Dynamic attributes manager
+            //TODO Dynamic attributes manager
 //                dynamicAttributesManagerAPI.storeDynamicAttributes(report);
 
-                if (loadedTemplates != null) {
-                    if (existingTemplates != null) {
-                        for (ReportTemplate template : existingTemplates) {
-                            if (!loadedTemplates.contains(template)) {
-                                em.remove(template);
-                            }
+            if (loadedTemplates != null) {
+                if (existingTemplates != null) {
+                    for (ReportTemplate template : existingTemplates) {
+                        if (!loadedTemplates.contains(template)) {
+                            em.remove(template);
                         }
                     }
+                }
 
-                    for (ReportTemplate loadedTemplate : loadedTemplates) {
-                        ReportTemplate existingTemplate = em.find(ReportTemplate.class, loadedTemplate.getId());
-                        if (existingTemplate != null) {
-                            loadedTemplate.setVersion(existingTemplate.getVersion());
-                            if (entityStates.isNew(loadedTemplate)) {
-                                entityStates.makeDetached(loadedTemplate);
-                            }
-                        } else {
-                            loadedTemplate.setVersion(0);
+                for (ReportTemplate loadedTemplate : loadedTemplates) {
+                    ReportTemplate existingTemplate = em.find(ReportTemplate.class, loadedTemplate.getId());
+                    if (existingTemplate != null) {
+                        loadedTemplate.setVersion(existingTemplate.getVersion());
+                        if (entityStates.isNew(loadedTemplate)) {
+                            entityStates.makeDetached(loadedTemplate);
                         }
-
-                        loadedTemplate.setReport(report);
-                        savedTemplates.add(em.merge(loadedTemplate));
+                    } else {
+                        loadedTemplate.setVersion(0);
                     }
-                }
-            } finally {
-                em.setProperty(PersistenceHints.SOFT_DELETION, true);
-            }
-            em.flush();
 
-            for (ReportTemplate savedTemplate : savedTemplates) {
-                if (savedTemplate.equals(defaultTemplate)) {
-                    defaultTemplate = savedTemplate;
-                    break;
+                    loadedTemplate.setReport(report);
+                    savedTemplates.add(em.merge(loadedTemplate));
                 }
             }
-            report.setDefaultTemplate(defaultTemplate);
-            report.setTemplates(savedTemplates);
-            savedReport = report;
-
-            tx.commit();
         } finally {
-            tx.end();
+            em.setProperty(PersistenceHints.SOFT_DELETION, true);
         }
+        em.flush();
+
+        for (ReportTemplate savedTemplate : savedTemplates) {
+            if (savedTemplate.equals(defaultTemplate)) {
+                defaultTemplate = savedTemplate;
+                break;
+            }
+        }
+        report.setDefaultTemplate(defaultTemplate);
+        report.setTemplates(savedTemplates);
+        savedReport = report;
+
+//            tx.commit();
+//        } finally {
+//            tx.end();
+//        }
 
         FetchPlan reportEditView = fetchPlanRepository.getFetchPlan(metadata.getClass(savedReport), "report.edit");
         return dataManager.load(Id.of(savedReport))
@@ -481,20 +475,31 @@ public class ReportingBean implements ReportingApi {
 
         }
 
-        Transaction tx = persistence.createTransaction();
-        try {
+//        Transaction tx = persistence.createTransaction();
+//        try {
+//
+//            Long countOfReportsWithSameName = (Long) persistence.getEntityManager()
+//                    .createQuery("select count(r) from report_Report r where r.name = :name")
+//                    .setParameter("name", reportName)
+//                    .getSingleResult();
+//            tx.commit();
+//            if (countOfReportsWithSameName > 0) {
+//                return generateReportName(sourceName, ++iteration);
+//            }
+//        } finally {
+//            tx.end();
+//        }
 
-            Long countOfReportsWithSameName = (Long) persistence.getEntityManager()
-                    .createQuery("select count(r) from report_Report r where r.name = :name")
-                    .setParameter("name", reportName)
+        String finalReportName = reportName;
+        transaction.executeWithoutResult(status -> {
+            Long countOfReportsWithSameName = (Long) em.createQuery("select count(r) from report_Report r where r.name = :name")
+                    .setParameter("name", finalReportName)
                     .getSingleResult();
-            tx.commit();
             if (countOfReportsWithSameName > 0) {
-                return generateReportName(sourceName, ++iteration);
+                //todo
+                //return generateReportName(sourceName, ++iteration);
             }
-        } finally {
-            tx.end();
-        }
+        });
         return reportName;
     }
 
@@ -738,7 +743,7 @@ public class ReportingBean implements ReportingApi {
 //            if (report.getRoles() != null) {
 
 //                for (Role role : report.getRoles()) {
-                    //TODO predefined
+            //TODO predefined
 //                    if (role.isPredefined()) {
 //                        roles.append(role.getName())
 //                                .append(IDX_SEPARATOR);

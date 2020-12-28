@@ -18,6 +18,7 @@ package io.jmix.reportsui.gui.report.wizard;
 
 import io.jmix.core.CoreProperties;
 import io.jmix.core.Messages;
+import io.jmix.reports.entity.BandDefinition;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportOutputType;
 import io.jmix.reports.entity.charts.*;
@@ -37,6 +38,8 @@ import io.jmix.ui.download.DownloadFormat;
 import io.jmix.ui.download.Downloader;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.Scope;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -44,6 +47,7 @@ import java.util.List;
 import java.util.Map;
 
 @org.springframework.stereotype.Component("report_SaveStep.fragment")
+@Scope(BeanDefinition.SCOPE_PROTOTYPE)
 public class SaveStepFrame extends StepFrame {
 
     @Autowired

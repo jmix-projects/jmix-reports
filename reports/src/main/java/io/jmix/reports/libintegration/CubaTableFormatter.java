@@ -32,6 +32,8 @@ import io.jmix.reports.entity.table.TemplateTableDescription;
 import io.jmix.reports.exception.ReportingException;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -41,6 +43,7 @@ import static io.jmix.reports.app.EntityMap.INSTANCE_NAME_KEY;
 import static io.jmix.reports.entity.wizard.ReportRegion.HEADER_BAND_PREFIX;
 
 @Component("report_CubaTableFormatter")
+@Scope(BeanDefinition.SCOPE_PROTOTYPE)
 public class CubaTableFormatter extends AbstractFormatter {
 
     @Autowired

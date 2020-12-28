@@ -15,7 +15,8 @@
   -->
 
 <window xmlns="http://jmix.io/schema/ui/window"
-        xmlns:c="http://jmix.io/schema/ui/jpql-condition">
+        xmlns:c="http://jmix.io/schema/ui/jpql-condition"
+        caption="msg://reportBrowser">
 
     <data>
         <collection id="reportDc"
@@ -46,13 +47,13 @@
         </filter>
         <groupTable id="table" editable="false" multiselect="true" width="100%" dataContainer="reportDc">
             <actions>
-                <action id="create"/>
-                <action id="edit"/>
-                <action id="remove"/>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+                <action id="remove" type="remove"/>
             </actions>
             <buttonsPanel>
                 <button id="createBtn" action="table.create"/>
-                <popupButton id="popupCreateBtn" icon="FILE_O" caption="mainMsg://actions.Create"/>
+                <popupButton id="popupCreateBtn" icon="FILE_O" caption="msg://report.create"/>
                 <button action="table.edit"/>
                 <button action="table.remove"/>
                 <button id="copy" icon="COPY"/>

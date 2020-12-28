@@ -19,10 +19,13 @@ package io.jmix.reportsui.gui.report.validators;
 import io.jmix.ui.component.Field;
 import io.jmix.ui.component.ValidationException;
 import io.jmix.ui.component.validation.AbstractValidator;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
 @Component("report_ReportCollectionValidator")
+@Scope(BeanDefinition.SCOPE_PROTOTYPE)
 public class ReportCollectionValidator extends AbstractValidator {
 
     protected Field field;

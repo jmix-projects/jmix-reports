@@ -76,7 +76,7 @@ public class ReportingConfig {
     boolean useOfficeForDocumentConversion;
 
     public ReportingConfig(@DefaultValue("/") String officePath,
-                           @DefaultValue("8100;8101;8102;8103") List<Integer> officePorts,
+                           @DefaultValue("8100,8101,8102,8103") List<Integer> officePorts,
                            @DefaultValue("20") int docFormatterTimeout,
                            @DefaultValue("false") boolean displayDeviceAvailable,
                            String pdfFontsDirectory,

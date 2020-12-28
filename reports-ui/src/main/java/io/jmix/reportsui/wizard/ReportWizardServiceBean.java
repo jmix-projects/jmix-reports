@@ -42,11 +42,11 @@ public class ReportWizardServiceBean implements ReportWizardService {
     @Autowired
     private Provider<EntityTreeModelBuilderApi> entityTreeModelBuilderApiProvider;
 
-    //todo prototype
-    @Autowired
-    protected TemplateGeneratorApi templateGeneratorApi(ReportData reportData, TemplateFileType templateFileType) {
-        return new TemplateGenerator(reportData, templateFileType);
-    }
+//    //todo prototype
+//    @Autowired
+//    protected TemplateGeneratorApi templateGeneratorApi(ReportData reportData, TemplateFileType templateFileType) {
+//        return new TemplateGenerator(reportData, templateFileType);
+//    }
 
     @Override
     public Report toReport(ReportData reportData, boolean temporary) {
@@ -75,7 +75,7 @@ public class ReportWizardServiceBean implements ReportWizardService {
 
     @Override
     public byte[] generateTemplate(ReportData reportData, TemplateFileType templateFileType) throws TemplateGenerationException {
-        TemplateGeneratorApi templateGeneratorApi = templateGeneratorApi(reportData, templateFileType);
+        TemplateGeneratorApi templateGeneratorApi = new TemplateGenerator(reportData, templateFileType);
         return templateGeneratorApi.generateTemplate();
     }
 

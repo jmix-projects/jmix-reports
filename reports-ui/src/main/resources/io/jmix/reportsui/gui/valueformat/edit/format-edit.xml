@@ -25,7 +25,7 @@
     </data>
 
     <layout spacing="true">
-        <grid id="gridLayout" spacing="true" width="700px">
+        <gridLayout id="gridLayout" spacing="true" width="700px">
             <columns count="1"/>
             <rows>
                 <row>
@@ -63,7 +63,7 @@
                     </vbox>
                 </row>
             </rows>
-        </grid>
+        </gridLayout>
         <hbox id="editActions" spacing="true">
             <button action="windowCommitAndClose"/>
             <button action="windowClose"/>

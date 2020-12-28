@@ -117,7 +117,7 @@ public class ReportBrowser extends StandardLookup<Report> {
         boolean hasPermissionsToCreateReports = showScreenContext.isCreatePermitted();
 
         Action copyAction = actions.create(ItemTrackingAction.class, "copy")
-                .withCaption(messages.getMessage("copy"))
+                .withCaption(messages.getMessage("io.jmix.reportsui.gui.report.browse/copy"))
                 .withHandler(event -> {
                     Report report = reportsTable.getSingleSelected();
                     if (report != null) {
@@ -125,7 +125,7 @@ public class ReportBrowser extends StandardLookup<Report> {
                         reportDl.load();
                     } else {
                         notifications.create(Notifications.NotificationType.HUMANIZED)
-                                .withCaption(messages.getMessage("notification.selectReport"))
+                                .withCaption(messages.getMessage("io.jmix.reportsui.gui.report.browse/notification.selectReport"))
                                 .show();
                     }
                 });
@@ -133,7 +133,7 @@ public class ReportBrowser extends StandardLookup<Report> {
         copyReport.setAction(copyAction);
 
         runReport.setAction(new ItemTrackingAction("runReport")
-                .withCaption(messages.getMessage("runReport"))
+                .withCaption(messages.getMessage("io.jmix.reportsui.gui.report.browse/runReport"))
                 .withHandler(event -> {
                     Report report = reportsTable.getSingleSelected();
                     if (report != null) {
@@ -198,7 +198,7 @@ public class ReportBrowser extends StandardLookup<Report> {
 
         CreateAction<Report> popupCreateReportAction = actions.create(CreateAction.class);
         popupCreateReportAction.setTarget(reportsTable);
-        popupCreateReportAction.withCaption(messages.getMessage("report.new"));
+        popupCreateReportAction.withCaption(messages.getMessage("io.jmix.reportsui.gui.report.browse/report.new"));
         popupCreateReportAction.setAfterCommitHandler(e -> reportsTable.expandPath(e));
 
         popupCreateBtn.addAction(popupCreateReportAction);
@@ -234,7 +234,7 @@ public class ReportBrowser extends StandardLookup<Report> {
 
             @Override
             public String getCaption() {
-                return messages.getMessage("report.wizard");
+                return messages.getMessage("io.jmix.reportsui.gui.report.browse/report.wizard");
             }
         });
 
@@ -284,7 +284,7 @@ public class ReportBrowser extends StandardLookup<Report> {
 
         @Override
         public String getCaption() {
-            return messages.getMessage("report.browser.showExecutions");
+            return messages.getMessage("io.jmix.reportsui.gui.report.browse/report.browser.showExecutions");
         }
 
         @Override

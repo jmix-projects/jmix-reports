@@ -147,7 +147,7 @@ public class RegionsStepFrame extends StepFrame {
             public void accept(Screen.AfterCloseEvent afterCloseEvent) {
                 StandardCloseAction standardCloseAction = (StandardCloseAction) afterCloseEvent.getCloseAction();
                 if (Window.COMMIT_ACTION_ID.equals(standardCloseAction.getActionId())) {
-                    wizard.regionsTable.refresh();
+//                    wizard.regionsTable.refresh();
                     wizard.setupButtonsVisibility();
                 }
             }
@@ -290,7 +290,7 @@ public class RegionsStepFrame extends StepFrame {
                                     //todo
                                     //wizard.reportRegionsDs.removeItem(wizard.regionsTable.getSingleSelected());
                                     normalizeRegionPropertiesOrderNum();
-                                    wizard.regionsTable.refresh();
+//                                    wizard.regionsTable.refresh();
                                     wizard.setupButtonsVisibility();
                                 }),
                                 new DialogAction(DialogAction.Type.NO).withPrimary(true)
