@@ -30,7 +30,6 @@ import io.jmix.reports.entity.ReportTemplate;
 import io.jmix.reportsui.gui.ReportGuiManager;
 import io.jmix.ui.Fragments;
 import io.jmix.ui.UiComponents;
-import io.jmix.ui.WindowParam;
 import io.jmix.ui.component.*;
 import io.jmix.ui.screen.*;
 import io.jmix.ui.theme.ThemeConstants;
@@ -40,15 +39,10 @@ import java.util.List;
 import java.util.Map;
 
 
-@UiController("report_ShowPivotTableController")
+@UiController("report_ShowPivotTable.lookup")
 @UiDescriptor("show-pivot-table.xml")
-public class ShowPivotTableController extends StandardLookup {
+public class ShowPivotTableLookup extends StandardLookup {
     public static final String PIVOT_TABLE_SCREEN_ID = "chart$pivotTable";
-
-    public static final String REPORT_PARAMETER = "report";
-    public static final String PIVOT_TABLE_DATA_PARAMETER = "pivotTableData";
-    public static final String TEMPLATE_CODE_PARAMETER = "templateCode";
-    public static final String PARAMS_PARAMETER = "reportParams";
 
     @Autowired
     protected ReportGuiManager reportGuiManager;
@@ -69,7 +63,7 @@ public class ShowPivotTableController extends StandardLookup {
     protected BoxLayout parametersFrameHolder;
 
     @Autowired
-    protected ComboBox<Report> reportLookup;
+    protected EntityComboBox<Report> reportEntityComboBox;
 
     @Autowired
     protected HBoxLayout reportSelectorBox;
@@ -89,20 +83,31 @@ public class ShowPivotTableController extends StandardLookup {
     @Autowired
     protected CurrentAuthentication currentAuthentication;
 
-    @WindowParam(name = REPORT_PARAMETER)
     protected Report report;
 
-    @WindowParam(name = PARAMS_PARAMETER)
     protected Map<String, Object> params;
 
-    @WindowParam(name = TEMPLATE_CODE_PARAMETER)
     protected String templateCode;
 
-    @WindowParam(name = PIVOT_TABLE_DATA_PARAMETER)
     protected byte[] pivotTableData;
 
-    protected InputParametersFrame inputParametersFrame;
+    protected InputParametersFragment inputParametersFrame;
 
+    public void setReport(Report report) {
+        this.report = report;
+    }
+
+    public void setParams(Map<String, Object> params) {
+        this.params = params;
+    }
+
+    public void setTemplateCode(String templateCode) {
+        this.templateCode = templateCode;
+    }
+
+    public void setPivotTableData(byte[] pivotTableData) {
+        this.pivotTableData = pivotTableData;
+    }
 
     @Install(to = "reportsDl", target = Target.DATA_LOADER)
     protected List<Report> reportsDlLoadDelegate(LoadContext<Report> loadContext) {
@@ -129,8 +134,8 @@ public class ShowPivotTableController extends StandardLookup {
             showStubText();
         }
 
-        reportLookup.addValueChangeListener(e -> {
-            report = (Report) e.getValue();
+        reportEntityComboBox.addValueChangeListener(e -> {
+            report = e.getValue();
             initFrames(null, null, null);
         });
 
@@ -145,12 +150,12 @@ public class ShowPivotTableController extends StandardLookup {
         parametersFrameHolder.removeAll();
         if (report != null) {
             Map<String, Object> params = ParamsMap.of(
-                    InputParametersFrame.REPORT_PARAMETER, report,
-                    InputParametersFrame.PARAMETERS_PARAMETER, reportParameters
+                    InputParametersFragment.REPORT_PARAMETER, report,
+                    InputParametersFragment.PARAMETERS_PARAMETER, reportParameters
             );
 
-            inputParametersFrame = (InputParametersFrame) fragments.create(this,
-                    "report_inputParametersFrame",
+            inputParametersFrame = (InputParametersFragment) fragments.create(this,
+                    "report_InputParameters.fragment",
                     new MapScreenOptions(params))
                     .init();
             parametersFrameHolder.add(inputParametersFrame.getFragment());
@@ -204,7 +209,7 @@ public class ShowPivotTableController extends StandardLookup {
     protected void showStubText() {
         if (reportBox.getOwnComponents().isEmpty()) {
             Label label = uiComponents.create(Label.class);
-            label.setValue(messages.getMessage("showPivotTable.caption"));
+            label.setValue(messages.getMessage(getClass(), "showPivotTable.caption"));
             label.setAlignment(Component.Alignment.MIDDLE_CENTER);
             label.setStyleName("h1");
             reportBox.add(label);

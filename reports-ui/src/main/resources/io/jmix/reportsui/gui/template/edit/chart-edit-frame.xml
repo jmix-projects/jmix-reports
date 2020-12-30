@@ -16,14 +16,14 @@
 
 <window xmlns="http://jmix.io/schema/ui/window">
 
-<!--    <dsContext>-->
-<!--        <datasource id="pieChartDs" class="com.haulmont.reports.entity.charts.PieChartDescription" view="_local"-->
-<!--                    allowCommit="false"/>-->
-<!--        <datasource id="serialChartDs" class="com.haulmont.reports.entity.charts.SerialChartDescription" view="_local"-->
-<!--                    allowCommit="false">-->
-<!--            <collectionDatasource id="seriesDs" property="series" allowCommit="false"/>-->
-<!--        </datasource>-->
-<!--    </dsContext>-->
+    <!--    <dsContext>-->
+    <!--        <datasource id="pieChartDs" class="com.haulmont.reports.entity.charts.PieChartDescription" view="_local"-->
+    <!--                    allowCommit="false"/>-->
+    <!--        <datasource id="serialChartDs" class="com.haulmont.reports.entity.charts.SerialChartDescription" view="_local"-->
+    <!--                    allowCommit="false">-->
+    <!--            <collectionDatasource id="seriesDs" property="series" allowCommit="false"/>-->
+    <!--        </datasource>-->
+    <!--    </dsContext>-->
 
     <data>
         <instance id="pieChartDc"
@@ -50,40 +50,35 @@
                     <comboBox id="type" width="${width}" required="true" align="MIDDLE_RIGHT"/>
                 </row>
                 <row>
-                    <form id="pieChartFieldGroup" datasource="pieChartDs" colspan="2">
+                    <form id="pieChartFieldGroup" dataContainer="pieChartDc" colspan="2">
                         <column width="${width}" fieldCaptionWidth="${captionWidth}">
-                            <field id="bandName">
-                                <comboBox property="bandName"
-                                             datasource="pieChartDs"/>
-                            </field>
-                            <field id="titleField"/>
-                            <field id="valueField"/>
-                            <field id="colorField"/>
-                            <field id="units"/>
-                            <field id="showLegend"/>
+                            <field id="bandName" property="bandName"/>
+                            <field id="titleField" property="titleField"/>
+                            <field id="valueField" property="valueField"/>
+                            <field id="colorField" property="colorField"/>
+                            <field id="units" property="units"/>
+                            <field id="showLegend" property="showLegend"/>
                         </column>
                     </form>
                 </row>
                 <row>
-                    <form id="serialChartFieldGroup" datasource="serialChartDs" colspan="2">
+                    <form id="serialChartFieldGroup" dataContainer="serialChartDc" colspan="2">
                         <column width="${width}" fieldCaptionWidth="${captionWidth}">
-                            <field id="bandName">
-                                <comboBox property="bandName"
-                                             datasource="serialChartDs"/>
-                            </field>
-                            <field id="categoryField"/>
-                            <field id="categoryAxisCaption"/>
-                            <field id="categoryAxisLabelRotation"/>
-                            <field id="valueAxisCaption"/>
-                            <field id="valueAxisUnits"/>
-                            <field id="valueStackType"/>
-                            <field id="showLegend"/>
+                            <field id="bandName" property="bandName"/>
+                            <field id="categoryField" property="categoryField"/>
+                            <field id="categoryAxisCaption" property="categoryAxisCaption"/>
+                            <field id="categoryAxisLabelRotation" property="categoryAxisLabelRotation"/>
+                            <field id="valueAxisCaption" property="valueAxisCaption"/>
+                            <field id="valueAxisUnits" property="valueAxisUnits"/>
+                            <field id="valueStackType" property="valueStackType"/>
+                            <field id="showLegend" property="showLegend"/>
                         </column>
                     </form>
                 </row>
                 <row>
                     <groupBox id="seriesBox" caption="msg://chartEdit.series" colspan="2">
-                        <table id="seriesTable" editable="true" height="200px" width="100%" sortable="false">
+                        <table id="seriesTable" dataContainer="seriesDc" editable="true" height="200px" width="100%"
+                               sortable="false">
                             <actions>
                                 <action id="create"/>
                                 <action id="remove"/>
@@ -103,7 +98,6 @@
                                 <column id="type" editable="true"/>
                                 <column id="colorField" editable="true"/>
                             </columns>
-                            <rows datasource="seriesDs"/>
                         </table>
                     </groupBox>
                 </row>

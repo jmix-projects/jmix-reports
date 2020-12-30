@@ -41,12 +41,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
 
-import static io.jmix.reportsui.gui.report.run.InputParametersWindow.BULK_PRINT;
-import static io.jmix.reportsui.gui.report.run.InputParametersWindow.INPUT_PARAMETER;
-
-@UiController("report_InputParametersFrame")
+@UiController("report_InputParameters.fragment")
 @UiDescriptor("input-parameters-frame.xml")
-public class InputParametersFrame extends ScreenFragment {
+public class InputParametersFragment extends ScreenFragment {
     public static final String REPORT_PARAMETER = "report";
     public static final String PARAMETERS_PARAMETER = "parameters";
 
@@ -93,41 +90,51 @@ public class InputParametersFrame extends ScreenFragment {
     @Autowired
     protected ParameterFieldCreator parameterFieldCreator;
 
+    public void setReport(Report report) {
+        this.report = report;
+    }
+
+    public void setParameters(Map<String, Object> parameters) {
+        this.parameters = parameters;
+    }
+
+    public void setBulkPrint(boolean bulkPrint) {
+        this.bulkPrint = bulkPrint;
+    }
+
+    public void setInputParameter(ReportInputParameter inputParameter) {
+        this.inputParameter = inputParameter;
+    }
+
     @Subscribe
     public void onInit(InitEvent event) {
-//        report = (Report) params.get(REPORT_PARAMETER);
-//        if (report != null && !report.getIsTmp()) {
-//            report = dataManager.load(Id.of(report))
-//                    .fetchPlan(ReportService.MAIN_VIEW_NAME)
-//                    .one();
-//        }
-//        //noinspection unchecked
-//        parameters = (Map<String, Object>) params.get(PARAMETERS_PARAMETER);
-//        if (parameters == null) {
-//            parameters = Collections.emptyMap();
-//        }
-//        bulkPrint = BooleanUtils.isTrue((Boolean) params.get(BULK_PRINT));
-//        inputParameter = (ReportInputParameter) params.get(INPUT_PARAMETER);
-//
-//        if (report != null) {
-//            if (CollectionUtils.isNotEmpty(report.getInputParameters())) {
-//                parametersGrid.setRows(report.getInputParameters().size() + 2);
-//                int currentGridRow = 2;
-//                for (ReportInputParameter parameter : report.getInputParameters()) {
-//                    if (bulkPrint && Objects.equals(inputParameter, parameter)) {
-//                        continue;
-//                    }
-//                    createComponent(parameter, currentGridRow, BooleanUtils.isNotTrue(parameter.getHidden()));
-//                    currentGridRow++;
-//                }
-//            }
-//            if (report.getTemplates() != null && report.getTemplates().size() > 1) {
-//                if (!report.getIsTmp()) {
-//                    templateReportsDl.setParameter("reportId", report.getId());
-//                    templateReportsDl.load();
-//                }
-//            }
-//        }
+        if (report != null && !report.getIsTmp()) {
+            report = dataManager.load(Id.of(report))
+                    .fetchPlan(ReportService.MAIN_VIEW_NAME)
+                    .one();
+        }
+        if (parameters == null) {
+            parameters = Collections.emptyMap();
+        }
+        if (report != null) {
+            if (CollectionUtils.isNotEmpty(report.getInputParameters())) {
+                parametersGrid.setRows(report.getInputParameters().size() + 2);
+                int currentGridRow = 2;
+                for (ReportInputParameter parameter : report.getInputParameters()) {
+                    if (bulkPrint && Objects.equals(inputParameter, parameter)) {
+                        continue;
+                    }
+                    createComponent(parameter, currentGridRow, BooleanUtils.isNotTrue(parameter.getHidden()));
+                    currentGridRow++;
+                }
+            }
+            if (report.getTemplates() != null && report.getTemplates().size() > 1) {
+                if (!report.getIsTmp()) {
+                    templateReportsDl.setParameter("reportId", report.getId());
+                    templateReportsDl.load();
+                }
+            }
+        }
     }
 
     public Map<String, Object> collectParameters() {

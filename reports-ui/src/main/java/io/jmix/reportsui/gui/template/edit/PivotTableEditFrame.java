@@ -67,13 +67,13 @@ public class PivotTableEditFrame extends DescriptionEditFrame {
     @Autowired
     protected Table<PivotTableAggregation> aggregationsTable;
 
-    @Named("rendererGroup.defaultRenderer")
+    @Autowired
     protected ComboBox defaultRenderer;
 
     @Autowired
     protected ComboBox defaultAggregation;
 
-    @Named("pivotTableGroup.bandName")
+    @Autowired
     protected ComboBox bandName;
 
     @Autowired

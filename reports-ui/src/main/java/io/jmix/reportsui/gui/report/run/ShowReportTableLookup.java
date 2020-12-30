@@ -17,7 +17,6 @@
 package io.jmix.reportsui.gui.report.run;
 
 import com.haulmont.yarg.reporting.ReportOutputDocument;
-import io.jmix.core.MessageTools;
 import io.jmix.core.Metadata;
 import io.jmix.core.MetadataTools;
 import io.jmix.core.common.util.ParamsMap;
@@ -32,12 +31,10 @@ import io.jmix.reports.entity.ReportTemplate;
 import io.jmix.reportsui.gui.ReportGuiManager;
 import io.jmix.ui.Fragments;
 import io.jmix.ui.UiComponents;
-import io.jmix.ui.WindowParam;
 import io.jmix.ui.component.*;
 import io.jmix.ui.component.data.table.ContainerGroupTableItems;
 import io.jmix.ui.model.CollectionContainer;
 import io.jmix.ui.screen.*;
-import io.jmix.ui.theme.ThemeConstants;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,20 +44,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-@UiController("report_ShowReportTable")
+@UiController("report_ShowReportTable.lookup")
 @UiDescriptor("show-report-table.xml")
-public class ShowReportTable extends StandardLookup {
-    public static final String REPORT_PARAMETER = "report";
-    public static final String TEMPLATE_CODE_PARAMETER = "templateCode";
-    public static final String PARAMS_PARAMETER = "reportParams";
-    public static final String TABLE_DATA_PARAMETER = "tableData";
+public class ShowReportTableLookup extends StandardLookup {
 
     @Autowired
     protected GroupBoxLayout reportParamsBox;
     @Autowired
     protected ReportGuiManager reportGuiManager;
-    @Autowired
-    protected ThemeConstants themeConstants;
     @Autowired
     protected UiComponents uiComponents;
     @Autowired
@@ -68,38 +59,49 @@ public class ShowReportTable extends StandardLookup {
     @Autowired
     protected MetadataTools metadataTools;
     @Autowired
-    protected MessageTools messageTools;
-
-    @Autowired
-    protected ComboBox<Report> reportLookup;
+    protected EntityComboBox<Report> reportEntityComboBox;
     @Autowired
     protected Button printReportBtn;
     @Autowired
     protected BoxLayout parametersFrameHolder;
     @Autowired
     protected HBoxLayout reportSelectorBox;
-
     @Autowired
     protected VBoxLayout tablesVBoxLayout;
-
     @Autowired
     protected StandardSerialization serialization;
-
     @Autowired
     protected Fragments fragments;
-
     @Autowired
     protected ScreenValidation screenValidation;
 
-    @WindowParam(name = REPORT_PARAMETER)
     protected Report report;
-    @WindowParam(name = TEMPLATE_CODE_PARAMETER)
+
     protected String templateCode;
-    @WindowParam(name = PARAMS_PARAMETER)
+
     protected Map<String, Object> reportParameters;
 
-    protected InputParametersFrame inputParametersFrame;
+    protected InputParametersFragment inputParametersFrame;
+
+    protected byte[] tableData;
+
 //    protected DsContextImpl dsContext;
+
+    public void setReport(Report report) {
+        this.report = report;
+    }
+
+    public void setTemplateCode(String templateCode) {
+        this.templateCode = templateCode;
+    }
+
+    public void setReportParameters(Map<String, Object> reportParameters) {
+        this.reportParameters = reportParameters;
+    }
+
+    public void setTableData(byte[] tableData) {
+        this.tableData = tableData;
+    }
 
     @Subscribe
     protected void onInit(InitEvent event) {
@@ -113,12 +115,13 @@ public class ShowReportTable extends StandardLookup {
 
         if (report != null) {
             reportSelectorBox.setVisible(false);
-//            CubaTableData dto = (CubaTableData) serialization.deserialize((byte[]) params.get(TABLE_DATA_PARAMETER));
-//            drawTables(dto);
+            CubaTableData dto = (CubaTableData) serialization.deserialize(tableData);
+            drawTables(dto);
             openReportParameters(reportParameters);
         }
-        reportLookup.addValueChangeListener(e -> {
-            report = (Report) e.getValue();
+
+        reportEntityComboBox.addValueChangeListener(e -> {
+            report = e.getValue();
             openReportParameters(null);
         });
     }
@@ -128,12 +131,12 @@ public class ShowReportTable extends StandardLookup {
 
         if (report != null) {
             Map<String, Object> params = ParamsMap.of(
-                    InputParametersFrame.REPORT_PARAMETER, report,
-                    InputParametersFrame.PARAMETERS_PARAMETER, reportParameters
+                    InputParametersFragment.REPORT_PARAMETER, report,
+                    InputParametersFragment.PARAMETERS_PARAMETER, reportParameters
             );
 
-            inputParametersFrame = (InputParametersFrame) fragments.create(this,
-                    "report_inputParametersFrame",
+            inputParametersFrame = (InputParametersFragment) fragments.create(this,
+                    "report_InputParameters.fragment",
                     new MapScreenOptions(params))
                     .init();
 
@@ -252,12 +255,12 @@ public class ShowReportTable extends StandardLookup {
                 CubaTableData.ColumnInfo columnInfo = getColumnInfo(propertyName, headers);
 
                 Element element = DocumentHelper.createElement("column");
-                Table.Column column = columnInfo.getPosition() == null
-                        ? table.addColumn(metaPropertyPath)
-                        : table.addColumn(metaPropertyPath, columnInfo.getPosition());
+//                Table.Column column = columnInfo.getPosition() == null
+//                        ? table.addColumn(metaPropertyPath)
+//                        : table.addColumn(metaPropertyPath, columnInfo.getPosition());
 
-                column.setXmlDescriptor(element);
-                column.setCaption(columnInfo.getCaption());
+//                column.setXmlDescriptor(element);
+//                column.setCaption(columnInfo.getCaption());
             }
         }
     }

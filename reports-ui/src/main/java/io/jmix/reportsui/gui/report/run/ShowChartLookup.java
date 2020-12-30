@@ -34,15 +34,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-@UiController("chart_ShowChartController")
+@UiController("report_ShowChart.lookup")
 @UiDescriptor("show-chart.xml")
-public class ShowChartController extends StandardLookup {
+public class ShowChartLookup extends StandardLookup {
     public static final String JSON_CHART_SCREEN_ID = "chart$jsonChart";
 
     public static final String CHART_JSON_PARAMETER = "chartJson";
-    public static final String REPORT_PARAMETER = "report";
-    public static final String TEMPLATE_CODE_PARAMETER = "templateCode";
-    public static final String PARAMS_PARAMETER = "reportParams";
 
     @Autowired
     protected GroupBoxLayout reportParamsBox;
@@ -57,7 +54,7 @@ public class ShowChartController extends StandardLookup {
     protected ThemeConstants themeConstants;
 
     @Autowired
-    protected ComboBox<Report> reportLookup;
+    protected EntityComboBox<Report> reportEntityComboBox;
 
     @Autowired
     protected UiComponents uiComponents;
@@ -83,11 +80,31 @@ public class ShowChartController extends StandardLookup {
     @Autowired
     protected ScreenValidation screenValidation;
 
-    protected InputParametersFrame inputParametersFrame;
+    protected InputParametersFragment inputParametersFrame;
 
     protected Report report;
 
     protected String templateCode;
+
+    protected String chartJson;
+
+    protected Map<String, Object> reportParameters;
+
+    public void setChartJson(String chartJson) {
+        this.chartJson = chartJson;
+    }
+
+    public void setReport(Report report) {
+        this.report = report;
+    }
+
+    public void setTemplateCode(String templateCode) {
+        this.templateCode = templateCode;
+    }
+
+    public void setReportParameters(Map<String, Object> reportParameters) {
+        this.reportParameters = reportParameters;
+    }
 
     @Subscribe
     protected void onInit(InitEvent event) {
@@ -96,30 +113,23 @@ public class ShowChartController extends StandardLookup {
 //                .setWidth(themeConstants.get("cuba.gui.report.ShowChartController.width"))
 //                .setHeight(themeConstants.get("cuba.gui.report.ShowChartController.height"))
 //                .setResizable(true);
-        //todo params
-//        String chartJson = (String) params.get(CHART_JSON_PARAMETER);
-//        report = (Report) params.get(REPORT_PARAMETER);
-//        templateCode = (String) params.get(TEMPLATE_CODE_PARAMETER);
-//        @SuppressWarnings("unchecked")
-//        Map<String, Object> reportParameters = (Map<String, Object>) params.get(PARAMS_PARAMETER);
-//
-//        if (!windowConfig.hasWindow(JSON_CHART_SCREEN_ID)) {
-//            showChartsNotIncluded();
-//            return;
-//        }
-//
-//        if (report != null) {
-//            reportSelectorBox.setVisible(false);
-//
-//            initFrames(chartJson, reportParameters);
-//        } else {
-//            showDiagramStubText();
-//        }
-//
-//        reportLookup.addValueChangeListener(e -> {
-//            report = (Report) e.getValue();
-//            initFrames(null, null);
-//        });
+
+        if (!windowConfig.hasWindow(JSON_CHART_SCREEN_ID)) {
+            showChartsNotIncluded();
+            return;
+        }
+
+        if (report != null) {
+            reportSelectorBox.setVisible(false);
+            initFrames(chartJson, reportParameters);
+        } else {
+            showDiagramStubText();
+        }
+
+        reportEntityComboBox.addValueChangeListener(e -> {
+            report = e.getValue();
+            initFrames(null, null);
+        });
     }
 
     protected void initFrames(String chartJson, Map<String, Object> reportParameters) {
@@ -132,14 +142,15 @@ public class ShowChartController extends StandardLookup {
 
         if (report != null) {
             Map<String, Object> params = ParamsMap.of(
-                    InputParametersFrame.REPORT_PARAMETER, report,
-                    InputParametersFrame.PARAMETERS_PARAMETER, reportParameters
+                    InputParametersFragment.REPORT_PARAMETER, report,
+                    InputParametersFragment.PARAMETERS_PARAMETER, reportParameters
             );
 
             fragments.create(this,
-                    "report_inputParametersFrame",
+                    "report_InputParameters.fragment",
                     new MapScreenOptions(params))
                     .init();
+
             parametersFrameHolder.add(inputParametersFrame.getFragment());
             reportParamsBox.setVisible(true);
         } else {
@@ -163,22 +174,22 @@ public class ShowChartController extends StandardLookup {
 
     protected void showDiagramStubText() {
         if (chartBox.getOwnComponents().isEmpty()) {
-            Label label = uiComponents.create(Label.class);
-            label.setValue(messages.getMessage("showChart.caption"));
-            label.setAlignment(Component.Alignment.MIDDLE_CENTER);
-            label.setStyleName("h1");
-            chartBox.add(label);
+            chartBox.add(createLabel(messages.getMessage("showChart.caption")));
         }
     }
 
     protected void showChartsNotIncluded() {
-        reportLookup.setEditable(false);
+        reportEntityComboBox.setEditable(false);
         chartBox.removeAll();
-        Label label = uiComponents.create(Label.class);
-        label.setValue(messages.getMessage("showChart.noChartComponent"));
+        chartBox.add(createLabel(messages.getMessage(getClass(), "showChart.noChartComponent")));
+    }
+
+    protected Label<String> createLabel(String caption) {
+        Label<String> label = uiComponents.create(Label.NAME);
+        label.setValue(caption);
         label.setAlignment(Component.Alignment.MIDDLE_CENTER);
         label.setStyleName("h1");
-        chartBox.add(label);
+        return label;
     }
 
     @Subscribe("printReportBtn")

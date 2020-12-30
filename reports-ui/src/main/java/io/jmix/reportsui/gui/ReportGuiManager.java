@@ -28,9 +28,9 @@ import io.jmix.reports.entity.*;
 import io.jmix.reports.exception.FailedToConnectToOpenOfficeException;
 import io.jmix.reports.exception.NoOpenOfficeFreePortsException;
 import io.jmix.reports.exception.ReportingException;
-import io.jmix.reportsui.gui.report.run.ShowChartController;
-import io.jmix.reportsui.gui.report.run.ShowPivotTableController;
-import io.jmix.reportsui.gui.report.run.ShowReportTable;
+import io.jmix.reportsui.gui.report.run.ShowChartLookup;
+import io.jmix.reportsui.gui.report.run.ShowPivotTableLookup;
+import io.jmix.reportsui.gui.report.run.ShowReportTableLookup;
 import io.jmix.ui.*;
 import io.jmix.ui.component.ComponentsHelper;
 import io.jmix.ui.component.Window;
@@ -52,12 +52,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-import static io.jmix.reportsui.gui.report.run.InputParametersFrame.PARAMETERS_PARAMETER;
-import static io.jmix.reportsui.gui.report.run.InputParametersWindow.*;
+import static io.jmix.reportsui.gui.report.run.InputParametersFragment.PARAMETERS_PARAMETER;
+import static io.jmix.reportsui.gui.report.run.InputParametersLookup.*;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @UIScope
-@Component("cuba_ReportGuiManager")
+@Component("report_ReportGuiManager")
 public class ReportGuiManager {
 
     @Autowired
@@ -311,31 +311,25 @@ public class ReportGuiManager {
                                     @Nullable ReportOutputType outputType, @Nullable FrameOwner screen) {
 
         if (document.getReportOutputType().getId().equals(CubaReportOutputType.chart.getId())) {
-            Map<String, Object> screenParams = new HashMap<>();
-            screenParams.put(ShowChartController.CHART_JSON_PARAMETER, new String(document.getContent(), StandardCharsets.UTF_8));
-            screenParams.put(ShowChartController.REPORT_PARAMETER, document.getReport());
-            screenParams.put(ShowChartController.TEMPLATE_CODE_PARAMETER, templateCode);
-            screenParams.put(ShowChartController.PARAMS_PARAMETER, params);
-
-            Screen chartScreen = screens.create("report_showChart", OpenMode.DIALOG, new MapScreenOptions(screenParams));
-            chartScreen.show();
+            ShowChartLookup showChartLookup = (ShowChartLookup) screens.create("report_ShowChart.lookup", OpenMode.DIALOG);
+            showChartLookup.setChartJson(new String(document.getContent(), StandardCharsets.UTF_8));
+            showChartLookup.setReport((Report) document.getReport());
+            showChartLookup.setTemplateCode(templateCode);
+            showChartLookup.setReportParameters(params);
+            showChartLookup.show();
         } else if (document.getReportOutputType().getId().equals(CubaReportOutputType.pivot.getId())) {
-            Map<String, Object> screenParams = ParamsMap.of(
-                    ShowPivotTableController.PIVOT_TABLE_DATA_PARAMETER, document.getContent(),
-                    ShowPivotTableController.REPORT_PARAMETER, document.getReport(),
-                    ShowPivotTableController.TEMPLATE_CODE_PARAMETER, templateCode,
-                    ShowPivotTableController.PARAMS_PARAMETER, params);
-
-            Screen pivotTableScreen = screens.create("report_showPivotTable", OpenMode.DIALOG, new MapScreenOptions(screenParams));
-            pivotTableScreen.show();
+            ShowPivotTableLookup pivotTableLookup = (ShowPivotTableLookup) screens.create("report_ShowPivotTable.lookup", OpenMode.DIALOG);
+            pivotTableLookup.setPivotTableData(document.getContent());
+            pivotTableLookup.setReport((Report) document.getReport());
+            pivotTableLookup.setTemplateCode(templateCode);
+            pivotTableLookup.setParams(params);
+            pivotTableLookup.show();
         } else if (document.getReportOutputType().getId().equals(CubaReportOutputType.table.getId())) {
-            Map<String, Object> screenParams = ParamsMap.of(
-                    ShowReportTable.TABLE_DATA_PARAMETER, document.getContent(),
-                    ShowReportTable.REPORT_PARAMETER, document.getReport(),
-                    ShowReportTable.TEMPLATE_CODE_PARAMETER, templateCode,
-                    ShowReportTable.PARAMS_PARAMETER, params);
-
-            Screen reportTable = screens.create("report_showReportTable", OpenMode.DIALOG, new MapScreenOptions(screenParams));
+            ShowReportTableLookup reportTable = (ShowReportTableLookup) screens.create("report_ShowReportTable.lookup", OpenMode.DIALOG);
+            reportTable.setTableData(document.getContent());
+            reportTable.setReport((Report) document.getReport());
+            reportTable.setTemplateCode(templateCode);
+            reportTable.setReportParameters(params);
             reportTable.show();
         } else {
             byte[] byteArr = document.getContent();

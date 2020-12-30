@@ -47,13 +47,13 @@
                     <rows>
                         <row id="row1">
                             <label id="templateCodeLabel" value="msg://template.code" align="MIDDLE_LEFT"/>
-                            <textField id="code" datasource="templateDs" property="code"
+                            <textField id="code" dataContainer="templateDc" property="code"
                                        width="${width}" required="true"
                                        requiredMessage="msg://template.codeMsg"/>
                         </row>
                         <row id="row2">
                             <label id="templateFileLabel" value="msg://template.file" align="MIDDLE_LEFT"/>
-                            <upload id="templateUploadField" dropZone="createTemplateFields" width="${width}"
+                            <fileUpload id="templateUploadField" dropZone="createTemplateFields" width="${width}"
                                     showFileName="true"/>
                         </row>
                         <row id="row3">
@@ -64,7 +64,7 @@
                         </row>
                         <row id="row4">
                             <label id="outputTypeLabel" value="msg://template.outputType" align="MIDDLE_LEFT"/>
-                            <comboBox id="outputType" datasource="templateDs"
+                            <comboBox id="outputType" dataContainer="templateDc"
                                          textInputAllowed="false"
                                          nullOptionVisible="true"
                                          property="reportOutputType"
@@ -74,7 +74,7 @@
                         </row>
                         <row id="row5">
                             <label id="outputNamePatternLabel" value="msg://template.outputNamePattern" align="MIDDLE_LEFT"/>
-                            <textField id="outputNamePattern" datasource="templateDs" property="outputNamePattern"
+                            <textField id="outputNamePattern" dataContainer="templateDc" property="outputNamePattern"
                                        width="${width}">
                                 <validator class="io.jmix.reportsui.gui.report.validators.OutputFileNameValidator"/>
                             </textField>
@@ -82,23 +82,23 @@
                         <row id="row6">
                             <label id="isGroovyLabel" value="msg://template.typeForHtml" align="MIDDLE_LEFT"/>
                             <radioButtonGroup id="isGroovyRadioButtonGroup"
-                                              datasource="templateDs"
+                                              dataContainer="templateDc"
                                               property="groovy"/>
                         </row>
                         <row id="row7">
                             <label id="isCustomLabel" value="msg://template.isCustom" align="MIDDLE_LEFT"/>
-                            <checkBox id="custom" datasource="templateDs" property="custom"
+                            <checkBox id="custom" dataContainer="templateDc" property="custom"
                                       width="${width}"/>
                         </row>
                         <row id="row8">
                             <label id="alterableLabel" value="msg://template.isAlterableOutput" align="MIDDLE_LEFT"/>
-                            <checkBox id="alterable" datasource="templateDs" property="alterable"
+                            <checkBox id="alterable" dataContainer="templateDc" property="alterable"
                                       width="${width}"/>
                         </row>
                         <row id="row9">
                             <label id="customDefinedByLabel" value="msg://template.customDefinedBy"
                                    align="MIDDLE_LEFT"/>
-                            <comboBox id="customDefinedBy" datasource="templateDs" property="customDefinedBy"
+                            <comboBox id="customDefinedBy" dataContainer="templateDc" property="customDefinedBy"
                                          width="${width}"/>
                         </row>
                         <row id="row10">
@@ -111,16 +111,16 @@
                                 <linkButton id="fullScreenLinkButton"
                                             align="MIDDLE_RIGHT"
                                             caption="msg://dataSet.fullScreen"/>
-                                <textArea id="customDefinition" datasource="templateDs" property="customDefinition"
+                                <textArea id="customDefinition" dataContainer="templateDc" property="customDefinition"
                                           width="${width}"/>
                             </vbox>
                         </row>
                     </rows>
                 </gridLayout>
                 <hbox id="descriptionEditBox">
-                    <fragment id="chartEdit" screen="report_ChartEdit.fragment" visible="false" width="100%"/>
-                    <fragment id="pivotTableEdit" screen="report_PivotTableEdit.fragment" visible="false" width="100%"/>
-                    <fragment id="tableEdit" screen="report_TableEdit.fragment" visible="false" width="100%"/>
+<!--                    <fragment id="chartEdit" screen="report_ChartEdit.fragment" visible="false" width="100%"/>-->
+<!--                    <fragment id="pivotTableEdit" screen="report_PivotTableEdit.fragment" visible="false" width="100%"/>-->
+<!--                    <fragment id="tableEdit" screen="report_TableEdit.fragment" visible="false" width="100%"/>-->
                 </hbox>
             </vbox>
             <vbox id="previewBox" visible="false"/>

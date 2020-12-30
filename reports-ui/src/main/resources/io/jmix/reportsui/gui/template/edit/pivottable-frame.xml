@@ -38,31 +38,30 @@
 
     <layout spacing="true">
         <vbox>
-            <form id="pivotTableGroup" datasource="pivotTableDs" width="${width}">
+            <form id="pivotTableGroup" dataContainer="pivotTableDc" width="${width}">
                 <column fieldCaptionWidth="${caption-width}" width="100%">
-                    <field id="bandName">
-                        <comboBox datasource="pivotTableDs"
-                                     property="bandName"
-                                     required="true"/>
-                    </field>
-                    <field property="editable"/>
+                    <comboBox id="bandName" property="bandName"/>
+<!--                        <comboBox dataContainer="pivotTableDc"-->
+<!--                                     property="bandName"-->
+<!--                                     required="true"/>-->
+                    <checkBox property="editable"/>
                 </column>
             </form>
             <tabSheet id="pivotTableTabSheet" width="${width}" stylename="framed">
                 <tab id="renderer" caption="msg://pivotTable.rendererOptions" margin="true">
-                    <form id="rendererGroup" datasource="pivotTableDs" width="100%">
+                    <form id="rendererGroup" dataContainer="pivotTableDc" width="100%">
                         <column width="100%">
                             <field id="defaultRenderer" property="defaultRenderer" required="true"/>
-                            <field id="renderers">
-                                <optionsList datasource="pivotTableDs"
-                                             property="renderers"
-                                             required="true" multiselect="true"/>
+                            <field id="renderers" property="renderers">
+<!--                                <optionsList dataContainer="pivotTableDc"-->
+<!--                                             property="renderers"-->
+<!--                                             required="true" multiselect="true"/>-->
                             </field>
                         </column>
                     </form>
                 </tab>
                 <tab id="aggregation" caption="msg://pivotTable.aggregationOptions" margin="true">
-                    <table id="aggregationsTable" width="100%" height="${height}">
+                    <table id="aggregationsTable" dataContainer="aggregationsDc" width="100%" height="${height}">
                         <actions>
                             <action id="create"/>
                             <action id="edit"/>
@@ -73,9 +72,9 @@
                             <button action="aggregationsTable.edit"/>
                             <button action="aggregationsTable.remove"/>
                             <comboBox id="defaultAggregation"
-                                         optionsDatasource="aggregationsDs"
+                                         optionsContainer="aggregationsDc"
                                          inputPrompt="msg://pivotTable.defaultAggregation"
-                                         datasource="pivotTableDs" property="defaultAggregation"
+                                         dataContainer="pivotTableDc" property="defaultAggregation"
                                          captionProperty="caption"
                                          width="220px"/>
                         </buttonsPanel>
@@ -84,11 +83,10 @@
                             <column id="mode"/>
                             <column id="function" collapsed="true"/>
                         </columns>
-                        <rows datasource="aggregationsDs"/>
                     </table>
                 </tab>
                 <tab id="properties" caption="msg://pivotTable.propertiesOptions" margin="true">
-                    <groupTable id="propertyTable" width="100%" height="${height}"
+                    <groupTable id="propertyTable" dataContainer="propertyDc" width="100%" height="${height}"
                                 reorderingAllowed="false"
                                 fixedGrouping="true">
                         <buttonsPanel>
@@ -103,46 +101,45 @@
                             <column id="name"/>
                             <column id="caption"/>
                         </columns>
-                        <rows datasource="propertyDs"/>
                     </groupTable>
                 </tab>
                 <tab id="custom" caption="msg://pivotTable.customOptions" margin="true">
                     <scrollBox height="${height}" width="100%">
                         <groupBox caption="msg://pivotTable.customFunctions" collapsable="true" collapsed="false"
                                   spacing="true">
-                            <fieldGroup id="customFunctionsGroup" datasource="pivotTableDs" width="100%">
+                            <form id="customFunctionsGroup" dataContainer="pivotTableDc" width="100%">
                                 <column fieldCaptionWidth="${tab-caption-width}" width="100%">
-                                    <field id="filterFunction">
-                                        <sourceCodeEditor mode="JavaScript" property="filterFunction"
-                                                          datasource="pivotTableDs"/>
+                                    <field id="filterFunction" property="filterFunction">
+<!--                                        <sourceCodeEditor mode="JavaScript" property="filterFunction"-->
+<!--                                                          dataContainer="pivotTableDc"/>-->
                                     </field>
-                                    <field id="sortersFunction">
-                                        <sourceCodeEditor mode="JavaScript" property="sortersFunction"
-                                                          datasource="pivotTableDs"/>
+                                    <field id="sortersFunction" property="sortersFunction">
+<!--                                        <sourceCodeEditor mode="JavaScript" property="sortersFunction"-->
+<!--                                                          dataContainer="pivotTableDc"/>-->
                                     </field>
                                 </column>
-                            </fieldGroup>
+                            </form>
                         </groupBox>
                         <groupBox id="customC3GroupBox" caption="msg://pivotTable.customC3properties" spacing="true"
                                   collapsable="true" collapsed="true" visible="false">
-                            <fieldGroup id="customC3Group" datasource="pivotTableDs" width="100%">
+                            <form id="customC3Group" dataContainer="pivotTableDc" width="100%">
                                 <column fieldCaptionWidth="${tab-caption-width}" width="100%">
                                     <field property="c3Width"/>
                                     <field property="c3Height"/>
                                 </column>
-                            </fieldGroup>
+                            </form>
                         </groupBox>
                         <groupBox id="customHeatmapGroupBox" caption="msg://pivotTable.customHeatmapProperties"
                                   spacing="true"
                                   collapsable="true" collapsed="true" visible="false">
-                            <fieldGroup id="customHeatmapGroup" datasource="pivotTableDs" width="100%">
+                            <form id="customHeatmapGroup" dataContainer="pivotTableDc" width="100%">
                                 <column fieldCaptionWidth="${tab-caption-width}" width="100%">
-                                    <field id="colorScaleGeneratorFunction">
-                                        <sourceCodeEditor mode="JavaScript" property="colorScaleGeneratorFunction"
-                                                          height="200px" datasource="pivotTableDs"/>
+                                    <field id="colorScaleGeneratorFunction" property="colorScaleGeneratorFunction">
+<!--                                        <sourceCodeEditor mode="JavaScript" property="colorScaleGeneratorFunction"-->
+<!--                                                          height="200px" dataContainer="pivotTableDc"/>-->
                                     </field>
                                 </column>
-                            </fieldGroup>
+                            </form>
                         </groupBox>
                     </scrollBox>
                 </tab>

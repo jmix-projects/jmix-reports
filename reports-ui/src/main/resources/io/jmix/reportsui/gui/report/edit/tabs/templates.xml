@@ -32,7 +32,7 @@
                 <button action="templatesTable.edit"/>
                 <button action="templatesTable.remove"/>
                 <button action="templatesTable.defaultTemplate" icon="CHECK"/>
-                <button action="templatesTable.copy" icon="font-icon:COPY"/>
+                <button action="templatesTable.copy" icon="COPY"/>
             </buttonsPanel>
             <columns>
                 <column id="name"/>

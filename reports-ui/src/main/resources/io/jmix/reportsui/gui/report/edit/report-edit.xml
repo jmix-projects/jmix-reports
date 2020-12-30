@@ -24,7 +24,7 @@
             <loader/>
             <collection id="parametersDc" property="inputParameters"/>
             <collection id="valuesFormatsDc" property="valuesFormats"/>
-            <!--            <collection id="rolesDc" property="roles"/>-->
+            <collection id="rolesDc" property="roles"/>
             <collection id="reportScreensDc" property="reportScreens"/>
             <collection id="templatesDc" property="templates"/>
             <collection id="bandsDc" property="bands">
@@ -41,10 +41,10 @@
                 </query>
             </loader>
         </collection>
-<!--        <collection id="lookupRolesDs"-->
-<!--                    class="com.haulmont.cuba.security.entity.Role"-->
-<!--                    fetchPlan="_local">-->
-<!--        </collection>-->
+        <collection id="lookupRolesDc"
+                    class="io.jmix.securitydata.entity.RoleEntity"
+                    fetchPlan="_local">
+        </collection>
     </data>
     <facets>
         <dataLoadCoordinator auto="true"/>
@@ -116,7 +116,7 @@
         <hbox spacing="true">
             <button id="windowCommitAndClose" action="windowCommitAndClose" icon="font-icon:CHECK"/>
             <button id="windowCommit" action="windowCommit"/>
-            <button id="run"/>
+            <button id="run" icon="ANGLE_DOUBLE_RIGHT"/>
             <button id="windowClose" action="windowClose" icon="font-icon:BAN"/>
         </hbox>
     </layout>

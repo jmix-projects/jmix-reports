@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Nullable;
 import java.util.List;
 
-@Component("cuba_ReportSecurityManager")
+@Component("report_ReportSecurityManager")
 public class ReportSecurityManager {
     @Autowired
     protected QueryTransformerFactory queryTransformerFactory;

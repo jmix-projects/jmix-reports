@@ -33,8 +33,6 @@ import io.jmix.ui.component.data.options.ContainerOptions;
 import io.jmix.ui.model.CollectionContainer;
 import io.jmix.ui.model.CollectionLoader;
 import io.jmix.ui.model.DataComponents;
-import io.jmix.ui.screen.Screen;
-import io.jmix.ui.screen.ScreenFragment;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,8 +74,6 @@ public class ParameterFieldCreator {
     @Autowired
     protected Actions actions;
 
-//    protected ScreenFragment frame;
-
     protected Map<ParameterType, FieldCreator> fieldCreationMapping = new ImmutableMap.Builder<ParameterType, FieldCreator>()
             .put(ParameterType.BOOLEAN, new CheckBoxCreator())
             .put(ParameterType.DATE, new DateFieldCreator())
@@ -89,10 +85,6 @@ public class ParameterFieldCreator {
             .put(ParameterType.DATETIME, new DateTimeFieldCreator())
             .put(ParameterType.TIME, new TimeFieldCreator())
             .build();
-
-//    public ParameterFieldCreator(ScreenFragment frame) {
-//        this.frame = frame;
-//    }
 
     public Label createLabel(ReportInputParameter parameter, Field field) {
         Label label = uiComponents.create(Label.class);

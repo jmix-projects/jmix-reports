@@ -22,11 +22,7 @@ import io.jmix.ui.component.BoxLayout;
 import io.jmix.ui.component.Window;
 import io.jmix.ui.screen.ScreenFragment;
 import io.jmix.ui.screen.Subscribe;
-import io.jmix.ui.screen.UiController;
-import io.jmix.ui.screen.UiDescriptor;
 
-@UiController("report_DescriptionEdit.fragment")
-@UiDescriptor("template-edit.xml")
 public abstract class DescriptionEditFrame extends ScreenFragment {
 
     protected ReportTemplate reportTemplate;

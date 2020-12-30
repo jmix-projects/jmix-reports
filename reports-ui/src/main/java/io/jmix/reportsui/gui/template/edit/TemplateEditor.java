@@ -26,8 +26,8 @@ import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportOutputType;
 import io.jmix.reports.entity.ReportTemplate;
 import io.jmix.reportsui.gui.definition.edit.scripteditordialog.ScriptEditorDialog;
-import io.jmix.reportsui.gui.report.run.ShowChartController;
-import io.jmix.reportsui.gui.report.run.ShowPivotTableController;
+import io.jmix.reportsui.gui.report.run.ShowChartLookup;
+import io.jmix.reportsui.gui.report.run.ShowPivotTableLookup;
 import io.jmix.security.constraint.PolicyStore;
 import io.jmix.security.constraint.SecureOperations;
 import io.jmix.ui.Dialogs;
@@ -36,6 +36,7 @@ import io.jmix.ui.ScreenBuilders;
 import io.jmix.ui.WindowConfig;
 import io.jmix.ui.component.*;
 import io.jmix.ui.model.CollectionContainer;
+import io.jmix.ui.model.InstanceContainer;
 import io.jmix.ui.screen.*;
 import io.jmix.ui.upload.TemporaryStorage;
 import org.apache.commons.io.FileUtils;
@@ -49,8 +50,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-@UiController("report_TemplateEditor")
+@UiController("report_ReportTemplate.edit")
 @UiDescriptor("template-edit.xml")
+@EditedEntityContainer("templateDc")
 public class TemplateEditor extends StandardEditor<ReportTemplate> {
 
     public static final String CUSTOM_DEFINE_BY = "customDefinedBy";
@@ -67,7 +69,7 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
     protected Label templateFileLabel;
 
     @Autowired
-    protected FileStorageUploadField templateUploadField;
+    private FileUploadField templateUploadField;
 
     @Autowired
     protected RadioButtonGroup<Boolean> isGroovyRadioButtonGroup;
@@ -108,17 +110,17 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
     @Autowired
     protected Label outputNamePatternLabel;
 
-    @Autowired
-    protected ChartEditFrame chartEdit;
+//    @Autowired
+//    protected ChartEditFrame chartEdit;
+
+//    @Autowired
+//    protected PivotTableEditFrame pivotTableEdit;
+//
+//    @Autowired
+//    protected TableEditFrame tableEdit;
 
     @Autowired
-    protected PivotTableEditFrame pivotTableEdit;
-
-    @Autowired
-    protected TableEditFrame tableEdit;
-
-    @Autowired
-    protected CollectionContainer<ReportTemplate> templateDc;
+    protected InstanceContainer<ReportTemplate> templateDc;
 
     @Autowired
     protected BoxLayout descriptionEditBox;
@@ -188,7 +190,7 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
 
     @Subscribe
     protected void onAfterInit(AfterInitEvent event) {
-        initUploadField();
+        //initUploadField();
         templateDc.addItemPropertyChangeListener(e -> {
             ReportTemplate reportTemplate = getEditedEntity();
             switch (e.getProperty()) {
@@ -232,7 +234,7 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
     }
 
     protected Collection<DescriptionEditFrame> getDescriptionEditFrames() {
-        return Arrays.asList(chartEdit, pivotTableEdit, tableEdit);
+        return Arrays.asList(/*chartEdit, pivotTableEdit, tableEdit*/);
     }
 
     protected boolean hasTemplateOutput(ReportOutputType reportOutputType) {
@@ -342,10 +344,10 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
     protected void initOutputTypeList() {
         ArrayList<ReportOutputType> outputTypes = new ArrayList<>(Arrays.asList(ReportOutputType.values()));
 
-        if (!windowConfig.hasWindow(ShowChartController.JSON_CHART_SCREEN_ID)) {
+        if (!windowConfig.hasWindow(ShowChartLookup.JSON_CHART_SCREEN_ID)) {
             outputTypes.remove(ReportOutputType.CHART);
         }
-        if (!windowConfig.hasWindow(ShowPivotTableController.PIVOT_TABLE_SCREEN_ID)) {
+        if (!windowConfig.hasWindow(ShowPivotTableLookup.PIVOT_TABLE_SCREEN_ID)) {
             outputTypes.remove(ReportOutputType.PIVOT_TABLE);
         }
 
@@ -362,14 +364,14 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
             ReportTemplate reportTemplate = getEditedEntity();
             reportTemplate.setName(fileName);
 
-            File file = temporaryStorage.getFile(templateUploadField.getFileId());
-            try {
-                byte[] data = FileUtils.readFileToByteArray(file);
-                reportTemplate.setContent(data);
-            } catch (IOException ex) {
-                throw new RuntimeException(
-                        String.format("An error occurred while uploading file for template [%s]", getEditedEntity().getCode()), ex);
-            }
+//            File file = temporaryStorage.getFile(templateUploadField.getFileId());
+//            try {
+//                byte[] data = FileUtils.readFileToByteArray(file);
+//                reportTemplate.setContent(data);
+//            } catch (IOException ex) {
+//                throw new RuntimeException(
+//                        String.format("An error occurred while uploading file for template [%s]", getEditedEntity().getCode()), ex);
+//            }
             initTemplateEditor(reportTemplate);
             setupTemplateTypeVisibility(hasTemplateOutput(reportTemplate.getReportOutputType()));
             updateOutputType();

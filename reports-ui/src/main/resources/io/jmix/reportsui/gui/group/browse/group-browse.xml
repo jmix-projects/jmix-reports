@@ -33,16 +33,16 @@
             <properties include=".*"/>
         </filter>
         <table id="reportGroupsTable" dataContainer="groupsDc" width="100%">
+            <actions>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+            </actions>
             <buttonsPanel>
                 <button action="reportGroupsTable.create"/>
                 <button action="reportGroupsTable.edit"/>
                 <button action="reportGroupsTable.remove"/>
             </buttonsPanel>
             <rowsCount/>
-            <actions>
-                <action id="create"/>
-                <action id="edit"/>
-            </actions>
             <columns>
                 <column id="locName"/>
                 <column id="systemFlag"/>

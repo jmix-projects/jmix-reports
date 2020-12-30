@@ -20,7 +20,7 @@
     <dialogMode width="auto"/>
 
     <layout spacing="true">
-        <fragment id="inputParametersFrame" screen="report_InputParametersFrame"/>
+        <fragment id="inputParametersFrame" screen="report_InputParameters.fragment"/>
 
         <hbox spacing="true">
             <button id="printReportBtn"

@@ -34,9 +34,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Collection;
 import java.util.Map;
 
-@UiController("report_InputParametersWindow")
+@UiController("report_InputParameters.lookup")
 @UiDescriptor("input-parameters.xml")
-public class InputParametersWindow extends StandardLookup {
+public class InputParametersLookup extends StandardLookup {
     public static final String TEMPLATE_CODE_PARAMETER = "templateCode";
     public static final String OUTPUT_FILE_NAME_PARAMETER = "outputFileName";
     public static final String INPUT_PARAMETER = "inputParameter";
@@ -62,7 +62,7 @@ public class InputParametersWindow extends StandardLookup {
     protected Button printReportBtn;
 
     @Autowired
-    protected InputParametersFrame inputParametersFrame;
+    protected InputParametersFragment inputParametersFrame;
 
     @Autowired
     protected ReportParameterValidator reportParameterValidator;

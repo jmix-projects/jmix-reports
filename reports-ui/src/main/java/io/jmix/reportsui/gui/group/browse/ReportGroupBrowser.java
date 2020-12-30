@@ -36,7 +36,7 @@ import javax.inject.Named;
 public class ReportGroupBrowser extends StandardLookup<ReportGroup> {
 
     @Autowired
-    protected Table reportGroupsTable;
+    protected Table<ReportGroup> reportGroupsTable;
 
     @Named("reportGroupsTable.create")
     protected CreateAction createAction;
@@ -64,14 +64,14 @@ public class ReportGroupBrowser extends StandardLookup<ReportGroup> {
         createAction.setOpenMode(OpenMode.DIALOG);
         editAction.setOpenMode(OpenMode.DIALOG);
 
-        reportGroupsTable.addAction(new RemoveReportGroupAction(reportGroupsTable));
+        reportGroupsTable.addAction(new RemoveReportGroupAction());
     }
 
     protected class RemoveReportGroupAction extends RemoveAction {
 
-        public RemoveReportGroupAction(ListComponent owner) {
-            super(owner.getId());
-        }
+//        public RemoveReportGroupAction(String id) {
+//            super(id);
+//        }
 
         @Override
         public void actionPerform(Component component) {

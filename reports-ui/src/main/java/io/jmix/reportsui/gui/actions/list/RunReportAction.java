@@ -24,8 +24,8 @@ import io.jmix.core.common.util.ParamsMap;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.reports.entity.Report;
 import io.jmix.reportsui.gui.ReportGuiManager;
-import io.jmix.reportsui.gui.report.run.InputParametersFrame;
-import io.jmix.reportsui.gui.report.run.InputParametersWindow;
+import io.jmix.reportsui.gui.report.run.InputParametersFragment;
+import io.jmix.reportsui.gui.report.run.InputParametersLookup;
 import io.jmix.reportsui.gui.report.run.ReportRun;
 import io.jmix.ui.ScreenBuilders;
 import io.jmix.ui.action.Action;
@@ -139,14 +139,14 @@ public class RunReportAction extends ListAction implements Action.HasBeforeActio
             hostScreen = UiControllerUtils.getHostScreen((ScreenFragment) screen);
         }
 
-        screenBuilders.lookup(Report.class, screen)
+        ReportRun reportRunScreen = (ReportRun) screenBuilders.lookup(Report.class, screen)
                 .withScreenId("report_Report.run")
                 .withOpenMode(OpenMode.DIALOG)
-                .withOptions(new MapScreenOptions(ParamsMap.of(
-                        ReportRun.SCREEN_PARAMETER, hostScreen.getId(),
-                        ReportRun.META_CLASS_PARAMETER, metaClass)))
                 .withSelectHandler(reports -> runReports(reports, screen))
-                .show();
+                .build();
+        reportRunScreen.setMetaClassParameter(metaClass);
+        reportRunScreen.setScreenParameter(hostScreen.getId());
+        reportRunScreen.show();
     }
 
     protected void runReports(Collection<Report> reports, FrameOwner screen) {
@@ -182,8 +182,8 @@ public class RunReportAction extends ListAction implements Action.HasBeforeActio
                 .withScreenId("report_inputParameters")
                 .withOpenMode(OpenMode.DIALOG)
                 .withOptions(new MapScreenOptions(ParamsMap.of(
-                        InputParametersWindow.REPORT_PARAMETER, report,
-                        InputParametersFrame.PARAMETERS_PARAMETER, selectedItems)))
+                        InputParametersLookup.REPORT_PARAMETER, report,
+                        InputParametersFragment.PARAMETERS_PARAMETER, selectedItems)))
                 .show();
     }
 }

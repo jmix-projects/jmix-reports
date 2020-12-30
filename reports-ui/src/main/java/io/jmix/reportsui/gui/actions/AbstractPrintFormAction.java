@@ -17,7 +17,6 @@
 package io.jmix.reportsui.gui.actions;
 
 import io.jmix.core.*;
-import io.jmix.core.common.util.ParamsMap;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.reports.app.ParameterPrototype;
@@ -25,12 +24,15 @@ import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportInputParameter;
 import io.jmix.reports.exception.ReportingException;
 import io.jmix.reportsui.gui.ReportGuiManager;
-import io.jmix.reportsui.gui.report.run.InputParametersFrame;
+import io.jmix.reportsui.gui.report.run.ReportRun;
 import io.jmix.ui.Notifications;
 import io.jmix.ui.ScreenBuilders;
 import io.jmix.ui.action.AbstractAction;
 import io.jmix.ui.action.Action;
-import io.jmix.ui.screen.*;
+import io.jmix.ui.screen.OpenMode;
+import io.jmix.ui.screen.Screen;
+import io.jmix.ui.screen.ScreenContext;
+import io.jmix.ui.screen.UiControllerUtils;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -79,17 +81,15 @@ public abstract class AbstractPrintFormAction extends AbstractAction implements 
                 Report reloadedReport = reloadReport(report);
                 ReportInputParameter parameter = getParameterAlias(reloadedReport, inputValueMetaClass);
 
-                Screen reportPrintScreen = screenBuilder.screen(screen).withScreenId("report_Report.run")
+                ReportRun reportRunScreen = (ReportRun) screenBuilder.screen(screen)
+                        .withScreenId("report_Report.run")
                         .withOpenMode(OpenMode.DIALOG)
-                        .withOptions(new MapScreenOptions(ParamsMap.of(
-                                InputParametersFrame.REPORT_PARAMETER, reports,
-                                InputParametersFrame.PARAMETERS_PARAMETER, parameter
-                        )))
                         .build();
-
-                reportPrintScreen.addAfterCloseListener(afterCloseEvent -> reportGuiManager.runReport(reloadedReport, screen, parameter, selectedValue, null, outputFileName));
-
-                reportPrintScreen.show();
+                reportRunScreen.setReportsParameter(reports);
+                reportRunScreen.addAfterCloseListener(afterCloseEvent ->
+                        reportGuiManager.runReport(reloadedReport, screen, parameter, selectedValue, null, outputFileName)
+                );
+                reportRunScreen.show();
             }
 
 

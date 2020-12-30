@@ -33,7 +33,7 @@ import org.springframework.stereotype.Component;
 @Component(JsonConfigValidator.NAME)
 public class JsonConfigValidator extends AbstractValidator<String> {
 
-    public static final String NAME = "cuba_JsonConfigValidator";
+    public static final String NAME = "report_JsonConfigValidator";
 
     protected static final Gson gson;
 

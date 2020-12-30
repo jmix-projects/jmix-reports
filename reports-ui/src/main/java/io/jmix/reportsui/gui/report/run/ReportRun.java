@@ -16,37 +16,35 @@
 
 package io.jmix.reportsui.gui.report.run;
 
+import io.jmix.core.DataManager;
+import io.jmix.core.Id;
 import io.jmix.core.Messages;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.core.security.CurrentAuthentication;
-import io.jmix.data.AuditInfoProvider;
-import io.jmix.ui.WindowParam;
-import io.jmix.ui.action.Action;
-import io.jmix.ui.action.BaseAction;
-import io.jmix.ui.action.ItemTrackingAction;
 import io.jmix.reports.app.service.ReportService;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportGroup;
 import io.jmix.reportsui.gui.ReportGuiManager;
+import io.jmix.ui.action.Action;
+import io.jmix.ui.action.ItemTrackingAction;
 import io.jmix.ui.component.*;
 import io.jmix.ui.model.CollectionContainer;
-import io.jmix.ui.screen.*;
 import io.jmix.ui.screen.LookupComponent;
+import io.jmix.ui.screen.*;
 import org.apache.commons.lang3.StringUtils;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import java.util.*;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
-@UiController("report_ReportRun")
+@UiController("report_Report.run")
 @UiDescriptor("report-run.xml")
 @LookupComponent("reportsTable")
 public class ReportRun extends StandardLookup<Report> {
 
     protected static final String RUN_ACTION_ID = "runReport";
-    public static final String META_CLASS_PARAMETER = "metaClass";
-    public static final String REPORTS_PARAMETER = "reports";
-    public static final String SCREEN_PARAMETER = "screen";
 
     @Autowired
     protected Table<Report> reportsTable;
@@ -55,7 +53,7 @@ public class ReportRun extends StandardLookup<Report> {
     protected ReportGuiManager reportGuiManager;
 
     @Autowired
-    protected CollectionContainer<Report> reportDc;
+    protected CollectionContainer<Report> reportsDc;
 
     @Autowired
     protected CurrentAuthentication currentAuthentication;
@@ -67,7 +65,7 @@ public class ReportRun extends StandardLookup<Report> {
     protected TextField<String> codeFilter;
 
     @Autowired
-    protected ComboBox<ReportGroup> groupFilter;
+    protected EntityComboBox<ReportGroup> groupFilter;
 
     @Autowired
     protected DateField<Date> updatedDateFilter;
@@ -78,13 +76,26 @@ public class ReportRun extends StandardLookup<Report> {
     @Autowired
     protected Messages messages;
 
-    @WindowParam(name = REPORTS_PARAMETER)
+    @Autowired
+    protected DataManager dataManager;
+
     protected List<Report> reportsParameter;
 
-    @WindowParam(name = META_CLASS_PARAMETER)
     protected MetaClass metaClassParameter;
-    @WindowParam(name = SCREEN_PARAMETER)
+
     protected String screenParameter;
+
+    public void setReportsParameter(List<Report> reportsParameter) {
+        this.reportsParameter = reportsParameter;
+    }
+
+    public void setMetaClassParameter(MetaClass metaClassParameter) {
+        this.metaClassParameter = metaClassParameter;
+    }
+
+    public void setScreenParameter(String screenParameter) {
+        this.screenParameter = screenParameter;
+    }
 
     @Subscribe
     protected void onInit(InitEvent event) {
@@ -99,15 +110,17 @@ public class ReportRun extends StandardLookup<Report> {
         }
 
         for (Report report : reports) {
-//            reportDc.includeItem(report);
+            reportsDc.getItems().add(report);
         }
 
         Action runAction = new ItemTrackingAction(RUN_ACTION_ID)
-                .withCaption(messages.getMessage("runReport"))
+                .withCaption(messages.getMessage(getClass(), "runReport"))
                 .withHandler(e -> {
                     Report report = reportsTable.getSingleSelected();
                     if (report != null) {
-//                        report = getDsContext().getDataSupplier().reload(report, ReportService.MAIN_VIEW_NAME);
+                        report = dataManager.load(Id.of(report))
+                                .fetchPlan(ReportService.MAIN_VIEW_NAME)
+                                .one();
                         reportGuiManager.runReport(report, ReportRun.this);
                     }
                 });
@@ -115,14 +128,16 @@ public class ReportRun extends StandardLookup<Report> {
         reportsTable.addAction(runAction);
         reportsTable.setItemClickAction(runAction);
 
-//        addAction(new BaseAction("applyFilter")
-                //TODO filter apply shortcut
+        //TODO shortcut
+//        Action applyAction = new BaseAction("applyFilter")
 //                .withShortcut(clientConfig.getFilterApplyShortcut())
 //                .withHandler(e -> {
 //                    filterReports();
-//                }));
+//                });
+//        reportsTable.addAction(applyAction);
     }
 
+    @Subscribe("setFilterButton")
     public void filterReports() {
         String nameFilterValue = StringUtils.lowerCase(nameFilter.getValue());
         String codeFilterValue = StringUtils.lowerCase(codeFilter.getValue());
@@ -161,10 +176,10 @@ public class ReportRun extends StandardLookup<Report> {
                         })
                         .collect(Collectors.toList());
 
-//        reportDc.clear();
-//        for (Report report : reports) {
-//            reportDc.includeItem(report);
-//        }
+        reportsDc.getItems().clear();
+        for (Report report : reports) {
+            reportsDc.getItems().add(report);
+        }
 
         Table.SortInfo sortInfo = reportsTable.getSortInfo();
         if (sortInfo != null) {
@@ -173,6 +188,7 @@ public class ReportRun extends StandardLookup<Report> {
         }
     }
 
+    @Subscribe("clearFilterButton")
     public void clearFilter() {
         nameFilter.setValue(null);
         codeFilter.setValue(null);

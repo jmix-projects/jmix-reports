@@ -21,9 +21,9 @@
         <item id="report_Report.browse" caption="msg://io.jmix.reportsui/menu.report_Report.browse"/>
         <item id="report_ReportGroup.browse" caption="msg://io.jmix.reportsui/menu.report_ReportGroup.browse"/>
         <item id="report_Report.run" caption="msg://io.jmix.reportsui/menu.report_Report.run"/>
-        <item id="report_showChart" caption="msg://io.jmix.reportsui/menu.report_showChart"/>
-        <item id="report_showReportTable" caption="msg://io.jmix.reportsui/menu.report_showReportTable"/>
-        <item id="report_showPivotTable" caption="msg://io.jmix.reportsui/menu.report_showPivotTable"/>
+        <item id="report_ShowChart.lookup" caption="msg://io.jmix.reportsui/menu.report_ShowChart.lookup"/>
+        <item id="report_ShowReportTable.lookup" caption="msg://io.jmix.reportsui/menu.report_ShowReportTable.lookup"/>
+        <item id="report_ShowPivotTable.lookup" caption="msg://io.jmix.reportsui/menu.report_ShowPivotTable.lookup"/>
     </menu>
 
 </menu-config>

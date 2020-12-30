@@ -328,15 +328,15 @@ public class ReportTemplate implements com.haulmont.yarg.structure.ReportTemplat
         this.customReport = customReport;
     }
 
-    @InstanceName
-    @DependsOnProperties({"code", "name", "customDefinition"})
-    public String getCaption(Messages messages) {
-        if (isCustom()) {
-            return messages.formatMessage(NAME_FORMAT, this.code, this.customDefinition);
-        } else {
-            return messages.formatMessage(NAME_FORMAT, this.code, this.name);
-        }
-    }
+//    @InstanceName
+//    @DependsOnProperties({"code", "name", "customDefinition"})
+//    public String getCaption(Messages messages) {
+//        if (isCustom()) {
+//            return messages.formatMessage(NAME_FORMAT, this.code, this.customDefinition);
+//        } else {
+//            return messages.formatMessage(NAME_FORMAT, this.code, this.name);
+//        }
+//    }
 
     @Nullable
     public AbstractChartDescription getChartDescription() {

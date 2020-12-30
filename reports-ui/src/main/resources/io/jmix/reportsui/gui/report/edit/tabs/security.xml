@@ -21,12 +21,13 @@
                   class="io.jmix.reports.entity.Report"
                   provided="true">
             <collection id="reportScreensDc" property="reportScreens" provided="true"/>
+            <collection id="rolesDc" property="roles" provided="true"/>
         </instance>
     </data>
 
     <layout>
         <split orientation="horizontal" width="100%" height="100%" pos="50">
-            <vbox margin="true" spacing="true" width="100%" height="100%">
+            <vbox margin="true" spacing="true" expand="rolesTable" width="100%" height="100%">
                 <label value="msg://securityFrame.roles" stylename="h2"/>
                 <groupBox id="addRoleGroupBox" width="100%" caption="msg://roles.addRole">
                     <hbox expand="rolesLookup" spacing="true" width="100%">
@@ -34,16 +35,19 @@
                         <button id="addRoleBtn"/>
                     </hbox>
                 </groupBox>
-                <!--                <table id="rolesTable" width="100%" multiselect="true" dataContainer="rolesDc"-->
-                <!--                       reorderingAllowed="false" columnControlVisible="false">-->
-                <!--                    <buttonsPanel>-->
-                <!--                        <button action="rolesTable.exclude" caption="msg://roles.removeRole"-->
-                <!--                                icon="REMOVE"/>-->
-                <!--                    </buttonsPanel>-->
-                <!--                    <columns>-->
-                <!--                        <column id="name" caption="msg://roles.roleName"/>-->
-                <!--                    </columns>-->
-                <!--                </table>-->
+                <table id="rolesTable" width="100%" multiselect="true" dataContainer="rolesDc"
+                       reorderingAllowed="false" columnControlVisible="false">
+                    <actions>
+                        <action id="exclude" type="exclude"/>
+                    </actions>
+                    <buttonsPanel>
+                        <button action="rolesTable.exclude" caption="msg://roles.removeRole"
+                                icon="font-icon:REMOVE"/>
+                    </buttonsPanel>
+                    <columns>
+                        <column id="name" caption="msg://roles.roleName"/>
+                    </columns>
+                </table>
             </vbox>
             <vbox margin="true" spacing="true" expand="screenTable" width="100%" height="100%">
                 <label value="msg://securityFrame.screens" stylename="h2"/>
@@ -57,7 +61,7 @@
                        reorderingAllowed="false" columnControlVisible="false">
                     <buttonsPanel>
                         <button action="screenTable.remove" caption="msg://screens.removeScreen"
-                                icon="REMOVE"/>
+                                icon="font-icon:REMOVE"/>
                     </buttonsPanel>
                     <columns>
                         <column id="screenId" caption="msg://screens.screenId"/>

@@ -16,13 +16,11 @@
 
 package io.jmix.reportsui.gui.group.edit;
 
-import io.jmix.ui.screen.StandardEditor;
-import io.jmix.ui.screen.Subscribe;
-import io.jmix.ui.screen.UiController;
-import io.jmix.ui.screen.UiDescriptor;
+import io.jmix.ui.screen.*;
 
 @UiController("report_ReportGroup.edit")
 @UiDescriptor("group-edit.xml")
+@EditedEntityContainer("groupDc")
 public class ReportGroupEditor extends StandardEditor {
 
     @Subscribe

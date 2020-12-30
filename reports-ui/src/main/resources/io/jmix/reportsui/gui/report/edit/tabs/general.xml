@@ -22,17 +22,21 @@
             <collection id="bandsDc" property="bands" provided="true"/>
             <collection id="parametersDc" property="inputParameters" provided="true"/>
         </instance>
+        <collection id="reportGroupsDc"
+                    class="io.jmix.reports.entity.ReportGroup"/>
     </data>
 
     <layout expand="bands" spacing="true" margin="true;true;false;true">
         <hbox id="reportFields" spacing="true">
             <form id="propertiesFieldGroup" dataContainer="reportDc">
                 <column>
-                    <textField id="name" required="true" property="name" requiredMessage="msg://report.nameMsg"/>
+                    <textField id="name" required="true" property="name"
+                               requiredMessage="msg://report.nameMsg"/>
                     <entityComboBox id="defaultTemplate" property="defaultTemplate" required="true"/>
                 </column>
                 <column>
-                    <comboBox id="group" required="true" property="group" requiredMessage="msg://report.reportTypeMsg"/>
+                    <entityComboBox id="group" required="true" property="group" optionsContainer="reportGroupsDc"
+                                    requiredMessage="msg://report.reportTypeMsg"/>
                     <textField id="code" property="code"/>
                 </column>
             </form>

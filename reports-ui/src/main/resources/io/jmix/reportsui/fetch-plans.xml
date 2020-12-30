@@ -55,6 +55,6 @@
     </fetchPlan>
 
     <fetchPlan entity="report_ReportExecution" name="reportExecution.browse" extends="_local">
-        <property name="fileUri" fetchPlan="_instance_name"/>
+<!--        <property name="fileUri" fetchPlan="_instance_name"/>-->
     </fetchPlan>
 </fetchPlans>

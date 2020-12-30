@@ -23,6 +23,7 @@ import io.jmix.core.common.util.ParamsMap;
 import io.jmix.reports.ReportPrintHelper;
 import io.jmix.reports.app.service.ReportService;
 import io.jmix.reports.entity.*;
+import io.jmix.reportsui.gui.definition.edit.BandDefinitionEditor;
 import io.jmix.security.constraint.PolicyStore;
 import io.jmix.security.constraint.SecureOperations;
 import io.jmix.ui.*;
@@ -31,6 +32,7 @@ import io.jmix.ui.action.ItemTrackingAction;
 import io.jmix.ui.action.ListAction;
 import io.jmix.ui.action.list.CreateAction;
 import io.jmix.ui.action.list.EditAction;
+import io.jmix.ui.action.list.ExcludeAction;
 import io.jmix.ui.action.list.RemoveAction;
 import io.jmix.ui.component.*;
 import io.jmix.ui.component.data.meta.ContainerDataUnit;
@@ -57,8 +59,8 @@ public class ReportEditor extends StandardEditor<Report> {
     @Named("generalFragment.propertiesFieldGroup")
     protected Form propertiesFieldGroup;
 
-//    @Named("generalFragment.bandEditor")
-//    protected BandDefinitionEditor bandEditor;
+    @Named("generalFragment.bandEditor")
+    protected BandDefinitionEditor bandEditor;
 
     @Named("securityFragment.screenIdLookup")
     protected ComboBox<String> screenIdLookup;
@@ -75,17 +77,17 @@ public class ReportEditor extends StandardEditor<Report> {
     @Named("run")
     protected Button run;
 
-//    @Named("generalFragment.createBandDefinition")
-//    protected Button createBandDefinitionButton;
-//
-//    @Named("generalFragment.removeBandDefinition")
-//    protected Button removeBandDefinitionButton;
+    @Named("generalFragment.createBandDefinition")
+    protected Button createBandDefinitionButton;
 
-//    @Named("generalFragment.up")
-//    protected Button bandUpButton;
-//
-//    @Named("generalFragment.down")
-//    protected Button bandDownButton;
+    @Named("generalFragment.removeBandDefinition")
+    protected Button removeBandDefinitionButton;
+
+    @Named("generalFragment.up")
+    protected Button bandUpButton;
+
+    @Named("generalFragment.down")
+    protected Button bandDownButton;
 
     @Named("securityFragment.addReportScreenBtn")
     protected Button addReportScreenBtn;
@@ -93,9 +95,8 @@ public class ReportEditor extends StandardEditor<Report> {
     @Named("securityFragment.addRoleBtn")
     protected Button addRoleBtn;
 
-//    @Named("securityFragment.rolesTable")
-//    //TODO roles table
-//    protected Table rolesTable;
+    @Named("securityFragment.rolesTable")
+    protected Table rolesTable;
 
     @Named("parametersFragment.inputParametersTable")
     protected Table<ReportInputParameter> parametersTable;
@@ -142,13 +143,11 @@ public class ReportEditor extends StandardEditor<Report> {
     @Autowired
     protected CollectionContainer<ReportScreen> reportScreensDc;
 
-    //TODO roles ds
-//    @Autowired
-//    protected CollectionContainer rolesDc;
+    @Autowired
+    protected CollectionContainer rolesDc;
 
-    //TODO roles ds
-//    @Autowired
-//    protected CollectionContainer lookupRolesDc;
+    @Autowired
+    protected CollectionContainer lookupRolesDc;
 
 //    @Autowired
 //    protected CollectionContainer<DataSet> dataSetsDc;
@@ -406,9 +405,9 @@ public class ReportEditor extends StandardEditor<Report> {
         CreateAction formatCreateAction = (CreateAction) actions.create(CreateAction.ID);
         formatCreateAction.setTarget(formatsTable);
         formatCreateAction.setOpenMode(OpenMode.DIALOG);
-//        formatCreateAction.setInitialValuesSupplier(() ->
-//                ParamsMap.of("report", getItem())
-//        );
+        formatCreateAction.setScreenOptionsSupplier(() ->
+                ParamsMap.of("report", getEditedEntity())
+        );
         formatsTable.addAction(formatCreateAction);
 
         RemoveAction removeAction = (RemoveAction) actions.create(RemoveAction.ID);
@@ -424,20 +423,23 @@ public class ReportEditor extends StandardEditor<Report> {
     }
 
     protected void initRoles() {
-        //todo
-//        rolesTable.addAction(new ExcludeAction(rolesTable, false, true) {
+        ExcludeAction excludeAction = (ExcludeAction) actions.create(ExcludeAction.ID);
+//        ExcludeAction excludeAction = new ExcludeAction() {
 //            @Override
 //            public boolean isEnabled() {
 //                return super.isEnabled() && isUpdatePermitted();
 //            }
-//        });
+//        };
+        excludeAction.setTarget(rolesTable);
+        excludeAction.setConfirmation(true);
+        rolesTable.addAction(excludeAction);
 
         addRoleBtn.setAction(new AbstractAction("actions.Add") {
             @Override
             public void actionPerform(Component component) {
-//                if (lookupRolesDc.getItem() != null && !rolesDc.containsItem(Id.of(lookupRolesDc.getItem()).getValue())) {
-//                    rolesDc.getItems().add(lookupRolesDc.getItem());
-//                }
+                if (lookupRolesDc.getItem() != null && !rolesDc.containsItem(Id.of(lookupRolesDc.getItem()).getValue())) {
+                    rolesDc.getItems().add(lookupRolesDc.getItem());
+                }
             }
 
             @Override
@@ -1086,13 +1088,12 @@ public class ReportEditor extends StandardEditor<Report> {
         templatesTable.addAction(templateCreateAction);
 
 
-        EditAction editAction = (EditAction) actions.create(EditAction.ID);
+        EditAction<ReportTemplate> editAction = (EditAction) actions.create(EditAction.ID);
         editAction.setOpenMode(OpenMode.DIALOG);
         editAction.setAfterCommitHandler(event -> {
-            ReportTemplate reportTemplate = (ReportTemplate) event;
             ReportTemplate defaultTemplate = getEditedEntity().getDefaultTemplate();
-            if (defaultTemplate != null && defaultTemplate.equals(reportTemplate)) {
-                getEditedEntity().setDefaultTemplate(reportTemplate);
+            if (defaultTemplate != null && defaultTemplate.equals(event)) {
+                getEditedEntity().setDefaultTemplate(event);
             }
         });
         templatesTable.addAction(editAction);
@@ -1119,7 +1120,7 @@ public class ReportEditor extends StandardEditor<Report> {
         templatesTable.addAction(new ListAction("defaultTemplate") {
             @Override
             public String getCaption() {
-                return messages.getMessage("report.defaultTemplate");
+                return messages.getMessage(getClass(), "report.defaultTemplate");
             }
 
             @Override

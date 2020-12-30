@@ -33,9 +33,7 @@ import io.jmix.ui.component.*;
 import io.jmix.ui.component.autocomplete.JpqlSuggestionFactory;
 import io.jmix.ui.component.autocomplete.Suggestion;
 import io.jmix.ui.model.InstanceContainer;
-import io.jmix.ui.screen.Screen;
-import io.jmix.ui.screen.StandardEditor;
-import io.jmix.ui.screen.Subscribe;
+import io.jmix.ui.screen.*;
 import io.jmix.ui.sys.ScreensHelper;
 import io.jmix.ui.theme.ThemeConstants;
 import org.apache.commons.lang3.BooleanUtils;
@@ -45,6 +43,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.inject.Named;
 import java.util.*;
 
+@UiController("report_ReportInputParameter.edit")
+@UiDescriptor("parameter-edit.xml")
+@EditedEntityContainer("parameterDc")
 public class ParameterEditor extends StandardEditor<ReportInputParameter> {
     protected final static String LOOKUP_SETTINGS_TAB_ID = "lookupSettingsTab";
     protected final static String WHERE = " where ";
@@ -160,7 +161,8 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
 
     protected ReportInputParameter parameter;
 
-    protected ParameterFieldCreator parameterFieldCreator /*= new ParameterFieldCreator(this)*/;
+    @Autowired
+    protected ParameterFieldCreator parameterFieldCreator;
 
     //todo
 //    @Override

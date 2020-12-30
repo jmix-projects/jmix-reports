@@ -25,7 +25,7 @@ import io.jmix.core.entity.annotation.SystemLevel;
 import io.jmix.core.metamodel.annotation.Composition;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.annotation.JmixProperty;
-import io.jmix.security.model.Role;
+import io.jmix.securitydata.entity.RoleEntity;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Predicate;
 import org.apache.commons.lang3.StringUtils;
@@ -155,9 +155,9 @@ public class Report implements com.haulmont.yarg.structure.Report, io.jmix.core.
     @JmixProperty
     protected List<ReportScreen> reportScreens = new ArrayList<>();
 
-//    @Transient
-//    @JmixProperty
-//    protected Set<Role> roles = new HashSet<>();
+    @Transient
+    @JmixProperty
+    protected Set<RoleEntity> roles = new HashSet<>();
 
     @Transient
     protected String localeName;
@@ -294,15 +294,15 @@ public class Report implements com.haulmont.yarg.structure.Report, io.jmix.core.
         this.reportType = reportType != null ? reportType.getId() : null;
     }
 
-//    @JmixProperty
-//    public Set<Role> getRoles() {
-//        return roles;
-//    }
-//
-//    public void setRoles(Set<Role> roles) {
-//        if (roles == null) roles = Collections.emptySet();
-//        this.roles = roles;
-//    }
+    @JmixProperty
+    public Set<RoleEntity> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<RoleEntity> roles) {
+        if (roles == null) roles = Collections.emptySet();
+        this.roles = roles;
+    }
 
     public List<ReportScreen> getReportScreens() {
         return reportScreens;

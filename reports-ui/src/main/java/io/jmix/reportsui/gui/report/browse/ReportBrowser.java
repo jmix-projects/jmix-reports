@@ -25,7 +25,7 @@ import io.jmix.reportsui.gui.ReportGuiManager;
 import io.jmix.reportsui.gui.report.edit.ReportEditor;
 import io.jmix.reportsui.gui.report.history.ReportExecutionBrowser;
 import io.jmix.reportsui.gui.report.importdialog.ReportImportDialog;
-import io.jmix.reportsui.gui.report.run.InputParametersWindow;
+import io.jmix.reportsui.gui.report.run.InputParametersLookup;
 import io.jmix.reportsui.gui.report.wizard.ReportWizardCreator;
 import io.jmix.ui.*;
 import io.jmix.ui.action.AbstractAction;
@@ -141,7 +141,7 @@ public class ReportBrowser extends StandardLookup<Report> {
                                 metadata.getClass(Report.class), "report.edit"));
                         if (report.getInputParameters() != null && report.getInputParameters().size() > 0 ||
                                 reportGuiManager.inputParametersRequiredByTemplates(report)) {
-                            screens.create(InputParametersWindow.class, OpenMode.DIALOG,
+                            screens.create(InputParametersLookup.class, OpenMode.DIALOG,
                                     new MapScreenOptions(ParamsMap.of("report", report)))
                                     .show()
                                     .addAfterCloseListener(e -> {

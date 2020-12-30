@@ -16,7 +16,6 @@
 
 package io.jmix.reportsui.gui.template.edit;
 
-import elemental.json.Json;
 import io.jmix.core.DataManager;
 import io.jmix.core.Messages;
 import io.jmix.core.Sort;
@@ -30,16 +29,13 @@ import io.jmix.ui.component.GroupBoxLayout;
 import io.jmix.ui.component.SourceCodeEditor;
 import io.jmix.ui.component.Table;
 import io.jmix.ui.component.*;
-import io.jmix.core.metamodel.model.MetaPropertyPath;
 import io.jmix.reports.entity.BandDefinition;
 import io.jmix.reports.entity.ReportOutputType;
 import io.jmix.reports.entity.ReportTemplate;
 import io.jmix.reports.entity.charts.*;
-import io.jmix.reportsui.gui.report.run.ShowChartController;
+import io.jmix.reportsui.gui.report.run.ShowChartLookup;
 import io.jmix.reportsui.gui.template.edit.generator.RandomChartDataGenerator;
 import io.jmix.ui.action.ItemTrackingAction;
-import io.jmix.ui.component.*;
-import io.jmix.ui.component.validation.AbstractValidator;
 import io.jmix.ui.component.validation.Validator;
 import io.jmix.ui.model.CollectionContainer;
 import io.jmix.ui.model.InstanceContainer;
@@ -51,11 +47,9 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.IterableUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @UiController("report_ChartEdit.fragment")
@@ -143,9 +137,9 @@ public class ChartEditFrame extends DescriptionEditFrame {
         serialJsonConfigEditor.addValueChangeListener(this::codeEditorChangeListener);
         pieJsonConfigEditor.addValueChangeListener(this::codeEditorChangeListener);
 
-        Validator<String> validator = beanFactory.getBean(JsonConfigValidator.class, this);
-        serialJsonConfigEditor.addValidator(validator);
-        pieJsonConfigEditor.addValidator(validator);
+//        Validator<String> validator = beanFactory.getBean(JsonConfigValidator.class, this);
+//        serialJsonConfigEditor.addValidator(validator);
+//        pieJsonConfigEditor.addValidator(validator);
 
         serialJsonConfigEditor.setContextHelpIconClickHandler(this::jsonEditorContextHelpIconClickHandler);
         pieJsonConfigEditor.setContextHelpIconClickHandler(this::jsonEditorContextHelpIconClickHandler);
@@ -243,9 +237,9 @@ public class ChartEditFrame extends DescriptionEditFrame {
         }
         chartJson = chartJson == null ? "{}" : chartJson;
 
-        Map<String, Object> parmas = ParamsMap.of(ShowChartController.CHART_JSON_PARAMETER, chartJson);
+        Map<String, Object> parmas = ParamsMap.of(ShowChartLookup.CHART_JSON_PARAMETER, chartJson);
 
-        Fragment fragment = fragments.create(this, ShowChartController.JSON_CHART_SCREEN_ID, new MapScreenOptions(parmas))
+        Fragment fragment = fragments.create(this, ShowChartLookup.JSON_CHART_SCREEN_ID, new MapScreenOptions(parmas))
                 .init()
                 .getFragment();
 

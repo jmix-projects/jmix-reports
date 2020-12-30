@@ -26,9 +26,9 @@
                dataContainer="valuesFormatsDc"
                reorderingAllowed="false" columnControlVisible="false">
             <actions>
-                <action id="create"/>
-                <action id="edit"/>
-                <action id="remove"/>
+                <action id="create" type="create"/>
+                <action id="edit" type="edit"/>
+                <action id="remove" type="remove"/>
             </actions>
             <buttonsPanel>
                 <button action="valuesFormatsTable.create"/>

@@ -328,7 +328,7 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
                     if (selectedBand != null) {
                         DataSet dataset = dataSetFactory.createEmptyDataSet(selectedBand);
                         selectedBand.getDataSets().add(dataset);
-                        dataSetDc.getItems().add(dataset);
+                        dataSetDc.getMutableItems().add(dataset);
                         dataSetDc.setItem(dataset);
                         dataSets.setSelected(dataset);
                     }

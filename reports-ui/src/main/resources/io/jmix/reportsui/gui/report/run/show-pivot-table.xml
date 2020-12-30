@@ -31,10 +31,10 @@
                 width="AUTO"
                 resizable="true"/>
 
-    <layout expand="reportBox">
+    <layout expand="reportBox" spacing="true">
         <hbox id="reportSelectorBox" spacing="true">
             <label id="reportLookupLabel" align="MIDDLE_CENTER" value="msg://caption.reportForPivotTable"/>
-            <comboBox id="reportLookup" dataContainer="reportsDc" property="name" width="400px"/>
+            <entityComboBox id="reportEntityComboBox" optionsContainer="reportsDc" width="400px"/>
         </hbox>
         <groupBox id="reportParamsBox" collapsable="true" collapsed="false" visible="false"
                   caption="msg://caption.reportParameters" spacing="true">

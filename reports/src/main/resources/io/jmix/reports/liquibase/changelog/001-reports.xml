@@ -35,7 +35,7 @@
             <column name="UPDATED_BY" type="varchar(50)"/>
             <column name="DELETE_TS" type="datetime"/>
             <column name="DELETED_BY" type="varchar(50)"/>
-            <!--            <column name="SYS_TENANT_ID" type="varchar(255)"/>-->
+            <column name="SYS_TENANT_ID" type="varchar(255)"/>
             <column name="TITLE" type="varchar(255)">
                 <constraints nullable="false"/>
             </column>
@@ -44,15 +44,10 @@
         </createTable>
 
         <addUniqueConstraint
-                columnNames="TITLE, DELETE_TS"
+                columnNames="TITLE, SYS_TENANT_ID, DELETE_TS"
                 constraintName="REPORT_GROUP_UNIQ_TITLE"
                 tableName="REPORT_GROUP"
         />
-        <!--        <addUniqueConstraint-->
-        <!--                columnNames="TITLE, SYS_TENANT_ID, DELETE_TS"-->
-        <!--                constraintName="REPORT_GROUP_UNIQ_TITLE"-->
-        <!--                tableName="REPORT_GROUP"-->
-        <!--        />-->
 
         <createTable tableName="REPORT_REPORT">
             <column name="ID" type="uuid">
@@ -87,20 +82,14 @@
             <column name="INPUT_ENTITY_TYPES_IDX" type="varchar(1000)"/>
             <column name="REST_ACCESS" type="boolean" defaultValue="false"/>
             <column name="IS_SYSTEM" type="boolean" defaultValue="false"/>
-            <!--            <column name="SYS_TENANT_ID" type="varchar(255)"/>-->
+            <column name="SYS_TENANT_ID" type="varchar(255)"/>
         </createTable>
 
         <addUniqueConstraint
-                columnNames="NAME, DELETE_TS"
+                columnNames="NAME, SYS_TENANT_ID, DELETE_TS"
                 constraintName="IDX_REPORT_REPORT_UNIQ_NAME_SYS_TENANT_ID_NN"
                 tableName="REPORT_REPORT"
         />
-
-        <!--        <addUniqueConstraint-->
-        <!--                columnNames="NAME, SYS_TENANT_ID, DELETE_TS"-->
-        <!--                constraintName="IDX_REPORT_REPORT_UNIQ_NAME_SYS_TENANT_ID_NN"-->
-        <!--                tableName="REPORT_REPORT"-->
-        <!--        />-->
 
         <createTable tableName="REPORT_TEMPLATE">
             <column name="ID" type="uuid">

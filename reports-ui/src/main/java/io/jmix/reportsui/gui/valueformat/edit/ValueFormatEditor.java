@@ -32,13 +32,15 @@ import io.jmix.ui.model.InstanceContainer;
 import io.jmix.ui.screen.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static io.jmix.ui.component.Window.COMMIT_ACTION_ID;
 
-@UiController("format-edit")
+@UiController("report_ReportValueFormat.edit")
 @UiDescriptor("format-edit.xml")
+@EditedEntityContainer("valuesFormatsDc")
 public class ValueFormatEditor extends StandardEditor<ReportValueFormat> {
 
     public static final String RETURN_VALUE = "return value";
@@ -56,7 +58,8 @@ public class ValueFormatEditor extends StandardEditor<ReportValueFormat> {
             "class:"
     };
 
-    protected ComboBox<String> formatField = null;
+    @Autowired
+    protected ComboBox<String> formatComboBox;
 
     @Autowired
     protected Form formatFields;
@@ -77,7 +80,7 @@ public class ValueFormatEditor extends StandardEditor<ReportValueFormat> {
     protected UiComponents componentsFactory;
 
     @Autowired
-    protected InstanceContainer valuesFormatsDs;
+    protected InstanceContainer valuesFormatsDc;
 
     @Autowired
     protected Metadata metadata;
@@ -103,6 +106,9 @@ public class ValueFormatEditor extends StandardEditor<ReportValueFormat> {
     @Autowired
     protected ScreenBuilders screenBuilders;
 
+    @Autowired
+    protected UiComponents uiComponents;
+
     protected SourceCodeEditor.Mode groovyScriptFieldMode = SourceCodeEditor.Mode.Groovy;
 
     @Subscribe
@@ -111,27 +117,7 @@ public class ValueFormatEditor extends StandardEditor<ReportValueFormat> {
 //        getDialogOptions().setWidthAuto();
 
         // Add default format strings to combobox
-        //todo
-//        formatFields.addCustomField("formatString", new FieldGroup.CustomFieldGenerator() {
-//            @Override
-//            public Component generateField(Datasource datasource, String propertyId) {
-//                formatField = componentsFactory.create(ComboBox.class);
-//                Map<String, String> options = new HashMap<>();
-//                for (String format : defaultFormats) {
-//                    options.put(format, format);
-//                }
-//
-//                formatField.setDatasource(datasource, propertyId);
-//                formatField.setOptionsMap(options);
-//                formatField.setNewOptionAllowed(true);
-//                formatField.setNewOptionHandler(caption -> {
-//                    addFormatItem(caption);
-//                    formatField.setValue(caption);
-//                });
-//                formatField.setEditable(security.isEntityOpPermitted(ReportValueFormat.class, EntityOp.UPDATE));
-//                return formatField;
-//            }
-//        });
+        initFormatComboBox();
 
         groovyCheckBox.setContextHelpIconClickHandler(e -> dialogs.createMessageDialog()
                 .withCaption(messages.getMessage("valuesFormats.groovyScript"))
@@ -151,16 +137,27 @@ public class ValueFormatEditor extends StandardEditor<ReportValueFormat> {
                 groovyCodeEditor.setValue(RETURN_VALUE);
             }
             if (Boolean.FALSE.equals(visible)) {
-                formatField.clear();
+                formatComboBox.clear();
             }
 
             groovyVBox.setVisible(Boolean.TRUE.equals(visible));
-            formatField.setVisible(Boolean.FALSE.equals(visible));
+            formatComboBox.setVisible(Boolean.FALSE.equals(visible));
         });
 
         //noinspection unchecked
 //        valuesFormatsDs.addItemPropertyChangeListener(e ->
 //                ((DatasourceImplementation) valuesFormatsDs).modified(e.getItem()));
+    }
+
+    protected void initFormatComboBox() {
+        formatComboBox.setOptionsList(Arrays.asList(defaultFormats));
+
+        formatComboBox.setNewOptionHandler(caption -> {
+            addFormatItem(caption);
+            formatComboBox.setValue(caption);
+        });
+
+        formatComboBox.setEditable(secureOperations.isEntityUpdatePermitted(metadata.getClass(ReportValueFormat.class), policyStore));
     }
 
     protected boolean isClickTrueGroovyScript(Boolean visible, Boolean prevVisible, Boolean userOriginated) {
@@ -169,21 +166,24 @@ public class ValueFormatEditor extends StandardEditor<ReportValueFormat> {
 
     protected void addFormatItem(String caption) {
         //noinspection unchecked
-//        Map<String, String> optionsMap =
-//                new HashMap<>((Map<? extends String, ? extends String>) formatField.getOptionsMap());
-//        optionsMap.put(caption, caption);
-//
-//        formatField.setOptionsMap(optionsMap);
+        List<String> optionsList = formatComboBox.getOptions().getOptions()
+                .collect(Collectors.toList());
+        optionsList.add(caption);
+
+        formatComboBox.setOptionsList(optionsList);
     }
 
     @Subscribe
     protected void onAfterInit(AfterInitEvent event) {
-        String value = formatField.getValue();
+        String value = formatComboBox.getValue();
         if (value != null) {
-//            if (!formatField.getOptions().containsValue(value) && Boolean.FALSE.equals(groovyCheckBox.isChecked())) {
-//                addFormatItem(value);
-//            }
-            formatField.setValue(value);
+            List<String> optionsList = formatComboBox.getOptions().getOptions()
+                    .collect(Collectors.toList());
+
+            if (!optionsList.contains(value) && Boolean.FALSE.equals(groovyCheckBox.isChecked())) {
+                addFormatItem(value);
+            }
+            formatComboBox.setValue(value);
         }
     }
 
@@ -196,6 +196,7 @@ public class ValueFormatEditor extends StandardEditor<ReportValueFormat> {
 //        super.setItem(newItem);
 //    }
 
+    @Subscribe("groovyFullScreenLinkButton")
     public void showGroovyEditorDialog() {
         ScriptEditorDialog editorDialog = (ScriptEditorDialog) screenBuilders.screen(this)
                 .withScreenId("scriptEditorDialog")

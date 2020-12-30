@@ -45,7 +45,7 @@
     </fetchPlan>
 
     <fetchPlan entity="report_ReportExecution" name="reportExecution.browse" extends="_local">
-        <property name="user" fetchPlan="_minimal"/>
-        <property name="fileUri" fetchPlan="_minimal"/>
+<!--        <property name="user" fetchPlan="_minimal"/>-->
+<!--        <property name="fileUri" fetchPlan="_minimal"/>-->
     </fetchPlan>
 </fetchPlans>

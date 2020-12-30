@@ -42,7 +42,7 @@
                 </columns>
                 <rows>
                     <row>
-                        <table id="bandsTable" width="220px" height="300px" multiselect="false"
+                        <table id="bandsTable" dataContainer="tableBandsDc" width="220px" height="300px" multiselect="false"
                                columnControlVisible="false" sortable="false" editable="true">
                             <buttonsPanel>
                                 <button action="bandsTable.create" icon="PLUS"/>
@@ -53,9 +53,8 @@
                             <columns>
                                 <column id="bandName" caption="msg://template.band" editable="true" required="true"/>
                             </columns>
-                            <rows datasource="tableBandsDs"/>
                         </table>
-                        <table width="100%" id="columnsTable" height="300px" multiselect="false"
+                        <table id="columnsTable" dataContainer="tableColumnsDc" width="100%" height="300px" multiselect="false"
                                columnControlVisible="false" sortable="false" editable="true">
                             <buttonsPanel>
                                 <button action="columnsTable.create" icon="PLUS"/>
@@ -67,7 +66,6 @@
                                 <column id="key" caption="msg://template.column" editable="true" required="true"/>
                                 <column id="caption" caption="msg://template.columnName" editable="true" required="true"/>
                             </columns>
-                            <rows datasource="tableColumnsDs"/>
                         </table>
                     </row>
                 </rows>

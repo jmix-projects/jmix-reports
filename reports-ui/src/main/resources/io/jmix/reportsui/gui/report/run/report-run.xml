@@ -32,7 +32,7 @@
 <!--    </dsContext>-->
 
     <data>
-        <collection id="reportDc"
+        <collection id="reportsDc"
                     class="io.jmix.reports.entity.Report"/>
         <collection id="reportGroupsDc"
                     class="io.jmix.reports.entity.ReportGroup"
@@ -57,12 +57,11 @@
                     <button id="setFilterButton"
                             caption="msg://report.reportFilterButton"
                             align="BOTTOM_LEFT"
-                            invoke="filterReports"
                             width="100px"/>
                 </row>
                 <row>
                     <label value="msg://report.reportRunFilterGroup" align="MIDDLE_RIGHT"/>
-                    <comboBox id="groupFilter" optionsDatasource="reportGroupsDc" width="250px"/>
+                    <entityComboBox id="groupFilter" optionsContainer="reportGroupsDc" width="250px"/>
 
                     <label value="msg://report.reportRunFilterUpdatedDate" align="MIDDLE_RIGHT"/>
                     <dateField id="updatedDateFilter" resolution="DAY" width="150px"/>
@@ -70,7 +69,6 @@
                     <button id="clearFilterButton"
                             caption="msg://report.reportClearButton"
                             align="BOTTOM_LEFT"
-                            invoke="clearFilter"
                             width="100px"/>
                 </row>
             </rows>
@@ -79,9 +77,9 @@
         <groupTable id="reportsTable"
                     editable="false"
                     width="100%"
-                    dataContainer="reportDc">
+                    dataContainer="reportsDc">
             <buttonsPanel>
-                <button id="runReport" action="reportsTable.runReport" icon="icons/run.png"/>
+                <button id="runReport" action="reportsTable.runReport" icon="ANGLE_DOUBLE_RIGHT"/>
             </buttonsPanel>
             <columns>
                 <column id="group"/>

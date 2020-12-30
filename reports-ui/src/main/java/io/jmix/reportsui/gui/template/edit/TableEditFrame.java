@@ -20,10 +20,7 @@ import io.jmix.core.Messages;
 import io.jmix.core.Metadata;
 import io.jmix.core.Sort;
 import io.jmix.ui.Notifications;
-import io.jmix.ui.action.list.RemoveAction;
 import io.jmix.ui.component.Table;
-import io.jmix.core.metamodel.model.MetaClass;
-import io.jmix.core.metamodel.model.MetaPropertyPath;
 import io.jmix.reports.entity.ReportOutputType;
 import io.jmix.reports.entity.ReportTemplate;
 import io.jmix.reports.entity.table.TemplateTableBand;
@@ -39,10 +36,6 @@ import io.jmix.ui.screen.Subscribe;
 import io.jmix.ui.screen.UiController;
 import io.jmix.ui.screen.UiDescriptor;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
 
 @UiController("report_TableEdit.fragment")
 @UiDescriptor("table-edit-frame.xml")
