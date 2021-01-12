@@ -29,6 +29,9 @@
         <table id="inputParametersTable" sortable="false" width="100%"
                reorderingAllowed="false" columnControlVisible="false"
                dataContainer="parametersDc">
+            <actions>
+                <action id="create" type="create"/>
+            </actions>
             <buttonsPanel>
                 <button action="inputParametersTable.create"/>
                 <button action="inputParametersTable.edit"/>
@@ -44,8 +47,10 @@
                 <column id="validationOn"/>
             </columns>
         </table>
-        <label value="msg://report.crossParametersValidation" stylename="h2"/>
-        <groupBox id="validationScriptGroupBox" collapsable="true" collapsed="true">
+        <groupBox id="validationScriptGroupBox"
+                  caption="msg://report.crossParametersValidation"
+                  collapsable="true"
+                  width="100%">
             <vbox id="validationScriptVBox">
                 <hbox margin="true;true;true;false" spacing="true">
                     <label value="msg://parameters.crossFieldValidate"/>

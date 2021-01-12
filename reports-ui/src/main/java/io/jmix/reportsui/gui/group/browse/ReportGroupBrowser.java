@@ -26,6 +26,7 @@ import io.jmix.ui.action.list.RemoveAction;
 import io.jmix.ui.component.Component;
 import io.jmix.ui.component.ListComponent;
 import io.jmix.ui.component.Table;
+import io.jmix.ui.navigation.Route;
 import io.jmix.ui.screen.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -33,6 +34,8 @@ import javax.inject.Named;
 
 @UiController("report_ReportGroup.browse")
 @UiDescriptor("group-browse.xml")
+@LookupComponent("reportGroupsTable")
+@Route("reportGroups")
 public class ReportGroupBrowser extends StandardLookup<ReportGroup> {
 
     @Autowired
@@ -64,7 +67,7 @@ public class ReportGroupBrowser extends StandardLookup<ReportGroup> {
         createAction.setOpenMode(OpenMode.DIALOG);
         editAction.setOpenMode(OpenMode.DIALOG);
 
-        reportGroupsTable.addAction(new RemoveReportGroupAction());
+        //reportGroupsTable.addAction(new RemoveReportGroupAction());
     }
 
     protected class RemoveReportGroupAction extends RemoveAction {

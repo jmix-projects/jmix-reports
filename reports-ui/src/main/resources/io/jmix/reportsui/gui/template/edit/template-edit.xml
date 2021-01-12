@@ -118,9 +118,9 @@
                     </rows>
                 </gridLayout>
                 <hbox id="descriptionEditBox">
-<!--                    <fragment id="chartEdit" screen="report_ChartEdit.fragment" visible="false" width="100%"/>-->
-<!--                    <fragment id="pivotTableEdit" screen="report_PivotTableEdit.fragment" visible="false" width="100%"/>-->
-<!--                    <fragment id="tableEdit" screen="report_TableEdit.fragment" visible="false" width="100%"/>-->
+                    <fragment id="chartEdit" screen="report_ChartEdit.fragment" visible="false" width="100%"/>
+                    <fragment id="pivotTableEdit" screen="report_PivotTableEdit.fragment" visible="false" width="100%"/>
+                    <fragment id="tableEdit" screen="report_TableEdit.fragment" visible="false" width="100%"/>
                 </hbox>
             </vbox>
             <vbox id="previewBox" visible="false"/>

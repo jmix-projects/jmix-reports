@@ -26,6 +26,7 @@ import io.jmix.reports.entity.*;
 import io.jmix.reportsui.gui.definition.edit.BandDefinitionEditor;
 import io.jmix.security.constraint.PolicyStore;
 import io.jmix.security.constraint.SecureOperations;
+import io.jmix.securitydata.entity.RoleEntity;
 import io.jmix.ui.*;
 import io.jmix.ui.action.AbstractAction;
 import io.jmix.ui.action.ItemTrackingAction;
@@ -72,7 +73,7 @@ public class ReportEditor extends StandardEditor<Report> {
     protected Table<ReportTemplate> templatesTable;
 
     @Named("localesFragment.localeTextField")
-    protected TextArea localesTextField;
+    protected TextArea<String> localesTextField;
 
     @Named("run")
     protected Button run;
@@ -96,7 +97,7 @@ public class ReportEditor extends StandardEditor<Report> {
     protected Button addRoleBtn;
 
     @Named("securityFragment.rolesTable")
-    protected Table rolesTable;
+    protected Table<RoleEntity> rolesTable;
 
     @Named("parametersFragment.inputParametersTable")
     protected Table<ReportInputParameter> parametersTable;
@@ -110,8 +111,8 @@ public class ReportEditor extends StandardEditor<Report> {
     @Named("parametersFragment.down")
     protected Button paramDownButton;
 
-//    @Named("generalFragment.serviceTree")
-//    protected Tree<BandDefinition> bandTree;
+    @Named("generalFragment.serviceTree")
+    protected Tree<BandDefinition> bandTree;
 
     @Named("generalFragment.invisibleFileUpload")
     protected FileUploadField invisibleFileUpload;
@@ -144,10 +145,10 @@ public class ReportEditor extends StandardEditor<Report> {
     protected CollectionContainer<ReportScreen> reportScreensDc;
 
     @Autowired
-    protected CollectionContainer rolesDc;
+    protected CollectionContainer<RoleEntity> rolesDc;
 
     @Autowired
-    protected CollectionContainer lookupRolesDc;
+    protected CollectionContainer<RoleEntity> lookupRolesDc;
 
 //    @Autowired
 //    protected CollectionContainer<DataSet> dataSetsDc;
@@ -278,25 +279,14 @@ public class ReportEditor extends StandardEditor<Report> {
     protected void initParameters() {
         CreateAction createAction = (CreateAction) actions.create(CreateAction.ID);
         createAction.setOpenMode(OpenMode.DIALOG);
+        createAction.setScreenOptionsSupplier(() ->
+                new MapScreenOptions(ParamsMap.of(
+                        "position", parametersDc.getItems().size(),
+                        "report", getEditedEntity()
+                ))
+        );
+        createAction.setAfterCommitHandler(handler -> orderParameters());
         parametersTable.addAction(createAction);
-
-//        parametersTable.addAction(
-//                new CreateAction(parametersTable, OpenType.DIALOG) {
-//                    @Override
-//                    public Map<String, Object> getInitialValues() {
-//                        Map<String, Object> params = new HashMap<>();
-//                        params.put("position", parametersDs.getItemIds().size());
-//                        params.put("report", getEditedEntity());
-//                        return params;
-//                    }
-//
-//                    @Override
-//                    public void actionPerform(Component component) {
-//                        orderParameters();
-//                        super.actionPerform(component);
-//                    }
-//                }
-//        );
 
         RemoveAction removeAction = (RemoveAction) actions.create(RemoveAction.ID);
         removeAction.setAfterActionPerformedHandler(event -> orderParameters());
@@ -406,7 +396,7 @@ public class ReportEditor extends StandardEditor<Report> {
         formatCreateAction.setTarget(formatsTable);
         formatCreateAction.setOpenMode(OpenMode.DIALOG);
         formatCreateAction.setScreenOptionsSupplier(() ->
-                ParamsMap.of("report", getEditedEntity())
+                new MapScreenOptions(ParamsMap.of("report", getEditedEntity()))
         );
         formatsTable.addAction(formatCreateAction);
 
@@ -437,7 +427,7 @@ public class ReportEditor extends StandardEditor<Report> {
         addRoleBtn.setAction(new AbstractAction("actions.Add") {
             @Override
             public void actionPerform(Component component) {
-                if (lookupRolesDc.getItem() != null && !rolesDc.containsItem(Id.of(lookupRolesDc.getItem()).getValue())) {
+                if (!rolesDc.containsItem(lookupRolesDc.getItem())) {
                     rolesDc.getItems().add(lookupRolesDc.getItem());
                 }
             }
@@ -452,15 +442,17 @@ public class ReportEditor extends StandardEditor<Report> {
     protected void initHelpButtons() {
         localesTextField.setContextHelpIconClickHandler(e ->
                 dialogs.createMessageDialog()
-                        .withCaption(messages.getMessage("localeText"))
-                        .withMessage(messages.getMessage("report.localeTextHelp"))
+                        .withCaption(messages.getMessage(getClass(), "localeText"))
+                        .withMessage(messages.getMessage(getClass(), "report.localeTextHelp"))
+                        .withContentMode(ContentMode.HTML)
                         .withModal(false)
                         .withWidth("600px")
                         .show());
         validationScriptCodeEditor.setContextHelpIconClickHandler(e ->
                 dialogs.createMessageDialog()
-                        .withCaption(messages.getMessage("validationScript"))
-                        .withMessage(messages.getMessage("crossFieldValidationScriptHelp"))
+                        .withCaption(messages.getMessage(getClass(), "validationScript"))
+                        .withMessage(messages.getMessage(getClass(), "crossFieldValidationScriptHelp"))
+                        .withContentMode(ContentMode.HTML)
                         .withModal(false)
                         .withWidth("600px")
                         .show());
@@ -504,7 +496,7 @@ public class ReportEditor extends StandardEditor<Report> {
                         ReportScreen reportScreen = metadata.create(ReportScreen.class);
                         reportScreen.setReport(getEditedEntity());
                         reportScreen.setScreenId(screenId);
-                        reportScreensDc.getItems().add(reportScreen);
+                        reportScreensDc.getMutableItems().add(reportScreen);
                     }
                 }
             }
@@ -545,12 +537,12 @@ public class ReportEditor extends StandardEditor<Report> {
 //                    }
                 } else {
                     notifications.create(Notifications.NotificationType.HUMANIZED)
-                            .withCaption(messages.getMessage("notification.fileIsNotAllowedForSpecificTypes"))
+                            .withCaption(messages.getMessage(getClass(), "notification.fileIsNotAllowedForSpecificTypes"))
                             .show();
                 }
             } else {
                 notifications.create(Notifications.NotificationType.HUMANIZED)
-                        .withCaption(messages.getMessage("notification.defaultTemplateIsEmpty"))
+                        .withCaption(messages.getMessage(getClass(), "notification.defaultTemplateIsEmpty"))
                         .show();
             }
         });
@@ -811,215 +803,213 @@ public class ReportEditor extends StandardEditor<Report> {
 
         bandsDc.getSorter().sort(Sort.by("position"));
 
-//        createBandDefinitionButton.setAction(new AbstractAction("create") {
-//            @Override
-//            public String getDescription() {
-//                return messages.getMessage("description.createBand");
-//            }
-//
-//            @Override
-//            public String getCaption() {
-//                return "";
-//            }
-//
-//            @Override
-//            public void actionPerform(Component component) {
-//                BandDefinition parentDefinition = bandsDc.getItem();
-//                Report report = getEditedEntity();
-//                // Use root band as parent if no items selected
-//                if (parentDefinition == null) {
-//                    parentDefinition = report.getRootBandDefinition();
-//                }
-//                if (parentDefinition.getChildrenBandDefinitions() == null) {
-//                    parentDefinition.setChildrenBandDefinitions(new ArrayList<>());
-//                }
-//
-//                //
-//                orderBandDefinitions(parentDefinition);
-//
-//                BandDefinition newBandDefinition = metadata.create(BandDefinition.class);
-//                newBandDefinition.setName("newBand" + (parentDefinition.getChildrenBandDefinitions().size() + 1));
-//                newBandDefinition.setOrientation(Orientation.HORIZONTAL);
-//                newBandDefinition.setParentBandDefinition(parentDefinition);
-//                if (parentDefinition.getChildrenBandDefinitions() != null) {
-//                    newBandDefinition.setPosition(parentDefinition.getChildrenBandDefinitions().size());
-//                } else {
-//                    newBandDefinition.setPosition(0);
-//                }
-//                newBandDefinition.setReport(report);
-//                parentDefinition.getChildrenBandDefinitions().add(newBandDefinition);
-//
-//                bandsDc.getItems().add(newBandDefinition);
-//
-//                //todo
-//                //treeDc.refresh();
-//                bandTree.expandTree();
-//                bandTree.setSelected(newBandDefinition);//let's try and see if it increases usability
-//
-//                bandTree.focus();
-//            }
-//
-//            @Override
-//            public boolean isEnabled() {
-//                return super.isEnabled() && isUpdatePermitted();
-//            }
-//        });
+        createBandDefinitionButton.setAction(new AbstractAction("create") {
+            @Override
+            public String getDescription() {
+                return messages.getMessage("description.createBand");
+            }
 
-        //removeBandDefinitionButton.setAction(new RemoveAction((ListComponent) bandTree, false, "generalFrame.removeBandDefinition") {
-//        removeBandDefinitionButton.setAction(new RemoveAction("generalFragment.removeBandDefinition") {
-//            @Override
-//            public String getDescription() {
-//                return messages.getMessage("description.removeBand");
-//            }
-//
-//            @Override
-//            public String getCaption() {
-//                return "";
-//            }
-//
-//            @Override
-//            protected boolean isApplicable() {
-//                if (target != null) {
-//                    Object selectedItem = target.getSingleSelected();
-//                    if (selectedItem != null) {
-//                        return !Objects.equals(getEditedEntity().getRootBandDefinition(), selectedItem);
-//                    }
-//                }
-//
-//                return false;
-//            }
-//
-//            protected void doRemove(Set selected, boolean autocommit) {
-//                if (selected != null) {
-//                    removeChildrenCascade(selected);
-//                    for (Object object : selected) {
-//                        BandDefinition definition = (BandDefinition) object;
-//                        if (definition.getParentBandDefinition() != null) {
-//                            orderBandDefinitions(((BandDefinition) object).getParentBandDefinition());
-//                        }
-//                    }
-//                }
-//                bandTree.focus();
-//            }
-//
-//            private void removeChildrenCascade(Collection selected) {
-//                for (Object o : selected) {
-//                    BandDefinition definition = (BandDefinition) o;
-//                    BandDefinition parentDefinition = definition.getParentBandDefinition();
-//                    if (parentDefinition != null) {
-//                        definition.getParentBandDefinition().getChildrenBandDefinitions().remove(definition);
-//                    }
-//
-//                    if (definition.getChildrenBandDefinitions() != null) {
-//                        removeChildrenCascade(new ArrayList<>(definition.getChildrenBandDefinitions()));
-//                    }
-//
-//                    if (definition.getDataSets() != null) {
-//                        bandsDc.setItem(definition);
-//                        for (DataSet dataSet : new ArrayList<>(definition.getDataSets())) {
-//                            if (entityStates.isNew(dataSet)) {
-//                                //todo
-//                                //dataSetsDc.removeItem(dataSet);
-//                            }
-//                        }
-//                    }
-//                    //todo
-//                    //treeDc.removeItem(definition);
-//                }
-//            }
-//        });
+            @Override
+            public String getCaption() {
+                return "";
+            }
 
-//        bandUpButton.setAction(new ListAction("generalFragment.up") {
-//            @Override
-//            public String getDescription() {
-//                return messages.getMessage("description.moveUp");
-//            }
-//
-//            @Override
-//            public String getCaption() {
-//                return "";
-//            }
-//
-//            @Override
-//            public void actionPerform(Component component) {
-//                BandDefinition definition = (BandDefinition) target.getSingleSelected();
-//                if (definition != null && definition.getParentBandDefinition() != null) {
-//                    BandDefinition parentDefinition = definition.getParentBandDefinition();
-//                    List<BandDefinition> definitionsList = parentDefinition.getChildrenBandDefinitions();
-//                    int index = definitionsList.indexOf(definition);
-//                    if (index > 0) {
-//                        BandDefinition previousDefinition = definitionsList.get(index - 1);
-//                        definition.setPosition(definition.getPosition() - 1);
-//                        previousDefinition.setPosition(previousDefinition.getPosition() + 1);
-//
-//                        definitionsList.set(index, previousDefinition);
-//                        definitionsList.set(index - 1, definition);
-//
-//                        //todo
-//                        //treeDc.refresh();
-//                    }
-//                }
-//            }
-//
-//            @Override
-//            protected boolean isApplicable() {
-//                if (target != null) {
-//                    BandDefinition selectedItem = (BandDefinition) target.getSingleSelected();
-//                    return selectedItem != null && selectedItem.getPosition() > 0 && isUpdatePermitted();
-//                }
-//
-//                return false;
-//            }
-//        });
-//
-//        bandDownButton.setAction(new ListAction("generalFragment.down") {
-//            @Override
-//            public String getDescription() {
-//                return messages.getMessage("description.moveDown");
-//            }
-//
-//            @Override
-//            public String getCaption() {
-//                return "";
-//            }
-//
-//            @Override
-//            public void actionPerform(Component component) {
-//                BandDefinition definition = (BandDefinition) target.getSingleSelected();
-//                if (definition != null && definition.getParentBandDefinition() != null) {
-//                    BandDefinition parentDefinition = definition.getParentBandDefinition();
-//                    List<BandDefinition> definitionsList = parentDefinition.getChildrenBandDefinitions();
-//                    int index = definitionsList.indexOf(definition);
-//                    if (index < definitionsList.size() - 1) {
-//                        BandDefinition nextDefinition = definitionsList.get(index + 1);
-//                        definition.setPosition(definition.getPosition() + 1);
-//                        nextDefinition.setPosition(nextDefinition.getPosition() - 1);
-//
-//                        definitionsList.set(index, nextDefinition);
-//                        definitionsList.set(index + 1, definition);
-//
-//                        //todo
-//                        //treeDc.refresh();
-//                    }
-//                }
-//            }
-//
-//            @Override
-//            protected boolean isApplicable() {
-//                if (target != null) {
-//                    BandDefinition bandDefinition = (BandDefinition) target.getSingleSelected();
-//                    if (bandDefinition != null) {
-//                        BandDefinition parent = bandDefinition.getParentBandDefinition();
-//                        return parent != null &&
-//                                parent.getChildrenBandDefinitions() != null &&
-//                                bandDefinition.getPosition() < parent.getChildrenBandDefinitions().size() - 1
-//                                && isUpdatePermitted();
-//                    }
-//                }
-//                return false;
-//            }
-//        });
-//
+            @Override
+            public void actionPerform(Component component) {
+                BandDefinition parentDefinition = bandsDc.getItem();
+                Report report = getEditedEntity();
+                // Use root band as parent if no items selected
+                if (parentDefinition == null) {
+                    parentDefinition = report.getRootBandDefinition();
+                }
+                if (parentDefinition.getChildrenBandDefinitions() == null) {
+                    parentDefinition.setChildrenBandDefinitions(new ArrayList<>());
+                }
+
+
+                orderBandDefinitions(parentDefinition);
+
+                BandDefinition newBandDefinition = metadata.create(BandDefinition.class);
+                newBandDefinition.setName("newBand" + (parentDefinition.getChildrenBandDefinitions().size() + 1));
+                newBandDefinition.setOrientation(Orientation.HORIZONTAL);
+                newBandDefinition.setParentBandDefinition(parentDefinition);
+                if (parentDefinition.getChildrenBandDefinitions() != null) {
+                    newBandDefinition.setPosition(parentDefinition.getChildrenBandDefinitions().size());
+                } else {
+                    newBandDefinition.setPosition(0);
+                }
+                newBandDefinition.setReport(report);
+                parentDefinition.getChildrenBandDefinitions().add(newBandDefinition);
+
+                bandsDc.getMutableItems().add(newBandDefinition);
+
+                bandTree.expandTree();
+                bandTree.setSelected(newBandDefinition);//let's try and see if it increases usability
+
+                bandTree.focus();
+            }
+
+            @Override
+            public boolean isEnabled() {
+                return super.isEnabled() && isUpdatePermitted();
+            }
+        });
+
+//        removeBandDefinitionButton.setAction(new RemoveAction((ListComponent) bandTree, false, "generalFrame.removeBandDefinition") {
+        removeBandDefinitionButton.setAction(new RemoveAction("generalFragment.removeBandDefinition") {
+            @Override
+            public String getDescription() {
+                return messages.getMessage("description.removeBand");
+            }
+
+            @Override
+            public String getCaption() {
+                return "";
+            }
+
+            @Override
+            protected boolean isApplicable() {
+                if (target != null) {
+                    Object selectedItem = target.getSingleSelected();
+                    if (selectedItem != null) {
+                        return !Objects.equals(getEditedEntity().getRootBandDefinition(), selectedItem);
+                    }
+                }
+
+                return false;
+            }
+
+            protected void doRemove(Set selected, boolean autocommit) {
+                if (selected != null) {
+                    removeChildrenCascade(selected);
+                    for (Object object : selected) {
+                        BandDefinition definition = (BandDefinition) object;
+                        if (definition.getParentBandDefinition() != null) {
+                            orderBandDefinitions(((BandDefinition) object).getParentBandDefinition());
+                        }
+                    }
+                }
+                //bandTree.focus();
+            }
+
+            private void removeChildrenCascade(Collection selected) {
+                for (Object o : selected) {
+                    BandDefinition definition = (BandDefinition) o;
+                    BandDefinition parentDefinition = definition.getParentBandDefinition();
+                    if (parentDefinition != null) {
+                        definition.getParentBandDefinition().getChildrenBandDefinitions().remove(definition);
+                    }
+
+                    if (definition.getChildrenBandDefinitions() != null) {
+                        removeChildrenCascade(new ArrayList<>(definition.getChildrenBandDefinitions()));
+                    }
+
+                    if (definition.getDataSets() != null) {
+                        bandsDc.setItem(definition);
+                        for (DataSet dataSet : new ArrayList<>(definition.getDataSets())) {
+                            if (entityStates.isNew(dataSet)) {
+                                //todo
+                                //dataSetsDc.removeItem(dataSet);
+                            }
+                        }
+                    }
+                    //todo
+                    //treeDc.removeItem(definition);
+                }
+            }
+        });
+
+        bandUpButton.setAction(new ListAction("generalFragment.up") {
+            @Override
+            public String getDescription() {
+                return messages.getMessage("description.moveUp");
+            }
+
+            @Override
+            public String getCaption() {
+                return "";
+            }
+
+            @Override
+            public void actionPerform(Component component) {
+                BandDefinition definition = (BandDefinition) target.getSingleSelected();
+                if (definition != null && definition.getParentBandDefinition() != null) {
+                    BandDefinition parentDefinition = definition.getParentBandDefinition();
+                    List<BandDefinition> definitionsList = parentDefinition.getChildrenBandDefinitions();
+                    int index = definitionsList.indexOf(definition);
+                    if (index > 0) {
+                        BandDefinition previousDefinition = definitionsList.get(index - 1);
+                        definition.setPosition(definition.getPosition() - 1);
+                        previousDefinition.setPosition(previousDefinition.getPosition() + 1);
+
+                        definitionsList.set(index, previousDefinition);
+                        definitionsList.set(index - 1, definition);
+
+                        //todo
+                        //treeDc.refresh();
+                    }
+                }
+            }
+
+            @Override
+            protected boolean isApplicable() {
+                if (target != null) {
+                    BandDefinition selectedItem = (BandDefinition) target.getSingleSelected();
+                    return selectedItem != null && selectedItem.getPosition() > 0 && isUpdatePermitted();
+                }
+
+                return false;
+            }
+        });
+
+        bandDownButton.setAction(new ListAction("generalFragment.down") {
+            @Override
+            public String getDescription() {
+                return messages.getMessage("description.moveDown");
+            }
+
+            @Override
+            public String getCaption() {
+                return "";
+            }
+
+            @Override
+            public void actionPerform(Component component) {
+                BandDefinition definition = (BandDefinition) target.getSingleSelected();
+                if (definition != null && definition.getParentBandDefinition() != null) {
+                    BandDefinition parentDefinition = definition.getParentBandDefinition();
+                    List<BandDefinition> definitionsList = parentDefinition.getChildrenBandDefinitions();
+                    int index = definitionsList.indexOf(definition);
+                    if (index < definitionsList.size() - 1) {
+                        BandDefinition nextDefinition = definitionsList.get(index + 1);
+                        definition.setPosition(definition.getPosition() + 1);
+                        nextDefinition.setPosition(nextDefinition.getPosition() - 1);
+
+                        definitionsList.set(index, nextDefinition);
+                        definitionsList.set(index + 1, definition);
+
+                        //todo
+                        //treeDc.refresh();
+                    }
+                }
+            }
+
+            @Override
+            protected boolean isApplicable() {
+                if (target != null) {
+                    BandDefinition bandDefinition = (BandDefinition) target.getSingleSelected();
+                    if (bandDefinition != null) {
+                        BandDefinition parent = bandDefinition.getParentBandDefinition();
+                        return parent != null &&
+                                parent.getChildrenBandDefinitions() != null &&
+                                bandDefinition.getPosition() < parent.getChildrenBandDefinitions().size() - 1
+                                && isUpdatePermitted();
+                    }
+                }
+                return false;
+            }
+        });
+
 //        bandTree.addAction(createBandDefinitionButton.getAction());
 ////        bandTree.addAction(removeBandDefinitionButton.getAction());
 //        bandTree.addAction(bandUpButton.getAction());
@@ -1064,7 +1054,7 @@ public class ReportEditor extends StandardEditor<Report> {
             if (!ReportPrintHelper.getInputOutputTypesMapping().containsKey(inputType) ||
                     !ReportPrintHelper.getInputOutputTypesMapping().get(inputType).contains(template.getReportOutputType())) {
                 notifications.create(Notifications.NotificationType.TRAY)
-                        .withCaption(messages.getMessage("inputOutputTypesError"))
+                        .withCaption(messages.getMessage(getClass(), "inputOutputTypesError"))
                         .show();
                 return false;
             }
@@ -1161,7 +1151,7 @@ public class ReportEditor extends StandardEditor<Report> {
                     ReportTemplate copy = metadataTools.copy(template);
                     copy.setId(UuidProvider.createUuid());
 
-                    String copyNamingPattern = messages.getMessage("template.copyNamingPattern");
+                    String copyNamingPattern = messages.getMessage(getClass(), "template.copyNamingPattern");
                     String copyCode = String.format(copyNamingPattern, StringUtils.isEmpty(copy.getCode()) ? StringUtils.EMPTY : copy.getCode());
 
                     CollectionContainer<Object> container = ((ContainerDataUnit) target.getItems()).getContainer();
@@ -1236,7 +1226,7 @@ public class ReportEditor extends StandardEditor<Report> {
     //    @Override
     protected void postValidate(ValidationErrors errors) {
         if (getEditedEntity().getRootBand() == null) {
-            errors.add(messages.getMessage("error.rootBandNull"));
+            errors.add(messages.getMessage(getClass(), "error.rootBandNull"));
         }
 
         if (CollectionUtils.isNotEmpty(getEditedEntity().getRootBandDefinition().getChildrenBandDefinitions())) {
@@ -1264,32 +1254,32 @@ public class ReportEditor extends StandardEditor<Report> {
         names.put(band.getName(), band);
 
         if (StringUtils.isBlank(band.getName())) {
-            errors.add(messages.getMessage("error.bandNameNull"));
+            errors.add(messages.getMessage(getClass(), "error.bandNameNull"));
         }
 
         if (band.getBandOrientation() == BandOrientation.UNDEFINED) {
-            errors.add(messages.formatMessage("error.bandOrientationNull", band.getName()));
+            errors.add(messages.formatMessage(getClass(), "error.bandOrientationNull", band.getName()));
         }
 
         if (CollectionUtils.isNotEmpty(band.getDataSets())) {
             for (DataSet dataSet : band.getDataSets()) {
                 if (StringUtils.isBlank(dataSet.getName())) {
-                    errors.add(messages.getMessage("error.dataSetNameNull"));
+                    errors.add(messages.getMessage(getClass(), "error.dataSetNameNull"));
                 }
 
                 if (dataSet.getType() == null) {
-                    errors.add(messages.formatMessage("error.dataSetTypeNull", dataSet.getName()));
+                    errors.add(messages.formatMessage(getClass(), "error.dataSetTypeNull", dataSet.getName()));
                 }
 
                 if (dataSet.getType() == DataSetType.GROOVY
                         || dataSet.getType() == DataSetType.SQL
                         || dataSet.getType() == DataSetType.JPQL) {
                     if (StringUtils.isBlank(dataSet.getScript())) {
-                        errors.add(messages.formatMessage("error.dataSetScriptNull", dataSet.getName()));
+                        errors.add(messages.formatMessage(getClass(), "error.dataSetScriptNull", dataSet.getName()));
                     }
                 } else if (dataSet.getType() == DataSetType.JSON) {
                     if (StringUtils.isBlank(dataSet.getJsonSourceText()) && dataSet.getJsonSourceType() != JsonSourceType.PARAMETER) {
-                        errors.add(messages.formatMessage("error.jsonDataSetScriptNull", dataSet.getName()));
+                        errors.add(messages.formatMessage(getClass(), "error.jsonDataSetScriptNull", dataSet.getName()));
                     }
                 }
             }
@@ -1316,9 +1306,9 @@ public class ReportEditor extends StandardEditor<Report> {
 
     protected void setValidationScriptGroupBoxCaption(Boolean onOffFlag) {
         if (BooleanUtils.isTrue(onOffFlag)) {
-            validationScriptGroupBox.setCaption(messages.getMessage("report.validationScriptOn"));
+            validationScriptGroupBox.setCaption(messages.getMessage(getClass(), "report.validationScriptOn"));
         } else {
-            validationScriptGroupBox.setCaption(messages.getMessage("report.validationScriptOff"));
+            validationScriptGroupBox.setCaption(messages.getMessage(getClass(), "report.validationScriptOff"));
         }
     }
 

@@ -19,7 +19,7 @@ package io.jmix.reportsui.gui.template.edit;
 import io.jmix.reports.entity.ReportOutputType;
 import io.jmix.reports.entity.ReportTemplate;
 import io.jmix.ui.component.BoxLayout;
-import io.jmix.ui.component.Window;
+import io.jmix.ui.component.Fragment;
 import io.jmix.ui.screen.ScreenFragment;
 import io.jmix.ui.screen.Subscribe;
 
@@ -31,8 +31,7 @@ public abstract class DescriptionEditFrame extends ScreenFragment {
 
     @Subscribe
     protected void onInit(InitEvent event) {
-        Window parent = (Window) getFragment();
-        previewBox = (BoxLayout) parent.getComponentNN("previewBox");
+        previewBox = (BoxLayout) getFragment().getComponentNN("previewBox");
     }
 
     public void setItem(ReportTemplate reportTemplate) {
@@ -44,29 +43,25 @@ public abstract class DescriptionEditFrame extends ScreenFragment {
     }
 
     public void showPreview() {
-//        Window parent = (Window) getFragment();
         previewBox.setVisible(true);
         previewBox.setHeight("100%");
         previewBox.setWidth("100%");
         previewBox.removeAll();
-        //TODO dialog options
-//        parent.getDialogOptions()
-//                .setWidth("1280px")
-//                .setResizable(true)
-//                .center();
+
+        Fragment parent = getFragment();
+        parent.setResponsive(true);
+        parent.setWidth("1280px");
+
         initPreviewContent(previewBox);
     }
 
     public void hidePreview() {
-//        Window parent = (Window) getFragment();
         previewBox.setVisible(false);
         previewBox.removeAll();
-        //TODO dialog options
-//        parent.getDialogOptions()
-//                .setWidthAuto()
-//                .setHeightAuto()
-//                .setResizable(false)
-//                .center();
+
+        Fragment parent = getFragment();
+        parent.setSizeAuto();
+        parent.setResponsive(false);
     }
 
 

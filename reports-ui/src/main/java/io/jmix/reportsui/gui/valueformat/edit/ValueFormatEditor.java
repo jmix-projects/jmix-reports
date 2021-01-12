@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 
 import static io.jmix.ui.component.Window.COMMIT_ACTION_ID;
 
+@DialogMode(width = "AUTO")
 @UiController("report_ReportValueFormat.edit")
 @UiDescriptor("format-edit.xml")
 @EditedEntityContainer("valuesFormatsDc")
@@ -77,10 +78,7 @@ public class ValueFormatEditor extends StandardEditor<ReportValueFormat> {
     protected SourceCodeEditor groovyCodeEditor;
 
     @Autowired
-    protected UiComponents componentsFactory;
-
-    @Autowired
-    protected InstanceContainer valuesFormatsDc;
+    protected InstanceContainer<ReportValueFormat> valuesFormatsDc;
 
     @Autowired
     protected Metadata metadata;
@@ -113,15 +111,12 @@ public class ValueFormatEditor extends StandardEditor<ReportValueFormat> {
 
     @Subscribe
     protected void onInit(InitEvent event) {
-        //TODO dialog options
-//        getDialogOptions().setWidthAuto();
-
-        // Add default format strings to combobox
+        // Add default format strings to comboBox
         initFormatComboBox();
 
         groovyCheckBox.setContextHelpIconClickHandler(e -> dialogs.createMessageDialog()
-                .withCaption(messages.getMessage("valuesFormats.groovyScript"))
-                .withMessage(messages.getMessage("valuesFormats.groovyScriptHelpText"))
+                .withCaption(messages.getMessage(getClass(), "valuesFormats.groovyScript"))
+                .withMessage(messages.getMessage(getClass(), "valuesFormats.groovyScriptHelpText"))
                 .withContentMode(ContentMode.HTML)
                 .withModal(false)
                 .withWidth("700px")
@@ -187,6 +182,11 @@ public class ValueFormatEditor extends StandardEditor<ReportValueFormat> {
         }
     }
 
+    @Subscribe
+    public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
+        getEditedEntity().setFormatString(formatComboBox.getValue());
+    }
+
     //todo
 //    @Override
 //    public void setItem(Entity item) {
@@ -197,9 +197,9 @@ public class ValueFormatEditor extends StandardEditor<ReportValueFormat> {
 //    }
 
     @Subscribe("groovyFullScreenLinkButton")
-    public void showGroovyEditorDialog() {
+    public void showGroovyEditorDialog(Button.ClickEvent event) {
         ScriptEditorDialog editorDialog = (ScriptEditorDialog) screenBuilders.screen(this)
-                .withScreenId("scriptEditorDialog")
+                .withScreenId("report_Editor.dialog")
                 .withOpenMode(OpenMode.DIALOG)
                 .withOptions(new MapScreenOptions(ParamsMap.of(
                         "mode", groovyScriptFieldMode,

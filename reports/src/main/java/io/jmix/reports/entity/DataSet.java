@@ -43,6 +43,7 @@ public class DataSet implements ReportQuery {
 
     protected FetchPlan fetchPlan;
     @Id
+    @JmixProperty
     @JmixGeneratedValue
     protected UUID id;
     @JmixProperty

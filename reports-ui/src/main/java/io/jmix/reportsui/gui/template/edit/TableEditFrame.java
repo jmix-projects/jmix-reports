@@ -19,19 +19,22 @@ package io.jmix.reportsui.gui.template.edit;
 import io.jmix.core.Messages;
 import io.jmix.core.Metadata;
 import io.jmix.core.Sort;
-import io.jmix.ui.Notifications;
-import io.jmix.ui.component.Table;
 import io.jmix.reports.entity.ReportOutputType;
 import io.jmix.reports.entity.ReportTemplate;
 import io.jmix.reports.entity.table.TemplateTableBand;
 import io.jmix.reports.entity.table.TemplateTableColumn;
 import io.jmix.reports.entity.table.TemplateTableDescription;
+import io.jmix.ui.Actions;
+import io.jmix.ui.Notifications;
+import io.jmix.ui.RemoveOperation;
 import io.jmix.ui.action.AbstractAction;
 import io.jmix.ui.action.ListAction;
 import io.jmix.ui.component.BoxLayout;
 import io.jmix.ui.component.Component;
+import io.jmix.ui.component.Table;
 import io.jmix.ui.model.CollectionContainer;
 import io.jmix.ui.model.InstanceContainer;
+import io.jmix.ui.screen.Install;
 import io.jmix.ui.screen.Subscribe;
 import io.jmix.ui.screen.UiController;
 import io.jmix.ui.screen.UiDescriptor;
@@ -70,6 +73,9 @@ public class TableEditFrame extends DescriptionEditFrame {
     protected Messages messages;
 
     @Autowired
+    protected Actions actions;
+
+    @Autowired
     protected Notifications notifications;
 
     public ReportTemplate getReportTemplate() {
@@ -78,12 +84,40 @@ public class TableEditFrame extends DescriptionEditFrame {
 
     @Subscribe
     protected void onInit(InitEvent event) {
+        super.onInit(event);
+
         initButtonBandTable();
         initButtonColumnTable();
     }
 
     protected void sortParametersByPosition(CollectionContainer collectionContainer) {
         collectionContainer.getSorter().sort(Sort.by(Sort.Direction.ASC, POSITION));
+    }
+
+    @Install(to = "bandsTable.remove", subject = "afterActionPerformedHandler")
+    protected void bandsTableRemoveAfterActionPerformedHandler(RemoveOperation.AfterActionPerformedEvent<TemplateTableBand> event) {
+        TemplateTableBand deletedColumn = event.getItems().iterator().next();
+        int deletedPosition = deletedColumn.getPosition();
+
+        for (TemplateTableBand templateTableBand : tableBandsDc.getItems()) {
+            if (templateTableBand.getPosition() > deletedPosition) {
+                int currentPosition = templateTableBand.getPosition();
+                templateTableBand.setPosition(currentPosition - 1);
+            }
+        }
+    }
+
+    @Install(to = "columnsTable.remove", subject = "afterActionPerformedHandler")
+    protected void columnsTableRemoveAfterActionPerformedHandler(RemoveOperation.AfterActionPerformedEvent<TemplateTableColumn> event) {
+        TemplateTableColumn deletedColumn = event.getItems().iterator().next();
+        int deletedPosition = deletedColumn.getPosition();
+
+        for (TemplateTableColumn templateTableColumn : tableColumnsDc.getItems()) {
+            if (templateTableColumn.getPosition() > deletedPosition) {
+                int currentPosition = templateTableColumn.getPosition();
+                templateTableColumn.setPosition(currentPosition - 1);
+            }
+        }
     }
 
     private void initButtonBandTable() {
@@ -98,30 +132,9 @@ public class TableEditFrame extends DescriptionEditFrame {
                 TemplateTableBand templateTableBand = metadata.create(TemplateTableBand.class);
                 templateTableBand.setPosition(tableBandsDc.getItems().size());
 
-                tableBandsDc.getItems().add(templateTableBand);
-//                tableBandsDc.commit();
+                tableBandsDc.getMutableItems().add(templateTableBand);
             }
         });
-
-//        bandsTable.addAction(new RemoveAction(bandsTable, false, "remove") {
-//            @Override
-//            public String getCaption() {
-//                return "";
-//            }
-//
-////            @Override
-//            protected void afterRemove(Set selected) {
-//                TemplateTableBand deletedColumn = (TemplateTableBand) selected.iterator().next();
-//                int deletedPosition = deletedColumn.getPosition();
-//
-//                for (TemplateTableBand templateTableBand : tableBandsDc.getItems()) {
-//                    if (templateTableBand.getPosition() > deletedPosition) {
-//                        int currentPosition = templateTableBand.getPosition();
-//                        templateTableBand.setPosition(currentPosition - 1);
-//                    }
-//                }
-//            }
-//        });
 
         bandsTable.addAction(new ListAction("up") {
             @Override
@@ -172,8 +185,7 @@ public class TableEditFrame extends DescriptionEditFrame {
                     TemplateTableColumn item = metadata.create(TemplateTableColumn.class);
                     item.setPosition(tableColumnsDc.getItems().size());
 
-                    tableColumnsDc.getItems().add(item);
-//                    tableColumnsDc.commit();
+                    tableColumnsDc.getMutableItems().add(item);
                 } else {
                     notifications.create(Notifications.NotificationType.HUMANIZED)
                             .withCaption(messages.getMessage("template.bandRequired"))
@@ -181,26 +193,6 @@ public class TableEditFrame extends DescriptionEditFrame {
                 }
             }
         });
-
-//        columnsTable.addAction(new RemoveAction(columnsTable, false, "remove") {
-//            @Override
-//            public String getCaption() {
-//                return "";
-//            }
-//
-//            @Override
-//            protected void afterRemove(Set selected) {
-//                TemplateTableColumn deletedColumn = (TemplateTableColumn) selected.iterator().next();
-//                int deletedPosition = deletedColumn.getPosition();
-//
-//                for (TemplateTableColumn templateTableColumn : tableColumnsDc.getItems()) {
-//                    if (templateTableColumn.getPosition() > deletedPosition) {
-//                        int currentPosition = templateTableColumn.getPosition();
-//                        templateTableColumn.setPosition(currentPosition - 1);
-//                    }
-//                }
-//            }
-//        });
 
         columnsTable.addAction(new ListAction("up") {
             @Override

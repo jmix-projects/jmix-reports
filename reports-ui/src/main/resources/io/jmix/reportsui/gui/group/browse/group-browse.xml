@@ -20,7 +20,11 @@
 
     <data>
         <collection id="groupsDc" class="io.jmix.reports.entity.ReportGroup" fetchPlan="_local">
-            <loader id="groupsDl"/>
+            <loader id="groupsDl">
+                <query>
+                    <![CDATA[select e from report_ReportGroup e]]>
+                </query>
+            </loader>
         </collection>
     </data>
 
@@ -28,7 +32,12 @@
                 width="theme://cuba.gui.dialogSize.width.medium"
                 resizable="true"/>
 
-    <layout expand="reportGroupsTable">
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+
+    <layout spacing="true" expand="reportGroupsTable">
+<!--        TODO filter-->
         <filter applyTo="reportGroupsTable" dataLoader="groupsDl" margin="false,false,true,false">
             <properties include=".*"/>
         </filter>
@@ -40,9 +49,8 @@
             <buttonsPanel>
                 <button action="reportGroupsTable.create"/>
                 <button action="reportGroupsTable.edit"/>
-                <button action="reportGroupsTable.remove"/>
+                <!--                <button action="reportGroupsTable.remove"/>-->
             </buttonsPanel>
-            <rowsCount/>
             <columns>
                 <column id="locName"/>
                 <column id="systemFlag"/>

@@ -26,10 +26,14 @@
         </instance>
     </data>
 
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+
     <layout spacing="true">
         <form id="groupProps" dataContainer="groupDc" width="100%">
-            <textField id="title" required="true" width="100%"/>
-            <textField id="code" width="100%"/>
+            <textField id="title" property="title" required="true" width="100%"/>
+            <textField id="code" property="code" width="100%"/>
         </form>
         <label value="msg://groupLocaleCaption"/>
         <textArea id="localeTextField" dataContainer="groupDc"

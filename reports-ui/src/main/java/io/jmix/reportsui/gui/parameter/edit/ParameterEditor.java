@@ -199,8 +199,8 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
     protected void initHelpButtons() {
         localeTextField.setContextHelpIconClickHandler(e ->
                 dialogs.createMessageDialog()
-                        .withCaption(messages.getMessage("localeText"))
-                        .withMessage(messages.getMessage("parameter.localeTextHelp"))
+                        .withCaption(messages.getMessage(getClass(), "localeText"))
+                        .withMessage(messages.getMessage(getClass(), "parameter.localeTextHelp"))
                         .withContentMode(ContentMode.HTML)
                         .withModal(false)
                         .withWidth("700px")
@@ -208,8 +208,8 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
 
         transformationScript.setContextHelpIconClickHandler(e ->
                 dialogs.createMessageDialog()
-                        .withCaption(messages.getMessage("transformationScript"))
-                        .withMessage(messages.getMessage("parameter.transformationScriptHelp"))
+                        .withCaption(messages.getMessage(getClass(), "transformationScript"))
+                        .withMessage(messages.getMessage(getClass(), "parameter.transformationScriptHelp"))
                         .withContentMode(ContentMode.HTML)
                         .withModal(false)
                         .withWidth("700px")
@@ -217,8 +217,8 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
 
         validationScript.setContextHelpIconClickHandler(e ->
                 dialogs.createMessageDialog()
-                        .withCaption(messages.getMessage("validationScript"))
-                        .withMessage(messages.getMessage("validationScriptHelp"))
+                        .withCaption(messages.getMessage(getClass(), "validationScript"))
+                        .withMessage(messages.getMessage(getClass(), "validationScriptHelp"))
                         .withContentMode(ContentMode.HTML)
                         .withModal(false)
                         .withWidth("700px")

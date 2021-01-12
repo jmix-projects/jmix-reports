@@ -18,7 +18,6 @@ package io.jmix.reportsui.gui.definition.edit;
 import io.jmix.core.*;
 import io.jmix.core.common.util.ParamsMap;
 import io.jmix.core.metamodel.model.MetaClass;
-import io.jmix.core.security.EntityOp;
 import io.jmix.reports.app.service.ReportService;
 import io.jmix.reports.app.service.ReportWizardService;
 import io.jmix.reports.entity.*;
@@ -31,7 +30,6 @@ import io.jmix.security.constraint.SecureOperations;
 import io.jmix.ui.Actions;
 import io.jmix.ui.Dialogs;
 import io.jmix.ui.ScreenBuilders;
-import io.jmix.ui.action.AbstractAction;
 import io.jmix.ui.action.Action;
 import io.jmix.ui.action.list.CreateAction;
 import io.jmix.ui.action.list.RemoveAction;
@@ -72,9 +70,9 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
     @Autowired
     protected BoxLayout textBox;
     @Autowired
-    protected Label entitiesParamLabel;
+    protected Label<String> entitiesParamLabel;
     @Autowired
-    protected Label entityParamLabel;
+    protected Label<String> entityParamLabel;
     @Autowired
     protected GridLayout commonEntityGrid;
     @Autowired
@@ -82,7 +80,7 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
     @Autowired
     protected VBoxLayout jsonDataSetTypeVBox;
     @Autowired
-    protected Label jsonPathQueryLabel;
+    protected Label<String> jsonPathQueryLabel;
     @Autowired
     protected VBoxLayout jsonSourceGroovyCodeVBox;
     @Autowired
@@ -92,7 +90,7 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
     @Autowired
     protected HBoxLayout textParamsBox;
     @Autowired
-    protected Label viewNameLabel;
+    protected Label<String> viewNameLabel;
     @Autowired
     protected ComboBox orientation;
     @Autowired
@@ -114,11 +112,11 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
     @Autowired
     protected Button viewEditButton;
     @Autowired
-    protected Label buttonEmptyElement;
+    protected Label<String> buttonEmptyElement;
     @Autowired
-    protected Label checkboxEmptyElement;
+    protected Label<String> checkboxEmptyElement;
     @Autowired
-    protected Label spacer;
+    protected Label<String> spacer;
     @Autowired
     protected Metadata metadata;
     @Autowired
@@ -157,18 +155,17 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
     protected SourceCodeEditor.Mode dataSetScriptFieldMode = SourceCodeEditor.Mode.Text;
 
     @Subscribe("jsonSourceGroovyCodeLinkBtn")
-    public void showJsonScriptEditorDialog() {
+    public void showJsonScriptEditorDialog(Button.ClickEvent event) {
         ScriptEditorDialog editorDialog = (ScriptEditorDialog) screenBuilders.screen(this)
-                .withScreenId("scriptEditorDialog")
+                .withScreenId("report_Editor.dialog")
                 .withOpenMode(OpenMode.DIALOG)
                 .withOptions(new MapScreenOptions(ParamsMap.of(
-                        "caption", getScriptEditorDialogCaption(),
                         "scriptValue", jsonGroovyCodeEditor.getValue(),
                         "helpHandler", jsonGroovyCodeEditor.getContextHelpIconClickHandler()
                 ))).build();
-
+        editorDialog.setCaption(getScriptEditorDialogCaption());
         editorDialog.addAfterCloseListener(actionId -> {
-            if (Window.COMMIT_ACTION_ID.equals(((StandardCloseAction)actionId.getCloseAction()).getActionId())) {
+            if (Window.COMMIT_ACTION_ID.equals(((StandardCloseAction) actionId.getCloseAction()).getActionId())) {
                 jsonGroovyCodeEditor.setValue(editorDialog.getValue());
             }
         });
@@ -187,20 +184,19 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
     }
 
     @Subscribe("dataSetTextLinkBtn")
-    public void showDataSetScriptEditorDialog() {
+    public void showDataSetScriptEditorDialog(Button.ClickEvent event) {
         ScriptEditorDialog editorDialog = (ScriptEditorDialog) screenBuilders.screen(this)
-                .withScreenId("scriptEditorDialog")
+                .withScreenId("report_Editor.dialog")
                 .withOpenMode(OpenMode.DIALOG)
                 .withOptions(new MapScreenOptions(ParamsMap.of(
-                        "caption", getScriptEditorDialogCaption(),
                         "mode", dataSetScriptFieldMode,
                         "suggester", dataSetScriptField.getSuggester(),
                         "scriptValue", dataSetScriptField.getValue(),
                         "helpHandler", dataSetScriptField.getContextHelpIconClickHandler()
                 ))).build();
-
+        editorDialog.setCaption(getScriptEditorDialogCaption());
         editorDialog.addAfterCloseListener(actionId -> {
-            if (Window.COMMIT_ACTION_ID.equals(((StandardCloseAction)actionId.getCloseAction()).getActionId())) {
+            if (Window.COMMIT_ACTION_ID.equals(((StandardCloseAction) actionId.getCloseAction()).getActionId())) {
                 dataSetScriptField.setValue(editorDialog.getValue());
             }
         });
@@ -219,7 +215,7 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
     }
 
 
-//    @Override
+    //    @Override
     public void setEnabled(boolean enabled) {
         //Desktop Component containers doesn't apply disable flags for child components
         for (Component component : getFragment().getComponents()) {
@@ -257,15 +253,15 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
     protected void initHelpButtons() {
         jsonGroovyCodeEditor.setContextHelpIconClickHandler(e ->
                 dialogs.createMessageDialog()
-                        .withCaption(messages.getMessage("dataSet.text"))
-                        .withMessage(messages.getMessage("dataSet.jsonSourceGroovyCodeHelp"))
+                        .withCaption(messages.getMessage(getClass(), "dataSet.text"))
+                        .withMessage(messages.getMessage(getClass(), "dataSet.jsonSourceGroovyCodeHelp"))
                         .withModal(false)
                         .withWidth("700px")
                         .show());
         jsonPathQueryTextAreaField.setContextHelpIconClickHandler(e ->
                 dialogs.createMessageDialog()
-                        .withCaption(messages.getMessage("dataSet.text"))
-                        .withMessage(messages.getMessage("dataSet.jsonPathQueryHelp"))
+                        .withCaption(messages.getMessage(getClass(), "dataSet.text"))
+                        .withMessage(messages.getMessage(getClass(), "dataSet.jsonPathQueryHelp"))
                         .withModal(false)
                         .withWidth("700px")
                         .show());
@@ -306,7 +302,7 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
 
     protected void initDataStoreField() {
         Map<String, Object> all = new HashMap<>();
-        all.put(messages.getMessage("dataSet.dataStoreMain"), Stores.MAIN);
+        all.put(messages.getMessage(getClass(), "dataSet.dataStoreMain"), Stores.MAIN);
         for (String additional : stores.getAdditional()) {
             all.put(additional, additional);
         }
@@ -316,13 +312,13 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
     protected void initActions() {
         RemoveAction removeAction = (RemoveAction) actions.create(RemoveAction.class)
                 .withCaption("")
-                .withDescription(messages.getMessage("description.removeDataSet"));
+                .withDescription(messages.getMessage(getClass(), "description.removeDataSet"));
         dataSets.addAction(removeAction);
 
 
         CreateAction createAction = (CreateAction) actions.create(CreateAction.class)
                 .withCaption("")
-                .withDescription(messages.getMessage("description.createDataSet"))
+                .withDescription(messages.getMessage(getClass(), "description.createDataSet"))
                 .withHandler(handle -> {
                     BandDefinition selectedBand = bandsDc.getItem();
                     if (selectedBand != null) {
@@ -506,10 +502,11 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
                     dataSetScriptField.setMode(SourceCodeEditor.Mode.Groovy);
                     dataSetScriptField.setContextHelpIconClickHandler(e ->
                             dialogs.createMessageDialog()
-                                    .withCaption(messages.getMessage("dataSet.text"))
-                                    .withMessage(messages.getMessage("dataSet.textHelp"))
+                                    .withCaption(messages.getMessage(getClass(), "dataSet.text"))
+                                    .withMessage(messages.getMessage(getClass(), "dataSet.textHelp"))
                                     .withModal(false)
                                     .withWidth("700px")
+                                    .withContentMode(ContentMode.HTML)
                                     .show());
                     break;
 

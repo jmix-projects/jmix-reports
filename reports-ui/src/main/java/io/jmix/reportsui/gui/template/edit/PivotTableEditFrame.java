@@ -31,12 +31,12 @@ import io.jmix.ui.action.list.CreateAction;
 import io.jmix.ui.action.list.EditAction;
 import io.jmix.ui.action.list.RemoveAction;
 import io.jmix.ui.component.*;
+import io.jmix.ui.model.CollectionChangeType;
 import io.jmix.ui.model.CollectionContainer;
 import io.jmix.ui.model.InstanceContainer;
 import io.jmix.ui.screen.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.inject.Named;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -68,13 +68,13 @@ public class PivotTableEditFrame extends DescriptionEditFrame {
     protected Table<PivotTableAggregation> aggregationsTable;
 
     @Autowired
-    protected ComboBox defaultRenderer;
+    protected ComboBox<RendererType> defaultRenderer;
 
     @Autowired
-    protected ComboBox defaultAggregation;
+    protected ComboBox<PivotTableAggregation> defaultAggregation;
 
     @Autowired
-    protected ComboBox bandName;
+    protected ComboBox<String> bandName;
 
     @Autowired
     protected GroupBoxLayout customC3GroupBox;
@@ -97,7 +97,8 @@ public class PivotTableEditFrame extends DescriptionEditFrame {
     @Subscribe
     @SuppressWarnings("IncorrectCreateEntity")
     protected void onInit(InitEvent event) {
-        dataGenerator = new RandomPivotTableDataGenerator();
+        super.onInit(event);
+
         PivotTableDescription description = createDefaultPivotTableDescription();
         pivotTableDc.setItem(description);
         initAggregationTable();
@@ -243,12 +244,11 @@ public class PivotTableEditFrame extends DescriptionEditFrame {
 
         aggregationsTable.addAction(actions.create(RemoveAction.class));
 
-        //todo
-//        aggregationsDs.addCollectionChangeListener(e -> {
-//            if (e.getOperation() == CollectionDatasource.Operation.REMOVE) {
-//                defaultAggregation.setOptionsDatasource(aggregationsDs);
-//            }
-//        });
+        aggregationsDc.addCollectionChangeListener(e -> {
+            if (e.getChangeType() == CollectionChangeType.REMOVE_ITEMS) {
+                defaultAggregation.setOptionsList(aggregationsDc.getItems());
+            }
+        });
     }
 
     protected void initCustomGroups() {

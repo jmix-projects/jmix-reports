@@ -94,6 +94,8 @@ public class ChartEditFrame extends DescriptionEditFrame {
     @Subscribe
     @SuppressWarnings("IncorrectCreateEntity")
     protected void onInit(InitEvent event) {
+        super.onInit(event);
+
         pieChartDc.setItem(new PieChartDescription());
         serialChartDc.setItem(new SerialChartDescription());
         type.setOptionsList(Arrays.asList(ChartType.values()));
@@ -279,12 +281,12 @@ public class ChartEditFrame extends DescriptionEditFrame {
                 .filter(bandDefinition -> bandDefinition.getParentBandDefinition() != null)
                 .map(BandDefinition::getName)
                 .collect(Collectors.toList());
-
-        ComboBox pieChartBandName = (ComboBox) pieChartFieldGroup.getComponentNN("bandName");
-        ComboBox serialChartBandName = (ComboBox) serialChartFieldGroup.getComponentNN("bandName");
-
-        pieChartBandName.setOptionsList(bandNames);
-        serialChartBandName.setOptionsList(bandNames);
+            // todo
+//        ComboBox pieChartBandName = (ComboBox) pieChartFieldGroup.getComponentNN("pieBandName");
+//        ComboBox serialChartBandName = (ComboBox) serialChartFieldGroup.getComponentNN("serialBandName");
+//
+//        pieChartBandName.setOptionsList(bandNames);
+//        serialChartBandName.setOptionsList(bandNames);
     }
 
     protected void checkSeriesOrder() {

@@ -35,21 +35,18 @@ import io.jmix.ui.Notifications;
 import io.jmix.ui.ScreenBuilders;
 import io.jmix.ui.WindowConfig;
 import io.jmix.ui.component.*;
-import io.jmix.ui.model.CollectionContainer;
 import io.jmix.ui.model.InstanceContainer;
 import io.jmix.ui.screen.*;
 import io.jmix.ui.upload.TemporaryStorage;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+@DialogMode(width = "AUTO")
 @UiController("report_ReportTemplate.edit")
 @UiDescriptor("template-edit.xml")
 @EditedEntityContainer("templateDc")
@@ -60,13 +57,13 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
     public static final String REPORT_OUTPUT_TYPE = "reportOutputType";
 
     @Autowired
-    protected Label isCustomLabel;
+    protected Label<String> isCustomLabel;
 
     @Autowired
     protected CheckBox custom;
 
     @Autowired
-    protected Label templateFileLabel;
+    protected Label<String> templateFileLabel;
 
     @Autowired
     private FileUploadField templateUploadField;
@@ -78,7 +75,7 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
     protected Label<String> isGroovyLabel;
 
     @Autowired
-    protected TextArea customDefinition;
+    protected TextArea<String> customDefinition;
 
     @Autowired
     protected LinkButton customDefinitionHelpLinkButton;
@@ -87,37 +84,37 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
     protected LinkButton fullScreenLinkButton;
 
     @Autowired
-    protected Label customDefinitionLabel;
+    protected Label<String> customDefinitionLabel;
 
     @Autowired
-    protected ComboBox customDefinedBy;
+    protected ComboBox<CustomTemplateDefinedBy> customDefinedBy;
 
     @Autowired
-    protected Label customDefinedByLabel;
+    protected Label<String> customDefinedByLabel;
 
     @Autowired
     protected CheckBox alterable;
 
     @Autowired
-    protected Label alterableLabel;
+    protected Label<String> alterableLabel;
 
     @Autowired
     protected ComboBox<ReportOutputType> outputType;
 
     @Autowired
-    protected TextField outputNamePattern;
+    protected TextField<String> outputNamePattern;
 
     @Autowired
-    protected Label outputNamePatternLabel;
+    protected Label<String> outputNamePatternLabel;
 
-//    @Autowired
-//    protected ChartEditFrame chartEdit;
+    @Autowired
+    protected ChartEditFrame chartEdit;
 
-//    @Autowired
-//    protected PivotTableEditFrame pivotTableEdit;
-//
-//    @Autowired
-//    protected TableEditFrame tableEdit;
+    @Autowired
+    protected PivotTableEditFrame pivotTableEdit;
+
+    @Autowired
+    protected TableEditFrame tableEdit;
 
     @Autowired
     protected InstanceContainer<ReportTemplate> templateDc;
@@ -162,15 +159,16 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
     protected void onInit(InitEvent event) {
         outputNamePattern.setContextHelpIconClickHandler(e ->
                 dialogs.createMessageDialog()
-                        .withCaption(messages.getMessage("template.namePatternText"))
-                        .withMessage(messages.getMessage("template.namePatternTextHelp"))
+                        .withCaption(messages.getMessage(getClass(), "template.namePatternText"))
+                        .withMessage(messages.getMessage(getClass(), "template.namePatternTextHelp"))
+                        .withContentMode(ContentMode.HTML)
                         .withModal(false)
                         .withWidth("560px")
                         .show());
 
         Map<String, Boolean> groovyOptions = new HashMap<>();
-        groovyOptions.put(messages.getMessage("template.freemarkerType"), Boolean.FALSE);
-        groovyOptions.put(messages.getMessage("template.groovyType"), Boolean.TRUE);
+        groovyOptions.put(messages.getMessage(getClass(), "template.freemarkerType"), Boolean.FALSE);
+        groovyOptions.put(messages.getMessage(getClass(), "template.groovyType"), Boolean.TRUE);
         isGroovyRadioButtonGroup.setOptionsMap(groovyOptions);
     }
 
@@ -183,7 +181,7 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
                 if (report.getTemplates() == null || report.getTemplates().isEmpty())
                     template.setCode(ReportService.DEFAULT_TEMPLATE_CODE);
                 else
-                    template.setCode("Template_" + Integer.toString(report.getTemplates().size()));
+                    template.setCode("Template_" + report.getTemplates().size());
             }
         }
     }
@@ -200,8 +198,8 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
                     setupVisibility(reportTemplate.getCustom(), newOutputType);
                     if (hasHtmlCsvTemplateOutput(prevOutputType) && !hasTemplateOutput(newOutputType)) {
                         dialogs.createMessageDialog()
-                                .withCaption(messages.getMessage("templateEditor.warning"))
-                                .withMessage(messages.getMessage("templateEditor.clearTemplateMessage"))
+                                .withCaption(messages.getMessage(getClass(), "templateEditor.warning"))
+                                .withMessage(messages.getMessage(getClass(), "templateEditor.clearTemplateMessage"))
                                 .show();
                     }
                     break;
@@ -234,7 +232,7 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
     }
 
     protected Collection<DescriptionEditFrame> getDescriptionEditFrames() {
-        return Arrays.asList(/*chartEdit, pivotTableEdit, tableEdit*/);
+        return Arrays.asList(chartEdit, pivotTableEdit, tableEdit);
     }
 
     protected boolean hasTemplateOutput(ReportOutputType reportOutputType) {
@@ -272,9 +270,9 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
         fullScreenLinkButton.setVisible(groovyScriptVisibility);
 
         customDefinedBy.setRequired(enabled);
-        customDefinedBy.setRequiredMessage(messages.getMessage("templateEditor.customDefinedBy"));
+        customDefinedBy.setRequiredMessage(messages.getMessage(getClass(), "templateEditor.customDefinedBy"));
         customDefinition.setRequired(enabled);
-        customDefinition.setRequiredMessage(messages.getMessage("templateEditor.classRequired"));
+        customDefinition.setRequiredMessage(messages.getMessage(getClass(), "templateEditor.classRequired"));
 
         boolean supportAlterableForTemplate = templateOutputVisibility && !enabled;
         alterable.setVisible(supportAlterableForTemplate);
@@ -308,7 +306,7 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
                         .findFirst().orElse(null);
         if (applicableFrame != null) {
             descriptionEditBox.setVisible(!customEnabled);
-            //todo
+            // todo
             //applicableFrame.setVisible(!customEnabled);
             applicableFrame.setItem(getEditedEntity());
 
@@ -357,7 +355,7 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
     protected void initUploadField() {
         templateUploadField.addFileUploadErrorListener(e ->
                 notifications.create(Notifications.NotificationType.WARNING)
-                        .withCaption(messages.getMessage("templateEditor.uploadUnsuccess"))
+                        .withCaption(messages.getMessage(getClass(), "templateEditor.uploadUnsuccess"))
                         .show());
         templateUploadField.addFileUploadSucceedListener(e -> {
             String fileName = templateUploadField.getFileName();
@@ -377,7 +375,7 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
             updateOutputType();
 
             notifications.create(Notifications.NotificationType.TRAY)
-                    .withCaption(messages.getMessage("templateEditor.uploadSuccess"))
+                    .withCaption(messages.getMessage(getClass(), "templateEditor.uploadSuccess"))
                     .show();
         });
 
@@ -387,7 +385,7 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
             templateUploadField.setContentProvider(() -> new ByteArrayInputStream(templateFile));
 
             temporaryStorage.saveFile(templateFile);
-            //todo
+            // todo
             //templateUploadField.setValue(fileDescriptor);
         }
 
@@ -464,7 +462,7 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
             if (!ReportPrintHelper.getInputOutputTypesMapping().containsKey(inputType) ||
                     !ReportPrintHelper.getInputOutputTypesMapping().get(inputType).contains(outputTypeValue)) {
                 notifications.create(Notifications.NotificationType.TRAY)
-                        .withCaption(messages.getMessage("inputOutputTypesError"))
+                        .withCaption(messages.getMessage(getClass(), "inputOutputTypesError"))
                         .show();
                 return false;
             }
@@ -477,18 +475,18 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
         if (!Boolean.TRUE.equals(template.getCustom())
                 && hasTemplateOutput(template.getReportOutputType())
                 && template.getContent() == null) {
-            StringBuilder notification = new StringBuilder(messages.getMessage("template.uploadTemplate"));
+            StringBuilder notification = new StringBuilder(messages.getMessage(getClass(), "template.uploadTemplate"));
 
             if (StringUtils.isEmpty(template.getCode())) {
-                notification.append("\n").append(messages.getMessage("template.codeMsg"));
+                notification.append("\n").append(messages.getMessage(getClass(), "template.codeMsg"));
             }
 
             if (template.getOutputType() == null) {
-                notification.append("\n").append(messages.getMessage("template.outputTypeMsg"));
+                notification.append("\n").append(messages.getMessage(getClass(), "template.outputTypeMsg"));
             }
 
             notifications.create(Notifications.NotificationType.TRAY)
-                    .withCaption(messages.getMessage("validationFail.caption"))
+                    .withCaption(messages.getMessage(getClass(), "validationFail.caption"))
                     .show();
 
             return false;
@@ -497,9 +495,9 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
     }
 
     @Subscribe("fullScreenLinkButton")
-    public void showGroovyScriptEditorDialog() {
+    public void showGroovyScriptEditorDialog(Button.ClickEvent event) {
         ScriptEditorDialog editorDialog = (ScriptEditorDialog) screenBuilders.screen(this)
-                .withScreenId("scriptEditorDialog")
+                .withScreenId("report_Editor.dialog")
                 .withOpenMode(OpenMode.DIALOG)
                 .withOptions(new MapScreenOptions(ParamsMap.of(
                         "mode", SourceCodeEditor.Mode.Groovy,
@@ -520,8 +518,8 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
     @Subscribe("customDefinitionHelpLinkButton")
     public void showCustomDefinitionHelp() {
         dialogs.createMessageDialog()
-                .withCaption(messages.getMessage("templateEditor.titleHelpGroovy"))
-                .withMessage(messages.getMessage("templateEditor.textHelpGroovy"))
+                .withCaption(messages.getMessage(getClass(), "templateEditor.titleHelpGroovy"))
+                .withMessage(messages.getMessage(getClass(), "templateEditor.textHelpGroovy"))
                 .withModal(false)
                 .withWidth("700px")
                 .show();

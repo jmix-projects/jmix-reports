@@ -52,7 +52,7 @@
                 <row>
                     <form id="pieChartFieldGroup" dataContainer="pieChartDc" colspan="2">
                         <column width="${width}" fieldCaptionWidth="${captionWidth}">
-                            <field id="bandName" property="bandName"/>
+                            <field id="pieBandName" property="bandName"/>
                             <field id="titleField" property="titleField"/>
                             <field id="valueField" property="valueField"/>
                             <field id="colorField" property="colorField"/>
@@ -64,7 +64,7 @@
                 <row>
                     <form id="serialChartFieldGroup" dataContainer="serialChartDc" colspan="2">
                         <column width="${width}" fieldCaptionWidth="${captionWidth}">
-                            <field id="bandName" property="bandName"/>
+                            <field id="serialBandName" property="bandName"/>
                             <field id="categoryField" property="categoryField"/>
                             <field id="categoryAxisCaption" property="categoryAxisCaption"/>
                             <field id="categoryAxisLabelRotation" property="categoryAxisLabelRotation"/>

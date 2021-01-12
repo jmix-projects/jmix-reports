@@ -107,7 +107,7 @@ public class InputParametersLookup extends StandardLookup {
     }
 
     @Subscribe("printReportBtn")
-    public void printReport() {
+    public void printReport(Button.ClickEvent event) {
         if (inputParametersFrame.getReport() != null) {
             ValidationErrors validationErrors = screenValidation.validateUiComponents(getWindow());
             if (validationErrors.isEmpty()) {

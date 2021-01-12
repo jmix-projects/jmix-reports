@@ -16,18 +16,14 @@
 
 package io.jmix.reportsui.gui.group.edit;
 
+import io.jmix.reports.entity.ReportGroup;
+import io.jmix.ui.navigation.Route;
 import io.jmix.ui.screen.*;
 
+@DialogMode(width = "400px")
 @UiController("report_ReportGroup.edit")
 @UiDescriptor("group-edit.xml")
 @EditedEntityContainer("groupDc")
-public class ReportGroupEditor extends StandardEditor {
-
-    @Subscribe
-    protected void onInit(InitEvent event) {
-//TODO fix dialog params
-//        getDialogOptions()
-//                .setResizable(false)
-//                .setWidth("400px");
-    }
+@Route(value = "reportGroups/edit", parentPrefix = "reportGroups")
+public class ReportGroupEditor extends StandardEditor<ReportGroup> {
 }

@@ -17,7 +17,9 @@
 <fragment xmlns="http://jmix.io/schema/ui/fragment">
 
     <data>
-        <collection id="valuesFormatsDc" class="io.jmix.reports.entity.ReportValueFormat" provided="true"/>
+        <collection id="valuesFormatsDc"
+                    class="io.jmix.reports.entity.ReportValueFormat"
+                    provided="true"/>
     </data>
 
     <layout margin="true" spacing="true" expand="valuesFormatsTable">

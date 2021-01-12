@@ -42,9 +42,10 @@
                 resizable="true"/>
 
     <layout expand="table" spacing="true">
-        <filter id="genericFilter" dataLoader="reportDl" applyTo="table">
-            <properties include=".*"/>
-        </filter>
+        <!--TODO filter-->
+<!--        <filter id="genericFilter" dataLoader="reportDl" applyTo="table">-->
+<!--            <properties include=".*"/>-->
+<!--        </filter>-->
         <groupTable id="table" editable="false" multiselect="true" width="100%" dataContainer="reportDc">
             <actions>
                 <action id="create" type="create"/>

@@ -19,9 +19,10 @@
         focusComponent="gridLayout">
 
     <data>
-        <collection id="valuesFormatsDc" class="io.jmix.reports.entity.ReportValueFormat">
+        <instance id="valuesFormatsDc"
+                  class="io.jmix.reports.entity.ReportValueFormat">
             <loader id="valuesFormatsDl"/>
-        </collection>
+        </instance>
     </data>
 
     <layout spacing="true">
@@ -32,11 +33,11 @@
                     <form id="formatFields" dataContainer="valuesFormatsDc" width="100%">
                         <column>
                             <textField id="valueName" property="valueName" required="true" width="100%"
-                                   caption="msg://valuesFormats.name"
-                                   requiredMessage="msg://valueNameMsg"/>
-                            <textField id="formatString" property="formatString" required="true" caption="msg://valuesFormats.format" width="100%"
-                                   maxLength="255" custom="true" requiredMessage="msg://formatStringMsg"/>
-                            <comboBox id="formatComboBox"/>
+                                       caption="msg://valuesFormats.name"
+                                       requiredMessage="msg://valueNameMsg"/>
+                            <comboBox id="formatComboBox" required="true"
+                                      caption="msg://valuesFormats.format" width="100%"
+                                      requiredMessage="msg://formatStringMsg"/>
                         </column>
                     </form>
                 </row>
@@ -57,7 +58,7 @@
                         <sourceCodeEditor id="groovyCodeEditor" height="200px" width="100%"
                                           required="true"
                                           requiredMessage="msg://groovyScriptMsg"
-
+                                          dataContainer="valuesFormatsDc"
                                           property="formatString"
                                           mode="Groovy"/>
                     </vbox>

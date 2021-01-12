@@ -27,13 +27,12 @@
     <data>
         <instance id="bandsDc"
                   class="io.jmix.reports.entity.BandDefinition" provided="true"/>
-
         <instance id="reportDc"
                   class="io.jmix.reports.entity.Report" provided="true">
             <collection id="parametersDc" property="inputParameters" provided="true"/>
         </instance>
-
         <collection id="dataSetDc" class="io.jmix.reports.entity.DataSet"/>
+<!--        <collection id="availableParentBandsDc" class="io.jmix.reports.entity.BandDefinition"/>-->
     </data>
 
     <assign name="width" value="150"/>
@@ -48,7 +47,7 @@
             <label value="msg://definition.orientation" align="MIDDLE_LEFT"/>
             <comboBox id="orientation" dataContainer="bandsDc" property="orientation" width="${width}"/>
             <label value="msg://definition.parentBand" align="MIDDLE_LEFT"/>
-            <comboBox id="parentBand" dataContainer="bandsDc" optionsDatasource="availableParentBandsDs"
+            <entityComboBox id="parentBand" dataContainer="bandsDc"
                       property="parentBandDefinition" width="${width}"/>
         </hbox>
 
@@ -165,9 +164,9 @@
                     </vbox>
                     <vbox id="jsonSourceParameterCodeVBox" spacing="true">
                         <label value="msg://dataSet.jsonParameter"/>
-                        <comboBox id="jsonQueryParameterField"
+                        <entityComboBox id="jsonQueryParameterField"
                                   dataContainer="dataSetDc"
-                                  optionsDatasource="stringParametersDs"
+                                  optionsContainer="parametersDc"
                                   property="jsonSourceInputParameter"
                                   nullOptionVisible="false"/>
                     </vbox>

@@ -44,6 +44,9 @@
                     <row>
                         <table id="bandsTable" dataContainer="tableBandsDc" width="220px" height="300px" multiselect="false"
                                columnControlVisible="false" sortable="false" editable="true">
+                            <actions>
+                                <action id="remove" type="remove"/>
+                            </actions>
                             <buttonsPanel>
                                 <button action="bandsTable.create" icon="PLUS"/>
                                 <button action="bandsTable.remove" icon="REMOVE"/>
@@ -56,6 +59,9 @@
                         </table>
                         <table id="columnsTable" dataContainer="tableColumnsDc" width="100%" height="300px" multiselect="false"
                                columnControlVisible="false" sortable="false" editable="true">
+                            <actions>
+                                <action id="remove" type="remove"/>
+                            </actions>
                             <buttonsPanel>
                                 <button action="columnsTable.create" icon="PLUS"/>
                                 <button action="columnsTable.remove" icon="REMOVE"/>

@@ -10,9 +10,10 @@
         </collection>
     </data>
     <layout spacing="true" expand="executionsTable">
-        <filter id="filter" dataLoader="executionsDl" applyTo="executionsTable">
-            <properties include=".*"/>
-        </filter>
+        <!--TODO filter-->
+<!--        <filter id="filter" dataLoader="executionsDl" applyTo="executionsTable">-->
+<!--            <properties include=".*"/>-->
+<!--        </filter>-->
         <table id="executionsTable" dataContainer="executionsDc" width="100%"
                presentations="true" multiselect="true">
             <actions>

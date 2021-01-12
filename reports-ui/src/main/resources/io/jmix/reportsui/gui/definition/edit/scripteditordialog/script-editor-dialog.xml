@@ -18,15 +18,16 @@
         caption="msg://scriptEditor">
 
     <dialogMode height="700"
-                resizable="true"
-                width="1200"/>
+                width="1200"
+                resizable="true"/>
 
     <layout expand="editor"
             spacing="true">
         <sourceCodeEditor id="editor" width="100%" stylename="c-report-source-code-font-size"/>
+
         <hbox id="editActions" spacing="true">
-            <button action="windowCommitAndClose"/>
-            <button action="windowClose"/>
+            <button id="commitBtn" action="commit"/>
+            <button id="cancelBtn" action="cancel"/>
         </hbox>
     </layout>
 </window>

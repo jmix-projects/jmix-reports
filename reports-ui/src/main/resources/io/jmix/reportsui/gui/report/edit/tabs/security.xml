@@ -32,7 +32,7 @@
                 <groupBox id="addRoleGroupBox" width="100%" caption="msg://roles.addRole">
                     <hbox expand="rolesLookup" spacing="true" width="100%">
                         <comboBox id="rolesLookup"/>
-                        <button id="addRoleBtn"/>
+                        <button id="addRoleBtn" caption="msg://roles.add"/>
                     </hbox>
                 </groupBox>
                 <table id="rolesTable" width="100%" multiselect="true" dataContainer="rolesDc"
@@ -54,7 +54,7 @@
                 <groupBox id="addScreenGroupBox" width="100%" caption="msg://screens.createScreen">
                     <hbox expand="screenIdLookup" spacing="true" width="100%">
                         <comboBox id="screenIdLookup"/>
-                        <button id="addReportScreenBtn"/>
+                        <button id="addReportScreenBtn" caption="msg://screens.add"/>
                     </hbox>
                 </groupBox>
                 <table id="screenTable" width="100%" multiselect="true" dataContainer="reportScreensDc"
