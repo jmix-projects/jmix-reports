@@ -30,8 +30,6 @@ import java.util.UUID;
 
 @JmixEntity(name = "report_ReportInputParameter")
 @SystemLevel
-//todo namepattern
-//@NamePattern("%s|locName")
 @SuppressWarnings("unused")
 public class ReportInputParameter implements ReportParameterWithDefaultValue {
 
@@ -104,7 +102,6 @@ public class ReportInputParameter implements ReportParameterWithDefaultValue {
     @JmixProperty
     protected Boolean defaultDateIsCurrent = false;
 
-    @InstanceName
     @Transient
     protected String localeName;
 
@@ -230,6 +227,7 @@ public class ReportInputParameter implements ReportParameterWithDefaultValue {
     }
 
     @JmixProperty
+    @InstanceName
     public String getLocName() {
         if (localeName == null) {
             //TODO Locale helper

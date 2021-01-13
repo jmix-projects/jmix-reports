@@ -21,6 +21,7 @@ import io.jmix.core.annotation.DeletedDate;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.entity.annotation.SystemLevel;
 import io.jmix.core.metamodel.annotation.DependsOnProperties;
+import io.jmix.core.metamodel.annotation.InstanceName;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.annotation.JmixProperty;
 import org.apache.commons.lang3.StringUtils;
@@ -35,11 +36,9 @@ import java.util.UUID;
 
 @Entity(name = "report_ReportGroup")
 @Table(name = "REPORT_GROUP")
-//todo namepattern
-//@NamePattern("#getLocName|title,localeNames")
 @JmixEntity
 @SuppressWarnings("unused")
-public class ReportGroup {
+public class ReportGroup implements io.jmix.core.Entity {
 
     private static final long serialVersionUID = 5399528790289039413L;
 
@@ -203,5 +202,11 @@ public class ReportGroup {
     @DependsOnProperties("code")
     public Boolean getSystemFlag() {
         return StringUtils.isNotEmpty(code);
+    }
+
+    @InstanceName
+    @DependsOnProperties({"title", "localeNames"})
+    public String getCaption() {
+        return String.format("%s [%s]", getTitle(), getLocName());
     }
 }

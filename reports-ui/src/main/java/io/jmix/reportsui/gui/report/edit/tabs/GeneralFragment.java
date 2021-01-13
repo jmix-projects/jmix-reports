@@ -8,14 +8,14 @@ import io.jmix.reportsui.gui.definition.edit.BandDefinitionEditor;
 import io.jmix.security.constraint.PolicyStore;
 import io.jmix.security.constraint.SecureOperations;
 import io.jmix.ui.Notifications;
-import io.jmix.ui.RemoveOperation;
 import io.jmix.ui.action.Action;
-import io.jmix.ui.component.*;
+import io.jmix.ui.component.Button;
+import io.jmix.ui.component.FileUploadField;
+import io.jmix.ui.component.Tree;
 import io.jmix.ui.model.CollectionContainer;
 import io.jmix.ui.model.CollectionPropertyContainer;
 import io.jmix.ui.model.InstanceContainer;
 import io.jmix.ui.screen.*;
-import org.bouncycastle.asn1.cms.MetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.inject.Named;
@@ -136,7 +136,6 @@ public class GeneralFragment extends ScreenFragment {
     }
 
 
-
     @Subscribe("serviceTree.create")
     public void onServiceTreeCreate(Action.ActionPerformedEvent event) {
         BandDefinition parentDefinition = bandsDc.getItem();
@@ -194,10 +193,10 @@ public class GeneralFragment extends ScreenFragment {
 
     @Install(to = "serviceTree.remove", subject = "enabledRule")
     private boolean serviceTreeRemoveEnabledRule() {
-            Object selectedItem = bandTree.getSingleSelected();
-            if (selectedItem != null) {
-                return !Objects.equals(reportDc.getItem().getRootBandDefinition(), selectedItem);
-            }
+        Object selectedItem = bandTree.getSingleSelected();
+        if (selectedItem != null) {
+            return !Objects.equals(reportDc.getItem().getRootBandDefinition(), selectedItem);
+        }
 
         return false;
     }
@@ -258,7 +257,6 @@ public class GeneralFragment extends ScreenFragment {
     }
 
 
-
 //    @Override
 //    protected boolean isApplicable() {
 //        if (target != null) {
@@ -309,8 +307,6 @@ public class GeneralFragment extends ScreenFragment {
         return template.getOutputType() == JmixReportOutputType.chart ||
                 template.getOutputType() == JmixReportOutputType.table ||
                 template.getOutputType() == JmixReportOutputType.pivot;
-
-
     }
 
     protected boolean isChildOrEqual(BandDefinition definition, BandDefinition child) {

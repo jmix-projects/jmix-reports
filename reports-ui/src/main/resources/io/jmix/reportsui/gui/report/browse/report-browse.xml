@@ -46,10 +46,9 @@
                 resizable="true"/>
 
     <layout expand="table" spacing="true">
-        <!--TODO filter-->
-<!--        <filter id="genericFilter" dataLoader="reportDl" applyTo="table">-->
-<!--            <properties include=".*"/>-->
-<!--        </filter>-->
+        <filter id="genericFilter" dataLoader="reportDl" applyTo="table">
+            <properties include=".*"/>
+        </filter>
         <groupTable id="table" editable="false" multiselect="true" width="100%" dataContainer="reportDc">
             <actions>
                 <action id="create" type="create"/>
@@ -67,7 +66,7 @@
                 <button id="runReport" icon="ANGLE_DOUBLE_RIGHT"/>
                 <button id="executionsButton" action="table.executions"/>
             </buttonsPanel>
-            <pagination/>
+            <simplePagination/>
             <columns>
                 <group>
                     <column id="group" width="200px"/>

@@ -25,7 +25,6 @@ import io.jmix.core.metamodel.annotation.InstanceName;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.annotation.JmixProperty;
 
-import javax.persistence.Id;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;

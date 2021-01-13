@@ -17,7 +17,6 @@
 package io.jmix.reports.entity;
 
 import com.haulmont.yarg.formatters.CustomReport;
-import io.jmix.core.Messages;
 import io.jmix.core.annotation.DeletedBy;
 import io.jmix.core.annotation.DeletedDate;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
@@ -328,15 +327,15 @@ public class ReportTemplate implements com.haulmont.yarg.structure.ReportTemplat
         this.customReport = customReport;
     }
 
-//    @InstanceName
-//    @DependsOnProperties({"code", "name", "customDefinition"})
-//    public String getCaption(Messages messages) {
-//        if (isCustom()) {
-//            return messages.formatMessage(NAME_FORMAT, this.code, this.customDefinition);
-//        } else {
-//            return messages.formatMessage(NAME_FORMAT, this.code, this.name);
-//        }
-//    }
+    @InstanceName
+    @DependsOnProperties({"code", "name", "customDefinition"})
+    public String getCaption() {
+        if (isCustom()) {
+            return String.format(NAME_FORMAT, this.code, this.customDefinition);
+        } else {
+            return String.format(NAME_FORMAT, this.code, this.name);
+        }
+    }
 
     @Nullable
     public AbstractChartDescription getChartDescription() {

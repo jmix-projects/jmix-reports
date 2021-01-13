@@ -22,9 +22,7 @@ import io.jmix.core.annotation.DeletedDate;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.entity.annotation.Listeners;
 import io.jmix.core.entity.annotation.SystemLevel;
-import io.jmix.core.metamodel.annotation.Composition;
-import io.jmix.core.metamodel.annotation.JmixEntity;
-import io.jmix.core.metamodel.annotation.JmixProperty;
+import io.jmix.core.metamodel.annotation.*;
 import io.jmix.securitydata.entity.RoleEntity;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Predicate;
@@ -43,8 +41,6 @@ import java.util.*;
  */
 @Entity(name = "report_Report")
 @Table(name = "REPORT_REPORT")
-//todo namepattern
-//@NamePattern("%s|locName,name,localeNames")
 @Listeners("report_ReportDetachListener")
 @JmixEntity
 @SuppressWarnings("unused")
@@ -491,5 +487,11 @@ public class Report implements com.haulmont.yarg.structure.Report, io.jmix.core.
 
     public void setValidationOn(Boolean validationOn) {
         this.validationOn = validationOn;
+    }
+
+    @InstanceName
+    @DependsOnProperties({"locName", "name", "localeNames"})
+    public String getCaption() {
+        return String.format("%s [%s] %s", getLocName(), getName(), getLocaleNames());
     }
 }
