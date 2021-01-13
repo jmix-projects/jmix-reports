@@ -24,7 +24,7 @@ import io.jmix.core.entity.KeyValueEntity;
 import io.jmix.core.impl.StandardSerialization;
 import io.jmix.core.metamodel.model.MetaProperty;
 import io.jmix.core.metamodel.model.MetaPropertyPath;
-import io.jmix.reports.entity.CubaTableData;
+import io.jmix.reports.entity.JmixTableData;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportOutputType;
 import io.jmix.reports.entity.ReportTemplate;
@@ -115,7 +115,7 @@ public class ShowReportTableLookup extends StandardLookup {
 
         if (report != null) {
             reportSelectorBox.setVisible(false);
-            CubaTableData dto = (CubaTableData) serialization.deserialize(tableData);
+            JmixTableData dto = (JmixTableData) serialization.deserialize(tableData);
             drawTables(dto);
             openReportParameters(reportParameters);
         }
@@ -157,7 +157,7 @@ public class ShowReportTableLookup extends StandardLookup {
                 if (templateCode == null || templateCode.isEmpty())
                     templateCode = findTableCode(report);
                 ReportOutputDocument reportResult = reportGuiManager.getReportResult(report, parameters, templateCode);
-                CubaTableData dto = (CubaTableData) serialization.deserialize(reportResult.getContent());
+                JmixTableData dto = (JmixTableData) serialization.deserialize(reportResult.getContent());
                 drawTables(dto);
             } else {
                 screenValidation.showValidationErrors(this, validationErrors);
@@ -173,9 +173,9 @@ public class ShowReportTableLookup extends StandardLookup {
         return null;
     }
 
-    protected void drawTables(CubaTableData dto) {
+    protected void drawTables(JmixTableData dto) {
         Map<String, List<KeyValueEntity>> data = dto.getData();
-        Map<String, Set<CubaTableData.ColumnInfo>> headerMap = dto.getHeaders();
+        Map<String, Set<JmixTableData.ColumnInfo>> headerMap = dto.getHeaders();
         tablesVBoxLayout.removeAll();
 
         if (data == null || data.isEmpty())
@@ -219,11 +219,11 @@ public class ShowReportTableLookup extends StandardLookup {
 //        return ds;
 //    }
 
-    protected Table createTable(String dataSetName, CollectionContainer dataSource, Map<String, Set<CubaTableData.ColumnInfo>> headerMap) {
+    protected Table createTable(String dataSetName, CollectionContainer dataSource, Map<String, Set<JmixTableData.ColumnInfo>> headerMap) {
         Table table = uiComponents.create(GroupTable.class);
         table.setId(dataSetName + "Table");
 
-        Set<CubaTableData.ColumnInfo> headers = headerMap.get(dataSetName);
+        Set<JmixTableData.ColumnInfo> headers = headerMap.get(dataSetName);
 
         createColumns(dataSource, table, headers);
         table.setItems(new ContainerGroupTableItems(dataSource));
@@ -245,14 +245,14 @@ public class ShowReportTableLookup extends StandardLookup {
         return table;
     }
 
-    protected void createColumns(CollectionContainer dataSource, Table table, Set<CubaTableData.ColumnInfo> headers) {
+    protected void createColumns(CollectionContainer dataSource, Table table, Set<JmixTableData.ColumnInfo> headers) {
         Collection<MetaPropertyPath> paths = metadataTools.getPropertyPaths(dataSource.getEntityMetaClass());
         for (MetaPropertyPath metaPropertyPath : paths) {
             MetaProperty property = metaPropertyPath.getMetaProperty();
             if (!property.getRange().getCardinality().isMany() && !metadataTools.isSystem(property)) {
                 String propertyName = property.getName();
 
-                CubaTableData.ColumnInfo columnInfo = getColumnInfo(propertyName, headers);
+                JmixTableData.ColumnInfo columnInfo = getColumnInfo(propertyName, headers);
 
                 Element element = DocumentHelper.createElement("column");
 //                Table.Column column = columnInfo.getPosition() == null
@@ -265,7 +265,7 @@ public class ShowReportTableLookup extends StandardLookup {
         }
     }
 
-    private CubaTableData.ColumnInfo getColumnInfo(String headerKey, Set<CubaTableData.ColumnInfo> headers) {
+    private JmixTableData.ColumnInfo getColumnInfo(String headerKey, Set<JmixTableData.ColumnInfo> headers) {
         return headers.stream()
                 .filter(header -> headerKey.equals(header.getKey()))
                 .findFirst()

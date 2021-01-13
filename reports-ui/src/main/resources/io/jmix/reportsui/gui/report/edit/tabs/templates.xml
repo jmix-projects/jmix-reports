@@ -27,6 +27,9 @@
         <label value="msg://report.templates" stylename="h2"/>
         <table id="templatesTable" sortable="false" width="100%" dataContainer="templatesDc"
                reorderingAllowed="false" columnControlVisible="false">
+            <actions>
+                <action id="create" type="create"/>
+            </actions>
             <buttonsPanel>
                 <button action="templatesTable.create"/>
                 <button action="templatesTable.edit"/>

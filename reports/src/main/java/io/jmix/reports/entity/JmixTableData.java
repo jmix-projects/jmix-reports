@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-public class CubaTableData implements Serializable {
+public class JmixTableData implements Serializable {
 
     /**
      * Data represents band/group/table name and list of rows as key(column)-value maps.
@@ -36,7 +36,7 @@ public class CubaTableData implements Serializable {
      */
     protected Map<String, Set<ColumnInfo>> headers;
 
-    public CubaTableData(Map<String, List<KeyValueEntity>> data, Map<String, Set<ColumnInfo>> headers) {
+    public JmixTableData(Map<String, List<KeyValueEntity>> data, Map<String, Set<ColumnInfo>> headers) {
         this.data = data;
         this.headers = headers;
     }

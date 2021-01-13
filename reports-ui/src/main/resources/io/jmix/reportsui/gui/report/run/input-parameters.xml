@@ -25,7 +25,7 @@
         <hbox spacing="true">
             <button id="printReportBtn"
                     caption="msg://input.printReport" icon="icons/run.png"/>
-            <button id="cancelBtn" caption="mainMsg://actions.Cancel"/>
+            <button id="cancelBtn" caption="msg://cancel"/>
         </hbox>
     </layout>
 </window>

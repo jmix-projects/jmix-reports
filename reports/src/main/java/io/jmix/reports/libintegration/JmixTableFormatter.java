@@ -24,7 +24,7 @@ import io.jmix.core.*;
 import io.jmix.core.entity.KeyValueEntity;
 import io.jmix.core.impl.StandardSerialization;
 import io.jmix.reports.app.EntityMap;
-import io.jmix.reports.entity.CubaTableData;
+import io.jmix.reports.entity.JmixTableData;
 import io.jmix.reports.entity.ReportTemplate;
 import io.jmix.reports.entity.table.TemplateTableBand;
 import io.jmix.reports.entity.table.TemplateTableColumn;
@@ -44,7 +44,7 @@ import static io.jmix.reports.entity.wizard.ReportRegion.HEADER_BAND_PREFIX;
 
 @Component("report_CubaTableFormatter")
 @Scope(BeanDefinition.SCOPE_PROTOTYPE)
-public class CubaTableFormatter extends AbstractFormatter {
+public class JmixTableFormatter extends AbstractFormatter {
 
     @Autowired
     protected MessageTools messageTools;
@@ -58,13 +58,13 @@ public class CubaTableFormatter extends AbstractFormatter {
     @Autowired
     protected StandardSerialization standardSerialization;
 
-    protected CubaTableFormatter(FormatterFactoryInput formatterFactoryInput) {
+    protected JmixTableFormatter(FormatterFactoryInput formatterFactoryInput) {
         super(formatterFactoryInput);
     }
 
     @Override
     public void renderDocument() {
-        CubaTableData dto = transformData(rootBand);
+        JmixTableData dto = transformData(rootBand);
         byte[] serializedData = standardSerialization.serialize(dto);
         try {
             IOUtils.write(serializedData, outputStream);
@@ -73,29 +73,29 @@ public class CubaTableFormatter extends AbstractFormatter {
         }
     }
 
-    protected CubaTableData transformData(BandData rootBand) {
+    protected JmixTableData transformData(BandData rootBand) {
         TemplateTableDescription templateTableDescription = ((ReportTemplate) reportTemplate).getTemplateTableDescription();
 
         Map<String, List<KeyValueEntity>> transformedData = new LinkedHashMap<>();
-        Map<String, Set<CubaTableData.ColumnInfo>> headerMap = new HashMap<>();
+        Map<String, Set<JmixTableData.ColumnInfo>> headerMap = new HashMap<>();
         Map<String, List<BandData>> childrenBands = rootBand.getChildrenBands();
 
         if (templateTableDescription.getTemplateTableBands().size() > 0) {
-            return getCubaTableData(templateTableDescription, transformedData, headerMap, childrenBands);
+            return getTableData(templateTableDescription, transformedData, headerMap, childrenBands);
         } else {
-            return getCubaTableData(transformedData, headerMap, childrenBands);
+            return getTableData(transformedData, headerMap, childrenBands);
         }
     }
 
-    private CubaTableData getCubaTableData(Map<String, List<KeyValueEntity>> transformedData,
-                                           Map<String, Set<CubaTableData.ColumnInfo>> headerMap,
-                                           Map<String, List<BandData>> childrenBands) {
+    private JmixTableData getTableData(Map<String, List<KeyValueEntity>> transformedData,
+                                       Map<String, Set<JmixTableData.ColumnInfo>> headerMap,
+                                       Map<String, List<BandData>> childrenBands) {
         childrenBands.forEach((bandName, bandDataList) -> {
             if (bandName.startsWith(HEADER_BAND_PREFIX)) {
                 return;
             }
             List<KeyValueEntity> entities = new ArrayList<>();
-            Set<CubaTableData.ColumnInfo> headers = new HashSet<>();
+            Set<JmixTableData.ColumnInfo> headers = new HashSet<>();
             Set<String> emptyHeaders = new LinkedHashSet<>();
 
             bandDataList.forEach(bandData -> {
@@ -149,7 +149,7 @@ public class CubaTableFormatter extends AbstractFormatter {
 
                             if (name != null && value != null) {
                                 Class valueClass = getColumnClass(bandData.getName(), name, value);
-                                headers.add(new CubaTableData.ColumnInfo(transformationKey(name), valueClass, name));
+                                headers.add(new JmixTableData.ColumnInfo(transformationKey(name), valueClass, name));
                             }
                             if (name != null && value == null) {
                                 emptyHeaders.add(transformationKey(name));
@@ -163,7 +163,7 @@ public class CubaTableFormatter extends AbstractFormatter {
 
             emptyHeaders.forEach(header -> {
                 if (!containsHeader(headers, header))
-                    headers.add(new CubaTableData.ColumnInfo(header, String.class, header));
+                    headers.add(new JmixTableData.ColumnInfo(header, String.class, header));
             });
 
             headers.removeIf(header -> containsLowerCaseDuplicate(header, headers));
@@ -172,12 +172,12 @@ public class CubaTableFormatter extends AbstractFormatter {
             headerMap.put(bandName, headers);
         });
 
-        return new CubaTableData(transformedData, headerMap);
+        return new JmixTableData(transformedData, headerMap);
     }
 
-    protected CubaTableData getCubaTableData(TemplateTableDescription templateTableDescription,
+    protected JmixTableData getTableData(TemplateTableDescription templateTableDescription,
                                              Map<String, List<KeyValueEntity>> transformedData,
-                                             Map<String, Set<CubaTableData.ColumnInfo>> headerMap,
+                                             Map<String, Set<JmixTableData.ColumnInfo>> headerMap,
                                              Map<String, List<BandData>> childrenBands) {
         for (TemplateTableBand band : templateTableDescription.getTemplateTableBands()) {
             String bandName = band.getBandName();
@@ -192,7 +192,7 @@ public class CubaTableFormatter extends AbstractFormatter {
             }
 
             List<KeyValueEntity> entities = new ArrayList<>();
-            Set<CubaTableData.ColumnInfo> headers = new LinkedHashSet<>();
+            Set<JmixTableData.ColumnInfo> headers = new LinkedHashSet<>();
 
             bandDataList.forEach(bandData -> {
                 Map<String, Object> data = bandData.getData();
@@ -245,9 +245,9 @@ public class CubaTableFormatter extends AbstractFormatter {
                             String transformationKey = transformationKey(key);
                             if (value != null) {
                                 Class valueClass = getColumnClass(bandName, key, value);
-                                headers.add(new CubaTableData.ColumnInfo(transformationKey, valueClass, column.getCaption(), column.getPosition()));
+                                headers.add(new JmixTableData.ColumnInfo(transformationKey, valueClass, column.getCaption(), column.getPosition()));
                             } else {
-                                headers.add(new CubaTableData.ColumnInfo(transformationKey, String.class, column.getCaption(), column.getPosition()));
+                                headers.add(new JmixTableData.ColumnInfo(transformationKey, String.class, column.getCaption(), column.getPosition()));
                             }
                         }
                     }
@@ -260,7 +260,7 @@ public class CubaTableFormatter extends AbstractFormatter {
             transformedData.put(bandName, entities);
             headerMap.put(bandName, headers);
         }
-        return new CubaTableData(transformedData, headerMap);
+        return new JmixTableData(transformedData, headerMap);
     }
 
     private String getFormattedValue(String bandName, String name, Object value) {
@@ -284,11 +284,11 @@ public class CubaTableFormatter extends AbstractFormatter {
         return pkName == null || !pkName.equals(name) || pkInView;
     }
 
-    protected boolean containsLowerCaseDuplicate(CubaTableData.ColumnInfo columnInfo, Set<CubaTableData.ColumnInfo> headers) {
+    protected boolean containsLowerCaseDuplicate(JmixTableData.ColumnInfo columnInfo, Set<JmixTableData.ColumnInfo> headers) {
         if (!columnInfo.getKey().equals(columnInfo.getKey().toUpperCase()))
             return false;
 
-        for (CubaTableData.ColumnInfo header : headers) {
+        for (JmixTableData.ColumnInfo header : headers) {
             if (!columnInfo.equals(header)
                     && header.getKey().toUpperCase().equals(columnInfo.getKey())
                     && header.getCaption().toUpperCase().equals(columnInfo.getCaption()))
@@ -312,8 +312,8 @@ public class CubaTableFormatter extends AbstractFormatter {
         }
     }
 
-    protected boolean containsHeader(Set<CubaTableData.ColumnInfo> headers, String header) {
-        for (CubaTableData.ColumnInfo columnInfo : headers) {
+    protected boolean containsHeader(Set<JmixTableData.ColumnInfo> headers, String header) {
+        for (JmixTableData.ColumnInfo columnInfo : headers) {
             if (columnInfo.getKey().equals(header))
                 return true;
         }

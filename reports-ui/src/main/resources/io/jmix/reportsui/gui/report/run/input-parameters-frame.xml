@@ -36,7 +36,7 @@
             <rows>
                 <row>
                     <label id="templateLbl" value="msg://caption.reportTemplate" align="MIDDLE_LEFT" visible="false"/>
-                    <comboBox id="templateField" dataContainer="templateReportsDc" width="400" visible="false"/>
+                    <entityComboBox id="templateField" optionsContainer="templateReportsDc" width="400" visible="false"/>
                 </row>
                 <row>
                     <label id="outputTypeLbl" value="msg://caption.reportOutputType" align="MIDDLE_LEFT"

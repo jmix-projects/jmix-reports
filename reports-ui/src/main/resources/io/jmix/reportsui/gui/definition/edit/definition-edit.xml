@@ -16,23 +16,18 @@
 
 <fragment xmlns="http://jmix.io/schema/ui/fragment">
 
-    <!--    <dsContext>-->
-    <!--        <datasource-->
-    <!--                id="bandDefinitionDc"-->
-    <!--                class="com.haulmont.reports.entity.BandDefinition"-->
-    <!--                datasourceClass="com.haulmont.reports.gui.datasource.NotPersistenceDatasource">-->
-    <!--        </datasource>-->
-    <!--    </dsContext>-->
-
     <data>
-        <instance id="bandsDc"
-                  class="io.jmix.reports.entity.BandDefinition" provided="true"/>
         <instance id="reportDc"
                   class="io.jmix.reports.entity.Report" provided="true">
             <collection id="parametersDc" property="inputParameters" provided="true"/>
+            <collection id="bandsDc" property="bands" provided="true">
+                <collection id="dataSetsDc" property="dataSets" provided="true"/>
+            </collection>
         </instance>
-        <collection id="dataSetDc" class="io.jmix.reports.entity.DataSet"/>
-<!--        <collection id="availableParentBandsDc" class="io.jmix.reports.entity.BandDefinition"/>-->
+
+        <collection id="availableParentBandsDc"
+                    class="io.jmix.reports.entity.BandDefinition"
+                    provided="true"/>
     </data>
 
     <assign name="width" value="150"/>
@@ -48,13 +43,13 @@
             <comboBox id="orientation" dataContainer="bandsDc" property="orientation" width="${width}"/>
             <label value="msg://definition.parentBand" align="MIDDLE_LEFT"/>
             <entityComboBox id="parentBand" dataContainer="bandsDc"
-                      property="parentBandDefinition" width="${width}"/>
+                            property="parentBandDefinition" width="${width}"/>
         </hbox>
 
         <split id="split" orientation="horizontal" pos="40" width="100%">
             <vbox margin="false;true;false;false" width="100%" height="100%">
                 <table id="dataSets" editable="true" width="100%" height="100%" columnControlVisible="false"
-                       reorderingAllowed="false" presentations="false" dataContainer="dataSetDc">
+                       reorderingAllowed="false" presentations="false" dataContainer="dataSetsDc">
                     <buttonsPanel>
                         <button action="dataSets.create" icon="PLUS"/>
                         <button action="dataSets.remove" icon="REMOVE"/>
@@ -76,22 +71,22 @@
                                     align="MIDDLE_RIGHT"
                                     caption="msg://dataSet.fullScreen"/>
                     </hbox>
-                    <sourceCodeEditor id="text" dataContainer="dataSetDc" property="text"
+                    <sourceCodeEditor id="text" dataContainer="dataSetsDc" property="text"
                                       mode="Text" width="100%"/>
 
                     <hbox id="textParamsBox" spacing="true">
                         <textField id="linkParameterName" width="${width}"
-                                   dataContainer="dataSetDc"
+                                   dataContainer="dataSetsDc"
                                    property="linkParameterName"
                                    caption="msg://dataSet.linkParameterName"/>
 
                         <comboBox id="dataStore" width="${width}"
-                                  dataContainer="dataSetDc"
+                                  dataContainer="dataSetsDc"
                                   property="dataStore"
                                   caption="msg://dataSet.dataStore"/>
                     </hbox>
                     <checkBox id="processTemplate"
-                              dataContainer="dataSetDc"
+                              dataContainer="dataSetsDc"
                               property="processTemplate"
                               caption="msg://dataSet.processTemplate"/>
                 </vbox>
@@ -103,12 +98,12 @@
                     <rows>
                         <row>
                             <label id="entitiesParamLabel" align="MIDDLE_LEFT" value="msg://dataSet.entitiesParamName"/>
-                            <comboBox id="entitiesParamLookup" dataContainer="dataSetDc"
+                            <comboBox id="entitiesParamLookup" dataContainer="dataSetsDc"
                                       property="listEntitiesParamName"/>
                         </row>
                         <row>
                             <label id="entityParamLabel" align="MIDDLE_LEFT" value="msg://dataSet.entityParamName"/>
-                            <comboBox id="entityParamLookup" width="${width}" dataContainer="dataSetDc"
+                            <comboBox id="entityParamLookup" width="${width}" dataContainer="dataSetsDc"
                                       property="entityParamName"/>
                         </row>
                         <row>
@@ -117,11 +112,11 @@
                         </row>
                         <row>
                             <label id="viewNameLabel" value="msg://dataSet.viewName"/>
-                            <comboBox id="viewNameLookup" dataContainer="dataSetDc" property="viewName"
+                            <comboBox id="viewNameComboBox" dataContainer="dataSetsDc" property="viewName"
                                       width="${width}"/>
                         </row>
                         <row>
-                            <checkBox id="useExistingViewCheckbox" dataContainer="dataSetDc"
+                            <checkBox id="useExistingViewCheckbox" dataContainer="dataSetsDc"
                                       property="useExistingView" caption="msg://dataSet.useExistingView"/>
                             <label id="checkboxEmptyElement"/>
                         </row>
@@ -130,12 +125,12 @@
                 <vbox id="jsonDataSetTypeVBox" spacing="true" height="100%">
                     <label value="msg://dataSet.jsonSourceType"/>
                     <comboBox id="jsonSourceTypeField"
-                              dataContainer="dataSetDc"
+                              dataContainer="dataSetsDc"
                               property="jsonSourceType"
                               width="${width}"/>
                     <label id="jsonPathQueryLabel" value="msg://dataSet.jsonPathQuery"/>
                     <textArea id="jsonPathQueryTextAreaField" rows="3"
-                              dataContainer="dataSetDc"
+                              dataContainer="dataSetsDc"
                               property="jsonPathQuery"
                               required="true"
                               width="100%"
@@ -151,24 +146,24 @@
                                         caption="msg://dataSet.fullScreen"/>
                         </hbox>
                         <sourceCodeEditor id="jsonGroovyCodeEditor" width="100%"
-                                          dataContainer="dataSetDc"
+                                          dataContainer="dataSetsDc"
                                           property="jsonSourceText"
                                           mode="Groovy"/>
                     </vbox>
                     <vbox id="jsonSourceURLVBox" spacing="true" expand="jsonSourceURLTextArea">
                         <label value="msg://dataSet.urlJsonSource"/>
                         <textArea id="jsonSourceURLTextArea" width="100%"
-                                  dataContainer="dataSetDc"
+                                  dataContainer="dataSetsDc"
                                   property="jsonSourceText" required="true"
                                   requiredMessage="msg://dataSet.urlJsonSourceMessage"/>
                     </vbox>
                     <vbox id="jsonSourceParameterCodeVBox" spacing="true">
                         <label value="msg://dataSet.jsonParameter"/>
                         <entityComboBox id="jsonQueryParameterField"
-                                  dataContainer="dataSetDc"
-                                  optionsContainer="parametersDc"
-                                  property="jsonSourceInputParameter"
-                                  nullOptionVisible="false"/>
+                                        dataContainer="dataSetsDc"
+                                        optionsContainer="parametersDc"
+                                        property="jsonSourceInputParameter"
+                                        nullOptionVisible="false"/>
                     </vbox>
                 </vbox>
                 <label id="spacer"/>

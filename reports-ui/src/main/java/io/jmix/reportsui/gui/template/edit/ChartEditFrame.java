@@ -20,23 +20,19 @@ import io.jmix.core.DataManager;
 import io.jmix.core.Messages;
 import io.jmix.core.Sort;
 import io.jmix.core.common.util.ParamsMap;
-import io.jmix.ui.Actions;
-import io.jmix.ui.Dialogs;
-import io.jmix.ui.Fragments;
-import io.jmix.ui.Notifications;
-import io.jmix.ui.action.list.CreateAction;
-import io.jmix.ui.component.GroupBoxLayout;
-import io.jmix.ui.component.SourceCodeEditor;
-import io.jmix.ui.component.Table;
-import io.jmix.ui.component.*;
 import io.jmix.reports.entity.BandDefinition;
 import io.jmix.reports.entity.ReportOutputType;
 import io.jmix.reports.entity.ReportTemplate;
 import io.jmix.reports.entity.charts.*;
 import io.jmix.reportsui.gui.report.run.ShowChartLookup;
 import io.jmix.reportsui.gui.template.edit.generator.RandomChartDataGenerator;
+import io.jmix.ui.Actions;
+import io.jmix.ui.Dialogs;
+import io.jmix.ui.Fragments;
+import io.jmix.ui.Notifications;
 import io.jmix.ui.action.ItemTrackingAction;
-import io.jmix.ui.component.validation.Validator;
+import io.jmix.ui.action.list.CreateAction;
+import io.jmix.ui.component.*;
 import io.jmix.ui.model.CollectionContainer;
 import io.jmix.ui.model.InstanceContainer;
 import io.jmix.ui.screen.MapScreenOptions;
@@ -199,7 +195,7 @@ public class ChartEditFrame extends DescriptionEditFrame {
             if (series == null || series.size() == 0) {
                 notifications.create(Notifications.NotificationType.TRAY)
                         .withCaption(messages.getMessage("validationFail.caption"))
-                        .withDescription(messages.getMessage("chartEdit.seriesEmptyMsg"))
+                        .withDescription(messages.getMessage(getClass(), "chartEdit.seriesEmptyMsg"))
                         .show();
                 return false;
             }
@@ -207,14 +203,14 @@ public class ChartEditFrame extends DescriptionEditFrame {
                 if (it.getType() == null) {
                     notifications.create(Notifications.NotificationType.TRAY)
                             .withCaption(messages.getMessage("validationFail.caption"))
-                            .withDescription(messages.getMessage("chartEdit.seriesTypeNullMsg"))
+                            .withDescription(messages.getMessage(getClass(), "chartEdit.seriesTypeNullMsg"))
                             .show();
                     return false;
                 }
                 if (it.getValueField() == null) {
                     notifications.create(Notifications.NotificationType.TRAY)
                             .withCaption(messages.getMessage("validationFail.caption"))
-                            .withDescription(messages.getMessage("chartEdit.seriesValueFieldNullMsg"))
+                            .withDescription(messages.getMessage(getClass(), "chartEdit.seriesValueFieldNullMsg"))
                             .show();
                     return false;
                 }
@@ -281,7 +277,7 @@ public class ChartEditFrame extends DescriptionEditFrame {
                 .filter(bandDefinition -> bandDefinition.getParentBandDefinition() != null)
                 .map(BandDefinition::getName)
                 .collect(Collectors.toList());
-            // todo
+        // todo
 //        ComboBox pieChartBandName = (ComboBox) pieChartFieldGroup.getComponentNN("pieBandName");
 //        ComboBox serialChartBandName = (ComboBox) serialChartFieldGroup.getComponentNN("serialBandName");
 //

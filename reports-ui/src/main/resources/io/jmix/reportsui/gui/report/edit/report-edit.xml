@@ -28,7 +28,7 @@
             <collection id="reportScreensDc" property="reportScreens"/>
             <collection id="templatesDc" property="templates"/>
             <collection id="bandsDc" property="bands">
-                <collection id="dataSetDc" property="dataSets"/>
+                <collection id="dataSetsDc" property="dataSets"/>
             </collection>
             <collection id="stringParametersDc" property="inputParameters"/>
         </instance>
@@ -116,7 +116,7 @@
         <hbox spacing="true">
             <button id="windowCommitAndClose" action="windowCommitAndClose" icon="font-icon:CHECK"/>
             <button id="windowCommit" action="windowCommit"/>
-            <button id="run" icon="ANGLE_DOUBLE_RIGHT"/>
+            <button id="run" caption="msg://runReport" icon="ANGLE_DOUBLE_RIGHT"/>
             <button id="windowClose" action="windowClose" icon="font-icon:BAN"/>
         </hbox>
     </layout>

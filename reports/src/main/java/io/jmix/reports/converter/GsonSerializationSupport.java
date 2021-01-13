@@ -141,7 +141,7 @@ public class GsonSerializationSupport {
     protected void readFields(JsonReader in, MetaClass metaClass, Entity entity) throws IOException {
         while (in.hasNext()) {
             String propertyName = in.nextName();
-            MetaProperty property = metaClass.getProperty(propertyName);
+            MetaProperty property = metaClass.findProperty(propertyName);
             if (property != null && !property.isReadOnly() && !exclude(entity.getClass(), propertyName)) {
                 Class<?> propertyType = property.getJavaType();
                 Range propertyRange = property.getRange();

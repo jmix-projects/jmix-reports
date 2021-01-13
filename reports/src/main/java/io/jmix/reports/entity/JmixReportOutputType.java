@@ -18,10 +18,10 @@ package io.jmix.reports.entity;
 
 import java.io.ObjectStreamException;
 
-public class CubaReportOutputType extends com.haulmont.yarg.structure.ReportOutputType {
-    public final static CubaReportOutputType chart = new CubaReportOutputType("chart");
-    public final static CubaReportOutputType table = new CubaReportOutputType("table");
-    public final static CubaReportOutputType pivot = new CubaReportOutputType("pivot");
+public class JmixReportOutputType extends com.haulmont.yarg.structure.ReportOutputType {
+    public final static JmixReportOutputType chart = new JmixReportOutputType("chart");
+    public final static JmixReportOutputType table = new JmixReportOutputType("table");
+    public final static JmixReportOutputType pivot = new JmixReportOutputType("pivot");
 
     static {
        values.put(chart.getId(), chart);
@@ -29,7 +29,7 @@ public class CubaReportOutputType extends com.haulmont.yarg.structure.ReportOutp
        values.put(pivot.getId(), pivot);
     }
 
-    public CubaReportOutputType(String id) {
+    public JmixReportOutputType(String id) {
         super(id);
     }
 

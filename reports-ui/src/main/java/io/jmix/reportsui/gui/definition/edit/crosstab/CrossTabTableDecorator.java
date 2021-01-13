@@ -29,6 +29,7 @@ import io.jmix.security.constraint.SecureOperations;
 import io.jmix.ui.UiComponents;
 import io.jmix.ui.component.Table;
 import io.jmix.ui.component.TextField;
+import io.jmix.ui.component.data.TableItems;
 import io.jmix.ui.model.CollectionContainer;
 import io.jmix.ui.model.InstanceContainer;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -179,7 +179,7 @@ public class RunReportAction extends ListAction implements Action.HasBeforeActio
         }
 
         screenBuilders.screen(screen)
-                .withScreenId("report_inputParameters")
+                .withScreenId("report_InputParameters.lookup")
                 .withOpenMode(OpenMode.DIALOG)
                 .withOptions(new MapScreenOptions(ParamsMap.of(
                         InputParametersLookup.REPORT_PARAMETER, report,

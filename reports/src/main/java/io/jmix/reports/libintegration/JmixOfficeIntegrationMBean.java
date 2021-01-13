@@ -16,7 +16,7 @@
 
 package io.jmix.reports.libintegration;
 
-public interface CubaOfficeIntegrationMBean {
+public interface JmixOfficeIntegrationMBean {
 
     void setTimeoutInSeconds(Integer timeoutInSeconds);
     Integer getTimeoutInSeconds();

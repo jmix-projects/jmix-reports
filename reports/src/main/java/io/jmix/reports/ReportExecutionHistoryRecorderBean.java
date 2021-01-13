@@ -11,7 +11,7 @@ import com.haulmont.yarg.structure.ReportOutputType;
 import io.jmix.core.*;
 import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.localfs.LocalFileStorage;
-import io.jmix.reports.entity.CubaReportOutputType;
+import io.jmix.reports.entity.JmixReportOutputType;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportExecution;
 import org.apache.commons.lang3.time.DateUtils;
@@ -142,9 +142,9 @@ public class ReportExecutionHistoryRecorderBean implements ReportExecutionHistor
     protected boolean shouldSaveDocument(ReportExecution execution, ReportOutputDocument document) {
         ReportOutputType type = document.getReportOutputType();
         Set<String> outputTypesWithoutDocument = Sets.newHashSet(
-                CubaReportOutputType.chart.getId(),
-                CubaReportOutputType.table.getId(),
-                CubaReportOutputType.pivot.getId());
+                JmixReportOutputType.chart.getId(),
+                JmixReportOutputType.table.getId(),
+                JmixReportOutputType.pivot.getId());
         return reportingConfig.isSaveOutputDocumentsToHistory() && !outputTypesWithoutDocument.contains(type.getId());
     }
 

@@ -38,7 +38,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component(GroovyScriptParametersProvider.NAME)
-public class CubaGroovyScriptParametersProvider implements GroovyScriptParametersProvider {
+public class JmixGroovyScriptParametersProvider implements GroovyScriptParametersProvider {
 
     @Autowired
     protected ReportingConfig reportingConfig;

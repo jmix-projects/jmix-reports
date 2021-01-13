@@ -135,6 +135,7 @@ public class Report implements com.haulmont.yarg.structure.Report, io.jmix.core.
     protected Boolean system = false;
 
     @Transient
+    @JmixProperty
     protected BandDefinition rootBandDefinition;
 
     @Transient

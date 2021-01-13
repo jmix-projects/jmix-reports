@@ -16,6 +16,7 @@
 package io.jmix.reportsui.gui.report.run;
 
 import io.jmix.core.Messages;
+import io.jmix.core.common.util.Preconditions;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportInputParameter;
 import io.jmix.reports.entity.ReportTemplate;
@@ -23,7 +24,7 @@ import io.jmix.reports.exception.ReportParametersValidationException;
 import io.jmix.reportsui.gui.ReportGuiManager;
 import io.jmix.reportsui.gui.ReportParameterValidator;
 import io.jmix.ui.Notifications;
-import io.jmix.ui.action.Action;
+import io.jmix.ui.UiProperties;
 import io.jmix.ui.component.Button;
 import io.jmix.ui.component.ValidationErrors;
 import io.jmix.ui.component.Window;
@@ -37,10 +38,7 @@ import java.util.Map;
 @UiController("report_InputParameters.lookup")
 @UiDescriptor("input-parameters.xml")
 public class InputParametersLookup extends StandardLookup {
-    public static final String TEMPLATE_CODE_PARAMETER = "templateCode";
-    public static final String OUTPUT_FILE_NAME_PARAMETER = "outputFileName";
     public static final String INPUT_PARAMETER = "inputParameter";
-    public static final String BULK_PRINT = "bulkPrint";
     public static final String REPORT_PARAMETER = "report";
 
     protected String templateCode;
@@ -52,6 +50,8 @@ public class InputParametersLookup extends StandardLookup {
     protected Report report;
 
     protected ReportInputParameter inputParameter;
+
+    protected Map<String, Object> parameters;
 
     protected Collection selectedEntities;
 
@@ -76,29 +76,43 @@ public class InputParametersLookup extends StandardLookup {
     @Autowired
     protected ScreenValidation screenValidation;
 
+    @Autowired
+    protected UiProperties properties;
+
+    public void setTemplateCode(String templateCode) {
+        this.templateCode = templateCode;
+    }
+
+    public void setOutputFileName(String outputFileName) {
+        this.outputFileName = outputFileName;
+    }
+
+    public void setBulkPrint(boolean bulkPrint) {
+        this.bulkPrint = bulkPrint;
+    }
+
+    public void setReport(Report report) {
+        this.report = report;
+    }
+
+    public void setInputParameter(ReportInputParameter inputParameter) {
+        this.inputParameter = inputParameter;
+    }
+
+    public void setParameters(Map<String, Object> parameters) {
+        this.parameters = parameters;
+    }
+
     @Subscribe
     protected void onInit(InitEvent event) {
-        //noinspection unchecked
-        //todo params
-//        templateCode = (String) params.get(TEMPLATE_CODE_PARAMETER);
-//        outputFileName = (String) params.get(OUTPUT_FILE_NAME_PARAMETER);
-//        bulkPrint = BooleanUtils.isTrue((Boolean) params.get(BULK_PRINT));
-//        inputParameter = (ReportInputParameter) params.get(INPUT_PARAMETER);
-//
-//        if (bulkPrint) {
-//            Preconditions.checkNotNullArgument(inputParameter, String.format("%s is null for bulk print", INPUT_PARAMETER));
-//            //noinspection unchecked
-//            Map<String, Object> parameters = (Map<String, Object>) params.get(PARAMETERS_PARAMETER);
-//            selectedEntities = (Collection) parameters.get(inputParameter.getAlias());
-//        }
-//
-//        report = (Report) params.get(REPORT_PARAMETER);
-
-        Action printReportAction = printReportBtn.getAction();
-//TODO Commit shortcut
-//        String commitShortcut = clientConfig.getCommitShortcut();
-//        printReportAction.setShortcut(commitShortcut);
-        //addAction(printReportAction);
+        if (bulkPrint) {
+            Preconditions.checkNotNullArgument(inputParameter, String.format("%s is null for bulk print", INPUT_PARAMETER));
+            //noinspection unchecked
+            selectedEntities = (Collection) parameters.get(inputParameter.getAlias());
+        }
+        //todo
+//        Action printReportAction = printReportBtn.getAction();
+//        printReportAction.setShortcut(properties.getCommitShortcut());
     }
 
     @Subscribe

@@ -20,8 +20,8 @@ import com.haulmont.yarg.formatters.factory.FormatterFactoryInput;
 import com.haulmont.yarg.formatters.impl.XlsxFormatter;
 import org.xlsx4j.sml.Cell;
 
-public class CubaXlsxFormatter extends XlsxFormatter {
-    public CubaXlsxFormatter(FormatterFactoryInput formatterFactoryInput) {
+public class JmixXlsxFormatter extends XlsxFormatter {
+    public JmixXlsxFormatter(FormatterFactoryInput formatterFactoryInput) {
         super(formatterFactoryInput);
     }
 

@@ -31,10 +31,7 @@ import io.jmix.reportsui.gui.report.validators.ReportParamFieldValidator;
 import io.jmix.ui.component.*;
 import io.jmix.ui.model.CollectionContainer;
 import io.jmix.ui.model.CollectionLoader;
-import io.jmix.ui.screen.ScreenFragment;
-import io.jmix.ui.screen.Subscribe;
-import io.jmix.ui.screen.UiController;
-import io.jmix.ui.screen.UiDescriptor;
+import io.jmix.ui.screen.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -108,6 +105,17 @@ public class InputParametersFragment extends ScreenFragment {
 
     @Subscribe
     public void onInit(InitEvent event) {
+        ScreenOptions options = event.getOptions();
+
+        if(options instanceof MapScreenOptions) {
+            MapScreenOptions mapScreenOptions = (MapScreenOptions) options;
+
+            report = (Report) mapScreenOptions.getParams().get(REPORT_PARAMETER);
+            parameters = (Map<String, Object>) mapScreenOptions.getParams().get(PARAMETERS_PARAMETER);
+//            bulkPrint = BooleanUtils.isTrue((Boolean) mapScreenOptions.getParams().get(BULK_PRINT));
+//            inputParameter = (ReportInputParameter) mapScreenOptions.getParams().get(INPUT_PARAMETER);
+        }
+
         if (report != null && !report.getIsTmp()) {
             report = dataManager.load(Id.of(report))
                     .fetchPlan(ReportService.MAIN_VIEW_NAME)
@@ -180,7 +188,7 @@ public class InputParametersFragment extends ScreenFragment {
             field.addValidator(new ReportCollectionValidator(field));
         }
 
-        Label label = parameterFieldCreator.createLabel(parameter, field);
+        Label<String> label = parameterFieldCreator.createLabel(parameter, field);
         label.setStyleName("c-report-parameter-caption");
 
         if (currentGridRow == 0) {

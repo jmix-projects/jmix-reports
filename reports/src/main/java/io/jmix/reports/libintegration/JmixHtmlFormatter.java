@@ -54,14 +54,14 @@ import java.util.regex.Pattern;
 
 import static java.lang.String.format;
 
-public class CubaHtmlFormatter extends HtmlFormatter {
+public class JmixHtmlFormatter extends HtmlFormatter {
     protected static final String CUBA_FONTS_DIR = "/cuba/fonts";
 
     public static final String FS_PROTOCOL_PREFIX = "fs://";
     public static final String WEB_APP_PREFIX = "web://";
     public static final String CORE_APP_PREFIX = "core://";
 
-    private static final Logger log = LoggerFactory.getLogger(CubaHtmlFormatter.class);
+    private static final Logger log = LoggerFactory.getLogger(JmixHtmlFormatter.class);
 
     @Autowired
     protected Messages messages;
@@ -80,7 +80,7 @@ public class CubaHtmlFormatter extends HtmlFormatter {
     @Autowired
     protected TemporaryStorage temporaryStorage;
 
-    public CubaHtmlFormatter(FormatterFactoryInput formatterFactoryInput) {
+    public JmixHtmlFormatter(FormatterFactoryInput formatterFactoryInput) {
         super(formatterFactoryInput);
     }
 

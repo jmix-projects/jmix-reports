@@ -19,6 +19,7 @@ import com.haulmont.yarg.structure.BandOrientation;
 import com.haulmont.yarg.structure.ReportBand;
 import com.haulmont.yarg.structure.ReportQuery;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
+import io.jmix.core.entity.annotation.JmixId;
 import io.jmix.core.entity.annotation.SystemLevel;
 import io.jmix.core.metamodel.annotation.InstanceName;
 import io.jmix.core.metamodel.annotation.JmixEntity;
@@ -35,7 +36,7 @@ public class BandDefinition implements ReportBand {
 
     private static final long serialVersionUID = 8658220979738705511L;
 
-    @Id
+    @JmixId
     @JmixGeneratedValue
     protected UUID id;
 

@@ -28,6 +28,7 @@ import io.jmix.reports.entity.*;
 import io.jmix.reports.exception.FailedToConnectToOpenOfficeException;
 import io.jmix.reports.exception.NoOpenOfficeFreePortsException;
 import io.jmix.reports.exception.ReportingException;
+import io.jmix.reportsui.gui.report.run.InputParametersLookup;
 import io.jmix.reportsui.gui.report.run.ShowChartLookup;
 import io.jmix.reportsui.gui.report.run.ShowPivotTableLookup;
 import io.jmix.reportsui.gui.report.run.ShowReportTableLookup;
@@ -52,8 +53,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-import static io.jmix.reportsui.gui.report.run.InputParametersFragment.PARAMETERS_PARAMETER;
-import static io.jmix.reportsui.gui.report.run.InputParametersLookup.*;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @UIScope
@@ -310,21 +309,21 @@ public class ReportGuiManager {
                                     @Nullable String templateCode, @Nullable String outputFileName,
                                     @Nullable ReportOutputType outputType, @Nullable FrameOwner screen) {
 
-        if (document.getReportOutputType().getId().equals(CubaReportOutputType.chart.getId())) {
+        if (document.getReportOutputType().getId().equals(JmixReportOutputType.chart.getId())) {
             ShowChartLookup showChartLookup = (ShowChartLookup) screens.create("report_ShowChart.lookup", OpenMode.DIALOG);
             showChartLookup.setChartJson(new String(document.getContent(), StandardCharsets.UTF_8));
             showChartLookup.setReport((Report) document.getReport());
             showChartLookup.setTemplateCode(templateCode);
             showChartLookup.setReportParameters(params);
             showChartLookup.show();
-        } else if (document.getReportOutputType().getId().equals(CubaReportOutputType.pivot.getId())) {
+        } else if (document.getReportOutputType().getId().equals(JmixReportOutputType.pivot.getId())) {
             ShowPivotTableLookup pivotTableLookup = (ShowPivotTableLookup) screens.create("report_ShowPivotTable.lookup", OpenMode.DIALOG);
             pivotTableLookup.setPivotTableData(document.getContent());
             pivotTableLookup.setReport((Report) document.getReport());
             pivotTableLookup.setTemplateCode(templateCode);
             pivotTableLookup.setParams(params);
             pivotTableLookup.show();
-        } else if (document.getReportOutputType().getId().equals(CubaReportOutputType.table.getId())) {
+        } else if (document.getReportOutputType().getId().equals(JmixReportOutputType.table.getId())) {
             ShowReportTableLookup reportTable = (ShowReportTableLookup) screens.create("report_ShowReportTable.lookup", OpenMode.DIALOG);
             reportTable.setTableData(document.getContent());
             reportTable.setReport((Report) document.getReport());
@@ -710,16 +709,15 @@ public class ReportGuiManager {
                                           @Nullable ReportInputParameter inputParameter, @Nullable String templateCode,
                                           @Nullable String outputFileName,
                                           boolean bulkPrint) {
-        Map<String, Object> params = ParamsMap.of(
-                REPORT_PARAMETER, report,
-                PARAMETERS_PARAMETER, parameters,
-                INPUT_PARAMETER, inputParameter,
-                TEMPLATE_CODE_PARAMETER, templateCode,
-                OUTPUT_FILE_NAME_PARAMETER, outputFileName,
-                BULK_PRINT, bulkPrint
-        );
-        screens.create("report_inputParameters", OpenMode.DIALOG, new MapScreenOptions(params))
-                .show();
+        InputParametersLookup inputParametersLookup = (InputParametersLookup) screens.create("report_inputParameters",
+                OpenMode.DIALOG);
+        inputParametersLookup.setReport(report);
+        inputParametersLookup.setInputParameter(inputParameter);
+        inputParametersLookup.setParameters(parameters);
+        inputParametersLookup.setTemplateCode(templateCode);
+        inputParametersLookup.setOutputFileName(outputFileName);
+        inputParametersLookup.setBulkPrint(bulkPrint);
+        inputParametersLookup.show();
     }
 
     protected void openReportParamsDialog(FrameOwner screen, Report report, @Nullable Map<String, Object> parameters,

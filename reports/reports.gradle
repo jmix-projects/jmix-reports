@@ -29,6 +29,7 @@ dependencies {
     api 'io.jmix.ui:jmix-ui'
     api 'io.jmix.security:jmix-security'
     api 'io.jmix.security:jmix-security-data'
+    api 'io.jmix.security:jmix-security-ui-starter'
 //    api 'io.jmix.dynattr:jmix-dynattr'
     api 'io.jmix.localfs:jmix-localfs'
 

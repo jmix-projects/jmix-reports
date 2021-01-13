@@ -39,10 +39,12 @@ import io.jmix.ui.model.InstanceContainer;
 import io.jmix.ui.screen.*;
 import io.jmix.ui.upload.TemporaryStorage;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -178,17 +180,17 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
         if (StringUtils.isEmpty(template.getCode())) {
             Report report = template.getReport();
             if (report != null) {
-                if (report.getTemplates() == null || report.getTemplates().isEmpty())
+                if (report.getTemplates() == null || report.getTemplates().isEmpty()) {
                     template.setCode(ReportService.DEFAULT_TEMPLATE_CODE);
-                else
+                } else {
                     template.setCode("Template_" + report.getTemplates().size());
+                }
             }
         }
     }
 
     @Subscribe
     protected void onAfterInit(AfterInitEvent event) {
-        //initUploadField();
         templateDc.addItemPropertyChangeListener(e -> {
             ReportTemplate reportTemplate = getEditedEntity();
             switch (e.getProperty()) {
@@ -225,10 +227,17 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
 
     @Subscribe
     protected void onBeforeShow(BeforeShowEvent event) {
+        initUploadField();
+
         ReportTemplate reportTemplate = getEditedEntity();
         initTemplateEditor(reportTemplate);
         getDescriptionEditFrames().forEach(controller -> controller.setItem(reportTemplate));
         setupVisibility(reportTemplate.getCustom(), reportTemplate.getReportOutputType());
+    }
+
+    @Subscribe("templateUploadField")
+    public void onTemplateUploadFieldFileUploadStart(UploadField.FileUploadStartEvent event) {
+        templateUploadField.setFileName(event.getFileName());
     }
 
     protected Collection<DescriptionEditFrame> getDescriptionEditFrames() {
@@ -362,14 +371,13 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
             ReportTemplate reportTemplate = getEditedEntity();
             reportTemplate.setName(fileName);
 
-//            File file = temporaryStorage.getFile(templateUploadField.getFileId());
-//            try {
-//                byte[] data = FileUtils.readFileToByteArray(file);
-//                reportTemplate.setContent(data);
-//            } catch (IOException ex) {
-//                throw new RuntimeException(
-//                        String.format("An error occurred while uploading file for template [%s]", getEditedEntity().getCode()), ex);
-//            }
+            try {
+                byte[] data = IOUtils.toByteArray(templateUploadField.getFileContent());
+                reportTemplate.setContent(data);
+            } catch (IOException ex) {
+                throw new RuntimeException(
+                        String.format("An error occurred while uploading file for template [%s]", getEditedEntity().getCode()), ex);
+            }
             initTemplateEditor(reportTemplate);
             setupTemplateTypeVisibility(hasTemplateOutput(reportTemplate.getReportOutputType()));
             updateOutputType();
@@ -384,9 +392,10 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
         if (templateFile != null && !hasChartTemplateOutput(reportTemplate.getReportOutputType())) {
             templateUploadField.setContentProvider(() -> new ByteArrayInputStream(templateFile));
 
+            //todo
             temporaryStorage.saveFile(templateFile);
-            // todo
-            //templateUploadField.setValue(fileDescriptor);
+            templateUploadField.setValue(templateFile);
+            templateUploadField.setFileName(getEditedEntity().getName());
         }
 
         boolean updatePermitted = secureOperations.isEntityUpdatePermitted(metadata.getClass(reportTemplate), policyStore)
@@ -487,6 +496,7 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
 
             notifications.create(Notifications.NotificationType.TRAY)
                     .withCaption(messages.getMessage(getClass(), "validationFail.caption"))
+                    .withDescription(notification.toString())
                     .show();
 
             return false;

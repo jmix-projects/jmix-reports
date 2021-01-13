@@ -33,7 +33,7 @@ public class JmixFormatterFactory extends DefaultFormatterFactory {
     public JmixFormatterFactory() {
         super();
         FormatterCreator ftlCreator = factoryInput -> {
-            HtmlFormatter htmlFormatter = beanFactory.getBean(CubaHtmlFormatter.class, factoryInput);
+            HtmlFormatter htmlFormatter = beanFactory.getBean(JmixHtmlFormatter.class, factoryInput);
             htmlFormatter.setDefaultFormatProvider(defaultFormatProvider);
             htmlFormatter.setScripting(scripting);
             return htmlFormatter;
@@ -42,7 +42,7 @@ public class JmixFormatterFactory extends DefaultFormatterFactory {
         formattersMap.put("html", ftlCreator);
 
         FormatterCreator docxCreator = factoryInput -> {
-            DocxFormatter docxFormatter = beanFactory.getBean(DocxFormatter.class, factoryInput);
+            DocxFormatter docxFormatter = new DocxFormatter(factoryInput);
             docxFormatter.setDefaultFormatProvider(defaultFormatProvider);
             if (useOfficeForDocumentConversion) {
                 docxFormatter.setDocumentConverter(documentConverter);
@@ -57,7 +57,7 @@ public class JmixFormatterFactory extends DefaultFormatterFactory {
         formattersMap.put("pivot", factoryInput -> beanFactory.getBean(PivotTableFormatter.class, factoryInput));
 
         FormatterCreator xlsxCreator = factoryInput -> {
-            XlsxFormatter xlsxFormatter = new CubaXlsxFormatter(factoryInput);
+            XlsxFormatter xlsxFormatter = new JmixXlsxFormatter(factoryInput);
             xlsxFormatter.setDefaultFormatProvider(defaultFormatProvider);
             xlsxFormatter.setDocumentConverter(documentConverter);
             xlsxFormatter.setScripting(scripting);
@@ -65,7 +65,7 @@ public class JmixFormatterFactory extends DefaultFormatterFactory {
         };
         formattersMap.put("xlsx", xlsxCreator);
 
-        formattersMap.put("table", CubaTableFormatter::new);
+        formattersMap.put("table", JmixTableFormatter::new);
     }
 
     public boolean isUseOfficeForDocumentConversion() {

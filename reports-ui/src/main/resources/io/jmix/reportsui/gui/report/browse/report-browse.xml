@@ -37,6 +37,10 @@
         </collection>
     </data>
 
+    <facets>
+        <dataLoadCoordinator auto="true"/>
+    </facets>
+
     <dialogMode height="theme://cuba.gui.dialogSize.height.xlarge"
                 width="theme://cuba.gui.dialogSize.width.xlarge"
                 resizable="true"/>

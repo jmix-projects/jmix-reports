@@ -86,8 +86,8 @@ public class ParameterFieldCreator {
             .put(ParameterType.TIME, new TimeFieldCreator())
             .build();
 
-    public Label createLabel(ReportInputParameter parameter, Field field) {
-        Label label = uiComponents.create(Label.class);
+    public Label<String> createLabel(ReportInputParameter parameter, Field field) {
+        Label<String> label = uiComponents.create(Label.class);
         label.setAlignment(field instanceof TagPicker ? Component.Alignment.TOP_LEFT : Component.Alignment.MIDDLE_LEFT);
         label.setWidth(Component.AUTO_SIZE);
         label.setValue(parameter.getLocName());
@@ -230,6 +230,7 @@ public class ParameterFieldCreator {
                 CollectionLoader collectionLoader = factory.createCollectionLoader();
                 collectionLoader.setContainer(collectionContainer);
 
+                //todo
 //                CollectionDatasource ds = DsBuilder.create()
 //                        .setViewName(View.MINIMAL)
 //                        .setMetaClass(entityMetaClass)
@@ -300,7 +301,7 @@ public class ParameterFieldCreator {
             factory.createCollectionLoader()
                     .setContainer(collectionContainer);
 
-
+                //todo
 //            DsBuilder builder = DsBuilder.create(frame.getDsContext());
 //            CollectionDatasource cds = builder
 //                    .setRefreshMode(CollectionDatasource.RefreshMode.NEVER)
