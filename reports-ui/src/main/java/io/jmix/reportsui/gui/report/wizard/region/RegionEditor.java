@@ -200,7 +200,7 @@ public class RegionEditor extends StandardEditor<ReportRegion> {
                         RegionProperty regionProperty = metadata.create(RegionProperty.class);
                         regionProperty.setEntityTreeNode(entityTreeNode);
                         regionProperty.setOrderNum((long) reportRegionPropertiesTableDc.getItems().size() + 1); //first element must be not zero cause later we do sorting by multiplying that values
-                        reportRegionPropertiesTableDc.getItems().add(regionProperty);
+                        reportRegionPropertiesTableDc.getMutableItems().add(regionProperty);
                         addedItems.add(regionProperty);
                     } else {
                         alreadyAdded = true;

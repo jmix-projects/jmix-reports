@@ -37,6 +37,7 @@
                                        requiredMessage="msg://valueNameMsg"/>
                             <comboBox id="formatComboBox" required="true"
                                       caption="msg://valuesFormats.format" width="100%"
+                                      property="formatString"
                                       requiredMessage="msg://formatStringMsg"/>
                         </column>
                     </form>

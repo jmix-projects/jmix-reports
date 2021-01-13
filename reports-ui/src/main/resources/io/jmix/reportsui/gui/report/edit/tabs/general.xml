@@ -19,6 +19,7 @@
     <data>
         <instance id="reportDc" class="io.jmix.reports.entity.Report"
                   provided="true">
+            <loader id="reportDl" provided="true"/>
             <collection id="parametersDc" property="inputParameters" provided="true"/>
             <collection id="bandsDc" property="bands" provided="true">
                 <collection id="dataSetsDc" property="dataSets" provided="true"/>
@@ -82,6 +83,7 @@
                             <actions>
                                 <action id="create" type="create"/>
                                 <action id="remove" type="remove"/>
+                                <action id="refresh" type="refresh"/>
                             </actions>
                             <buttonsPanel>
                                 <button id="createBandDefinition" action="serviceTree.create" description="msg://description.createBand" icon="font-icon:PLUS"/>

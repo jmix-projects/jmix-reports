@@ -27,7 +27,6 @@ import io.jmix.ui.Notifications;
 import io.jmix.ui.UiProperties;
 import io.jmix.ui.component.Button;
 import io.jmix.ui.component.ValidationErrors;
-import io.jmix.ui.component.Window;
 import io.jmix.ui.screen.*;
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,9 +34,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Collection;
 import java.util.Map;
 
-@UiController("report_InputParameters.lookup")
+@DialogMode(width = "AUTO", forceDialog = true)
+@UiController("report_InputParameters.dialog")
 @UiDescriptor("input-parameters.xml")
-public class InputParametersLookup extends StandardLookup {
+public class InputParametersDialog extends Screen {
     public static final String INPUT_PARAMETER = "inputParameter";
     public static final String REPORT_PARAMETER = "report";
 
@@ -168,6 +168,6 @@ public class InputParametersLookup extends StandardLookup {
 
     @Subscribe("cancelBtn")
     public void cancel() {
-        close(new StandardCloseAction(Window.CLOSE_ACTION_ID));
+        close(StandardOutcome.CLOSE);
     }
 }

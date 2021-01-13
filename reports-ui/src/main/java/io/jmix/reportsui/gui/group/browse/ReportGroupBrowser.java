@@ -20,6 +20,7 @@ import io.jmix.core.*;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportGroup;
 import io.jmix.ui.Notifications;
+import io.jmix.ui.action.Action;
 import io.jmix.ui.action.list.CreateAction;
 import io.jmix.ui.action.list.EditAction;
 import io.jmix.ui.action.list.RemoveAction;
@@ -42,10 +43,13 @@ public class ReportGroupBrowser extends StandardLookup<ReportGroup> {
     protected Table<ReportGroup> reportGroupsTable;
 
     @Named("reportGroupsTable.create")
-    protected CreateAction createAction;
+    protected CreateAction<ReportGroup> createAction;
 
     @Named("reportGroupsTable.edit")
-    protected EditAction editAction;
+    protected EditAction<ReportGroup> editAction;
+
+    @Named("reportGroupsTable.remove")
+    protected RemoveAction<ReportGroup> removeAction;
 
     @Autowired
     protected DataManager dataManager;
@@ -66,46 +70,38 @@ public class ReportGroupBrowser extends StandardLookup<ReportGroup> {
     protected void onInit(InitEvent event) {
         createAction.setOpenMode(OpenMode.DIALOG);
         editAction.setOpenMode(OpenMode.DIALOG);
-
-        //reportGroupsTable.addAction(new RemoveReportGroupAction());
     }
 
-    protected class RemoveReportGroupAction extends RemoveAction {
+    @Subscribe("reportGroupsTable.remove")
+    public void onReportGroupsTableRemove(Action.ActionPerformedEvent event) {
+        if (!event.getSource().isEnabled()) {
+            return;
+        }
 
-//        public RemoveReportGroupAction(String id) {
-//            super(id);
-//        }
+        ReportGroup group = reportGroupsTable.getSingleSelected();
+        if (group != null) {
+            if (group.getSystemFlag()) {
+                notifications.create(Notifications.NotificationType.WARNING)
+                        .withCaption(messages.getMessage(getClass(), "unableToDeleteSystemReportGroup"))
+                        .show();
+            } else {
+                LoadContext<Report> loadContext = new LoadContext(metadata.getClass(Report.class));
+                loadContext.setFetchPlan(fetchPlanRepository.getFetchPlan(Report.class, "report.view"));
+                LoadContext.Query query = new LoadContext.Query("select r from report_Report r where r.group.id = :groupId");
+                query.setMaxResults(1);
+                query.setParameter("groupId", group.getId());
+                loadContext.setQuery(query);
 
-        @Override
-        public void actionPerform(Component component) {
-            if (!isEnabled()) {
-                return;
-            }
-
-            ReportGroup group = (ReportGroup) target.getSingleSelected();
-            if (group != null) {
-                if (group.getSystemFlag()) {
+                Report report = dataManager.load(loadContext);
+                if (report != null) {
                     notifications.create(Notifications.NotificationType.WARNING)
-                            .withCaption(messages.getMessage("unableToDeleteSystemReportGroup"))
+                            .withCaption(messages.getMessage(getClass(), "unableToDeleteNotEmptyReportGroup"))
                             .show();
                 } else {
-                    LoadContext<Report> loadContext = new LoadContext(metadata.getClass(Report.class));
-                    loadContext.setFetchPlan(fetchPlanRepository.getFetchPlan(Report.class, "report.view"));
-                    LoadContext.Query query = new LoadContext.Query("select r from report_Report r where r.group.id = :groupId");
-                    query.setMaxResults(1);
-                    query.setParameter("groupId", group.getId());
-                    loadContext.setQuery(query);
-
-                    Report report = dataManager.load(loadContext);
-                    if (report != null) {
-                        notifications.create(Notifications.NotificationType.WARNING)
-                                .withCaption(messages.getMessage("unableToDeleteNotEmptyReportGroup"))
-                                .show();
-                    } else {
-                        super.actionPerform(component);
-                    }
+                    removeAction.execute();
                 }
             }
         }
     }
+
 }

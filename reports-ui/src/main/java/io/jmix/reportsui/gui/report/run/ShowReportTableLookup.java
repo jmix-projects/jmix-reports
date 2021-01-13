@@ -197,6 +197,7 @@ public class ShowReportTableLookup extends StandardLookup {
         });
     }
 
+    //todo
 //    protected CollectionContainer createDataSource(String dataSetName, List<KeyValueEntity> keyValueEntities, Map<String, Set<CubaTableData.ColumnInfo>> headerMap) {
 //        DsBuilder dsBuilder = DsBuilder.create(getDsContext())
 //                .setId(dataSetName + "Ds")
@@ -255,12 +256,12 @@ public class ShowReportTableLookup extends StandardLookup {
                 JmixTableData.ColumnInfo columnInfo = getColumnInfo(propertyName, headers);
 
                 Element element = DocumentHelper.createElement("column");
-//                Table.Column column = columnInfo.getPosition() == null
-//                        ? table.addColumn(metaPropertyPath)
-//                        : table.addColumn(metaPropertyPath, columnInfo.getPosition());
+                Table.Column column = columnInfo.getPosition() == null
+                        ? table.addColumn(metaPropertyPath)
+                        : table.addColumn(metaPropertyPath, columnInfo.getPosition());
 
-//                column.setXmlDescriptor(element);
-//                column.setCaption(columnInfo.getCaption());
+                column.setXmlDescriptor(element);
+                column.setCaption(columnInfo.getCaption());
             }
         }
     }

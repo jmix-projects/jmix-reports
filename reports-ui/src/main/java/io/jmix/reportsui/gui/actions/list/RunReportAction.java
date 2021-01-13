@@ -25,7 +25,7 @@ import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.reports.entity.Report;
 import io.jmix.reportsui.gui.ReportGuiManager;
 import io.jmix.reportsui.gui.report.run.InputParametersFragment;
-import io.jmix.reportsui.gui.report.run.InputParametersLookup;
+import io.jmix.reportsui.gui.report.run.InputParametersDialog;
 import io.jmix.reportsui.gui.report.run.ReportRun;
 import io.jmix.ui.ScreenBuilders;
 import io.jmix.ui.action.Action;
@@ -179,10 +179,10 @@ public class RunReportAction extends ListAction implements Action.HasBeforeActio
         }
 
         screenBuilders.screen(screen)
-                .withScreenId("report_InputParameters.lookup")
+                .withScreenClass(InputParametersDialog.class)
                 .withOpenMode(OpenMode.DIALOG)
                 .withOptions(new MapScreenOptions(ParamsMap.of(
-                        InputParametersLookup.REPORT_PARAMETER, report,
+                        InputParametersDialog.REPORT_PARAMETER, report,
                         InputParametersFragment.PARAMETERS_PARAMETER, selectedItems)))
                 .show();
     }

@@ -24,6 +24,7 @@ import io.jmix.core.entity.annotation.Listeners;
 import io.jmix.core.entity.annotation.SystemLevel;
 import io.jmix.core.metamodel.annotation.*;
 import io.jmix.securitydata.entity.RoleEntity;
+import io.jmix.securityui.model.RoleModel;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Predicate;
 import org.apache.commons.lang3.StringUtils;
@@ -154,7 +155,7 @@ public class Report implements com.haulmont.yarg.structure.Report, io.jmix.core.
 
     @Transient
     @JmixProperty
-    protected Set<RoleEntity> roles = new HashSet<>();
+    protected Set<RoleModel> roles = new HashSet<>();
 
     @Transient
     protected String localeName;
@@ -292,11 +293,11 @@ public class Report implements com.haulmont.yarg.structure.Report, io.jmix.core.
     }
 
     @JmixProperty
-    public Set<RoleEntity> getRoles() {
+    public Set<RoleModel> getRoles() {
         return roles;
     }
 
-    public void setRoles(Set<RoleEntity> roles) {
+    public void setRoles(Set<RoleModel> roles) {
         if (roles == null) roles = Collections.emptySet();
         this.roles = roles;
     }

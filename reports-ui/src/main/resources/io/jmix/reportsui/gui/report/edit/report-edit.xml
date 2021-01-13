@@ -21,7 +21,7 @@
         <instance id="reportDc"
                   class="io.jmix.reports.entity.Report">
             <fetchPlan extends="report.edit"/>
-            <loader/>
+            <loader id="reportDl"/>
             <collection id="parametersDc" property="inputParameters"/>
             <collection id="valuesFormatsDc" property="valuesFormats"/>
             <collection id="rolesDc" property="roles"/>

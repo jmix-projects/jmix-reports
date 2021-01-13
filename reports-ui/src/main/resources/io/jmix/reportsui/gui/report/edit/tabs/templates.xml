@@ -29,6 +29,8 @@
                reorderingAllowed="false" columnControlVisible="false">
             <actions>
                 <action id="create" type="create"/>
+                <action id="remove" type="remove"/>
+                <action id="edit" type="edit"/>
             </actions>
             <buttonsPanel>
                 <button action="templatesTable.create"/>

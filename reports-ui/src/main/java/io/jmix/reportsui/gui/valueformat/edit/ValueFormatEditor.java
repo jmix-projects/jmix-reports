@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 
 import static io.jmix.ui.component.Window.COMMIT_ACTION_ID;
 
-@DialogMode(width = "AUTO")
+@DialogMode(width = "AUTO", forceDialog = true)
 @UiController("report_ReportValueFormat.edit")
 @UiDescriptor("format-edit.xml")
 @EditedEntityContainer("valuesFormatsDc")

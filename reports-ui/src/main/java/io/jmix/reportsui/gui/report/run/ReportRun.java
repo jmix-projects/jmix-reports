@@ -110,7 +110,7 @@ public class ReportRun extends StandardLookup<Report> {
         }
 
         for (Report report : reports) {
-            reportsDc.getItems().add(report);
+            reportsDc.getMutableItems().add(report);
         }
 
         Action runAction = new ItemTrackingAction(RUN_ACTION_ID)
@@ -176,9 +176,9 @@ public class ReportRun extends StandardLookup<Report> {
                         })
                         .collect(Collectors.toList());
 
-        reportsDc.getItems().clear();
+        reportsDc.getMutableItems().clear();
         for (Report report : reports) {
-            reportsDc.getItems().add(report);
+            reportsDc.getMutableItems().add(report);
         }
 
         Table.SortInfo sortInfo = reportsTable.getSortInfo();

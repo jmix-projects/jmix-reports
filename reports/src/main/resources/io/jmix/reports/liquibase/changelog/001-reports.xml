@@ -116,7 +116,6 @@
             <column name="OUTPUT_TYPE" type="integer" defaultValue="0">
                 <constraints nullable="false"/>
             </column>
-            <column name="IS_DEFAULT" type="boolean" defaultValue="false"/>
             <column name="IS_CUSTOM" type="boolean" defaultValue="false"/>
             <column name="IS_ALTERABLE_OUTPUT" type="boolean" defaultValue="false"/>
             <column name="IS_GROOVY" type="boolean" defaultValue="false"/>

@@ -29,7 +29,6 @@ import io.jmix.security.constraint.SecureOperations;
 import io.jmix.ui.UiComponents;
 import io.jmix.ui.component.Table;
 import io.jmix.ui.component.TextField;
-import io.jmix.ui.component.data.TableItems;
 import io.jmix.ui.model.CollectionContainer;
 import io.jmix.ui.model.InstanceContainer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -168,8 +167,8 @@ public class CrossTabTableDecorator {
                 }
 
                 if (Orientation.CROSS == orientation) {
-                    dataSetsDs.getItems().add(horizontal);
-                    dataSetsDs.getItems().add(vertical);
+                    dataSetsDs.getMutableItems().add(horizontal);
+                    dataSetsDs.getMutableItems().add(vertical);
                 }
             }
 
@@ -181,10 +180,9 @@ public class CrossTabTableDecorator {
     }
 
     protected void onOrientationChange(CollectionContainer<DataSet> dataSetsDs, InstanceContainer<BandDefinition> bandDefinitionDs) {
-        //todo
-        //        dataSetsDs.getItems().stream()
-//                .filter(Objects::nonNull)
-//                .forEach(dataSetsDs::removeItem);
-        dataSetsDs.getItems().add(dataSetFactory.createEmptyDataSet(bandDefinitionDs.getItem()));
+        dataSetsDs.getItems().stream()
+                .filter(Objects::nonNull)
+                .forEach(item -> dataSetsDs.getMutableItems().remove(item));
+        dataSetsDs.getMutableItems().add(dataSetFactory.createEmptyDataSet(bandDefinitionDs.getItem()));
     }
 }

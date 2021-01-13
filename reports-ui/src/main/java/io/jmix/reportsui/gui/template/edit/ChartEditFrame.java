@@ -55,7 +55,6 @@ public class ChartEditFrame extends DescriptionEditFrame {
     protected InstanceContainer<PieChartDescription> pieChartDc;
     @Autowired
     protected InstanceContainer<SerialChartDescription> serialChartDc;
-    //todo sort
     @Autowired
     protected CollectionContainer<ChartSeries> seriesDc;
     @Autowired
@@ -115,7 +114,7 @@ public class ChartEditFrame extends DescriptionEditFrame {
         createAction.withHandler(handle -> {
             ChartSeries chartSeries = dataManager.create(ChartSeries.class);
             chartSeries.setOrder(seriesDc.getItems().size() + 1);
-            seriesDc.getItems().add(chartSeries);
+            seriesDc.getMutableItems().add(chartSeries);
         });
         seriesTable.addAction(createAction);
 
@@ -301,7 +300,7 @@ public class ChartEditFrame extends DescriptionEditFrame {
 
         ChartSeriesMoveAction(boolean up) {
             super(seriesTable, up ? "up" : "down");
-            setCaption(messages.getMessage(up ? "generalFrame.up" : "generalFrame.down"));
+            setCaption(messages.getMessage(getClass(), up ? "generalFrame.up" : "generalFrame.down"));
             this.up = up;
         }
 

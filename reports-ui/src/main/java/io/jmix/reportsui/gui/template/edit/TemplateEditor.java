@@ -48,7 +48,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-@DialogMode(width = "AUTO")
+@DialogMode(width = "AUTO", forceDialog = true)
 @UiController("report_ReportTemplate.edit")
 @UiDescriptor("template-edit.xml")
 @EditedEntityContainer("templateDc")

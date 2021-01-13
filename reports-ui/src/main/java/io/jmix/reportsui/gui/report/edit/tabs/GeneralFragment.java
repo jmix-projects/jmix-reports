@@ -3,6 +3,7 @@ package io.jmix.reportsui.gui.report.edit.tabs;
 import io.jmix.core.EntityStates;
 import io.jmix.core.Messages;
 import io.jmix.core.Metadata;
+import io.jmix.core.Sort;
 import io.jmix.reports.entity.*;
 import io.jmix.reportsui.gui.definition.edit.BandDefinitionEditor;
 import io.jmix.security.constraint.PolicyStore;
@@ -15,6 +16,7 @@ import io.jmix.ui.component.Tree;
 import io.jmix.ui.model.CollectionContainer;
 import io.jmix.ui.model.CollectionPropertyContainer;
 import io.jmix.ui.model.InstanceContainer;
+import io.jmix.ui.model.InstanceLoader;
 import io.jmix.ui.screen.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -27,6 +29,9 @@ public class GeneralFragment extends ScreenFragment {
 
     @Named("serviceTree")
     protected Tree<BandDefinition> bandTree;
+
+    @Autowired
+    protected InstanceLoader<Report> reportDl;
 
     @Autowired
     protected InstanceContainer<Report> reportDc;
@@ -63,6 +68,12 @@ public class GeneralFragment extends ScreenFragment {
 
     @Autowired
     private BandDefinitionEditor bandEditor;
+
+    @Autowired
+    protected Button up;
+
+    @Autowired
+    protected Button down;
 
     @Subscribe
     public void onInit(InitEvent event) {
@@ -133,8 +144,227 @@ public class GeneralFragment extends ScreenFragment {
             //todo
             //treeDc.modifyItem(e.getItem());
         });
+
+        //        propertiesFieldGroup.add("defaultTemplate", new FieldGroup.CustomFieldGenerator() {
+//            @Override
+//            public Component generateField(Datasource datasource, String propertyId) {
+//                EntityComboBox entityComboBox = uiComponents.create(EntityComboBox.class);
+//
+////                entityComboBox.setOptionsDatasource(templatesDc);
+////                entityComboBox.setDatasource(datasource, propertyId);
+//
+//                entityComboBox.addAction(new AbstractAction("download") {
+//
+//                    @Override
+//                    public String getDescription() {
+//                        return messages.getMessage("description.downloadTemplate");
+//                    }
+//
+//                    @Override
+//                    public String getCaption() {
+//                        return null;
+//                    }
+//
+//                    @Override
+//                    public String getIcon() {
+//                        return "icons/reports-template-download.png";
+//                    }
+//
+//                    @Override
+//                    public void actionPerform(Component component) {
+//                        ReportTemplate defaultTemplate = getEditedEntity().getDefaultTemplate();
+//                        if (defaultTemplate != null) {
+//                            if (defaultTemplate.isCustom()) {
+//                                notifications.create(Notifications.NotificationType.HUMANIZED)
+//                                        .withCaption(messages.getMessage("unableToSaveTemplateWhichDefinedWithClass"))
+//                                        .show();
+//                            } else if (isTemplateWithoutFile(defaultTemplate)) {
+//                                notifications.create(Notifications.NotificationType.HUMANIZED)
+//                                        .withCaption(messages.getMessage("notification.fileIsNotAllowedForSpecificTypes"))
+//                                        .show();
+//                            } else {
+//                                byte[] reportTemplate = defaultTemplate.getContent();
+//                                downloader.download(new ByteArrayDataProvider(reportTemplate, uiProperties.getSaveExportedByteArrayDataThresholdBytes(), coreProperties.getTempDir()),
+//                                        defaultTemplate.getName(), DownloadFormat.getByExtension(defaultTemplate.getExt()));
+//                            }
+//                        } else {
+//                            notifications.create(Notifications.NotificationType.HUMANIZED)
+//                                    .withCaption(messages.getMessage("notification.defaultTemplateIsEmpty"))
+//                                    .show();
+//                        }
+//
+//                        entityComboBox.focus();
+//                    }
+//                });
+//
+//                entityComboBox.addAction(new AbstractAction("upload") {
+//                    @Override
+//                    public String getDescription() {
+//                        return messages.getMessage("description.uploadTemplate");
+//                    }
+//
+//                    @Override
+//                    public String getCaption() {
+//                        return null;
+//                    }
+//
+//                    @Override
+//                    public String getIcon() {
+//                        return "icons/reports-template-upload.png";
+//                    }
+//
+//                    @Override
+//                    public void actionPerform(Component component) {
+//                        final ReportTemplate defaultTemplate = getEditedEntity().getDefaultTemplate();
+//                        if (defaultTemplate != null) {
+//                            if (!isTemplateWithoutFile(defaultTemplate)) {
+//                                FileUploadDialog fileUploadDialog = (FileUploadDialog) screens.create("fileUploadDialog", OpenMode.DIALOG);
+//                                fileUploadDialog.addAfterCloseListener(event -> {
+//                                    StandardCloseAction standardCloseAction = (StandardCloseAction) event.getCloseAction();
+//                                    if (Window.COMMIT_ACTION_ID.equals(standardCloseAction.getActionId())) {
+//                                        //todo
+////                                        File file = fileUpload.getFile(fileUploadDialog.getFileId());
+////                                        try {
+////                                            byte[] data = FileUtils.readFileToByteArray(file);
+////                                            defaultTemplate.setContent(data);
+////                                            defaultTemplate.setName(fileUploadDialog.getFileName());
+////                                            //todo
+////                                            //templatesDc.modifyItem(defaultTemplate);
+////                                        } catch (IOException e) {
+////                                            throw new RuntimeException(String.format(
+////                                                    "An error occurred while uploading file for template [%s]",
+////                                                    defaultTemplate.getCode()));
+////                                        }
+//                                    }
+//                                    entityComboBox.focus();
+//                                });
+//                                fileUploadDialog.show();
+//
+//                            } else {
+//                                notifications.create(Notifications.NotificationType.HUMANIZED)
+//                                        .withCaption(messages.getMessage("notification.fileIsNotAllowedForSpecificTypes"))
+//                                        .show();
+//                            }
+//                        } else {
+//                            notifications.create(Notifications.NotificationType.HUMANIZED)
+//                                    .withCaption(messages.getMessage("notification.defaultTemplateIsEmpty"))
+//                                    .show();
+//                        }
+//                    }
+//
+//                    @Override
+//                    public boolean isEnabled() {
+//                        return super.isEnabled() && isUpdatePermitted();
+//                    }
+//                });
+//
+//                entityComboBox.addAction(new AbstractAction("create") {
+//
+//                    @Override
+//                    public String getDescription() {
+//                        return messages.getMessage("description.createTemplate");
+//                    }
+//
+//                    @Override
+//                    public String getIcon() {
+//                        return "icons/plus-btn.png";
+//                    }
+//
+//                    @Override
+//                    public void actionPerform(Component component) {
+//                        ReportTemplate template = metadata.create(ReportTemplate.class);
+//                        template.setReport(getEditedEntity());
+//
+//                        StandardEditor editor = (StandardEditor) screenBuilders.editor(entityComboBox)
+//                                .withScreenId("report_ReportTemplate.edit")
+//                                .withContainer(templatesDc)
+//                                .editEntity(template)
+//                                .build();
+//                        editor.addAfterCloseListener(e -> {
+//                            StandardCloseAction standardCloseAction = (StandardCloseAction) e.getCloseAction();
+//                            if (Window.COMMIT_ACTION_ID.equals(standardCloseAction.getActionId())) {
+//                                ReportTemplate item = (ReportTemplate) editor.getEditedEntity();
+//                                templatesDc.getItems().add(item);
+//                                getEditedEntity().setDefaultTemplate(item);
+//                                //Workaround to disable button after default template setting
+//                                Action defaultTemplate = templatesTable.getActionNN("defaultTemplate");
+//                                defaultTemplate.refreshState();
+//                            }
+//                            entityComboBox.focus();
+//                        });
+//
+//                        editor.show();
+//                    }
+//
+//                    @Override
+//                    public boolean isEnabled() {
+//                        return super.isEnabled() && isUpdatePermitted();
+//                    }
+//                });
+//
+//                entityComboBox.addAction(new AbstractAction("edit") {
+//                    @Override
+//                    public String getDescription() {
+//                        return messages.getMessage("description.editTemplate");
+//                    }
+//
+//                    @Override
+//                    public String getIcon() {
+//                        return "icons/reports-template-view.png";
+//                    }
+//
+//                    @Override
+//                    public void actionPerform(Component component) {
+//                        ReportTemplate defaultTemplate = getEditedEntity().getDefaultTemplate();
+//                        if (defaultTemplate != null) {
+//                            StandardEditor editor = (StandardEditor) screenBuilders.editor(entityComboBox)
+//                                    .withScreenId("report_ReportTemplate.edit")
+//                                    .withOpenMode(OpenMode.DIALOG)
+//                                    .withContainer(templatesDc)
+//                                    .build();
+//                            editor.addAfterCloseListener(e -> {
+//                                StandardCloseAction standardCloseAction = (StandardCloseAction) e.getCloseAction();
+//                                if (Window.COMMIT_ACTION_ID.equals(standardCloseAction.getActionId())) {
+//                                    ReportTemplate item = (ReportTemplate) editor.getEditedEntity();
+//                                    getEditedEntity().setDefaultTemplate(item);
+//                                    //todo
+//                                    //templatesDc.modifyItem(item);
+//                                }
+//                                entityComboBox.focus();
+//                            });
+//                            editor.show();
+//                        } else {
+//                            notifications.create(Notifications.NotificationType.HUMANIZED)
+//                                    .withCaption(messages.getMessage("notification.defaultTemplateIsEmpty"))
+//                                    .show();
+//                        }
+//                    }
+//
+//                    @Override
+//                    public boolean isEnabled() {
+//                        return super.isEnabled() && isUpdatePermitted();
+//                    }
+//                });
+//
+//                entityComboBox.addValueChangeListener(event -> {
+//                    setupDropZoneForTemplate();
+//                });
+//
+//                entityComboBox.setEditable(isUpdatePermitted());
+//
+//                return entityComboBox;
+//            }
+//        });
     }
 
+    protected void sortBandDefinitionsTableByPosition() {
+        bandsDc.getSorter().sort(Sort.by(Sort.Direction.ASC, "position"));
+    }
+
+    protected void refreshMoveButtonEnabled() {
+        up.setEnabled(isUpButtonEnabled());
+        down.setEnabled(isDownButtonEnabled());
+    }
 
     @Subscribe("serviceTree.create")
     public void onServiceTreeCreate(Action.ActionPerformedEvent event) {
@@ -173,7 +403,7 @@ public class GeneralFragment extends ScreenFragment {
 
     @Install(to = "serviceTree.create", subject = "enabledRule")
     private boolean serviceTreeCreateEnabledRule() {
-        return secureOperations.isEntityUpdatePermitted(metadata.getClass(Report.class), policyStore);
+        return isUpdatePermitted();
     }
 
     @Subscribe("serviceTree.remove")
@@ -201,6 +431,10 @@ public class GeneralFragment extends ScreenFragment {
         return false;
     }
 
+    @Subscribe("serviceTree")
+    public void onServiceTreeSelection(Tree.SelectionEvent<BandDefinition> event) {
+        refreshMoveButtonEnabled();
+    }
 
     private void removeChildrenCascade(Collection selected) {
         for (Object o : selected) {
@@ -251,21 +485,19 @@ public class GeneralFragment extends ScreenFragment {
                 definitionsList.set(index, previousDefinition);
                 definitionsList.set(index - 1, definition);
 
-                bandTree.repaint();
+                sortBandDefinitionsTableByPosition();
+                refreshMoveButtonEnabled();
             }
         }
     }
 
-
-//    @Override
-//    protected boolean isApplicable() {
-//        if (target != null) {
-//            BandDefinition selectedItem = (BandDefinition) target.getSingleSelected();
-//            return selectedItem != null && selectedItem.getPosition() > 0 && isUpdatePermitted();
-//        }
-//
-//        return false;
-//    }
+    protected boolean isUpButtonEnabled() {
+        if (bandTree != null) {
+            BandDefinition selectedItem = bandTree.getSingleSelected();
+            return selectedItem != null && selectedItem.getPosition() > 0 && isUpdatePermitted();
+        }
+        return false;
+    }
 
     @Subscribe("down")
     public void onDownClick(Button.ClickEvent event) {
@@ -282,26 +514,30 @@ public class GeneralFragment extends ScreenFragment {
                 definitionsList.set(index, nextDefinition);
                 definitionsList.set(index + 1, definition);
 
-                bandTree.repaint();
+                sortBandDefinitionsTableByPosition();
+                refreshMoveButtonEnabled();
             }
         }
     }
 
 
-//        @Override
-//        protected boolean isApplicable() {
-//            if (target != null) {
-//                BandDefinition bandDefinition = (BandDefinition) target.getSingleSelected();
-//                if (bandDefinition != null) {
-//                    BandDefinition parent = bandDefinition.getParentBandDefinition();
-//                    return parent != null &&
-//                            parent.getChildrenBandDefinitions() != null &&
-//                            bandDefinition.getPosition() < parent.getChildrenBandDefinitions().size() - 1
-//                            && isUpdatePermitted();
-//                }
-//            }
-//            return false;
-//        }
+    protected boolean isDownButtonEnabled() {
+        if (bandTree != null) {
+            BandDefinition bandDefinition = bandTree.getSingleSelected();
+            if (bandDefinition != null) {
+                BandDefinition parent = bandDefinition.getParentBandDefinition();
+                return parent != null &&
+                        parent.getChildrenBandDefinitions() != null &&
+                        bandDefinition.getPosition() < parent.getChildrenBandDefinitions().size() - 1
+                        && isUpdatePermitted();
+            }
+        }
+        return false;
+    }
+
+    protected boolean isUpdatePermitted() {
+        return secureOperations.isEntityUpdatePermitted(metadata.getClass(Report.class), policyStore);
+    }
 
     protected boolean isTemplateWithoutFile(ReportTemplate template) {
         return template.getOutputType() == JmixReportOutputType.chart ||

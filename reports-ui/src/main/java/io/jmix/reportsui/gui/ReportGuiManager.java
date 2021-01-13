@@ -28,7 +28,7 @@ import io.jmix.reports.entity.*;
 import io.jmix.reports.exception.FailedToConnectToOpenOfficeException;
 import io.jmix.reports.exception.NoOpenOfficeFreePortsException;
 import io.jmix.reports.exception.ReportingException;
-import io.jmix.reportsui.gui.report.run.InputParametersLookup;
+import io.jmix.reportsui.gui.report.run.InputParametersDialog;
 import io.jmix.reportsui.gui.report.run.ShowChartLookup;
 import io.jmix.reportsui.gui.report.run.ShowPivotTableLookup;
 import io.jmix.reportsui.gui.report.run.ShowReportTableLookup;
@@ -709,15 +709,14 @@ public class ReportGuiManager {
                                           @Nullable ReportInputParameter inputParameter, @Nullable String templateCode,
                                           @Nullable String outputFileName,
                                           boolean bulkPrint) {
-        InputParametersLookup inputParametersLookup = (InputParametersLookup) screens.create("report_inputParameters",
-                OpenMode.DIALOG);
-        inputParametersLookup.setReport(report);
-        inputParametersLookup.setInputParameter(inputParameter);
-        inputParametersLookup.setParameters(parameters);
-        inputParametersLookup.setTemplateCode(templateCode);
-        inputParametersLookup.setOutputFileName(outputFileName);
-        inputParametersLookup.setBulkPrint(bulkPrint);
-        inputParametersLookup.show();
+        InputParametersDialog inputParametersDialog = screens.create(InputParametersDialog.class, OpenMode.DIALOG);
+        inputParametersDialog.setReport(report);
+        inputParametersDialog.setInputParameter(inputParameter);
+        inputParametersDialog.setParameters(parameters);
+        inputParametersDialog.setTemplateCode(templateCode);
+        inputParametersDialog.setOutputFileName(outputFileName);
+        inputParametersDialog.setBulkPrint(bulkPrint);
+        inputParametersDialog.show();
     }
 
     protected void openReportParamsDialog(FrameOwner screen, Report report, @Nullable Map<String, Object> parameters,
