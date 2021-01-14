@@ -19,6 +19,7 @@ package io.jmix.reportsui.gui.report.run;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import io.jmix.core.*;
+import io.jmix.core.common.util.ParamsMap;
 import io.jmix.core.metamodel.datatype.DatatypeRegistry;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.reports.app.service.ReportService;
@@ -27,12 +28,18 @@ import io.jmix.reports.entity.ReportInputParameter;
 import io.jmix.reports.entity.ReportType;
 import io.jmix.ui.Actions;
 import io.jmix.ui.UiComponents;
+import io.jmix.ui.action.Action;
+import io.jmix.ui.action.entitypicker.EntityClearAction;
 import io.jmix.ui.action.entitypicker.LookupAction;
+import io.jmix.ui.action.tagpicker.TagLookupAction;
+import io.jmix.ui.action.valuepicker.ValueClearAction;
+import io.jmix.ui.action.valuespicker.SelectAction;
 import io.jmix.ui.component.*;
 import io.jmix.ui.component.data.options.ContainerOptions;
 import io.jmix.ui.model.CollectionContainer;
 import io.jmix.ui.model.CollectionLoader;
 import io.jmix.ui.model.DataComponents;
+import io.jmix.ui.screen.MapScreenOptions;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,8 +107,6 @@ public class ParameterFieldCreator {
 
         field.setId("param_" + parameter.getAlias());
         field.setWidth("100%");
-        //field.setFrame(frame);
-//        field.setFrame(frame.getWrappedFrame());
         field.setEditable(true);
 
         field.setRequired(parameter.getRequired());
@@ -179,8 +184,6 @@ public class ParameterFieldCreator {
         @Override
         public Field createField(ReportInputParameter parameter) {
             TextField textField = uiComponents.create(TextField.class);
-            //todo
-            //textField.addValidator(new DoubleValidator());
             textField.setDatatype(datatypeRegistry.get(Double.class));
             return textField;
         }
@@ -218,68 +221,57 @@ public class ParameterFieldCreator {
             MetaClass entityMetaClass = metadata.getClass(parameter.getEntityMetaClass());
 
             if (isLookup) {
-                field = uiComponents.create(EntityComboBox.class);
-
-                FetchPlan fetchPlan = fetchPlans.builder(entityMetaClass.getJavaClass())
-                        .addFetchPlan(FetchPlan.INSTANCE_NAME)
-                        .build();
-
-                CollectionContainer collectionContainer = factory.createCollectionContainer(entityMetaClass.getJavaClass());
-                collectionContainer.setFetchPlan(fetchPlan);
-
-                CollectionLoader collectionLoader = factory.createCollectionLoader();
-                collectionLoader.setContainer(collectionContainer);
-
-                //todo
-//                CollectionDatasource ds = DsBuilder.create()
-//                        .setViewName(View.MINIMAL)
-//                        .setMetaClass(entityMetaClass)
-//                        .buildCollectionDatasource();
-//                ds.setRefreshOnComponentValueChange(true);
-
-                String whereClause = parameter.getLookupWhere();
-                String joinClause = parameter.getLookupJoin();
-                if (!Strings.isNullOrEmpty(whereClause)) {
-                    String query = String.format("select e from %s e", entityMetaClass.getName());
-                    QueryTransformer queryTransformer = queryTransformerFactory.transformer(query);
-                    queryTransformer.addWhere(whereClause);
-                    if (!Strings.isNullOrEmpty(joinClause)) {
-                        queryTransformer.addJoin(joinClause);
-                    }
-                    query = queryTransformer.getResult();
-                    collectionLoader.setQuery(query);
-                }
-                collectionLoader.load();
-//                ((DatasourceImplementation) ds).initialized();
-                ((EntityComboBox) field).setOptionsContainer(collectionContainer);
+                field = createEntityComboBox(parameter, entityMetaClass);
             } else {
-                field = uiComponents.create(EntityPicker.class);
+                field = createEntityPicker();
             }
             field.setMetaClass(entityMetaClass);
 
             LookupAction pickerLookupAction = (LookupAction) actions.create(LookupAction.ID);
             field.addAction(pickerLookupAction);
-            //field.addClearAction();
 
             String parameterScreen = parameter.getScreen();
 
             if (StringUtils.isNotEmpty(parameterScreen)) {
                 pickerLookupAction.setScreenId(parameterScreen);
-                pickerLookupAction.setScreenOptionsSupplier(() -> Collections.emptyMap());
-            } else {
-                pickerLookupAction.setScreenId(COMMON_LOOKUP_SCREEN_ID);
-
-                Map<String, Object> params = new HashMap<>();
-                //TODO class parameter
-//                params.put(CLASS_PARAMETER, entityMetaClass);
-
-                if (parameter.getReport().getReportType() == ReportType.SIMPLE) {
-                    //WindowParams.MULTI_SELECT.set(params, false);
-                }
-
-                pickerLookupAction.setScreenOptionsSupplier(() -> params);
             }
 
+            Action entityClearAction = actions.create(EntityClearAction.ID);
+            field.addAction(entityClearAction);
+
+            return field;
+        }
+
+        protected EntityPicker createEntityPicker() {
+            return uiComponents.create(EntityPicker.class);
+        }
+
+        protected EntityPicker createEntityComboBox(ReportInputParameter parameter, MetaClass entityMetaClass) {
+            EntityComboBox field = uiComponents.create(EntityComboBox.class);
+
+            FetchPlan fetchPlan = fetchPlans.builder(entityMetaClass.getJavaClass())
+                    .addFetchPlan(FetchPlan.INSTANCE_NAME)
+                    .build();
+
+            CollectionContainer collectionContainer = factory.createCollectionContainer(entityMetaClass.getJavaClass());
+            collectionContainer.setFetchPlan(fetchPlan);
+
+            CollectionLoader collectionLoader = factory.createCollectionLoader();
+            collectionLoader.setContainer(collectionContainer);
+
+            String whereClause = parameter.getLookupWhere();
+            String joinClause = parameter.getLookupJoin();
+            if (!Strings.isNullOrEmpty(whereClause)) {
+                String query = String.format("select e from %s e", entityMetaClass.getName());
+                QueryTransformer queryTransformer = queryTransformerFactory.transformer(query);
+                queryTransformer.addWhere(whereClause);
+                if (!Strings.isNullOrEmpty(joinClause)) {
+                    queryTransformer.addJoin(joinClause);
+                }
+                query = queryTransformer.getResult();
+                collectionLoader.setQuery(query);
+            }
+            field.setOptionsContainer(collectionContainer);
             return field;
         }
     }
@@ -297,42 +289,28 @@ public class ParameterFieldCreator {
                     .build();
 
             collectionContainer.setFetchPlan(fetchPlan);
+            factory.createCollectionLoader().setContainer(collectionContainer);
 
-            factory.createCollectionLoader()
-                    .setContainer(collectionContainer);
+            ContainerOptions options = new ContainerOptions(collectionContainer);
 
-                //todo
-//            DsBuilder builder = DsBuilder.create(frame.getDsContext());
-//            CollectionDatasource cds = builder
-//                    .setRefreshMode(CollectionDatasource.RefreshMode.NEVER)
-//                    .setId("entities_" + parameter.getAlias())
-//                    .setMetaClass(entityMetaClass)
-//                    .setViewName(View.LOCAL)
-//                    .setAllowCommit(false)
-//                    .buildCollectionDatasource();
-//
-//            cds.refresh();
-
-
-            tagPicker.setOptions(new ContainerOptions(collectionContainer));
+            tagPicker.setOptions(options);
             tagPicker.setEditable(true);
-//            tagPicker.setLookup(true);
             tagPicker.setHeight("120px");
 
+            TagLookupAction tagLookupAction = (TagLookupAction) actions.create(TagLookupAction.ID);
+            tagLookupAction.setTagPicker(tagPicker);
+            tagLookupAction.setMultiSelect(true);
+
             String screen = parameter.getScreen();
-
             if (StringUtils.isNotEmpty(screen)) {
-//                tagPicker.setLookupScreen(screen);
-//                tagPicker.setLookupScreenParams(Collections.emptyMap());
-            } else {
-                //tagPicker.setLookupScreen("commonLookup");
-                //TODO class parameter
-//                tokenList.setLookupScreenParams(ParamsMap.of(CLASS_PARAMETER, entityMetaClass));
+                tagLookupAction.setScreenId(screen);
             }
+            tagPicker.addAction(tagLookupAction);
 
-//            tagPicker.setAddButtonCaption(messages.getMessage(TagPicker.class, "actions.Select"));
-//            tagPicker.setInline(true);
-//            tagPicker.setSimple(true);
+            ValueClearAction valueClearAction = (ValueClearAction) actions.create(ValueClearAction.ID);
+            tagPicker.addAction(valueClearAction);
+
+            tagPicker.setInlineTags(true);
 
             return tagPicker;
         }

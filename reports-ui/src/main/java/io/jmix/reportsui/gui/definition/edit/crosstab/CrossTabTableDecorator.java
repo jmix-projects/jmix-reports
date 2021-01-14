@@ -29,6 +29,7 @@ import io.jmix.security.constraint.SecureOperations;
 import io.jmix.ui.UiComponents;
 import io.jmix.ui.component.Table;
 import io.jmix.ui.component.TextField;
+import io.jmix.ui.component.data.value.ContainerValueSource;
 import io.jmix.ui.model.CollectionContainer;
 import io.jmix.ui.model.InstanceContainer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,18 +61,19 @@ public class CrossTabTableDecorator {
     @Autowired
     protected Metadata metadata;
 
-    public void decorate(Table<DataSet> dataSets, final InstanceContainer<BandDefinition> bandDefinitionDs) {
+    public void decorate(Table<DataSet> dataSets,
+                         final CollectionContainer<DataSet> dataSetsDc,
+                         final InstanceContainer<BandDefinition> bandDefinitionDc) {
         dataSets.addGeneratedColumn("name", entity -> {
-            TextField textField = uiComponents.create(TextField.class);
+            TextField<String> textField = uiComponents.create(TextField.class);
             textField.setParent(dataSets);
             textField.setWidthFull();
             textField.setHeightAuto();
             textField.setValue(entity.getName());
-            //TODO item datasource
-//            textField.setDatasource(dataSets.getItemDatasource(entity), "name");
+            textField.setValueSource(new ContainerValueSource<>(dataSets.getInstanceContainer(entity), "name"));
 
-            if (bandDefinitionDs.getItem() != null) {
-                if (Orientation.CROSS == bandDefinitionDs.getItem().getOrientation() &&
+            if (bandDefinitionDc != null) {
+                if (Orientation.CROSS == bandDefinitionDc.getItem().getOrientation() &&
                         !Strings.isNullOrEmpty(entity.getName()) &&
                         (entity.getName().endsWith(HORIZONTAL_TPL) || entity.getName().endsWith(VERTICAL_TPL))) {
                     textField.setEditable(false);
@@ -81,22 +83,8 @@ public class CrossTabTableDecorator {
             return textField;
         });
 
-        //todo
-//        bandDefinitionDs.addItemChangeListener(band -> {
-//            if (VALID == dataSets.getDatasource().getState()) {
-//                onTableReady(dataSets, bandDefinitionDs);
-//            } else {
-//                dataSets.getDatasource().addStateChangeListener(new Datasource.StateChangeListener<DataSet>() {
-//                    @Override
-//                    public void stateChanged(Datasource.StateChangeEvent<DataSet> e) {
-//                        if (VALID == e.getState()) {
-//                            onTableReady(dataSets, bandDefinitionDs);
-//                            dataSets.getDatasource().removeStateChangeListener(this);
-//                        }
-//                    }
-//                });
-//            }
-//        });
+        bandDefinitionDc.addItemChangeListener(band -> onTableReady(dataSetsDc, bandDefinitionDc));
+        dataSetsDc.addItemChangeListener(e -> onTableReady(dataSetsDc, bandDefinitionDc));
     }
 
     protected boolean isUpdatePermitted() {
@@ -112,16 +100,13 @@ public class CrossTabTableDecorator {
     }
 
 
-    protected void onTableReady(Table<DataSet> dataSets, InstanceContainer<BandDefinition> bandDefinitionDs) {
-        //todo
-//        CollectionDatasource<DataSet, UUID> dataSetsDs = dataSets.getDatasource();
-//
-//        initCrossDatasets(dataSetsDs, bandDefinitionDs);
+    protected void onTableReady(CollectionContainer<DataSet> dataSetsDc, InstanceContainer<BandDefinition> bandDefinitionDs) {
+        initCrossDatasets(dataSetsDc, bandDefinitionDs);
     }
 
     protected void initCrossDatasets(CollectionContainer<DataSet> dataSetsDs,
                                      InstanceContainer<BandDefinition> bandDefinitionDs) {
-        if (bandDefinitionDs.getItem() == null) {
+        if (bandDefinitionDs == null) {
             return;
         }
 

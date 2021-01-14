@@ -23,7 +23,7 @@ import io.jmix.ui.component.Fragment;
 import io.jmix.ui.screen.ScreenFragment;
 import io.jmix.ui.screen.Subscribe;
 
-public abstract class DescriptionEditFrame extends ScreenFragment {
+public abstract class DescriptionEditFragment extends ScreenFragment {
 
     protected ReportTemplate reportTemplate;
     protected BoxLayout previewBox;
@@ -64,6 +64,9 @@ public abstract class DescriptionEditFrame extends ScreenFragment {
         parent.setResponsive(false);
     }
 
+    public void setVisible(boolean visible) {
+        getFragment().setVisible(visible);
+    }
 
     public abstract boolean isSupportPreview();
 

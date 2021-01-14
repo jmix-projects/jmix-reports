@@ -63,7 +63,7 @@ public class ValueFormatEditor extends StandardEditor<ReportValueFormat> {
     protected ComboBox<String> formatComboBox;
 
     @Autowired
-    protected Form formatFields;
+    protected Form formatForm;
 
     @Autowired
     protected CheckBox groovyCheckBox;
@@ -113,15 +113,6 @@ public class ValueFormatEditor extends StandardEditor<ReportValueFormat> {
     protected void onInit(InitEvent event) {
         // Add default format strings to comboBox
         initFormatComboBox();
-
-        groovyCheckBox.setContextHelpIconClickHandler(e -> dialogs.createMessageDialog()
-                .withCaption(messages.getMessage(getClass(), "valuesFormats.groovyScript"))
-                .withMessage(messages.getMessage(getClass(), "valuesFormats.groovyScriptHelpText"))
-                .withContentMode(ContentMode.HTML)
-                .withModal(false)
-                .withWidth("700px")
-                .show());
-
         groovyCheckBox.addValueChangeListener(booleanValueChangeEvent -> {
             Boolean visible = booleanValueChangeEvent.getValue();
             Boolean prevVisible = booleanValueChangeEvent.getPrevValue();
@@ -138,10 +129,35 @@ public class ValueFormatEditor extends StandardEditor<ReportValueFormat> {
             groovyVBox.setVisible(Boolean.TRUE.equals(visible));
             formatComboBox.setVisible(Boolean.FALSE.equals(visible));
         });
+    }
 
-        //noinspection unchecked
-//        valuesFormatsDs.addItemPropertyChangeListener(e ->
-//                ((DatasourceImplementation) valuesFormatsDs).modified(e.getItem()));
+    @Install(to = "groovyCheckBox", subject = "contextHelpIconClickHandler")
+    private void groovyCheckBoxContextHelpIconClickHandler(HasContextHelp.ContextHelpIconClickEvent contextHelpIconClickEvent) {
+        dialogs.createMessageDialog()
+                .withCaption(messages.getMessage(getClass(), "valuesFormats.groovyScript"))
+                .withMessage(messages.getMessage(getClass(), "valuesFormats.groovyScriptHelpText"))
+                .withContentMode(ContentMode.HTML)
+                .withModal(false)
+                .withWidth("700px")
+                .show();
+    }
+
+    @Subscribe("groovyCheckBox")
+    public void onGroovyCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        Boolean visible = event.getValue();
+        Boolean prevVisible = event.getPrevValue();
+
+        Boolean userOriginated = event.isUserOriginated();
+
+        if (isClickTrueGroovyScript(visible, prevVisible, userOriginated)) {
+            groovyCodeEditor.setValue(RETURN_VALUE);
+        }
+        if (Boolean.FALSE.equals(visible)) {
+            formatComboBox.clear();
+        }
+
+        groovyVBox.setVisible(Boolean.TRUE.equals(visible));
+        formatComboBox.setVisible(Boolean.FALSE.equals(visible));
     }
 
     protected void initFormatComboBox() {
@@ -186,15 +202,6 @@ public class ValueFormatEditor extends StandardEditor<ReportValueFormat> {
     public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
         getEditedEntity().setFormatString(formatComboBox.getValue());
     }
-
-    //todo
-//    @Override
-//    public void setItem(Entity item) {
-//        Entity newItem = valuesFormatsDs.getDataSupplier().newInstance(valuesFormatsDs.getMetaClass());
-//        metadataTools.copy(item, newItem);
-//        ((ReportValueFormat) newItem).setId((UUID) Id.of(item).getValue());
-//        super.setItem(newItem);
-//    }
 
     @Subscribe("groovyFullScreenLinkButton")
     public void showGroovyEditorDialog(Button.ClickEvent event) {

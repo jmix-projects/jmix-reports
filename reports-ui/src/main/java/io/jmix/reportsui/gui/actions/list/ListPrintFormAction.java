@@ -29,10 +29,7 @@ import io.jmix.ui.action.AbstractAction;
 import io.jmix.ui.action.Action;
 import io.jmix.ui.action.ActionType;
 import io.jmix.ui.action.DialogAction;
-import io.jmix.ui.component.Component;
-import io.jmix.ui.component.ComponentsHelper;
-import io.jmix.ui.component.ListComponent;
-import io.jmix.ui.component.Window;
+import io.jmix.ui.component.*;
 import io.jmix.ui.component.data.BindingState;
 import io.jmix.ui.component.data.meta.ContainerDataUnit;
 import io.jmix.ui.icon.Icons;
@@ -130,8 +127,6 @@ public class ListPrintFormAction extends AbstractPrintFormAction implements Acti
                 dialogs.createOptionDialog()
                         .withCaption(messages.getMessage(ReportGuiManager.class, "notifications.confirmPrintSelectedheader"))
                         .withMessage(messages.getMessage(ReportGuiManager.class, "notifications.confirmPrintSelected"))
-                        //TODO set type
-//                        .withType(Dialogs.MessageType.CONFIRMATION)
                         .withActions(printAllAction, printSelectedAction, cancelAction)
                         .show();
             } else {
@@ -151,8 +146,6 @@ public class ListPrintFormAction extends AbstractPrintFormAction implements Acti
                 dialogs.createOptionDialog()
                         .withCaption(messages.getMessage(ListPrintFormAction.class, "notifications.confirmPrintAllheader"))
                         .withMessage(messages.getMessage(ListPrintFormAction.class, "notifications.confirmPrintAll"))
-                        //TODO set type
-//                        .withType(Dialogs.MessageType.CONFIRMATION)
                         .withActions(yesAction, cancelAction)
                         .show();
             } else {
@@ -213,7 +206,7 @@ public class ListPrintFormAction extends AbstractPrintFormAction implements Acti
         }
         CollectionLoader loader = (CollectionLoader) ((HasLoader) unit.getContainer()).getLoader();
         metaClass = container.getEntityMetaClass();
-        loadContext = (LoadContext) loader.createLoadContext();
+        loadContext = loader.createLoadContext();
 //        } else {
 //            CollectionDatasource ds = ((io.jmix.ui.component.ListComponent) target).getDatasource();
 //            metaClass = ds.getMetaClass();

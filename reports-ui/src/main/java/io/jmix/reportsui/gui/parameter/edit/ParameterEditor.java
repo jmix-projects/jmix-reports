@@ -15,10 +15,7 @@
  */
 package io.jmix.reportsui.gui.parameter.edit;
 
-import io.jmix.core.MessageTools;
-import io.jmix.core.Messages;
-import io.jmix.core.Metadata;
-import io.jmix.core.MetadataTools;
+import io.jmix.core.*;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.reports.ParameterClassResolver;
 import io.jmix.reports.app.service.ReportService;
@@ -61,9 +58,9 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
     @Autowired
     protected ComboBox<String> enumeration;
     @Autowired
-    protected ComboBox<ParameterType> type;
+    protected ComboBox<ParameterType> parameterTypeComboBox;
     @Autowired
-    protected ComboBox<String> metaClass;
+    protected ComboBox<String> metaClassComboBox;
     @Autowired
     protected CheckBox lookup;
     @Autowired
@@ -143,7 +140,7 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
     protected ParameterClassResolver parameterClassResolver;
 
     @Autowired
-    protected TextArea localeTextField;
+    protected TextArea<String> localeTextField;
 
     @Autowired
     protected JpqlSuggestionFactory jpqlSuggestionFactory;
@@ -165,124 +162,96 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
     @Autowired
     protected ParameterFieldCreator parameterFieldCreator;
 
-    //todo
-//    @Override
-//    public void setItem(JmixEntity item) {
-//        ReportInputParameter newParameter = (ReportInputParameter) metadata.create(parameterDs.getMetaClass());
-//        metadataTools.copy(item, newParameter);
-//        newParameter.setId((UUID) Id.of(item).getValue());
-//        if (newParameter.getParameterClass() == null) {
-//            newParameter.setParameterClass(parameterClassResolver.resolveClass(newParameter));
-//        }
-//
-//        super.setItem(newParameter);
-//        enableControlsByParamType(newParameter.getType());
-//        initScreensLookup();
-//        initTransformations();
-//    }
-
     @Subscribe
     protected void onInit(Screen.InitEvent event) {
-        type.setOptionsList(Arrays.asList(ParameterType.TEXT, ParameterType.NUMERIC, ParameterType.BOOLEAN, ParameterType.ENUMERATION,
+        parameterTypeComboBox.setOptionsList(Arrays.asList(ParameterType.TEXT, ParameterType.NUMERIC, ParameterType.BOOLEAN, ParameterType.ENUMERATION,
                 ParameterType.DATE, ParameterType.TIME, ParameterType.DATETIME, ParameterType.ENTITY, ParameterType.ENTITY_LIST));
 
         initMetaClassLookup();
-
         initEnumsLookup();
-
-        initListeners();
-
-        initHelpButtons();
-
         initCodeEditors();
     }
 
-    protected void initHelpButtons() {
-        localeTextField.setContextHelpIconClickHandler(e ->
-                dialogs.createMessageDialog()
-                        .withCaption(messages.getMessage(getClass(), "localeText"))
-                        .withMessage(messages.getMessage(getClass(), "parameter.localeTextHelp"))
-                        .withContentMode(ContentMode.HTML)
-                        .withModal(false)
-                        .withWidth("700px")
-                        .show());
-
-        transformationScript.setContextHelpIconClickHandler(e ->
-                dialogs.createMessageDialog()
-                        .withCaption(messages.getMessage(getClass(), "transformationScript"))
-                        .withMessage(messages.getMessage(getClass(), "parameter.transformationScriptHelp"))
-                        .withContentMode(ContentMode.HTML)
-                        .withModal(false)
-                        .withWidth("700px")
-                        .show());
-
-        validationScript.setContextHelpIconClickHandler(e ->
-                dialogs.createMessageDialog()
-                        .withCaption(messages.getMessage(getClass(), "validationScript"))
-                        .withMessage(messages.getMessage(getClass(), "validationScriptHelp"))
-                        .withContentMode(ContentMode.HTML)
-                        .withModal(false)
-                        .withWidth("700px")
-                        .show());
+    @Install(to = "localeTextField", subject = "contextHelpIconClickHandler")
+    private void localeTextFieldContextHelpIconClickHandler(HasContextHelp.ContextHelpIconClickEvent contextHelpIconClickEvent) {
+        dialogs.createMessageDialog()
+                .withCaption(messages.getMessage(getClass(), "localeText"))
+                .withMessage(messages.getMessage(getClass(), "parameter.localeTextHelp"))
+                .withContentMode(ContentMode.HTML)
+                .withModal(false)
+                .withWidth("700px")
+                .show();
     }
 
-    //todo
-//    @Override
-//    public boolean commit() {
-//        if (super.commit()) {
-//            metadataTools.copy(getEditedEntity(), parameter);
-//            return true;
-//        }
-//        return false;
-//    }
+    @Install(to = "transformationScript", subject = "contextHelpIconClickHandler")
+    private void transformationScriptContextHelpIconClickHandler(HasContextHelp.ContextHelpIconClickEvent contextHelpIconClickEvent) {
+        dialogs.createMessageDialog()
+                .withCaption(messages.getMessage(getClass(), "transformationScript"))
+                .withMessage(messages.getMessage(getClass(), "parameter.transformationScriptHelp"))
+                .withContentMode(ContentMode.HTML)
+                .withModal(false)
+                .withWidth("700px")
+                .show();
+    }
 
-    protected void initListeners() {
-        type.addValueChangeListener(e ->
-                enableControlsByParamType(e.getValue())
-        );
+    @Install(to = "validationScript", subject = "contextHelpIconClickHandler")
+    private void validationScriptContextHelpIconClickHandler(HasContextHelp.ContextHelpIconClickEvent contextHelpIconClickEvent) {
+        dialogs.createMessageDialog()
+                .withCaption(messages.getMessage(getClass(), "validationScript"))
+                .withMessage(messages.getMessage(getClass(), "validationScriptHelp"))
+                .withContentMode(ContentMode.HTML)
+                .withModal(false)
+                .withWidth("700px")
+                .show();
+    }
 
-        parameterDc.addItemPropertyChangeListener(e -> {
-            boolean typeChanged = e.getProperty().equalsIgnoreCase("type");
-            boolean classChanged = e.getProperty().equalsIgnoreCase("entityMetaClass")
-                    || e.getProperty().equalsIgnoreCase("enumerationClass");
-            boolean defaultDateIsCurrentChanged = e.getProperty().equalsIgnoreCase("defaultDateIsCurrent");
-            ReportInputParameter parameter = getEditedEntity();
-            if (typeChanged || classChanged) {
-                parameter.setParameterClass(parameterClassResolver.resolveClass(parameter));
+    @Subscribe("parameterTypeComboBox")
+    public void onTypeValueChange(HasValue.ValueChangeEvent<ParameterType> event) {
+        enableControlsByParamType(event.getValue());
+    }
 
-                if (typeChanged) {
-                    parameter.setEntityMetaClass(null);
-                    parameter.setEnumerationClass(null);
-                }
+    @Subscribe(id = "parameterDc", target = Target.DATA_CONTAINER)
+    public void onParameterDcItemPropertyChange(InstanceContainer.ItemPropertyChangeEvent<ReportInputParameter> event) {
+        String property = event.getProperty();
 
-                parameter.setDefaultValue(null);
-                parameter.setScreen(null);
+        boolean typeChanged = property.equalsIgnoreCase("type");
+        boolean classChanged = property.equalsIgnoreCase("entityMetaClass")
+                || property.equalsIgnoreCase("enumerationClass");
+        boolean defaultDateIsCurrentChanged = property.equalsIgnoreCase("defaultDateIsCurrent");
+        ReportInputParameter parameter = getEditedEntity();
+        if (typeChanged || classChanged) {
+            parameter.setParameterClass(parameterClassResolver.resolveClass(parameter));
 
-                initScreensLookup();
-
-                initDefaultValueField();
+            if (typeChanged) {
+                parameter.setEntityMetaClass(null);
+                parameter.setEnumerationClass(null);
             }
 
-            if (defaultDateIsCurrentChanged) {
-                initDefaultValueField();
-                initCurrentDateTimeField();
-            }
+            parameter.setDefaultValue(null);
+            parameter.setScreen(null);
 
-            //todo
-            //((DatasourceImplementation<ReportInputParameter>) parameterDc).modified(e.getItem());
-        });
+            initScreensLookup();
 
-        lookup.addValueChangeListener(e -> {
-            if (Boolean.TRUE.equals(e.getValue())) {
-                if (tabsheet.getTab(LOOKUP_SETTINGS_TAB_ID) == null) {
-                    tabsheet.addTab(LOOKUP_SETTINGS_TAB_ID, lookupSettingsTab);
-                }
-            } else {
-                if (tabsheet.getTab(LOOKUP_SETTINGS_TAB_ID) != null) {
-                    tabsheet.removeTab(LOOKUP_SETTINGS_TAB_ID);
-                }
+            initDefaultValueField();
+        }
+
+        if (defaultDateIsCurrentChanged) {
+            initDefaultValueField();
+            initCurrentDateTimeField();
+        }
+    }
+
+    @Subscribe("lookup")
+    public void onLookupValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+        if (Boolean.TRUE.equals(event.getValue())) {
+            if (tabsheet.getTab(LOOKUP_SETTINGS_TAB_ID) == null) {
+                tabsheet.addTab(LOOKUP_SETTINGS_TAB_ID, lookupSettingsTab);
             }
-        });
+        } else {
+            if (tabsheet.getTab(LOOKUP_SETTINGS_TAB_ID) != null) {
+                tabsheet.removeTab(LOOKUP_SETTINGS_TAB_ID);
+            }
+        }
     }
 
     protected void initCodeEditors() {
@@ -322,7 +291,7 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
                 metaClassesOptionsMap.put(caption, clazz.getName());
             }
         }
-        metaClass.setOptionsMap(metaClassesOptionsMap);
+        metaClassComboBox.setOptionsMap(metaClassesOptionsMap);
     }
 
 
@@ -372,6 +341,21 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
         defaultValueBox.setEnabled(secureOperations.isEntityUpdatePermitted(metadata.getClass(ReportInputParameter.class), policyStore));
     }
 
+    @Subscribe(id = "parameterDc", target = Target.DATA_CONTAINER)
+    public void onParameterDcItemChange(InstanceContainer.ItemChangeEvent<ReportInputParameter> event) {
+        ReportInputParameter reportInputParameter = event.getItem();
+        ReportInputParameter newParameter = metadata.create(reportInputParameter.getClass());
+        metadataTools.copy(reportInputParameter, newParameter);
+        newParameter.setId((UUID) Id.of(reportInputParameter).getValue());
+        if (newParameter.getParameterClass() == null) {
+            newParameter.setParameterClass(parameterClassResolver.resolveClass(newParameter));
+        }
+
+        enableControlsByParamType(newParameter.getType());
+        initScreensLookup();
+        initTransformations();
+    }
+
     protected void initCurrentDateTimeField() {
         boolean parameterDateOrTime = isParameterDateOrTime();
         defaultDateIsCurrentLabel.setVisible(parameterDateOrTime);
@@ -380,10 +364,6 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
 
     protected boolean canHaveDefaultValue() {
         ReportInputParameter parameter = getEditedEntity();
-        if (parameter == null) {
-            return false;
-        }
-
         if (isParameterDateOrTime() && BooleanUtils.isTrue(parameter.getDefaultDateIsCurrent())) {
             return false;
         }
@@ -401,7 +381,7 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
         boolean isEnum = type == ParameterType.ENUMERATION;
         boolean isText = type == ParameterType.TEXT;
 
-        metaClass.setVisible(isEntity);
+        metaClassComboBox.setVisible(isEntity);
         metaClassLabel.setVisible(isEntity);
 
         lookup.setVisible(isSingleEntity);

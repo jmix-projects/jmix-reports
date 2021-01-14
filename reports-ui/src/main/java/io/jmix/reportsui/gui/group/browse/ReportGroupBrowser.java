@@ -24,8 +24,6 @@ import io.jmix.ui.action.Action;
 import io.jmix.ui.action.list.CreateAction;
 import io.jmix.ui.action.list.EditAction;
 import io.jmix.ui.action.list.RemoveAction;
-import io.jmix.ui.component.Component;
-import io.jmix.ui.component.ListComponent;
 import io.jmix.ui.component.Table;
 import io.jmix.ui.navigation.Route;
 import io.jmix.ui.screen.*;
@@ -103,5 +101,4 @@ public class ReportGroupBrowser extends StandardLookup<ReportGroup> {
             }
         }
     }
-
 }

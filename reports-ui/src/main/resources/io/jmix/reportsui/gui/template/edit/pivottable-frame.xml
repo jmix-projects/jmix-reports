@@ -16,14 +16,6 @@
 
 <window xmlns="http://jmix.io/schema/ui/window">
 
-    <!--    <dsContext>-->
-    <!--        <datasource id="pivotTableDs" class="io.jmix.reports.entity.pivottable.PivotTableDescription"-->
-    <!--                    allowCommit="false">-->
-    <!--            <groupDatasource id="propertyDs" property="properties" allowCommit="false"/>-->
-    <!--            <collectionDatasource id="aggregationsDs" property="aggregations" allowCommit="false"/>-->
-    <!--        </datasource>-->
-    <!--    </dsContext>-->
-
     <data>
         <instance id="pivotTableDc" class="io.jmix.reports.entity.pivottable.PivotTableDescription">
             <collection id="propertyDc" property="properties"/>

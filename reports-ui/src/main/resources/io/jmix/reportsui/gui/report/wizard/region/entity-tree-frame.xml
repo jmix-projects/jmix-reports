@@ -18,12 +18,6 @@
 <!--their id must to be equal codes in localization props files-->
 <window xmlns="http://jmix.io/schema/ui/window">
 
-<!--    <dsContext>-->
-<!--        <hierarchicalDatasource id="reportEntityTreeNodeDs"-->
-<!--                                class="com.haulmont.reports.entity.wizard.EntityTreeNode"-->
-<!--                                datasourceClass="com.haulmont.reports.gui.report.wizard.region.EntityTreeNodeDs"/>-->
-<!--    </dsContext>-->
-
     <data>
         <collection id="reportEntityTreeNodeDc"
                     class="io.jmix.reports.entity.wizard.EntityTreeNode">
@@ -36,8 +30,6 @@
             <textField id="reportPropertyName"/>
             <button id="reportPropertyNameSearchButton" icon="font-icon:SEARCH"/>
         </hbox>
-        <tree id="entityTree" width="100%" multiselect="false">
-            <treechildren datasource="reportEntityTreeNodeDs" captionProperty="localizedName"/>
-        </tree>
+        <tree id="entityTree" width="100%" multiselect="false" dataContainer="reportEntityTreeNodeDc"/>
     </layout>
 </window>

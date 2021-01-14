@@ -44,7 +44,7 @@ public class ReportImportDialog extends StandardEditor {
     @Autowired
     protected FileStorageUploadField fileUpload;
     @Autowired
-    protected Label fileName;
+    protected Label<String> fileName;
     @Autowired
     protected CheckBox importRoles;
     @Autowired
@@ -60,7 +60,6 @@ public class ReportImportDialog extends StandardEditor {
 
     @Subscribe
     public void onInit(InitEvent event) {
-        //initWindowActions();
         fileUpload.addFileUploadSucceedListener(e -> {
             fileName.setValue(fileUpload.getFileName());
         });
@@ -68,34 +67,6 @@ public class ReportImportDialog extends StandardEditor {
 
         dropZone.setVisible(false);
     }
-
-//    protected void initWindowActions() {
-//        addAction(new AbstractAction("windowCommit") {
-//            @Override
-//            public void actionPerform(Component component) {
-//                if (validateAll()) {
-//                    importReport();
-//                    close(COMMIT_ACTION_ID);
-//                }
-//            }
-//
-//            @Override
-//            public String getCaption() {
-//                return messages.getMainMessage("actions.Ok");
-//            }
-//        });
-//        addAction(new AbstractAction("windowClose") {
-//            @Override
-//            public void actionPerform(Component component) {
-//                close(CLOSE_ACTION_ID);
-//            }
-//
-//            @Override
-//            public String getCaption() {
-//                return messages.getMainMessage("actions.Cancel");
-//            }
-//        });
-//    }
 
     protected void importReport() {
         try {

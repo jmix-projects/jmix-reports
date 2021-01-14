@@ -208,7 +208,7 @@ public class ShowPivotTableLookup extends StandardLookup {
 
     protected void showStubText() {
         if (reportBox.getOwnComponents().isEmpty()) {
-            Label label = uiComponents.create(Label.class);
+            Label<String> label = uiComponents.create(Label.class);
             label.setValue(messages.getMessage(getClass(), "showPivotTable.caption"));
             label.setAlignment(Component.Alignment.MIDDLE_CENTER);
             label.setStyleName("h1");

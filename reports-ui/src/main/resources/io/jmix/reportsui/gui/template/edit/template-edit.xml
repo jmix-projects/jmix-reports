@@ -18,14 +18,6 @@
         caption="msg://templateEditor"
         focusComponent="code">
 
-<!--    <dsContext>-->
-<!--        <datasource-->
-<!--                id="templateDs"-->
-<!--                class="io.jmix.reports.entity.ReportTemplate"-->
-<!--                view="template.edit"-->
-<!--                datasourceClass="com.haulmont.reports.gui.datasource.NotPersistenceDatasource"/>-->
-<!--    </dsContext>-->
-
     <data>
         <instance id="templateDc"
                   class="io.jmix.reports.entity.ReportTemplate"
@@ -87,7 +79,7 @@
                         </row>
                         <row id="row7">
                             <label id="isCustomLabel" value="msg://template.isCustom" align="MIDDLE_LEFT"/>
-                            <checkBox id="custom" dataContainer="templateDc" property="custom"
+                            <checkBox id="customField" dataContainer="templateDc" property="custom"
                                       width="${width}"/>
                         </row>
                         <row id="row8">
@@ -98,8 +90,8 @@
                         <row id="row9">
                             <label id="customDefinedByLabel" value="msg://template.customDefinedBy"
                                    align="MIDDLE_LEFT"/>
-                            <comboBox id="customDefinedBy" dataContainer="templateDc" property="customDefinedBy"
-                                         width="${width}"/>
+                            <comboBox id="customDefinedByField" dataContainer="templateDc" property="customDefinedBy"
+                                      width="${width}"/>
                         </row>
                         <row id="row10">
                             <hbox>
@@ -111,7 +103,7 @@
                                 <linkButton id="fullScreenLinkButton"
                                             align="MIDDLE_RIGHT"
                                             caption="msg://dataSet.fullScreen"/>
-                                <textArea id="customDefinition" dataContainer="templateDc" property="customDefinition"
+                                <textArea id="customDefinitionField" dataContainer="templateDc" property="customDefinition"
                                           width="${width}"/>
                             </vbox>
                         </row>

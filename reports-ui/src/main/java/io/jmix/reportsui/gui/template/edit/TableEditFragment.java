@@ -27,10 +27,10 @@ import io.jmix.reports.entity.table.TemplateTableDescription;
 import io.jmix.ui.Actions;
 import io.jmix.ui.Notifications;
 import io.jmix.ui.RemoveOperation;
-import io.jmix.ui.action.AbstractAction;
-import io.jmix.ui.action.ListAction;
+import io.jmix.ui.action.Action;
+import io.jmix.ui.action.list.CreateAction;
+import io.jmix.ui.action.list.RemoveAction;
 import io.jmix.ui.component.BoxLayout;
-import io.jmix.ui.component.Component;
 import io.jmix.ui.component.Table;
 import io.jmix.ui.model.CollectionContainer;
 import io.jmix.ui.model.InstanceContainer;
@@ -40,9 +40,11 @@ import io.jmix.ui.screen.UiController;
 import io.jmix.ui.screen.UiDescriptor;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.inject.Named;
+
 @UiController("report_TableEdit.fragment")
 @UiDescriptor("table-edit-frame.xml")
-public class TableEditFrame extends DescriptionEditFrame {
+public class TableEditFragment extends DescriptionEditFragment {
 
     public static final int UP = 1;
     public static final int DOWN = -1;
@@ -73,10 +75,18 @@ public class TableEditFrame extends DescriptionEditFrame {
     protected Messages messages;
 
     @Autowired
-    protected Actions actions;
-
-    @Autowired
     protected Notifications notifications;
+
+    @Named("columnsTable.remove")
+    protected RemoveAction<TemplateTableColumn> columnsTableRemove;
+    @Named("columnsTable.create")
+    protected CreateAction<TemplateTableColumn> columnsTableCreate;
+    @Autowired
+    protected Actions actions;
+    @Named("bandsTable.remove")
+    protected RemoveAction<TemplateTableBand> bandsTableRemove;
+    @Named("bandsTable.create")
+    protected CreateAction<TemplateTableBand> bandsTableCreate;
 
     public ReportTemplate getReportTemplate() {
         return reportTemplate;
@@ -86,8 +96,14 @@ public class TableEditFrame extends DescriptionEditFrame {
     protected void onInit(InitEvent event) {
         super.onInit(event);
 
-        initButtonBandTable();
-        initButtonColumnTable();
+        clearCaption();
+    }
+
+    private void clearCaption() {
+        columnsTableCreate.setCaption("");
+        columnsTableRemove.setCaption("");
+        bandsTableCreate.setCaption("");
+        bandsTableRemove.setCaption("");
     }
 
     protected void sortParametersByPosition(CollectionContainer collectionContainer) {
@@ -107,6 +123,58 @@ public class TableEditFrame extends DescriptionEditFrame {
         }
     }
 
+    @Subscribe("bandsTable.create")
+    public void onBandsTableCreate(Action.ActionPerformedEvent event) {
+        TemplateTableBand templateTableBand = metadata.create(TemplateTableBand.class);
+        templateTableBand.setPosition(tableBandsDc.getItems().size());
+
+        tableBandsDc.getMutableItems().add(templateTableBand);
+    }
+
+    @Subscribe("bandsTable.downBand")
+    public void onBandsTableDownBand(Action.ActionPerformedEvent event) {
+        changeOrderBandsOfIndexes(DOWN);
+    }
+
+    @Install(to = "bandsTable.downBand", subject = "enabledRule")
+    private boolean bandsTableDownBandEnabledRule() {
+        TemplateTableBand item = bandsTable.getSingleSelected();
+        if (item == null) {
+            return false;
+        }
+        return item.getPosition() < (tableBandsDc.getItems().size() - 1);
+    }
+
+    @Subscribe("bandsTable.upBand")
+    public void onBandsTableUpBand(Action.ActionPerformedEvent event) {
+        changeOrderBandsOfIndexes(UP);
+    }
+
+    @Install(to = "bandsTable.upBand", subject = "enabledRule")
+    private boolean bandsTableUpBandEnabledRule() {
+        TemplateTableBand item = bandsTable.getSingleSelected();
+        if (item == null) {
+            return false;
+        }
+        return item.getPosition() > 0;
+    }
+
+    @Subscribe("columnsTable.create")
+    public void onColumnsTableCreate(Action.ActionPerformedEvent event) {
+        TemplateTableBand selectBand = bandsTable.getSingleSelected();
+
+        if (selectBand != null) {
+            TemplateTableColumn item = metadata.create(TemplateTableColumn.class);
+            item.setPosition(tableColumnsDc.getItems().size());
+
+            tableColumnsDc.getMutableItems().add(item);
+        } else {
+            notifications.create(Notifications.NotificationType.HUMANIZED)
+                    .withCaption(messages.getMessage("template.bandRequired"))
+                    .show();
+        }
+    }
+
     @Install(to = "columnsTable.remove", subject = "afterActionPerformedHandler")
     protected void columnsTableRemoveAfterActionPerformedHandler(RemoveOperation.AfterActionPerformedEvent<TemplateTableColumn> event) {
         TemplateTableColumn deletedColumn = event.getItems().iterator().next();
@@ -120,113 +188,33 @@ public class TableEditFrame extends DescriptionEditFrame {
         }
     }
 
-    private void initButtonBandTable() {
-        bandsTable.addAction(new AbstractAction("create") {
-            @Override
-            public String getCaption() {
-                return "";
-            }
-
-            @Override
-            public void actionPerform(Component component) {
-                TemplateTableBand templateTableBand = metadata.create(TemplateTableBand.class);
-                templateTableBand.setPosition(tableBandsDc.getItems().size());
-
-                tableBandsDc.getMutableItems().add(templateTableBand);
-            }
-        });
-
-        bandsTable.addAction(new ListAction("up") {
-            @Override
-            public void actionPerform(Component component) {
-                changeOrderBandsOfIndexes(UP);
-            }
-
-            @Override
-            protected boolean isApplicable() {
-                TemplateTableBand item = bandsTable.getSingleSelected();
-                if (item == null) {
-                    return false;
-                }
-                return item.getPosition() > 0;
-            }
-        });
-
-        bandsTable.addAction(new ListAction("down") {
-            @Override
-            public void actionPerform(Component component) {
-                changeOrderBandsOfIndexes(DOWN);
-            }
-
-            @Override
-            protected boolean isApplicable() {
-                TemplateTableBand item = bandsTable.getSingleSelected();
-                if (item == null) {
-                    return false;
-                }
-                return item.getPosition() < (tableBandsDc.getItems().size() - 1) && super.isApplicable();
-            }
-        });
+    @Subscribe("columnsTable.upColumn")
+    public void onColumnsTableUpColumn(Action.ActionPerformedEvent event) {
+        changeOrderColumnsOfIndexes(UP);
     }
 
-
-    private void initButtonColumnTable() {
-        columnsTable.addAction(new AbstractAction("create") {
-            @Override
-            public String getCaption() {
-                return "";
-            }
-
-            @Override
-            public void actionPerform(Component component) {
-                TemplateTableBand selectBand = bandsTable.getSingleSelected();
-
-                if (selectBand != null) {
-                    TemplateTableColumn item = metadata.create(TemplateTableColumn.class);
-                    item.setPosition(tableColumnsDc.getItems().size());
-
-                    tableColumnsDc.getMutableItems().add(item);
-                } else {
-                    notifications.create(Notifications.NotificationType.HUMANIZED)
-                            .withCaption(messages.getMessage("template.bandRequired"))
-                            .show();
-                }
-            }
-        });
-
-        columnsTable.addAction(new ListAction("up") {
-            @Override
-            public void actionPerform(Component component) {
-                changeOrderColumnsOfIndexes(UP);
-            }
-
-            @Override
-            protected boolean isApplicable() {
-                TemplateTableColumn item = columnsTable.getSingleSelected();
-                if (item == null) {
-                    return false;
-                }
-                return item.getPosition() > 0 && super.isApplicable();
-            }
-        });
-
-        columnsTable.addAction(new ListAction("down") {
-            @Override
-            public void actionPerform(Component component) {
-                changeOrderColumnsOfIndexes(DOWN);
-            }
-
-            @Override
-            protected boolean isApplicable() {
-                TemplateTableColumn item = columnsTable.getSingleSelected();
-                if (item == null) {
-                    return false;
-                }
-                return item.getPosition() < (tableColumnsDc.getItems().size() - 1) && super.isApplicable();
-            }
-        });
+    @Install(to = "columnsTable.upColumn", subject = "enabledRule")
+    private boolean columnsTableUpColumnEnabledRule() {
+        TemplateTableColumn item = columnsTable.getSingleSelected();
+        if (item == null) {
+            return false;
+        }
+        return item.getPosition() > 0;
     }
 
+    @Subscribe("columnsTable.downColumn")
+    public void onColumnsTableDownColumn(Action.ActionPerformedEvent event) {
+        changeOrderColumnsOfIndexes(DOWN);
+    }
+
+    @Install(to = "columnsTable.downColumn", subject = "enabledRule")
+    public boolean columnsTableDownColumnEnabledRule() {
+        TemplateTableColumn item = columnsTable.getSingleSelected();
+        if (item == null) {
+            return false;
+        }
+        return item.getPosition() < (tableColumnsDc.getItems().size() - 1);
+    }
 
     private void changeOrderColumnsOfIndexes(int order) {
         TemplateTableColumn currentColumn = columnsTable.getSingleSelected();

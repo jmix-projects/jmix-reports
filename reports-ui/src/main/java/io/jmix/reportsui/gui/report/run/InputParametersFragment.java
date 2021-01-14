@@ -50,16 +50,16 @@ public class InputParametersFragment extends ScreenFragment {
     protected ReportInputParameter inputParameter;
 
     @Autowired
-    protected ComboBox<ReportTemplate> templateField;
+    protected ComboBox<ReportTemplate> templateComboBox;
 
     @Autowired
-    protected ComboBox<ReportOutputType> outputTypeField;
+    protected ComboBox<ReportOutputType> outputTypeComboBox;
 
     @Autowired
-    protected Label outputTypeLbl;
+    protected Label<String> outputTypeLabel;
 
     @Autowired
-    protected Label templateLbl;
+    protected Label<String> templateLabel;
 
     @Autowired
     protected GridLayout parametersGrid;
@@ -207,10 +207,10 @@ public class InputParametersFragment extends ScreenFragment {
     public void initTemplateAndOutputSelect() {
         if (report != null) {
             if (report.getTemplates() != null && report.getTemplates().size() > 1) {
-                templateField.setValue(report.getDefaultTemplate());
+                templateComboBox.setValue(report.getDefaultTemplate());
                 setTemplateVisible(true);
             }
-            templateField.addValueChangeListener(e -> updateOutputTypes());
+            templateComboBox.addValueChangeListener(e -> updateOutputTypes());
             updateOutputTypes();
         }
     }
@@ -223,7 +223,7 @@ public class InputParametersFragment extends ScreenFragment {
 
         ReportTemplate template;
         if (report.getTemplates() != null && report.getTemplates().size() > 1) {
-            template = templateField.getValue();
+            template = templateComboBox.getValue();
         } else {
             template = report.getDefaultTemplate();
         }
@@ -231,29 +231,29 @@ public class InputParametersFragment extends ScreenFragment {
         if (template != null && reportGuiManager.supportAlterableForTemplate(template)) {
             List<ReportOutputType> outputTypes = ReportPrintHelper.getInputOutputTypesMapping().get(template.getExt());
             if (outputTypes != null && !outputTypes.isEmpty()) {
-                outputTypeField.setOptionsList(outputTypes);
-                if (outputTypeField.getValue() == null) {
-                    outputTypeField.setValue(template.getReportOutputType());
+                outputTypeComboBox.setOptionsList(outputTypes);
+                if (outputTypeComboBox.getValue() == null) {
+                    outputTypeComboBox.setValue(template.getReportOutputType());
                 }
                 setOutputTypeVisible(true);
             } else {
-                outputTypeField.setValue(null);
+                outputTypeComboBox.setValue(null);
                 setOutputTypeVisible(false);
             }
         } else {
-            outputTypeField.setValue(null);
+            outputTypeComboBox.setValue(null);
             setOutputTypeVisible(false);
         }
     }
 
     protected void setOutputTypeVisible(boolean visible) {
-        outputTypeLbl.setVisible(visible);
-        outputTypeField.setVisible(visible);
+        outputTypeLabel.setVisible(visible);
+        outputTypeComboBox.setVisible(visible);
     }
 
     protected void setTemplateVisible(boolean visible) {
-        templateLbl.setVisible(visible);
-        templateField.setVisible(visible);
+        templateLabel.setVisible(visible);
+        templateComboBox.setVisible(visible);
     }
 
     public Report getReport() {
@@ -261,10 +261,10 @@ public class InputParametersFragment extends ScreenFragment {
     }
 
     public ReportTemplate getReportTemplate() {
-        return templateField.getValue();
+        return templateComboBox.getValue();
     }
 
     public ReportOutputType getOutputType() {
-        return outputTypeField.getValue();
+        return outputTypeComboBox.getValue();
     }
 }

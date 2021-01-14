@@ -31,6 +31,7 @@ import io.jmix.reportsui.gui.report.run.InputParametersDialog;
 import io.jmix.security.constraint.PolicyStore;
 import io.jmix.security.constraint.SecureOperations;
 import io.jmix.securitydata.entity.RoleEntity;
+import io.jmix.securityui.model.RoleModel;
 import io.jmix.ui.*;
 import io.jmix.ui.component.*;
 import io.jmix.ui.model.CollectionContainer;
@@ -77,7 +78,7 @@ public class ReportEditor extends StandardEditor<Report> {
     protected CollectionContainer<ReportGroup> groupsDc;
 
     @Autowired
-    protected CollectionLoader groupsDl;
+    private CollectionLoader<ReportGroup> groupsDl;
 
     @Autowired
     protected CollectionContainer<ReportInputParameter> parametersDc;
@@ -86,7 +87,7 @@ public class ReportEditor extends StandardEditor<Report> {
     protected CollectionContainer<ReportScreen> reportScreensDc;
 
     @Autowired
-    protected CollectionContainer<RoleEntity> rolesDc;
+    protected CollectionContainer<RoleModel> rolesDc;
 
     @Autowired
     protected CollectionContainer<RoleEntity> lookupRolesDc;

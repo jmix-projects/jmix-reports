@@ -119,11 +119,12 @@ public class ShowReportTableLookup extends StandardLookup {
             drawTables(dto);
             openReportParameters(reportParameters);
         }
+    }
 
-        reportEntityComboBox.addValueChangeListener(e -> {
-            report = e.getValue();
-            openReportParameters(null);
-        });
+    @Subscribe("reportEntityComboBox")
+    public void onReportEntityComboBoxValueChange(HasValue.ValueChangeEvent<Report> event) {
+        report = event.getValue();
+        openReportParameters(null);
     }
 
     private void openReportParameters(Map<String, Object> reportParameters) {

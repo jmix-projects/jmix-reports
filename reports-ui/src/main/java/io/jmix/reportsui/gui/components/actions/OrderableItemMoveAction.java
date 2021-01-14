@@ -212,7 +212,6 @@ public class OrderableItemMoveAction<T extends ListComponent<E>, E extends Order
             ContainerDataUnit containerDataUnit = (ContainerDataUnit) dataUnit;
             return containerDataUnit.getContainer().getItems();
         } else {
-            //todo
             return null;
         }
     }

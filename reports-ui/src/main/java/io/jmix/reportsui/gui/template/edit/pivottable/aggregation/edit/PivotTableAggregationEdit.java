@@ -65,7 +65,6 @@ public class PivotTableAggregationEdit extends StandardEditor<PivotTableAggregat
                 ValidationErrors validationErrors = new ValidationErrors();
                 validationErrors.add(messages.getMessage("pivotTableEdit.uniqueAggregationOptionCaption"));
 
-                //todo
                 screenValidation.showValidationErrors(this, validationErrors);
                 event.preventCommit();
             }

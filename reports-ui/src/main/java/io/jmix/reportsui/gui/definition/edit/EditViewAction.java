@@ -26,10 +26,15 @@ import io.jmix.reports.app.EntityTree;
 import io.jmix.reports.entity.DataSet;
 import io.jmix.reports.entity.DataSetType;
 import io.jmix.reports.entity.wizard.ReportRegion;
+import io.jmix.reportsui.gui.report.wizard.region.RegionEditor;
 import io.jmix.ui.Notifications;
 import io.jmix.ui.ScreenBuilders;
 import io.jmix.ui.action.AbstractAction;
 import io.jmix.ui.component.Component;
+import io.jmix.ui.component.Window;
+import io.jmix.ui.screen.OpenMode;
+import io.jmix.ui.screen.Screen;
+import io.jmix.ui.screen.StandardCloseAction;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -88,31 +93,19 @@ public class EditViewAction extends AbstractAction {
                             editorParams.put("scalarOnly", Boolean.TRUE);
                             editorParams.put("updateDisabled", !bandDefinitionEditor.isUpdatePermitted());
 
-                            //todo
-//                            Screen screen = screenBuilders.screen(this)
-//                                    .withScreenId("report_Report.regionEditor")
-//                                    .withOpenMode(OpenMode.DIALOG)
-//                                    .build();
-//
-//                            screen.addAfterCloseListener(afterCloseEvent -> {
-//                                if (Window.COMMIT_ACTION_ID.equals(((StandardCloseAction) afterCloseEvent.getCloseAction()).getActionId())) {
-//                                    dataSet.setFetchPlan(reportRegionToView(entityTree, (ReportRegion) screen.getItem()));
-//                                }
-//                            });
-//                            screen.show();
-//
-//                            Window.Editor regionEditor =
-//                                    bandDefinitionEditor.openEditor("report_Report.regionEditor",
-//                                            reportRegion, OpenType.DIALOG, editorParams, bandDefinitionEditor.dataSetsDs);
-//                            regionEditor.addCloseListener(actionId -> {
-//                                if (Window.COMMIT_ACTION_ID.equals(actionId)) {
-//                                    dataSet.setFetchPlan(reportRegionToView(entityTree, (ReportRegion) regionEditor.getItem()));
-//                                }
-//                            });
+                            Screen screen = screenBuilders.editor(ReportRegion.class, bandDefinitionEditor.getHostController())
+                                    .editEntity(reportRegion)
+                                    .withScreenClass(RegionEditor.class)
+                                    .withOpenMode(OpenMode.DIALOG)
+                                    .build();
+                            screen.addAfterCloseListener(afterCloseEvent -> {
+                                if (Window.COMMIT_ACTION_ID.equals(((StandardCloseAction) afterCloseEvent.getCloseAction()).getActionId())) {
+                                    dataSet.setFetchPlan(reportRegionToView(entityTree, reportRegion));
+                                }
+                            });
+                            screen.show();
                         }
-
                     }
-
                 }
             }
         }

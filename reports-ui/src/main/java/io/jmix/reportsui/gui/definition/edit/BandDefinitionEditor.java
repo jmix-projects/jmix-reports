@@ -332,7 +332,6 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
         createAction.setEnabled(createAction.isEnabled() && isUpdatePermitted());
         dataSets.addAction(createAction);
 
-        //todo
         Action editDataSetViewAction = new EditViewAction(this);
         viewEditButton.setAction(editDataSetViewAction);
 
@@ -372,7 +371,7 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
     }
 
     protected void initDataSetListeners() {
-        tabOrientationTableDecorator.decorate(dataSets, bandsDc);
+        tabOrientationTableDecorator.decorate(dataSets, dataSetsDc, bandsDc);
 
         dataSetsDc.addItemChangeListener(e -> {
             if (e.getItem() != null) {

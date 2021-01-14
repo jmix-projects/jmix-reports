@@ -15,10 +15,12 @@
  */
 package io.jmix.reportsui.web.exception;
 
+import com.vaadin.spring.annotation.UIScope;
 import com.vaadin.ui.Window;
 import io.jmix.core.Messages;
 import io.jmix.reports.exception.*;
 import io.jmix.ui.AppUI;
+import io.jmix.ui.Notifications;
 import io.jmix.ui.exception.AbstractUiExceptionHandler;
 import io.jmix.ui.widget.ExceptionDialog;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,11 +31,15 @@ import javax.annotation.Nullable;
 /**
  * Handles reporting exceptions.
  */
+@UIScope
 @Component("report_ReportExceptionHandler")
 public class ReportExceptionHandler extends AbstractUiExceptionHandler {
 
     @Autowired
     protected Messages messages;
+
+    @Autowired
+    protected Notifications notifications;
 
     public ReportExceptionHandler() {
         super(
@@ -49,16 +55,17 @@ public class ReportExceptionHandler extends AbstractUiExceptionHandler {
     @Override
     protected void doHandle(String className, String message, @Nullable Throwable throwable, UiContext context) {
         if (FailedToConnectToOpenOfficeException.class.getName().equals(className)) {
-            String msg = messages.getMessage(getClass(), "reportException.failedConnectToOffice");
-            //TODO show notifications
-//            App.getInstance().getWindowManager().showNotification(msg, Frame.NotificationType.ERROR);
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withCaption(messages.getMessage(getClass(), "reportException.failedConnectToOffice"))
+                    .show();
         } else if (NoOpenOfficeFreePortsException.class.getName().equals(className)) {
-            String msg = messages.getMessage(getClass(), "reportException.noOpenOfficeFreePorts");
-            //TODO show notifications
-//            app.getWindowManager().showNotification(msg, Frame.NotificationType.ERROR);
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withCaption(messages.getMessage(getClass(), "reportException.noOpenOfficeFreePorts"))
+                    .show();
         } else if (ValidationException.class.getName().equals(className)) {
-            //TODO show notifications
-//            app.getWindowManager().showNotification(message, Frame.NotificationType.ERROR);
+            notifications.create(Notifications.NotificationType.ERROR)
+                    .withCaption(message)
+                    .show();
         } else {
             ExceptionDialog dialog = new ExceptionDialog(
                     throwable,

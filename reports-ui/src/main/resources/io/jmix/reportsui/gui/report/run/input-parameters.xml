@@ -16,16 +16,17 @@
 
 <window xmlns="http://jmix.io/schema/ui/window"
         caption="msg://inputParameters">
-
-    <dialogMode width="auto"/>
+    <actions>
+        <action id="printAction"/>
+    </actions>
 
     <layout spacing="true">
         <fragment id="inputParametersFrame" screen="report_InputParameters.fragment"/>
 
         <hbox spacing="true">
-            <button id="printReportBtn"
+            <button id="printReportButton" action="printAction"
                     caption="msg://input.printReport" icon="icons/run.png"/>
-            <button id="cancelBtn" caption="msg://cancel"/>
+            <button id="cancelButton" caption="msg://cancel"/>
         </hbox>
     </layout>
 </window>

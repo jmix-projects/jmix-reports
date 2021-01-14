@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 
 @UiController("report_PivotTableEdit.fragment")
 @UiDescriptor("pivottable-frame.xml")
-public class PivotTableEditFrame extends DescriptionEditFrame {
+public class PivotTableEditFragment extends DescriptionEditFragment {
 
     public static final Set<RendererType> C3_RENDERER_TYPES = Sets.newHashSet(
             RendererType.LINE_CHART, RendererType.BAR_CHART, RendererType.STACKED_BAR_CHART,

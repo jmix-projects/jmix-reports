@@ -25,6 +25,7 @@ import io.jmix.reportsui.gui.ReportGuiManager;
 import io.jmix.reportsui.gui.ReportParameterValidator;
 import io.jmix.ui.Notifications;
 import io.jmix.ui.UiProperties;
+import io.jmix.ui.action.Action;
 import io.jmix.ui.component.Button;
 import io.jmix.ui.component.ValidationErrors;
 import io.jmix.ui.screen.*;
@@ -59,7 +60,7 @@ public class InputParametersDialog extends Screen {
     protected ReportGuiManager reportGuiManager;
 
     @Autowired
-    protected Button printReportBtn;
+    protected Action printAction;
 
     @Autowired
     protected InputParametersFragment inputParametersFrame;
@@ -110,18 +111,11 @@ public class InputParametersDialog extends Screen {
             //noinspection unchecked
             selectedEntities = (Collection) parameters.get(inputParameter.getAlias());
         }
-        //todo
-//        Action printReportAction = printReportBtn.getAction();
-//        printReportAction.setShortcut(properties.getCommitShortcut());
+        printAction.setShortcut(properties.getCommitShortcut());
     }
 
-    @Subscribe
-    protected void onBeforeShow(BeforeShowEvent event) {
-        inputParametersFrame.initTemplateAndOutputSelect();
-    }
-
-    @Subscribe("printReportBtn")
-    public void printReport(Button.ClickEvent event) {
+    @Subscribe("printAction")
+    public void onPrint(Action.ActionPerformedEvent event) {
         if (inputParametersFrame.getReport() != null) {
             ValidationErrors validationErrors = screenValidation.validateUiComponents(getWindow());
             if (validationErrors.isEmpty()) {
@@ -142,10 +136,10 @@ public class InputParametersDialog extends Screen {
         }
     }
 
-//    @Override
-//    public boolean validateAll() {
-//        return super.validateAll() && crossValidateParameters();
-//    }
+    @Subscribe
+    protected void onBeforeShow(BeforeShowEvent event) {
+        inputParametersFrame.initTemplateAndOutputSelect();
+    }
 
     protected boolean crossValidateParameters() {
         boolean isValid = true;
@@ -166,7 +160,7 @@ public class InputParametersDialog extends Screen {
         return isValid;
     }
 
-    @Subscribe("cancelBtn")
+    @Subscribe("cancelButton")
     public void cancel() {
         close(StandardOutcome.CLOSE);
     }

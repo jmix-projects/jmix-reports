@@ -134,13 +134,6 @@ public class ParametersFragment extends ScreenFragment {
 
         inputParametersTable.addAction(upButton.getAction());
         inputParametersTable.addAction(downButton.getAction());
-
-        parametersDc.addItemPropertyChangeListener(e -> {
-            if ("position".equals(e.getProperty())) {
-                //todo
-                //((DatasourceImplementation) parametersDc).modified(e.getItem());
-            }
-        });
     }
 
     @Install(to = "inputParametersTable.create", subject = "initializer")

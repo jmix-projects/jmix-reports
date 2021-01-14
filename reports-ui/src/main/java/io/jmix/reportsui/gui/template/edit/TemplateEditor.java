@@ -62,7 +62,7 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
     protected Label<String> isCustomLabel;
 
     @Autowired
-    protected CheckBox custom;
+    protected CheckBox customField;
 
     @Autowired
     protected Label<String> templateFileLabel;
@@ -77,7 +77,7 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
     protected Label<String> isGroovyLabel;
 
     @Autowired
-    protected TextArea<String> customDefinition;
+    protected TextArea<String> customDefinitionField;
 
     @Autowired
     protected LinkButton customDefinitionHelpLinkButton;
@@ -89,7 +89,7 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
     protected Label<String> customDefinitionLabel;
 
     @Autowired
-    protected ComboBox<CustomTemplateDefinedBy> customDefinedBy;
+    protected ComboBox<CustomTemplateDefinedBy> customDefinedByField;
 
     @Autowired
     protected Label<String> customDefinedByLabel;
@@ -110,13 +110,13 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
     protected Label<String> outputNamePatternLabel;
 
     @Autowired
-    protected ChartEditFrame chartEdit;
+    protected ChartEditFragment chartEdit;
 
     @Autowired
-    protected PivotTableEditFrame pivotTableEdit;
+    protected PivotTableEditFragment pivotTableEdit;
 
     @Autowired
-    protected TableEditFrame tableEdit;
+    protected TableEditFragment tableEdit;
 
     @Autowired
     protected InstanceContainer<ReportTemplate> templateDc;
@@ -240,7 +240,7 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
         templateUploadField.setFileName(event.getFileName());
     }
 
-    protected Collection<DescriptionEditFrame> getDescriptionEditFrames() {
+    protected Collection<DescriptionEditFragment> getDescriptionEditFrames() {
         return Arrays.asList(chartEdit, pivotTableEdit, tableEdit);
     }
 
@@ -267,21 +267,21 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
         boolean enabled = templateOutputVisibility && customEnabled;
         boolean groovyScriptVisibility = enabled && hasScriptCustomDefinedBy(getEditedEntity().getCustomDefinedBy());
 
-        custom.setVisible(templateOutputVisibility);
+        customField.setVisible(templateOutputVisibility);
         isCustomLabel.setVisible(templateOutputVisibility);
 
-        customDefinedBy.setVisible(enabled);
-        customDefinition.setVisible(enabled);
+        customDefinedByField.setVisible(enabled);
+        customDefinitionField.setVisible(enabled);
         customDefinedByLabel.setVisible(enabled);
         customDefinitionLabel.setVisible(enabled);
 
         customDefinitionHelpLinkButton.setVisible(groovyScriptVisibility);
         fullScreenLinkButton.setVisible(groovyScriptVisibility);
 
-        customDefinedBy.setRequired(enabled);
-        customDefinedBy.setRequiredMessage(messages.getMessage(getClass(), "templateEditor.customDefinedBy"));
-        customDefinition.setRequired(enabled);
-        customDefinition.setRequiredMessage(messages.getMessage(getClass(), "templateEditor.classRequired"));
+        customDefinedByField.setRequired(enabled);
+        customDefinedByField.setRequiredMessage(messages.getMessage(getClass(), "templateEditor.customDefinedBy"));
+        customDefinitionField.setRequired(enabled);
+        customDefinitionField.setRequiredMessage(messages.getMessage(getClass(), "templateEditor.classRequired"));
 
         boolean supportAlterableForTemplate = templateOutputVisibility && !enabled;
         alterable.setVisible(supportAlterableForTemplate);
@@ -309,14 +309,13 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
     }
 
     protected void setupVisibilityDescriptionEdit(boolean customEnabled, ReportOutputType reportOutputType) {
-        DescriptionEditFrame applicableFrame =
+        DescriptionEditFragment applicableFrame =
                 getDescriptionEditFrames().stream()
                         .filter(c -> c.isApplicable(reportOutputType))
                         .findFirst().orElse(null);
         if (applicableFrame != null) {
             descriptionEditBox.setVisible(!customEnabled);
-            // todo
-            //applicableFrame.setVisible(!customEnabled);
+            applicableFrame.setVisible(!customEnabled);
             applicableFrame.setItem(getEditedEntity());
 
             if (!customEnabled && applicableFrame.isSupportPreview()) {
@@ -326,10 +325,9 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
             }
         }
 
-        for (DescriptionEditFrame frame : getDescriptionEditFrames()) {
+        for (DescriptionEditFragment frame : getDescriptionEditFrames()) {
             if (applicableFrame != frame) {
-                //todo
-                //frame.setVisible(false);
+                frame.setVisible(false);
             }
             if (applicableFrame == null) {
                 frame.hidePreview();
@@ -435,7 +433,7 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
             event.preventCommit();
         }
         ReportTemplate reportTemplate = getEditedEntity();
-        for (DescriptionEditFrame frame : getDescriptionEditFrames()) {
+        for (DescriptionEditFragment frame : getDescriptionEditFrames()) {
             if (frame.isApplicable(reportTemplate.getReportOutputType())) {
                 if (!frame.applyChanges()) {
                     event.preventCommit();
@@ -511,7 +509,7 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
                 .withOpenMode(OpenMode.DIALOG)
                 .withOptions(new MapScreenOptions(ParamsMap.of(
                         "mode", SourceCodeEditor.Mode.Groovy,
-                        "scriptValue", customDefinition.getValue(),
+                        "scriptValue", customDefinitionField.getValue(),
                         "helpVisible", customDefinitionHelpLinkButton.isVisible(),
                         "helpMsgKey", "templateEditor.textHelpGroovy"
                 )))
@@ -519,7 +517,7 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
         editorDialog.addAfterCloseListener(actionId -> {
             StandardCloseAction closeAction = (StandardCloseAction) actionId.getCloseAction();
             if (Window.COMMIT_ACTION_ID.equals(closeAction.getActionId())) {
-                customDefinition.setValue(editorDialog.getValue());
+                customDefinitionField.setValue(editorDialog.getValue());
             }
         });
         editorDialog.show();

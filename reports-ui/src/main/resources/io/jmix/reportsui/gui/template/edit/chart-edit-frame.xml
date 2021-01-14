@@ -16,15 +16,6 @@
 
 <window xmlns="http://jmix.io/schema/ui/window">
 
-    <!--    <dsContext>-->
-    <!--        <datasource id="pieChartDs" class="com.haulmont.reports.entity.charts.PieChartDescription" view="_local"-->
-    <!--                    allowCommit="false"/>-->
-    <!--        <datasource id="serialChartDs" class="com.haulmont.reports.entity.charts.SerialChartDescription" view="_local"-->
-    <!--                    allowCommit="false">-->
-    <!--            <collectionDatasource id="seriesDs" property="series" allowCommit="false"/>-->
-    <!--        </datasource>-->
-    <!--    </dsContext>-->
-
     <data>
         <instance id="pieChartDc"
                   class="io.jmix.reports.entity.charts.PieChartDescription"
@@ -51,7 +42,7 @@
                 </row>
                 <row>
                     <form id="pieChartFieldGroup" dataContainer="pieChartDc" colspan="2">
-                        <column width="${width}" fieldCaptionWidth="${captionWidth}">
+                        <column width="${width}">
                             <field id="pieBandName" property="bandName"/>
                             <field id="titleField" property="titleField"/>
                             <field id="valueField" property="valueField"/>
@@ -63,7 +54,7 @@
                 </row>
                 <row>
                     <form id="serialChartFieldGroup" dataContainer="serialChartDc" colspan="2">
-                        <column width="${width}" fieldCaptionWidth="${captionWidth}">
+                        <column width="${width}">
                             <field id="serialBandName" property="bandName"/>
                             <field id="categoryField" property="categoryField"/>
                             <field id="categoryAxisCaption" property="categoryAxisCaption"/>

@@ -17,11 +17,6 @@
 <window xmlns="http://jmix.io/schema/ui/window"
         caption="msg://pivotTableAggregationEditor">
 
-<!--    <dsContext>-->
-<!--        <datasource id="aggregationDs" class="com.haulmont.reports.entity.pivottable.PivotTableAggregation"-->
-<!--                    allowCommit="false"/>-->
-<!--    </dsContext>-->
-
     <data>
         <instance id="aggregationDc"
                   class="io.jmix.reports.entity.pivottable.PivotTableAggregation">
@@ -36,7 +31,7 @@
 
     <layout spacing="true" expand="editBox">
         <groupBox id="editBox" showAsPanel="true">
-            <fieldGroup id="editGroup" datasource="aggregationDs" width="100%">
+            <form id="editGroup" dataContainer="aggregationDc" width="100%">
                 <column>
                     <field property="mode" width="337px"/>
                     <field property="caption" width="337px"/>
@@ -50,7 +45,7 @@
                                           width="100%"/>
                     </field>
                 </column>
-            </fieldGroup>
+            </form>
         </groupBox>
         <hbox spacing="true" stylename="c-edit-window-actions">
             <button id="windowCommit" action="windowCommit" icon="EDITOR_OK"/>

@@ -99,8 +99,7 @@ public class ReportExecutionBrowser extends StandardLookup<ReportExecution> {
 
     @Install(to = "executionsTable.executionTimeSec", subject = "formatter")
     protected String formatExecutionTimeSec(Long value) {
-        String text = durationFormatter.apply(value);
-        return text;
+        return durationFormatter.apply(value);
     }
 
     protected String getReportsNames() {

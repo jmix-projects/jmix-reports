@@ -75,7 +75,7 @@ public class ParameterClassResolver {
         Class aClass = primitiveParameterTypeMapping.get(parameter.getType());
         if (aClass == null) {
             if (parameter.getType() == ParameterType.ENTITY || parameter.getType() == ParameterType.ENTITY_LIST) {
-                MetaClass metaClass = metadata.getSession().getClass(parameter.getEntityMetaClass());
+                MetaClass metaClass = metadata.findClass(parameter.getEntityMetaClass());
                 if (metaClass != null) {
                     return metaClass.getJavaClass();
                 } else {

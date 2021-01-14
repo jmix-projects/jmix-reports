@@ -141,8 +141,7 @@ public class GeneralFragment extends ScreenFragment {
                     orderBandDefinitions(parent);
                 }
             }
-            //todo
-            //treeDc.modifyItem(e.getItem());
+
         });
 
         //        propertiesFieldGroup.add("defaultTemplate", new FieldGroup.CustomFieldGenerator() {
@@ -409,13 +408,11 @@ public class GeneralFragment extends ScreenFragment {
     @Subscribe("serviceTree.remove")
     public void onServiceTreeRemove(Action.ActionPerformedEvent event) {
         Set<BandDefinition> selected = bandTree.getSelected();
-        if (selected != null) {
-            removeChildrenCascade(selected);
-            for (Object object : selected) {
-                BandDefinition definition = (BandDefinition) object;
-                if (definition.getParentBandDefinition() != null) {
-                    orderBandDefinitions(((BandDefinition) object).getParentBandDefinition());
-                }
+        removeChildrenCascade(selected);
+        for (Object object : selected) {
+            BandDefinition definition = (BandDefinition) object;
+            if (definition.getParentBandDefinition() != null) {
+                orderBandDefinitions(((BandDefinition) object).getParentBandDefinition());
             }
         }
         bandTree.focus();

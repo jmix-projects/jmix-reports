@@ -30,13 +30,11 @@ import io.jmix.ui.screen.UiController;
 import io.jmix.ui.screen.UiDescriptor;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.awt.*;
-
 @UiController("report_PivotTableProperty.edit")
 @UiDescriptor("pivottable-property-edit.xml")
 public class PivotTablePropertyEdit extends StandardEditor<PivotTableProperty> {
     @Autowired
-    protected Form editGroup;
+    protected Form propertyForm;
     @Autowired
     protected InstanceContainer<PivotTableProperty> propertyDc;
     @Autowired
@@ -65,7 +63,7 @@ public class PivotTablePropertyEdit extends StandardEditor<PivotTableProperty> {
 
     protected void initFunctionField() {
         PivotTableProperty property = getEditedEntity();
-        editGroup.getComponent("function")
+        propertyForm.getComponent("function")
                 .setVisible(property.getType() == PivotTablePropertyType.DERIVED);
     }
 }

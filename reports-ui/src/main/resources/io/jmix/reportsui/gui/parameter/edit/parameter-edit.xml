@@ -47,9 +47,9 @@
                         </row>
                         <row>
                             <label value="msg://parameters.type" align="MIDDLE_LEFT"/>
-                            <comboBox id="type" dataContainer="parameterDc" property="type" required="true"
-                                         textInputAllowed="false"
-                                         width="100%" requiredMessage="msg://parameters.typeMsg"/>
+                            <comboBox id="parameterTypeComboBox" dataContainer="parameterDc" property="type" required="true"
+                                      textInputAllowed="false"
+                                      width="100%" requiredMessage="msg://parameters.typeMsg"/>
                         </row>
                         <row>
                             <label value="msg://parameters.hidden" align="MIDDLE_LEFT"/>
@@ -66,9 +66,9 @@
                         </row>
                         <row>
                             <label id="metaClassLabel" value="msg://parameters.metaClass" align="MIDDLE_LEFT"/>
-                            <comboBox id="metaClass" width="100%" dataContainer="parameterDc"
-                                         property="entityMetaClass"
-                                         requiredMessage="msg://parameters.requiredMetaClass" required="true"/>
+                            <comboBox id="metaClassComboBox" width="100%" dataContainer="parameterDc"
+                                      property="entityMetaClass"
+                                      requiredMessage="msg://parameters.requiredMetaClass" required="true"/>
                         </row>
                         <row>
                             <label id="enumerationLabel" value="msg://parameters.enum" align="MIDDLE_LEFT"/>

@@ -20,5 +20,4 @@ public class FormatsFragment extends ScreenFragment {
     private void valuesFormatsTableCreateInitializer(ReportValueFormat reportValueFormat) {
         reportValueFormat.setReport(reportDc.getItem());
     }
-
 }

@@ -17,11 +17,6 @@
 <window xmlns="http://jmix.io/schema/ui/window"
         caption="msg://pivotTablePropertyEditor">
 
-<!--    <dsContext>-->
-<!--        <datasource id="propertyDs" class="com.haulmont.reports.entity.pivottable.PivotTableProperty"-->
-<!--                    allowCommit="false"/>-->
-<!--    </dsContext>-->
-
     <data>
         <instance id="propertyDc"
                   class="io.jmix.reports.entity.pivottable.PivotTableProperty">
@@ -36,7 +31,7 @@
 
     <layout spacing="true" expand="editBox">
         <groupBox id="editBox" showAsPanel="true">
-            <fieldGroup id="editGroup" datasource="propertyDc" width="100%">
+            <form id="propertyForm" dataContainer="propertyDc" width="100%">
                 <column width="100%">
                     <field property="name" width="337px"/>
                     <field property="caption" width="337px"/>
@@ -52,7 +47,7 @@
 
                     </field>
                 </column>
-            </fieldGroup>
+            </form>
         </groupBox>
         <hbox spacing="true" stylename="c-edit-window-actions">
             <button id="windowCommit" action="windowCommit" icon="EDITOR_OK"/>

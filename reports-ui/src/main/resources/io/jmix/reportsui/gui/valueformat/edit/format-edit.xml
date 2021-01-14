@@ -30,9 +30,9 @@
             <columns count="1"/>
             <rows>
                 <row>
-                    <form id="formatFields" dataContainer="valuesFormatsDc" width="100%">
+                    <form id="formatForm" dataContainer="valuesFormatsDc" width="100%">
                         <column>
-                            <textField id="valueName" property="valueName" required="true" width="100%"
+                            <textField id="valueNameField" property="valueName" required="true" width="100%"
                                        caption="msg://valuesFormats.name"
                                        requiredMessage="msg://valueNameMsg"/>
                             <comboBox id="formatComboBox" required="true"

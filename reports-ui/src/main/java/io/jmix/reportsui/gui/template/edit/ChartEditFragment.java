@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
 
 @UiController("report_ChartEdit.fragment")
 @UiDescriptor("chart-edit-frame.xml")
-public class ChartEditFrame extends DescriptionEditFrame {
+public class ChartEditFragment extends DescriptionEditFragment {
     @Autowired
     protected InstanceContainer<PieChartDescription> pieChartDc;
     @Autowired

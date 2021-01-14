@@ -35,13 +35,13 @@
             </columns>
             <rows>
                 <row>
-                    <label id="templateLbl" value="msg://caption.reportTemplate" align="MIDDLE_LEFT" visible="false"/>
-                    <entityComboBox id="templateField" optionsContainer="templateReportsDc" width="400" visible="false"/>
+                    <label id="templateLabel" value="msg://caption.reportTemplate" align="MIDDLE_LEFT" visible="false"/>
+                    <entityComboBox id="templateComboBox" optionsContainer="templateReportsDc" width="400" visible="false"/>
                 </row>
                 <row>
-                    <label id="outputTypeLbl" value="msg://caption.reportOutputType" align="MIDDLE_LEFT"
+                    <label id="outputTypeLabel" value="msg://caption.reportOutputType" align="MIDDLE_LEFT"
                            visible="false"/>
-                    <comboBox id="outputTypeField" width="400" visible="false"/>
+                    <comboBox id="outputTypeComboBox" width="400" visible="false"/>
                 </row>
                 <row>
                 </row>
