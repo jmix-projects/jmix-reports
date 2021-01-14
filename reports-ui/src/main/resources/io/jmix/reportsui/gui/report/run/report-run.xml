@@ -17,23 +17,10 @@
 <window xmlns="http://jmix.io/schema/ui/window"
         caption="msg://reportBrowser">
 
-<!--    <dsContext>-->
-<!--        <groupDatasource-->
-<!--                id="reportDs"-->
-<!--                class="com.haulmont.reports.entity.Report"-->
-<!--                refreshMode="NEVER">-->
-<!--        </groupDatasource>-->
-<!--        <collectionDatasource-->
-<!--                id="reportGroupsDs"-->
-<!--                class="com.haulmont.reports.entity.ReportGroup"-->
-<!--                view="_local">-->
-<!--            <query>select r from report_ReportGroup r</query>-->
-<!--        </collectionDatasource>-->
-<!--    </dsContext>-->
-
     <data>
         <collection id="reportsDc"
-                    class="io.jmix.reports.entity.Report"/>
+                    class="io.jmix.reports.entity.Report"
+                    fetchPlan="report.browse"/>
         <collection id="reportGroupsDc"
                     class="io.jmix.reports.entity.ReportGroup"
                     fetchPlan="_local">

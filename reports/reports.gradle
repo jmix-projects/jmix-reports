@@ -35,14 +35,15 @@ dependencies {
 
     api 'com.thoughtworks.xstream:xstream:1.4.13'
 
-    implementation 'com.google.code.gson:gson'
-    implementation('com.haulmont.yarg:yarg-api:2.2.5') {
+    api ('com.haulmont.yarg:yarg-api:2.2.5') {
         exclude group: 'org.codehaus.groovy', module: 'groovy-all'
     }
-    implementation('com.haulmont.yarg:yarg:2.2.5') {
+    api ('com.haulmont.yarg:yarg:2.2.5') {
         exclude group: 'org.codehaus.groovy', module: 'groovy-all'
         exclude group: 'commons-dbcp', module: 'commons-dbcp'
     }
+
+    implementation 'com.google.code.gson:gson'
     implementation 'com.fasterxml.jackson.core:jackson-annotations'
     implementation 'com.fasterxml.jackson.core:jackson-databind'
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'

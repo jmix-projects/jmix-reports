@@ -23,6 +23,9 @@ import com.haulmont.yarg.reporting.ReportingAPI;
 import com.haulmont.yarg.reporting.RunParams;
 import io.jmix.core.*;
 import io.jmix.core.metamodel.model.MetaClass;
+import io.jmix.core.security.AccessDeniedException;
+import io.jmix.core.security.EntityOp;
+import io.jmix.core.security.PermissionType;
 import io.jmix.data.PersistenceHints;
 import io.jmix.localfs.LocalFileStorage;
 import io.jmix.reports.app.ParameterPrototype;
@@ -31,6 +34,8 @@ import io.jmix.reports.converter.XStreamConverter;
 import io.jmix.reports.entity.*;
 import io.jmix.reports.exception.*;
 import io.jmix.reports.libintegration.CustomFormatter;
+import io.jmix.security.constraint.PolicyStore;
+import io.jmix.security.constraint.SecureOperations;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Predicate;
 import org.apache.commons.compress.archivers.ArchiveEntry;
@@ -76,6 +81,11 @@ public class ReportingBean implements ReportingApi {
     protected ReportImportExportAPI reportImportExport;
     @Autowired
     protected ReportExecutionHistoryRecorder executionHistoryRecorder;
+    @Autowired
+    protected SecureOperations secureOperations;
+    @Autowired
+    protected PolicyStore policyStore;
+
     //    @Autowired
 //    protected UserSessionSource userSessionSource;
     //TODO global config
@@ -332,12 +342,11 @@ public class ReportingBean implements ReportingApi {
 
     protected void checkPermission(Report report) {
         if (entityStates.isNew(report)) {
-            //TODO security
-//            if (!security.isEntityOpPermitted(metadata.getClassNN(Report.class), EntityOp.CREATE))
-//                throw new AccessDeniedException(PermissionType.ENTITY_OP, EntityOp.CREATE, metadata.getClassNN(Report.class).getName());
+            if (!secureOperations.isEntityCreatePermitted(metadata.getClass(Report.class), policyStore))
+                throw new AccessDeniedException(PermissionType.ENTITY_OP.name(), metadata.getClass(Report.class).getName(), EntityOp.UPDATE.getId());
         } else {
-//            if (!security.isEntityOpPermitted(metadata.getClassNN(Report.class), EntityOp.UPDATE))
-//                throw new AccessDeniedException(PermissionType.ENTITY_OP, EntityOp.UPDATE, metadata.getClassNN(Report.class).getName());
+            if (!secureOperations.isEntityUpdatePermitted(metadata.getClass(Report.class), policyStore))
+                throw new AccessDeniedException(PermissionType.ENTITY_OP.name(), metadata.getClass(Report.class).getName(), EntityOp.UPDATE.getId());
         }
     }
 

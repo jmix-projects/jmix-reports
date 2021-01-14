@@ -25,6 +25,11 @@
         </property>
     </fetchPlan>
 
+    <fetchPlan entity="report_Report" name="report.browse" extends="_local">
+        <property name="group"/>
+        <property name="updateTs"/>
+    </fetchPlan>
+
     <fetchPlan entity="report_Report" name="report.edit" extends="_local">
         <property name="templates" fetchPlan="template.edit"/>
         <property name="defaultTemplate" fetchPlan="template.edit"/>
@@ -57,6 +62,6 @@
     </fetchPlan>
 
     <fetchPlan entity="report_ReportExecution" name="reportExecution.browse" extends="_local">
-<!--        <property name="fileUri" fetchPlan="_instance_name"/>-->
+        <!--        <property name="fileUri" fetchPlan="_instance_name"/>-->
     </fetchPlan>
 </fetchPlans>

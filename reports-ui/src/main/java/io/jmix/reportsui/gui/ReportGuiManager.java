@@ -460,6 +460,7 @@ public class ReportGuiManager {
                 .add("description")
                 .add("code")
                 .add("group", FetchPlan.LOCAL)
+                .add("updateTs")
                 .build();
 
         lc.setFetchPlan(fetchPlan);
