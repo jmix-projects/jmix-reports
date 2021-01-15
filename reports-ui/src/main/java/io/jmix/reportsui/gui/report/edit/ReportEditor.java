@@ -198,7 +198,7 @@ public class ReportEditor extends StandardEditor<Report> {
     }
 
     @Subscribe("run")
-    public void onRunClick(Button.ClickEvent event) {
+    protected void onRunClick(Button.ClickEvent event) {
         if (getWindow().validateAll() && validateInputOutputFormats()) {
             getEditedEntity().setIsTmp(true);
             Map<String, Object> params = ParamsMap.of("report", getEditedEntity());
@@ -214,7 +214,7 @@ public class ReportEditor extends StandardEditor<Report> {
     }
 
     @Subscribe
-    public void onValidation(ValidationEvent event) {
+    protected void onValidation(ValidationEvent event) {
         ValidationErrors validationErrors = new ValidationErrors();
         if (getEditedEntity().getRootBand() == null) {
             validationErrors.add(messages.getMessage(getClass(), "error.rootBandNull"));

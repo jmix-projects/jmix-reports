@@ -12,6 +12,7 @@ import io.jmix.ui.Notifications;
 import io.jmix.ui.action.Action;
 import io.jmix.ui.component.Button;
 import io.jmix.ui.component.FileUploadField;
+import io.jmix.ui.component.SingleFileUploadField;
 import io.jmix.ui.component.Tree;
 import io.jmix.ui.model.CollectionContainer;
 import io.jmix.ui.model.CollectionPropertyContainer;
@@ -40,7 +41,7 @@ public class GeneralFragment extends ScreenFragment {
     protected CollectionContainer<BandDefinition> bandsDc;
 
     @Autowired
-    private CollectionContainer<BandDefinition> availableParentBandsDc;
+    protected CollectionContainer<BandDefinition> availableParentBandsDc;
 
     @Autowired
     protected Metadata metadata;
@@ -61,13 +62,10 @@ public class GeneralFragment extends ScreenFragment {
     protected Notifications notifications;
 
     @Autowired
-    private FileUploadField invisibleFileUpload;
-
-    @Autowired
     protected Messages messages;
 
     @Autowired
-    private BandDefinitionEditor bandEditor;
+    protected BandDefinitionEditor bandEditor;
 
     @Autowired
     protected Button up;
@@ -75,13 +73,12 @@ public class GeneralFragment extends ScreenFragment {
     @Autowired
     protected Button down;
 
-    @Subscribe
-    public void onInit(InitEvent event) {
-        invisibleFileUpload.addFileUploadSucceedListener(invisibleUpload -> {
-            final ReportTemplate defaultTemplate = reportDc.getItem().getDefaultTemplate();
-            if (defaultTemplate != null) {
-                if (!isTemplateWithoutFile(defaultTemplate)) {
-                    //todo
+    @Subscribe("invisibleFileUpload")
+    protected void onInvisibleFileUploadFileUploadSucceed(SingleFileUploadField.FileUploadSucceedEvent event) {
+        final ReportTemplate defaultTemplate = reportDc.getItem().getDefaultTemplate();
+        if (defaultTemplate != null) {
+            if (!isTemplateWithoutFile(defaultTemplate)) {
+                //todo
 //                    File file = fileUpload.getFile(invisibleFileUpload.getFileName());
 //                    try {
 //                        byte[] data = FileUtils.readFileToByteArray(file);
@@ -93,57 +90,57 @@ public class GeneralFragment extends ScreenFragment {
 //                                "An error occurred while uploading file for template [%s]",
 //                                defaultTemplate.getCode()));
 //                    }
-                } else {
-                    notifications.create(Notifications.NotificationType.HUMANIZED)
-                            .withCaption(messages.getMessage(getClass(), "notification.fileIsNotAllowedForSpecificTypes"))
-                            .show();
-                }
             } else {
                 notifications.create(Notifications.NotificationType.HUMANIZED)
-                        .withCaption(messages.getMessage(getClass(), "notification.defaultTemplateIsEmpty"))
+                        .withCaption(messages.getMessage(getClass(), "notification.fileIsNotAllowedForSpecificTypes"))
                         .show();
             }
-        });
+        } else {
+            notifications.create(Notifications.NotificationType.HUMANIZED)
+                    .withCaption(messages.getMessage(getClass(), "notification.defaultTemplateIsEmpty"))
+                    .show();
+        }
+    }
 
-        bandsDc.addItemChangeListener(e -> {
-            //bandEditor.setBandDefinition(e.getItem());
-            bandEditor.setEnabled(e.getItem() != null);
-            availableParentBandsDc.getMutableItems().clear();
-            if (e.getItem() != null) {
-                for (BandDefinition bandDefinition : bandsDc.getItems()) {
-                    if (!isChildOrEqual(e.getItem(), bandDefinition) ||
-                            Objects.equals(e.getItem().getParentBandDefinition(), bandDefinition)) {
-                        availableParentBandsDc.getMutableItems().add(bandDefinition);
-                    }
+    @Subscribe(id = "bandsDc", target = Target.DATA_CONTAINER)
+    protected void onBandsDcItemChange(InstanceContainer.ItemChangeEvent<BandDefinition> event) {
+        bandEditor.setEnabled(event.getItem() != null);
+        availableParentBandsDc.getMutableItems().clear();
+        if (event.getItem() != null) {
+            for (BandDefinition bandDefinition : bandsDc.getItems()) {
+                if (!isChildOrEqual(event.getItem(), bandDefinition) ||
+                        Objects.equals(event.getItem().getParentBandDefinition(), bandDefinition)) {
+                    availableParentBandsDc.getMutableItems().add(bandDefinition);
                 }
             }
-        });
+        }
+    }
 
-        bandEditor.getBandDefinitionDs().addItemPropertyChangeListener(e -> {
-            if ("parentBandDefinition".equals(e.getProperty())) {
-                BandDefinition previousParent = (BandDefinition) e.getPrevValue();
-                BandDefinition parent = (BandDefinition) e.getValue();
+    @Subscribe(id = "bandsDc", target = Target.DATA_CONTAINER)
+    protected void onBandsDcItemPropertyChange(InstanceContainer.ItemPropertyChangeEvent<BandDefinition> event) {
+        if ("parentBandDefinition".equals(event.getProperty())) {
+            BandDefinition previousParent = (BandDefinition) event.getPrevValue();
+            BandDefinition parent = (BandDefinition) event.getValue();
 
-                if (e.getValue() == e.getItem()) {
-                    e.getItem().setParentBandDefinition(previousParent);
-                } else {
-                    //todo
-                    //treeDc.refresh();
-                    previousParent.getChildrenBandDefinitions().remove(e.getItem());
-                    parent.getChildrenBandDefinitions().add(e.getItem());
-                }
-
-                if (e.getPrevValue() != null) {
-                    orderBandDefinitions(previousParent);
-                }
-
-                if (e.getValue() != null) {
-                    orderBandDefinitions(parent);
-                }
+            if (event.getValue() == event.getItem()) {
+                event.getItem().setParentBandDefinition(previousParent);
+            } else {
+                previousParent.getChildrenBandDefinitions().remove(event.getItem());
+                parent.getChildrenBandDefinitions().add(event.getItem());
             }
 
-        });
+            if (event.getPrevValue() != null) {
+                orderBandDefinitions(previousParent);
+            }
 
+            if (event.getValue() != null) {
+                orderBandDefinitions(parent);
+            }
+        }
+    }
+
+    @Subscribe
+    protected void onInit(InitEvent event) {
         //        propertiesFieldGroup.add("defaultTemplate", new FieldGroup.CustomFieldGenerator() {
 //            @Override
 //            public Component generateField(Datasource datasource, String propertyId) {
@@ -356,17 +353,24 @@ public class GeneralFragment extends ScreenFragment {
 //        });
     }
 
+    @Install(to = "serviceTree.upAction", subject = "enabledRule")
+    private boolean serviceTreeUpActionEnabledRule() {
+        return isUpButtonEnabled();
+    }
+
+    @Install(to = "serviceTree.downAction", subject = "enabledRule")
+    private boolean serviceTreeDownActionEnabledRule() {
+        return isDownButtonEnabled();
+    }
+
+
+
     protected void sortBandDefinitionsTableByPosition() {
         bandsDc.getSorter().sort(Sort.by(Sort.Direction.ASC, "position"));
     }
 
-    protected void refreshMoveButtonEnabled() {
-        up.setEnabled(isUpButtonEnabled());
-        down.setEnabled(isDownButtonEnabled());
-    }
-
     @Subscribe("serviceTree.create")
-    public void onServiceTreeCreate(Action.ActionPerformedEvent event) {
+    protected void onServiceTreeCreate(Action.ActionPerformedEvent event) {
         BandDefinition parentDefinition = bandsDc.getItem();
         Report report = reportDc.getItem();
         // Use root band as parent if no items selected
@@ -401,12 +405,12 @@ public class GeneralFragment extends ScreenFragment {
     }
 
     @Install(to = "serviceTree.create", subject = "enabledRule")
-    private boolean serviceTreeCreateEnabledRule() {
+    protected boolean serviceTreeCreateEnabledRule() {
         return isUpdatePermitted();
     }
 
     @Subscribe("serviceTree.remove")
-    public void onServiceTreeRemove(Action.ActionPerformedEvent event) {
+    protected void onServiceTreeRemove(Action.ActionPerformedEvent event) {
         Set<BandDefinition> selected = bandTree.getSelected();
         removeChildrenCascade(selected);
         for (Object object : selected) {
@@ -419,18 +423,13 @@ public class GeneralFragment extends ScreenFragment {
     }
 
     @Install(to = "serviceTree.remove", subject = "enabledRule")
-    private boolean serviceTreeRemoveEnabledRule() {
+    protected boolean serviceTreeRemoveEnabledRule() {
         Object selectedItem = bandTree.getSingleSelected();
         if (selectedItem != null) {
             return !Objects.equals(reportDc.getItem().getRootBandDefinition(), selectedItem);
         }
 
         return false;
-    }
-
-    @Subscribe("serviceTree")
-    public void onServiceTreeSelection(Tree.SelectionEvent<BandDefinition> event) {
-        refreshMoveButtonEnabled();
     }
 
     private void removeChildrenCascade(Collection selected) {
@@ -468,7 +467,7 @@ public class GeneralFragment extends ScreenFragment {
     }
 
     @Subscribe("up")
-    public void onUpClick(Button.ClickEvent event) {
+    protected void onUpClick(Button.ClickEvent event) {
         BandDefinition definition = bandTree.getSingleSelected();
         if (definition != null && definition.getParentBandDefinition() != null) {
             BandDefinition parentDefinition = definition.getParentBandDefinition();
@@ -483,7 +482,6 @@ public class GeneralFragment extends ScreenFragment {
                 definitionsList.set(index - 1, definition);
 
                 sortBandDefinitionsTableByPosition();
-                refreshMoveButtonEnabled();
             }
         }
     }
@@ -497,7 +495,7 @@ public class GeneralFragment extends ScreenFragment {
     }
 
     @Subscribe("down")
-    public void onDownClick(Button.ClickEvent event) {
+    protected void onDownClick(Button.ClickEvent event) {
         BandDefinition definition = bandTree.getSingleSelected();
         if (definition != null && definition.getParentBandDefinition() != null) {
             BandDefinition parentDefinition = definition.getParentBandDefinition();
@@ -512,7 +510,6 @@ public class GeneralFragment extends ScreenFragment {
                 definitionsList.set(index + 1, definition);
 
                 sortBandDefinitionsTableByPosition();
-                refreshMoveButtonEnabled();
             }
         }
     }

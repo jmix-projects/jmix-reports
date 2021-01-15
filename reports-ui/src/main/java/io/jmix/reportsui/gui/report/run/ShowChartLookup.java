@@ -165,8 +165,9 @@ public class ShowChartLookup extends StandardLookup {
                     CHART_JSON_PARAMETER,
                     chartJson);
 
-            fragments.create(this, JSON_CHART_SCREEN_ID, new MapScreenOptions(params))
-                    .init();
+            //todo chart
+//            fragments.create(this, JSON_CHART_SCREEN_ID, new MapScreenOptions(params))
+//                    .init();
         }
 
         showDiagramStubText();
@@ -193,7 +194,7 @@ public class ShowChartLookup extends StandardLookup {
     }
 
     @Subscribe("printReportBtn")
-    public void printReport() {
+    protected void printReport() {
         if (inputParametersFrame != null && inputParametersFrame.getReport() != null) {
             ValidationErrors validationErrors = screenValidation.validateUiComponents(getWindow());
             if (validationErrors.isEmpty()) {

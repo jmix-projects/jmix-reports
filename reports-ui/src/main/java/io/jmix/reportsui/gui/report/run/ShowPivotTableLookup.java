@@ -167,7 +167,7 @@ public class ShowPivotTableLookup extends StandardLookup {
     }
 
     @Subscribe("printReportBtn")
-    public void printReport() {
+    protected void printReport() {
         if (inputParametersFrame != null && inputParametersFrame.getReport() != null) {
             ValidationErrors validationErrors = screenValidation.validateUiComponents(getWindow());
             if (validationErrors.isEmpty()) {

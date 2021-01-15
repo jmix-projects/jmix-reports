@@ -60,13 +60,13 @@ public class ValueFormatEditor extends StandardEditor<ReportValueFormat> {
     };
 
     @Autowired
-    protected ComboBox<String> formatComboBox;
+    protected ComboBox<String> formatField;
 
     @Autowired
     protected Form formatForm;
 
     @Autowired
-    protected CheckBox groovyCheckBox;
+    protected CheckBox groovyField;
 
     @Autowired
     protected LinkButton groovyFullScreenLinkButton;
@@ -113,26 +113,10 @@ public class ValueFormatEditor extends StandardEditor<ReportValueFormat> {
     protected void onInit(InitEvent event) {
         // Add default format strings to comboBox
         initFormatComboBox();
-        groovyCheckBox.addValueChangeListener(booleanValueChangeEvent -> {
-            Boolean visible = booleanValueChangeEvent.getValue();
-            Boolean prevVisible = booleanValueChangeEvent.getPrevValue();
-
-            Boolean userOriginated = booleanValueChangeEvent.isUserOriginated();
-
-            if (isClickTrueGroovyScript(visible, prevVisible, userOriginated)) {
-                groovyCodeEditor.setValue(RETURN_VALUE);
-            }
-            if (Boolean.FALSE.equals(visible)) {
-                formatComboBox.clear();
-            }
-
-            groovyVBox.setVisible(Boolean.TRUE.equals(visible));
-            formatComboBox.setVisible(Boolean.FALSE.equals(visible));
-        });
     }
 
-    @Install(to = "groovyCheckBox", subject = "contextHelpIconClickHandler")
-    private void groovyCheckBoxContextHelpIconClickHandler(HasContextHelp.ContextHelpIconClickEvent contextHelpIconClickEvent) {
+    @Install(to = "groovyField", subject = "contextHelpIconClickHandler")
+    protected void groovyCheckBoxContextHelpIconClickHandler(HasContextHelp.ContextHelpIconClickEvent contextHelpIconClickEvent) {
         dialogs.createMessageDialog()
                 .withCaption(messages.getMessage(getClass(), "valuesFormats.groovyScript"))
                 .withMessage(messages.getMessage(getClass(), "valuesFormats.groovyScriptHelpText"))
@@ -142,8 +126,8 @@ public class ValueFormatEditor extends StandardEditor<ReportValueFormat> {
                 .show();
     }
 
-    @Subscribe("groovyCheckBox")
-    public void onGroovyCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+    @Subscribe("groovyField")
+    protected void onGroovyCheckBoxValueChange(HasValue.ValueChangeEvent<Boolean> event) {
         Boolean visible = event.getValue();
         Boolean prevVisible = event.getPrevValue();
 
@@ -153,22 +137,22 @@ public class ValueFormatEditor extends StandardEditor<ReportValueFormat> {
             groovyCodeEditor.setValue(RETURN_VALUE);
         }
         if (Boolean.FALSE.equals(visible)) {
-            formatComboBox.clear();
+            formatField.clear();
         }
 
         groovyVBox.setVisible(Boolean.TRUE.equals(visible));
-        formatComboBox.setVisible(Boolean.FALSE.equals(visible));
+        formatField.setVisible(Boolean.FALSE.equals(visible));
     }
 
     protected void initFormatComboBox() {
-        formatComboBox.setOptionsList(Arrays.asList(defaultFormats));
+        formatField.setOptionsList(Arrays.asList(defaultFormats));
 
-        formatComboBox.setNewOptionHandler(caption -> {
+        formatField.setNewOptionHandler(caption -> {
             addFormatItem(caption);
-            formatComboBox.setValue(caption);
+            formatField.setValue(caption);
         });
 
-        formatComboBox.setEditable(secureOperations.isEntityUpdatePermitted(metadata.getClass(ReportValueFormat.class), policyStore));
+        formatField.setEditable(secureOperations.isEntityUpdatePermitted(metadata.getClass(ReportValueFormat.class), policyStore));
     }
 
     protected boolean isClickTrueGroovyScript(Boolean visible, Boolean prevVisible, Boolean userOriginated) {
@@ -177,34 +161,34 @@ public class ValueFormatEditor extends StandardEditor<ReportValueFormat> {
 
     protected void addFormatItem(String caption) {
         //noinspection unchecked
-        List<String> optionsList = formatComboBox.getOptions().getOptions()
+        List<String> optionsList = formatField.getOptions().getOptions()
                 .collect(Collectors.toList());
         optionsList.add(caption);
 
-        formatComboBox.setOptionsList(optionsList);
+        formatField.setOptionsList(optionsList);
     }
 
     @Subscribe
     protected void onAfterInit(AfterInitEvent event) {
-        String value = formatComboBox.getValue();
+        String value = formatField.getValue();
         if (value != null) {
-            List<String> optionsList = formatComboBox.getOptions().getOptions()
+            List<String> optionsList = formatField.getOptions().getOptions()
                     .collect(Collectors.toList());
 
-            if (!optionsList.contains(value) && Boolean.FALSE.equals(groovyCheckBox.isChecked())) {
+            if (!optionsList.contains(value) && Boolean.FALSE.equals(groovyField.isChecked())) {
                 addFormatItem(value);
             }
-            formatComboBox.setValue(value);
+            formatField.setValue(value);
         }
     }
 
     @Subscribe
-    public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
-        getEditedEntity().setFormatString(formatComboBox.getValue());
+    protected void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
+        getEditedEntity().setFormatString(formatField.getValue());
     }
 
     @Subscribe("groovyFullScreenLinkButton")
-    public void showGroovyEditorDialog(Button.ClickEvent event) {
+    protected void showGroovyEditorDialog(Button.ClickEvent event) {
         ScriptEditorDialog editorDialog = (ScriptEditorDialog) screenBuilders.screen(this)
                 .withScreenId("report_Editor.dialog")
                 .withOpenMode(OpenMode.DIALOG)

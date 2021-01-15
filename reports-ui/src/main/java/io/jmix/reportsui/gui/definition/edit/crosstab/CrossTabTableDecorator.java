@@ -104,16 +104,16 @@ public class CrossTabTableDecorator {
         initCrossDatasets(dataSetsDc, bandDefinitionDs);
     }
 
-    protected void initCrossDatasets(CollectionContainer<DataSet> dataSetsDs,
-                                     InstanceContainer<BandDefinition> bandDefinitionDs) {
-        if (bandDefinitionDs == null) {
+    protected void initCrossDatasets(CollectionContainer<DataSet> dataSetsDc,
+                                     InstanceContainer<BandDefinition> bandDefinitionDc) {
+        if (bandDefinitionDc == null) {
             return;
         }
 
         DataSet horizontal = null;
         DataSet vertical = null;
 
-        for (DataSet dataSet : dataSetsDs.getItems()) {
+        for (DataSet dataSet : dataSetsDc.getItems()) {
             if (horizontal == null && !Strings.isNullOrEmpty(dataSet.getName()) && dataSet.getName().endsWith(HORIZONTAL_TPL)) {
                 horizontal = dataSet;
             }
@@ -126,48 +126,46 @@ public class CrossTabTableDecorator {
         }
 
         if (horizontal == null) {
-            horizontal = dataSetFactory.createEmptyDataSet(bandDefinitionDs.getItem());
+            horizontal = dataSetFactory.createEmptyDataSet(bandDefinitionDc.getItem());
             onHorizontalSetChange(horizontal);
         }
 
         if (vertical == null) {
-            vertical = dataSetFactory.createEmptyDataSet(bandDefinitionDs.getItem());
+            vertical = dataSetFactory.createEmptyDataSet(bandDefinitionDc.getItem());
             onVerticalSetChange(vertical);
         }
 
-        initListeners(dataSetsDs, bandDefinitionDs, horizontal, vertical);
+        initListeners(dataSetsDc, bandDefinitionDc, horizontal, vertical);
     }
 
-    protected void initListeners(CollectionContainer<DataSet> dataSetsDs,
-                                 InstanceContainer<BandDefinition> bandDefinitionDs,
+    protected void initListeners(CollectionContainer<DataSet> dataSetsDc,
+                                 InstanceContainer<BandDefinition> bandDefinitionDc,
                                  DataSet horizontal, DataSet vertical) {
-        bandDefinitionDs.addItemPropertyChangeListener(e -> {
+        bandDefinitionDc.addItemPropertyChangeListener(e -> {
             if ("orientation".equals(e.getProperty())) {
                 Orientation orientation = (Orientation) e.getValue();
                 Orientation prevOrientation = (Orientation) e.getPrevValue();
                 if (orientation == prevOrientation) return;
 
                 if (Orientation.CROSS == orientation || Orientation.CROSS == prevOrientation) {
-                    onOrientationChange(dataSetsDs, bandDefinitionDs);
+                    onOrientationChange(dataSetsDc, bandDefinitionDc);
                 }
 
                 if (Orientation.CROSS == orientation) {
-                    dataSetsDs.getMutableItems().add(horizontal);
-                    dataSetsDs.getMutableItems().add(vertical);
+                    dataSetsDc.getMutableItems().add(horizontal);
+                    dataSetsDc.getMutableItems().add(vertical);
                 }
             }
 
-            if (bandDefinitionDs.getItem().getOrientation() == Orientation.CROSS && "name".equals(e.getProperty())) {
+            if (bandDefinitionDc.getItem().getOrientation() == Orientation.CROSS && "name".equals(e.getProperty())) {
                 onHorizontalSetChange(horizontal);
                 onVerticalSetChange(vertical);
             }
         });
     }
 
-    protected void onOrientationChange(CollectionContainer<DataSet> dataSetsDs, InstanceContainer<BandDefinition> bandDefinitionDs) {
-        dataSetsDs.getItems().stream()
-                .filter(Objects::nonNull)
-                .forEach(item -> dataSetsDs.getMutableItems().remove(item));
-        dataSetsDs.getMutableItems().add(dataSetFactory.createEmptyDataSet(bandDefinitionDs.getItem()));
+    protected void onOrientationChange(CollectionContainer<DataSet> dataSetsDc, InstanceContainer<BandDefinition> bandDefinitionDc) {
+        dataSetsDc.getMutableItems().clear();
+        dataSetsDc.getMutableItems().add(dataSetFactory.createEmptyDataSet(bandDefinitionDc.getItem()));
     }
 }

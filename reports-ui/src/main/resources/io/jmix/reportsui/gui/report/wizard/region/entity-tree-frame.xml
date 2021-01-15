@@ -16,7 +16,7 @@
 
 <!--CAUTION: for correct validation (correct messages) of required fields without caption in controller-->
 <!--their id must to be equal codes in localization props files-->
-<window xmlns="http://jmix.io/schema/ui/window">
+<fragment xmlns="http://jmix.io/schema/ui/fragment">
 
     <data>
         <collection id="reportEntityTreeNodeDc"
@@ -25,11 +25,15 @@
         </collection>
     </data>
 
+    <actions>
+        <action id="search"/>
+    </actions>
+
     <layout spacing="true" expand="entityTree">
         <hbox id="reportPropertyHBox" spacing="true" expand="reportPropertyName" width="100%">
             <textField id="reportPropertyName"/>
-            <button id="reportPropertyNameSearchButton" icon="font-icon:SEARCH"/>
+            <button id="reportPropertyNameSearchButton" icon="SEARCH"/>
         </hbox>
         <tree id="entityTree" width="100%" multiselect="false" dataContainer="reportEntityTreeNodeDc"/>
     </layout>
-</window>
+</fragment>

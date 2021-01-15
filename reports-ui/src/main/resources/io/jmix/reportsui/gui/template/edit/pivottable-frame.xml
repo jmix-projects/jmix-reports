@@ -31,11 +31,8 @@
     <layout spacing="true">
         <vbox>
             <form id="pivotTableGroup" dataContainer="pivotTableDc" width="${width}">
-                <column fieldCaptionWidth="${caption-width}" width="100%">
-                    <comboBox id="bandName" property="bandName"/>
-                    <!--                        <comboBox dataContainer="pivotTableDc"-->
-                    <!--                                     property="bandName"-->
-                    <!--                                     required="true"/>-->
+                <column width="100%">
+                    <comboBox id="bandNameField" property="bandName" required="true"/>
                     <checkBox property="editable"/>
                 </column>
             </form>
@@ -43,7 +40,7 @@
                 <tab id="renderer" caption="msg://pivotTable.rendererOptions" margin="true">
                     <form id="rendererGroup" dataContainer="pivotTableDc" width="100%">
                         <column width="100%">
-                            <field id="defaultRenderer" property="defaultRenderer" required="true"/>
+                            <comboBox id="defaultRendererField" property="defaultRenderer" required="true"/>
                             <multiSelectList dataContainer="pivotTableDc"
                                              property="renderers"
                                              required="true"/>
@@ -61,7 +58,7 @@
                             <button action="aggregationsTable.create"/>
                             <button action="aggregationsTable.edit"/>
                             <button action="aggregationsTable.remove"/>
-                            <entityComboBox id="defaultAggregation"
+                            <entityComboBox id="defaultAggregationField"
                                             optionsContainer="aggregationsDc"
                                             inputPrompt="msg://pivotTable.defaultAggregation"
                                             dataContainer="pivotTableDc" property="defaultAggregation"
@@ -101,7 +98,7 @@
                         <groupBox caption="msg://pivotTable.customFunctions" collapsable="true" collapsed="false"
                                   spacing="true">
                             <form id="customFunctionsGroup" dataContainer="pivotTableDc" width="100%">
-                                <column fieldCaptionWidth="${tab-caption-width}" width="100%">
+                                <column width="100%">
                                     <sourceCodeEditor mode="JavaScript" property="filterFunction"
                                                       dataContainer="pivotTableDc"/>
                                     <sourceCodeEditor mode="JavaScript" property="sortersFunction"
@@ -112,7 +109,7 @@
                         <groupBox id="customC3GroupBox" caption="msg://pivotTable.customC3properties" spacing="true"
                                   collapsable="true" collapsed="true" visible="false">
                             <form id="customC3Group" dataContainer="pivotTableDc" width="100%">
-                                <column fieldCaptionWidth="${tab-caption-width}" width="100%">
+                                <column width="100%">
                                     <field property="c3Width"/>
                                     <field property="c3Height"/>
                                 </column>
@@ -122,7 +119,7 @@
                                   spacing="true"
                                   collapsable="true" collapsed="true" visible="false">
                             <form id="customHeatmapGroup" dataContainer="pivotTableDc" width="100%">
-                                <column fieldCaptionWidth="${tab-caption-width}" width="100%">
+                                <column width="100%">
                                     <sourceCodeEditor mode="JavaScript" property="colorScaleGeneratorFunction"
                                                       height="200px" dataContainer="pivotTableDc"/>
                                 </column>

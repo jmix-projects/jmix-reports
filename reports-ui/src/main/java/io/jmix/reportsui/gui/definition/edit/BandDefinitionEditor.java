@@ -155,7 +155,7 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
     protected SourceCodeEditor.Mode dataSetScriptFieldMode = SourceCodeEditor.Mode.Text;
 
     @Subscribe("jsonSourceGroovyCodeLinkBtn")
-    public void showJsonScriptEditorDialog(Button.ClickEvent event) {
+    protected void showJsonScriptEditorDialog(Button.ClickEvent event) {
         ScriptEditorDialog editorDialog = (ScriptEditorDialog) screenBuilders.screen(this)
                 .withScreenId("report_Editor.dialog")
                 .withOpenMode(OpenMode.DIALOG)
@@ -184,7 +184,7 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
     }
 
     @Subscribe("dataSetTextLinkBtn")
-    public void showDataSetScriptEditorDialog(Button.ClickEvent event) {
+    protected void showDataSetScriptEditorDialog(Button.ClickEvent event) {
         ScriptEditorDialog editorDialog = (ScriptEditorDialog) screenBuilders.screen(this)
                 .withScreenId("report_Editor.dialog")
                 .withOpenMode(OpenMode.DIALOG)
@@ -237,8 +237,6 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
     protected void onInit(InitEvent event) {
         initDataSetListeners();
 
-        initBandDefinitionsListeners();
-
         initParametersListeners();
 
         initActions();
@@ -246,25 +244,26 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
         initDataStoreField();
 
         initSourceCodeOptions();
-
-        initHelpButtons();
     }
 
-    protected void initHelpButtons() {
-        jsonGroovyCodeEditor.setContextHelpIconClickHandler(e ->
-                dialogs.createMessageDialog()
-                        .withCaption(messages.getMessage(getClass(), "dataSet.text"))
-                        .withMessage(messages.getMessage(getClass(), "dataSet.jsonSourceGroovyCodeHelp"))
-                        .withModal(false)
-                        .withWidth("700px")
-                        .show());
-        jsonPathQueryTextAreaField.setContextHelpIconClickHandler(e ->
-                dialogs.createMessageDialog()
-                        .withCaption(messages.getMessage(getClass(), "dataSet.text"))
-                        .withMessage(messages.getMessage(getClass(), "dataSet.jsonPathQueryHelp"))
-                        .withModal(false)
-                        .withWidth("700px")
-                        .show());
+    @Install(to = "jsonGroovyCodeEditor", subject = "contextHelpIconClickHandler")
+    protected void jsonGroovyCodeEditorContextHelpIconClickHandler(HasContextHelp.ContextHelpIconClickEvent contextHelpIconClickEvent) {
+        dialogs.createMessageDialog()
+                .withCaption(messages.getMessage(getClass(), "dataSet.text"))
+                .withMessage(messages.getMessage(getClass(), "dataSet.jsonSourceGroovyCodeHelp"))
+                .withModal(false)
+                .withWidth("700px")
+                .show();
+    }
+
+    @Install(to = "jsonPathQueryTextAreaField", subject = "contextHelpIconClickHandler")
+    protected void jsonPathQueryTextAreaFieldContextHelpIconClickHandler(HasContextHelp.ContextHelpIconClickEvent contextHelpIconClickEvent) {
+        dialogs.createMessageDialog()
+                .withCaption(messages.getMessage(getClass(), "dataSet.text"))
+                .withMessage(messages.getMessage(getClass(), "dataSet.jsonPathQueryHelp"))
+                .withModal(false)
+                .withWidth("700px")
+                .show();
     }
 
     protected void initSourceCodeOptions() {
@@ -358,52 +357,53 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
         });
     }
 
-    protected void initBandDefinitionsListeners() {
-        bandsDc.addItemChangeListener(e -> {
-            updateRequiredIndicators(e.getItem());
-            selectFirstDataSet();
-        });
-        bandsDc.addItemPropertyChangeListener(e -> {
-            if ("name".equals(e.getProperty()) && StringUtils.isBlank((String) e.getValue())) {
-                e.getItem().setName("*");
+    @Subscribe(id = "bandsDc", target = Target.DATA_CONTAINER)
+    protected void onBandsDcItemPropertyChange(InstanceContainer.ItemPropertyChangeEvent<BandDefinition> event) {
+        if ("name".equals(event.getProperty()) && StringUtils.isBlank((String) event.getValue())) {
+            event.getItem().setName("*");
+        }
+    }
+
+    @Subscribe(id = "bandsDc", target = Target.DATA_CONTAINER)
+    protected void onBandsDcItemChange(InstanceContainer.ItemChangeEvent<BandDefinition> event) {
+        updateRequiredIndicators(event.getItem());
+        selectFirstDataSet();
+    }
+
+    @Subscribe(id = "dataSetsDc", target = Target.DATA_CONTAINER)
+    protected void onDataSetsDcItemChange(InstanceContainer.ItemChangeEvent<DataSet> event) {
+        DataSet dataSet = event.getItem();
+
+        if (dataSet != null) {
+            applyVisibilityRules(event.getItem());
+
+            if (dataSet.getType() == DataSetType.SINGLE) {
+                refreshViewNames(findParameterByAlias(dataSet.getEntityParamName()));
+            } else if (dataSet.getType() == DataSetType.MULTI) {
+                refreshViewNames(findParameterByAlias(dataSet.getListEntitiesParamName()));
             }
-        });
+
+            dataSetScriptField.resetEditHistory();
+        } else {
+            hideAllDataSetEditComponents();
+        }
+    }
+
+    @Subscribe(id = "dataSetsDc", target = Target.DATA_CONTAINER)
+    protected void onDataSetsDcItemPropertyChange(InstanceContainer.ItemPropertyChangeEvent<DataSet> event) {
+        applyVisibilityRules(event.getItem());
+        if ("entityParamName".equals(event.getProperty()) || "listEntitiesParamName".equals(event.getProperty())) {
+            ReportInputParameter linkedParameter = findParameterByAlias(String.valueOf(event.getValue()));
+            refreshViewNames(linkedParameter);
+        }
+
+        if ("processTemplate".equals(event.getProperty())) {
+            applyVisibilityRulesForType(event.getItem());
+        }
     }
 
     protected void initDataSetListeners() {
         tabOrientationTableDecorator.decorate(dataSets, dataSetsDc, bandsDc);
-
-        dataSetsDc.addItemChangeListener(e -> {
-            if (e.getItem() != null) {
-                applyVisibilityRules(e.getItem());
-
-                if (e.getItem().getType() == DataSetType.SINGLE) {
-                    refreshViewNames(findParameterByAlias(e.getItem().getEntityParamName()));
-                } else if (e.getItem().getType() == DataSetType.MULTI) {
-                    refreshViewNames(findParameterByAlias(e.getItem().getListEntitiesParamName()));
-                }
-
-                dataSetScriptField.resetEditHistory();
-            } else {
-                hideAllDataSetEditComponents();
-            }
-        });
-
-        dataSetsDc.addItemPropertyChangeListener(e -> {
-            applyVisibilityRules(e.getItem());
-            if ("entityParamName".equals(e.getProperty()) || "listEntitiesParamName".equals(e.getProperty())) {
-                ReportInputParameter linkedParameter = findParameterByAlias(String.valueOf(e.getValue()));
-                refreshViewNames(linkedParameter);
-            }
-
-            if ("processTemplate".equals(e.getProperty()) && e.getItem() != null) {
-                applyVisibilityRulesForType(e.getItem());
-            }
-
-//            @SuppressWarnings("unchecked")
-//            DatasourceImplementation<DataSet> implementation = (DatasourceImplementation<DataSet>) dataSetDc;
-//            implementation.modified(e.getItem());
-        });
 
         dataSetScriptField.resetEditHistory();
 

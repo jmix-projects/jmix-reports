@@ -109,7 +109,7 @@ public class RegionsStepFrame extends StepFrame {
                                     .withScreenId("report_Region.edit")
                                     .editEntity(item)
                                     .withOpenMode(OpenMode.DIALOG)
-                                    .withContainer(wizard.reportRegionsDs)
+                                    .withContainer(wizard.reportRegionsDc)
                                     .withOptions(new MapScreenOptions(editorParams))
                                     .build();
 
@@ -134,7 +134,7 @@ public class RegionsStepFrame extends StepFrame {
                     .withScreenId("report_Region.edit")
                     .editEntity(item)
                     .withOpenMode(OpenMode.DIALOG)
-                    .withContainer(wizard.reportRegionsDs)
+                    .withContainer(wizard.reportRegionsDc)
                     .withOptions(new MapScreenOptions(editorParams))
                     .build();
 
@@ -287,10 +287,8 @@ public class RegionsStepFrame extends StepFrame {
                         .withMessage(wizard.formatMessage("deleteRegion", wizard.regionsTable.getSingleSelected().getName()))
                         .withActions(
                                 new DialogAction(DialogAction.Type.YES).withHandler(e -> {
-                                    //todo
-                                    //wizard.reportRegionsDs.removeItem(wizard.regionsTable.getSingleSelected());
+                                    wizard.reportRegionsDc.getMutableItems().remove(wizard.regionsTable.getSingleSelected());
                                     normalizeRegionPropertiesOrderNum();
-//                                    wizard.regionsTable.refresh();
                                     wizard.setupButtonsVisibility();
                                 }),
                                 new DialogAction(DialogAction.Type.NO).withPrimary(true)
@@ -305,7 +303,7 @@ public class RegionsStepFrame extends StepFrame {
 
         protected void normalizeRegionPropertiesOrderNum() {
             long normalizedIdx = 0;
-            List<ReportRegion> allItems = new ArrayList<>(wizard.reportRegionsDs.getItems());
+            List<ReportRegion> allItems = new ArrayList<>(wizard.reportRegionsDc.getItems());
             for (ReportRegion item : allItems) {
                 item.setOrderNum(++normalizedIdx); //first must to be 1
             }
@@ -328,7 +326,7 @@ public class RegionsStepFrame extends StepFrame {
                 RegionEditor regionEditor = (RegionEditor) wizard.screenBuilders.editor(ReportRegion.class, wizard)
                         .withScreenId("report_Region.edit")
                         .editEntity(wizard.regionsTable.getSingleSelected())
-                        .withContainer(wizard.reportRegionsDs)
+                        .withContainer(wizard.reportRegionsDc)
                         .withOpenMode(OpenMode.DIALOG)
                         .withOptions(new MapScreenOptions(editorParams))
                         .build();
@@ -394,7 +392,7 @@ public class RegionsStepFrame extends StepFrame {
         }
 
         private void showAddRegion() {
-            if (wizard.reportRegionsDs.getItems().isEmpty()) {
+            if (wizard.reportRegionsDc.getItems().isEmpty()) {
                 if (((ReportType) wizard.reportTypeRadioButtonGroup.getValue()).isList()) {
                     if (wizard.entityTreeHasSimpleAttrs) {
                         addTabulatedRegionAction.actionPerform(wizard.regionsStepFrame.getFrame());

@@ -45,7 +45,7 @@ public class ReportDetachListener implements BeforeDetachEntityListener<Report> 
             entity.setBands(reportFromXml.getBands());
             entity.setInputParameters(reportFromXml.getInputParameters());
             entity.setReportScreens(reportFromXml.getReportScreens());
-//            entity.setRoles(reportFromXml.getRoles());
+            entity.setRoles(reportFromXml.getRoles());
             entity.setValuesFormats(reportFromXml.getValuesFormats());
             entity.setValidationOn(reportFromXml.getValidationOn());
             entity.setValidationScript(reportFromXml.getValidationScript());
@@ -59,12 +59,7 @@ public class ReportDetachListener implements BeforeDetachEntityListener<Report> 
         if (entity.getRootBandDefinition() != null
                 && CollectionUtils.isNotEmpty(entity.getRootBandDefinition().getChildrenBandDefinitions())) {
             List<BandDefinition> bandDefinitions = new ArrayList<>(entity.getRootBandDefinition().getChildrenBandDefinitions());
-            Collections.sort(bandDefinitions, new Comparator<BandDefinition>() {
-                @Override
-                public int compare(BandDefinition o1, BandDefinition o2) {
-                    return o1.getPosition().compareTo(o2.getPosition());
-                }
-            });
+            Collections.sort(bandDefinitions, Comparator.comparing(BandDefinition::getPosition));
             entity.getRootBandDefinition().setChildrenBandDefinitions(bandDefinitions);
         }
     }

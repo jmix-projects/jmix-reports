@@ -59,7 +59,7 @@ public class ReportImportDialog extends StandardEditor {
     protected Notifications notifications;
 
     @Subscribe
-    public void onInit(InitEvent event) {
+    protected void onInit(InitEvent event) {
         fileUpload.addFileUploadSucceedListener(e -> {
             fileName.setValue(fileUpload.getFileName());
         });
@@ -77,11 +77,11 @@ public class ReportImportDialog extends StandardEditor {
             ReportImportResult result = reportService.importReportsWithResult(bytes, getImportOptions());
 
             notifications.create(Notifications.NotificationType.HUMANIZED)
-                    .withCaption(messages.formatMessage(ReportImportDialog.class, "importResult", result.getCreatedReports().size(), result.getUpdatedReports().size()))
+                    .withCaption(messages.formatMessage(getClass(), "importResult", result.getCreatedReports().size(), result.getUpdatedReports().size()))
                     .show();
         } catch (Exception e) {
             notifications.create(Notifications.NotificationType.ERROR)
-                    .withCaption(messages.getMessage("reportException.unableToImportReport"))
+                    .withCaption(messages.getMessage(getClass(), "reportException.unableToImportReport"))
                     .withDescription(e.toString())
                     .show();
         }
@@ -97,12 +97,12 @@ public class ReportImportDialog extends StandardEditor {
     @Override
     protected void validateAdditionalRules(ValidationErrors errors) {
         if (fileUpload.getFileId() == null) {
-            errors.add(messages.getMessage("reportException.noFile"));
+            errors.add(messages.getMessage(getClass(), "reportException.noFile"));
             return;
         }
         String extension = FilenameUtils.getExtension(fileUpload.getFileName());
         if (!StringUtils.equalsIgnoreCase(extension, DownloadFormat.ZIP.getFileExt())) {
-            errors.add(messages.formatMessage("reportException.wrongFileType", extension));
+            errors.add(messages.formatMessage(getClass(), "reportException.wrongFileType", extension));
         }
 
         super.validateAdditionalRules(errors);

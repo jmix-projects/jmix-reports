@@ -71,7 +71,7 @@ public class ReportGroupBrowser extends StandardLookup<ReportGroup> {
     }
 
     @Subscribe("reportGroupsTable.remove")
-    public void onReportGroupsTableRemove(Action.ActionPerformedEvent event) {
+    protected void onReportGroupsTableRemove(Action.ActionPerformedEvent event) {
         if (!event.getSource().isEnabled()) {
             return;
         }

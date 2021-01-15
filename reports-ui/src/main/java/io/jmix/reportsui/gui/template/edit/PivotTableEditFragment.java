@@ -68,13 +68,13 @@ public class PivotTableEditFragment extends DescriptionEditFragment {
     protected Table<PivotTableAggregation> aggregationsTable;
 
     @Autowired
-    protected ComboBox<RendererType> defaultRenderer;
+    protected ComboBox<RendererType> defaultRendererField;
 
     @Autowired
-    protected ComboBox<PivotTableAggregation> defaultAggregation;
+    protected ComboBox<PivotTableAggregation> defaultAggregationField;
 
     @Autowired
-    protected ComboBox<String> bandName;
+    protected ComboBox<String> bandNameField;
 
     @Autowired
     protected GroupBoxLayout customC3GroupBox;
@@ -211,7 +211,7 @@ public class PivotTableEditFragment extends DescriptionEditFragment {
                 .filter(bandDefinition -> bandDefinition.getParentBandDefinition() != null)
                 .map(BandDefinition::getName)
                 .collect(Collectors.toList());
-        bandName.setOptionsList(bandNames);
+        bandNameField.setOptionsList(bandNames);
     }
 
     protected void initRendererTypes() {
@@ -246,7 +246,7 @@ public class PivotTableEditFragment extends DescriptionEditFragment {
 
         aggregationsDc.addCollectionChangeListener(e -> {
             if (e.getChangeType() == CollectionChangeType.REMOVE_ITEMS) {
-                defaultAggregation.setOptionsList(aggregationsDc.getItems());
+                defaultAggregationField.setOptionsList(aggregationsDc.getItems());
             }
         });
     }
@@ -259,8 +259,8 @@ public class PivotTableEditFragment extends DescriptionEditFragment {
 
     protected void initDefaultRenderer() {
         List<RendererType> rendererTypes = new ArrayList<>(getPivotTableDescription().getRenderers());
-        defaultRenderer.setOptionsList(rendererTypes);
-        defaultRenderer.setEnabled(rendererTypes.size() > 1);
+        defaultRendererField.setOptionsList(rendererTypes);
+        defaultRendererField.setEnabled(rendererTypes.size() > 1);
     }
 
     protected void initPropertyTable() {

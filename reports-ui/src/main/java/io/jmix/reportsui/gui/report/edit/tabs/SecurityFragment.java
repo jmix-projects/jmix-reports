@@ -80,7 +80,7 @@ public class SecurityFragment extends ScreenFragment {
     protected RoleModelConverter roleModelConverter;
 
     @Install(to = "roleModelsDl", target = Target.DATA_LOADER)
-    private List<RoleModel> roleModelsDlLoadDelegate(LoadContext<RoleModel> loadContext) {
+    protected List<RoleModel> roleModelsDlLoadDelegate(LoadContext<RoleModel> loadContext) {
         Collection<Role> roles = roleRepository.getAllRoles();
         return roles.stream()
                 .map(roleModelConverter::createRoleModel)
@@ -90,7 +90,7 @@ public class SecurityFragment extends ScreenFragment {
     }
 
     @Subscribe
-    public void onInit(InitEvent event) {
+    protected void onInit(InitEvent event) {
         List<WindowInfo> windowInfoCollection = new ArrayList<>(windowConfig.getWindows());
         // sort by screenId
         screensHelper.sortWindowInfos(windowInfoCollection);
@@ -107,7 +107,7 @@ public class SecurityFragment extends ScreenFragment {
     }
 
     @Subscribe
-    public void onAfterInit(AfterInitEvent event) {
+    protected void onAfterInit(AfterInitEvent event) {
         reloadRoles();
     }
 
@@ -132,7 +132,7 @@ public class SecurityFragment extends ScreenFragment {
     }
 
     @Subscribe("rolesTable.add")
-    public void onRolesTableAdd(Action.ActionPerformedEvent event) {
+    protected void onRolesTableAdd(Action.ActionPerformedEvent event) {
         if (rolesComboBox.getValue() != null && !rolesDc.containsItem(roleModelsDc.getItem())) {
             rolesDc.getMutableItems().add(rolesComboBox.getValue());
         }

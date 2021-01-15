@@ -35,7 +35,7 @@
                             <textField id="valueNameField" property="valueName" required="true" width="100%"
                                        caption="msg://valuesFormats.name"
                                        requiredMessage="msg://valueNameMsg"/>
-                            <comboBox id="formatComboBox" required="true"
+                            <comboBox id="formatField" required="true"
                                       caption="msg://valuesFormats.format" width="100%"
                                       property="formatString"
                                       requiredMessage="msg://formatStringMsg"/>
@@ -43,7 +43,7 @@
                     </form>
                 </row>
                 <row>
-                    <checkBox id="groovyCheckBox" dataContainer="valuesFormatsDc" property="groovyScript"
+                    <checkBox id="groovyField" dataContainer="valuesFormatsDc" property="groovyScript"
                               caption="msg://valuesFormats.groovyScript"
                               align="MIDDLE_LEFT"/>
                 </row>

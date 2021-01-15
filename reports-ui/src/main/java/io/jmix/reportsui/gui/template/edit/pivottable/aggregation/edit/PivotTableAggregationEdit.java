@@ -20,6 +20,7 @@ import io.jmix.core.Messages;
 import io.jmix.reports.entity.pivottable.PivotTableAggregation;
 import io.jmix.ui.Dialogs;
 import io.jmix.ui.WindowParam;
+import io.jmix.ui.component.HasContextHelp;
 import io.jmix.ui.component.SourceCodeEditor;
 import io.jmix.ui.component.ValidationErrors;
 import io.jmix.ui.screen.*;
@@ -43,15 +44,14 @@ public class PivotTableAggregationEdit extends StandardEditor<PivotTableAggregat
     @Autowired
     protected ScreenValidation screenValidation;
 
-    @Subscribe
-    protected void onAfterInit(AfterInitEvent event) {
-        sourceCodeEditor.setContextHelpIconClickHandler(e ->
-                dialogs.createMessageDialog()
-                        .withCaption(messages.getMessage("pivotTable.functionHelpCaption"))
-                        .withMessage(messages.getMessage("pivotTable.aggregationFunctionHelp"))
-                        .withModal(false)
-                        .withWidth("560px")
-                        .show());
+    @Install(to = "sourceCodeEditor", subject = "contextHelpIconClickHandler")
+    protected void sourceCodeEditorContextHelpIconClickHandler(HasContextHelp.ContextHelpIconClickEvent contextHelpIconClickEvent) {
+        dialogs.createMessageDialog()
+                .withCaption(messages.getMessage("pivotTable.functionHelpCaption"))
+                .withMessage(messages.getMessage("pivotTable.aggregationFunctionHelp"))
+                .withModal(false)
+                .withWidth("560px")
+                .show();
     }
 
     @Subscribe

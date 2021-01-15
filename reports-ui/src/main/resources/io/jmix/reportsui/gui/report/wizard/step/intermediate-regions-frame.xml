@@ -37,13 +37,12 @@
             <button id="removeBtn" icon="REMOVE"/>
         </hbox>
         <vbox id="regionsBox">
-            <table id="regionsTable"
+            <table id="regionsTable" dataContainer="reportRegionsDs"
                    sortable="false" reorderingAllowed="false" columnControlVisible="false"
                    height="100%" width="100%">
                 <columns>
                     <column id="regionsGeneratedColumn" caption="msg://reportRegionsColumn"/>
                 </columns>
-                <rows datasource="reportRegionsDs"/>
             </table>
         </vbox>
     </layout>

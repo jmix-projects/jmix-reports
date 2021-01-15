@@ -17,7 +17,7 @@
 <window xmlns="http://jmix.io/schema/ui/window"
         messagesPack="io.jmix.reportsui.gui.report.wizard">
     <layout width="100%" expand="spacer">
-        <fieldGroup id="mainFields" width="100%">
+        <hbox id="mainFields" width="100%">
             <field id="entity" caption="msg://entity" required="true" requiredMessage="msg://fillEntityMsg"
                    description="msg://entityHintMsg" custom="true" width="100%"/>
             <field id="templateFileFormat" caption="msg://templateFileFormat" required="true"
@@ -29,7 +29,7 @@
             <field id="reportType" caption="msg://reportBuildType"
                    width="-1px" custom="true"
                    description="msg://singleMultiEntityHintMsg" descriptionAsHtml="true"/>
-        </fieldGroup>
+        </hbox>
         <linkButton id="setQuery" caption="msg://setQuery"/>
         <label id="spacer"/>
     </layout>

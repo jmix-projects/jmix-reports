@@ -122,7 +122,7 @@ public class ShowReportTableLookup extends StandardLookup {
     }
 
     @Subscribe("reportEntityComboBox")
-    public void onReportEntityComboBoxValueChange(HasValue.ValueChangeEvent<Report> event) {
+    protected void onReportEntityComboBoxValueChange(HasValue.ValueChangeEvent<Report> event) {
         report = event.getValue();
         openReportParameters(null);
     }
@@ -149,7 +149,7 @@ public class ShowReportTableLookup extends StandardLookup {
     }
 
     @Subscribe("printReportBtn")
-    public void printReport() {
+    protected void printReport() {
         if (inputParametersFrame != null && inputParametersFrame.getReport() != null) {
             ValidationErrors validationErrors = screenValidation.validateUiComponents(getWindow());
             if (validationErrors.isEmpty()) {

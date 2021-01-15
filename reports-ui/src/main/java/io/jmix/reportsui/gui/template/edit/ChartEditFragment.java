@@ -30,15 +30,13 @@ import io.jmix.ui.Actions;
 import io.jmix.ui.Dialogs;
 import io.jmix.ui.Fragments;
 import io.jmix.ui.Notifications;
+import io.jmix.ui.action.Action;
 import io.jmix.ui.action.ItemTrackingAction;
 import io.jmix.ui.action.list.CreateAction;
 import io.jmix.ui.component.*;
 import io.jmix.ui.model.CollectionContainer;
 import io.jmix.ui.model.InstanceContainer;
-import io.jmix.ui.screen.MapScreenOptions;
-import io.jmix.ui.screen.Subscribe;
-import io.jmix.ui.screen.UiController;
-import io.jmix.ui.screen.UiDescriptor;
+import io.jmix.ui.screen.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.IterableUtils;
 import org.springframework.beans.factory.BeanFactory;
@@ -52,21 +50,25 @@ import java.util.stream.Collectors;
 @UiDescriptor("chart-edit-frame.xml")
 public class ChartEditFragment extends DescriptionEditFragment {
     @Autowired
+    protected ComboBox<String> serialBandNameField;
+    @Autowired
+    protected ComboBox<String> pieBandNameField;
+    @Autowired
     protected InstanceContainer<PieChartDescription> pieChartDc;
     @Autowired
     protected InstanceContainer<SerialChartDescription> serialChartDc;
     @Autowired
     protected CollectionContainer<ChartSeries> seriesDc;
     @Autowired
-    protected ComboBox<ChartType> type;
+    protected ComboBox<ChartType> typeField;
     @Autowired
     protected Table<ChartSeries> seriesTable;
     @Autowired
-    protected GroupBoxLayout seriesBox;
+    protected GroupBoxLayout seriesGroupBox;
     @Autowired
-    protected Form pieChartFieldGroup;
+    protected Form pieChartForm;
     @Autowired
-    protected Form serialChartFieldGroup;
+    protected Form serialChartForm;
     @Autowired
     protected SourceCodeEditor serialJsonConfigEditor;
     @Autowired
@@ -93,59 +95,83 @@ public class ChartEditFragment extends DescriptionEditFragment {
 
         pieChartDc.setItem(new PieChartDescription());
         serialChartDc.setItem(new SerialChartDescription());
-        type.setOptionsList(Arrays.asList(ChartType.values()));
+        typeField.setOptionsList(Arrays.asList(ChartType.values()));
 
-        type.addValueChangeListener(e -> {
-            pieChartFieldGroup.setVisible(ChartType.PIE == e.getValue());
-            serialChartFieldGroup.setVisible(ChartType.SERIAL == e.getValue());
-            seriesBox.setVisible(ChartType.SERIAL == e.getValue());
-            serialJsonConfigEditor.setVisible(ChartType.SERIAL == e.getValue());
-            pieJsonConfigEditor.setVisible(ChartType.PIE == e.getValue());
-            showPreview();
-        });
-
-        pieChartFieldGroup.setVisible(false);
-        serialChartFieldGroup.setVisible(false);
-        seriesBox.setVisible(false);
+        pieChartForm.setVisible(false);
+        serialChartForm.setVisible(false);
+        seriesGroupBox.setVisible(false);
         serialJsonConfigEditor.setVisible(false);
         pieJsonConfigEditor.setVisible(false);
-
-        CreateAction createAction = (CreateAction) actions.create(CreateAction.ID);
-        createAction.withHandler(handle -> {
-            ChartSeries chartSeries = dataManager.create(ChartSeries.class);
-            chartSeries.setOrder(seriesDc.getItems().size() + 1);
-            seriesDc.getMutableItems().add(chartSeries);
-        });
-        seriesTable.addAction(createAction);
 
         seriesTable.addAction(new ChartSeriesMoveAction(true));
         seriesTable.addAction(new ChartSeriesMoveAction(false));
 
-        pieChartDc.addItemPropertyChangeListener(e -> showPreview());
+        serialJsonConfigEditor.addValidator(new JsonConfigValidator(getClass()));
+        pieJsonConfigEditor.addValidator(new JsonConfigValidator(getClass()));
+    }
 
-        serialChartDc.addItemPropertyChangeListener(e -> showPreview());
+    @Subscribe("seriesTable.create")
+    protected void onSeriesTableCreate(Action.ActionPerformedEvent event) {
+        ChartSeries chartSeries = dataManager.create(ChartSeries.class);
+        chartSeries.setOrder(seriesDc.getItems().size() + 1);
+        seriesDc.getMutableItems().add(chartSeries);
+    }
 
-        seriesDc.addItemPropertyChangeListener(e -> showPreview());
-        seriesDc.addCollectionChangeListener(e -> {
-            checkSeriesOrder();
-            showPreview();
-        });
+    @Subscribe(id = "seriesDc", target = Target.DATA_CONTAINER)
+    protected void onSeriesDcCollectionChange(CollectionContainer.CollectionChangeEvent<ChartSeries> event) {
+        checkSeriesOrder();
+        showPreview();
+    }
 
-        serialJsonConfigEditor.addValueChangeListener(this::codeEditorChangeListener);
-        pieJsonConfigEditor.addValueChangeListener(this::codeEditorChangeListener);
+    @Subscribe(id = "seriesDc", target = Target.DATA_CONTAINER)
+    protected void onSeriesDcItemPropertyChange(InstanceContainer.ItemPropertyChangeEvent<ChartSeries> event) {
+        showPreview();
+    }
 
-//        Validator<String> validator = beanFactory.getBean(JsonConfigValidator.class, this);
-//        serialJsonConfigEditor.addValidator(validator);
-//        pieJsonConfigEditor.addValidator(validator);
+    @Subscribe(id = "serialChartDc", target = Target.DATA_CONTAINER)
+    protected void onSerialChartDcItemPropertyChange(InstanceContainer.ItemPropertyChangeEvent<SerialChartDescription> event) {
+        showPreview();
+    }
 
-        serialJsonConfigEditor.setContextHelpIconClickHandler(this::jsonEditorContextHelpIconClickHandler);
-        pieJsonConfigEditor.setContextHelpIconClickHandler(this::jsonEditorContextHelpIconClickHandler);
+    @Subscribe(id = "pieChartDc", target = Target.DATA_CONTAINER)
+    protected void onPieChartDcItemPropertyChange(InstanceContainer.ItemPropertyChangeEvent<PieChartDescription> event) {
+        showPreview();
+    }
+
+    @Install(to = "serialJsonConfigEditor", subject = "contextHelpIconClickHandler")
+    protected void serialJsonConfigEditorContextHelpIconClickHandler(HasContextHelp.ContextHelpIconClickEvent event) {
+        jsonEditorContextHelpIconClickHandler(event);
+    }
+
+    @Install(to = "pieJsonConfigEditor", subject = "contextHelpIconClickHandler")
+    protected void pieJsonConfigEditorContextHelpIconClickHandler(HasContextHelp.ContextHelpIconClickEvent event) {
+        jsonEditorContextHelpIconClickHandler(event);
+    }
+
+    @Subscribe("serialJsonConfigEditor")
+    protected void onSerialJsonConfigEditorValueChange(HasValue.ValueChangeEvent<String> event) {
+        codeEditorChangeListener(event);
+    }
+
+    @Subscribe("pieJsonConfigEditor")
+    protected void onPieJsonConfigEditorValueChange(HasValue.ValueChangeEvent<String> event) {
+        codeEditorChangeListener(event);
+    }
+
+    @Subscribe("typeField")
+    protected void onTypeFieldValueChange(HasValue.ValueChangeEvent event) {
+        pieChartForm.setVisible(ChartType.PIE == event.getValue());
+        serialChartForm.setVisible(ChartType.SERIAL == event.getValue());
+        seriesGroupBox.setVisible(ChartType.SERIAL == event.getValue());
+        serialJsonConfigEditor.setVisible(ChartType.SERIAL == event.getValue());
+        pieJsonConfigEditor.setVisible(ChartType.PIE == event.getValue());
+        showPreview();
     }
 
     protected void codeEditorChangeListener(HasValue.ValueChangeEvent<String> event) {
-        if (ChartType.SERIAL == type.getValue() && serialJsonConfigEditor.isValid()) {
+        if (ChartType.SERIAL == typeField.getValue() && serialJsonConfigEditor.isValid()) {
             serialChartDc.getItem().setCustomJsonConfig(event.getValue());
-        } else if (ChartType.PIE == type.getValue() && pieJsonConfigEditor.isValid()) {
+        } else if (ChartType.PIE == typeField.getValue() && pieJsonConfigEditor.isValid()) {
             pieChartDc.getItem().setCustomJsonConfig(event.getValue());
         }
     }
@@ -221,12 +247,12 @@ public class ChartEditFragment extends DescriptionEditFragment {
     protected void initPreviewContent(BoxLayout previewBox) {
         List<Map<String, Object>> data;
         String chartJson = null;
-        if (ChartType.SERIAL == type.getValue()) {
+        if (ChartType.SERIAL == typeField.getValue()) {
             SerialChartDescription chartDescription = serialChartDc.getItem();
             data = new RandomChartDataGenerator().generateRandomChartData(chartDescription);
             ChartToJsonConverter chartToJsonConverter = beanFactory.getBean(ChartToJsonConverter.class);
             chartJson = chartToJsonConverter.convertSerialChart(chartDescription, data);
-        } else if (ChartType.PIE == type.getValue()) {
+        } else if (ChartType.PIE == typeField.getValue()) {
             PieChartDescription chartDescription = pieChartDc.getItem();
             data = new RandomChartDataGenerator().generateRandomChartData(chartDescription);
             ChartToJsonConverter chartToJsonConverter = beanFactory.getBean(ChartToJsonConverter.class);
@@ -236,23 +262,24 @@ public class ChartEditFragment extends DescriptionEditFragment {
 
         Map<String, Object> parmas = ParamsMap.of(ShowChartLookup.CHART_JSON_PARAMETER, chartJson);
 
-        Fragment fragment = fragments.create(this, ShowChartLookup.JSON_CHART_SCREEN_ID, new MapScreenOptions(parmas))
-                .init()
-                .getFragment();
-
-        if (ChartType.SERIAL == type.getValue()) {
-            fragment.setHeight("700px");
-        } else if (ChartType.PIE == type.getValue()) {
-            fragment.setHeight("350px");
-        }
-        previewBox.add(fragment);
+        //todo chart
+//        Fragment fragment = fragments.create(this, ShowChartLookup.JSON_CHART_SCREEN_ID, new MapScreenOptions(parmas))
+//                .init()
+//                .getFragment();
+//
+//        if (ChartType.SERIAL == typeField.getValue()) {
+//            fragment.setHeight("700px");
+//        } else if (ChartType.PIE == typeField.getValue()) {
+//            fragment.setHeight("350px");
+//        }
+//        previewBox.add(fragment);
     }
 
     @Nullable
     protected AbstractChartDescription getChartDescription() {
-        if (ChartType.SERIAL == type.getValue()) {
+        if (ChartType.SERIAL == typeField.getValue()) {
             return serialChartDc.getItem();
-        } else if (ChartType.PIE == type.getValue()) {
+        } else if (ChartType.PIE == typeField.getValue()) {
             return pieChartDc.getItem();
         }
         return null;
@@ -267,7 +294,7 @@ public class ChartEditFragment extends DescriptionEditFragment {
                 pieChartDc.setItem((PieChartDescription) chartDescription);
                 pieJsonConfigEditor.setValue(chartDescription.getCustomJsonConfig());
             }
-            type.setValue(chartDescription.getType());
+            typeField.setValue(chartDescription.getType());
         }
     }
 
@@ -276,12 +303,9 @@ public class ChartEditFragment extends DescriptionEditFragment {
                 .filter(bandDefinition -> bandDefinition.getParentBandDefinition() != null)
                 .map(BandDefinition::getName)
                 .collect(Collectors.toList());
-        // todo
-//        ComboBox pieChartBandName = (ComboBox) pieChartFieldGroup.getComponentNN("pieBandName");
-//        ComboBox serialChartBandName = (ComboBox) serialChartFieldGroup.getComponentNN("serialBandName");
-//
-//        pieChartBandName.setOptionsList(bandNames);
-//        serialChartBandName.setOptionsList(bandNames);
+
+        pieBandNameField.setOptionsList(bandNames);
+        serialBandNameField.setOptionsList(bandNames);
     }
 
     protected void checkSeriesOrder() {

@@ -110,7 +110,7 @@ public class ReportBrowser extends StandardLookup<Report> {
     protected Button createBtn;
 
     @Subscribe
-    public void onInit(InitEvent initEvent) {
+    protected void onInit(InitEvent initEvent) {
         CrudEntityContext showScreenContext = new CrudEntityContext(metadata.getClass(Report.class));
         accessManager.applyRegisteredConstraints(showScreenContext);
 

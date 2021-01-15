@@ -118,7 +118,7 @@ public class ReportingBean implements ReportingApi {
     protected FetchPlanRepository fetchPlanRepository;
 
     @Autowired
-    protected GsonConverter gsonConverter = new GsonConverter();
+    protected GsonConverter gsonConverter;
 
     protected XStreamConverter xStreamConverter = new XStreamConverter();
 

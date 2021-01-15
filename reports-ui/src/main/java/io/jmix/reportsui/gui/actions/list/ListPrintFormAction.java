@@ -160,42 +160,21 @@ public class ListPrintFormAction extends AbstractPrintFormAction implements Acti
     }
 
     protected boolean isDataAvailable() {
-        //todo
-//        if (target.getItems() instanceof ContainerDataUnit) {
         ContainerDataUnit unit = (ContainerDataUnit) target.getItems();
         CollectionContainer container = unit.getContainer();
         return container instanceof HasLoader && unit.getState() == BindingState.ACTIVE && !container.getItems().isEmpty();
-//        } else {
-//            CollectionDatasource ds = ((com.haulmont.cuba.gui.components.ListComponent) target).getDatasource();
-//            if (ds != null)
-//                return ds.getState() == Datasource.State.VALID && ds.size() > 0;
-//        }
-//        return false;
     }
 
     protected void printSelected(Set selected) {
-        MetaClass metaClass;
-        //todo
-//        if (target.getItems() instanceof ContainerDataUnit) {
         ContainerDataUnit unit = (ContainerDataUnit) target.getItems();
         InstanceContainer container = unit.getContainer();
-        metaClass = container.getEntityMetaClass();
-//        }
+        MetaClass metaClass = container.getEntityMetaClass();
 
-        /*else {
-            CollectionDatasource ds = ((io.jmix.ui.component.ListComponent) target).getDatasource();
-            metaClass = ds.getMetaClass();
-        }*/
         Window window = ComponentsHelper.getWindowNN(target);
         openRunReportScreen(window.getFrameOwner(), selected, metaClass);
     }
 
     protected void printAll() {
-        MetaClass metaClass;
-        LoadContext loadContext;
-
-        //todo
-//        if (target.getItems() instanceof ContainerDataUnit) {
         ContainerDataUnit unit = (ContainerDataUnit) target.getItems();
         CollectionContainer container = unit.getContainer();
         if (container instanceof CollectionPropertyContainer) {
@@ -205,13 +184,8 @@ public class ListPrintFormAction extends AbstractPrintFormAction implements Acti
             return;
         }
         CollectionLoader loader = (CollectionLoader) ((HasLoader) unit.getContainer()).getLoader();
-        metaClass = container.getEntityMetaClass();
-        loadContext = loader.createLoadContext();
-//        } else {
-//            CollectionDatasource ds = ((io.jmix.ui.component.ListComponent) target).getDatasource();
-//            metaClass = ds.getMetaClass();
-//            loadContext = ds.getCompiledLoadContext();
-//        }
+        MetaClass metaClass = container.getEntityMetaClass();
+        LoadContext loadContext = loader.createLoadContext();
 
         ParameterPrototype parameterPrototype = new ParameterPrototype(metaClass.getName());
         parameterPrototype.setMetaClassName(metaClass.getName());

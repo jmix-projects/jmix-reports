@@ -24,17 +24,12 @@ import io.jmix.reports.entity.wizard.RegionProperty;
 import io.jmix.reports.entity.wizard.ReportRegion;
 import io.jmix.reportsui.gui.components.actions.OrderableItemMoveAction;
 import io.jmix.ui.Notifications;
-import io.jmix.ui.action.AbstractAction;
 import io.jmix.ui.action.Action;
 import io.jmix.ui.action.ItemTrackingAction;
 import io.jmix.ui.component.*;
 import io.jmix.ui.model.CollectionContainer;
 import io.jmix.ui.model.InstanceContainer;
-import io.jmix.ui.screen.StandardEditor;
-import io.jmix.ui.screen.Subscribe;
-import io.jmix.ui.screen.UiController;
-import io.jmix.ui.screen.UiDescriptor;
-import org.apache.commons.lang3.BooleanUtils;
+import io.jmix.ui.screen.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cglib.core.CollectionUtils;
 
@@ -47,18 +42,18 @@ import java.util.Set;
 @UiController("report_Region.edit")
 @UiDescriptor("region-edit.xml")
 public class RegionEditor extends StandardEditor<ReportRegion> {
-//    @Named("entityTreeFrame.reportEntityTreeNodeDs")
+    //    @Named("entityTreeFrame.reportEntityTreeNodeDs")
 //    protected AbstractTreeDatasource reportEntityTreeNodeDs;
     @Autowired
     protected CollectionContainer<RegionProperty> reportRegionPropertiesTableDc;
     @Named("entityTreeFrame.entityTree")
     protected Tree<EntityTreeNode> entityTree;
     @Named("entityTreeFrame.reportPropertyName")
-    protected TextField reportPropertyName;
+    protected TextField<String> reportPropertyName;
     @Named("entityTreeFrame.reportPropertyNameSearchButton")
     protected Button reportPropertyNameSearchButton;
     @Autowired
-    protected InstanceContainer reportRegionDc;
+    protected InstanceContainer<ReportRegion> reportRegionDc;
     @Autowired
     protected Button addItem;
     @Autowired
@@ -70,7 +65,7 @@ public class RegionEditor extends StandardEditor<ReportRegion> {
     @Autowired
     protected Table<RegionProperty> propertiesTable;
     @Autowired
-    protected Label tipLabel;
+    protected Label<String> tipLabel;
     @Autowired
     protected Metadata metadata;
     @Autowired
@@ -84,28 +79,103 @@ public class RegionEditor extends StandardEditor<ReportRegion> {
     protected EntityTreeNode rootNode;
     protected boolean updatePermission;
 
+    public void setTabulated(boolean tabulated) {
+        isTabulated = tabulated;
+    }
+
+    public void setAsViewEditor(boolean asViewEditor) {
+        this.asViewEditor = asViewEditor;
+    }
+
+    public void setUpdatePermission(boolean updatePermission) {
+        this.updatePermission = updatePermission;
+    }
+
+    public void setRootNode(EntityTreeNode rootNode) {
+        this.rootNode = rootNode;
+    }
+
     @Subscribe
     protected void onInit(InitEvent event) {
-//        updatePermission = !Boolean.TRUE.equals(params.get("updateDisabled"));
-//        isTabulated = ((ReportRegion) WindowParams.ITEM.getEntity(params)).getIsTabulatedRegion();
-//        asViewEditor = BooleanUtils.isTrue((Boolean) params.get("asViewEditor"));
-//        params.put("component$reportPropertyName", reportPropertyName);
-//        reportEntityTreeNodeDs.refresh(params);
-//        //TODO add disallowing of classes selection in tree
-//        rootNode = (EntityTreeNode) params.get("rootEntity");
-//        if (!asViewEditor) {
-//            if (isTabulated) {
-//                setTabulatedRegionEditorCaption(((EntityTreeNode) (params.get("rootEntity"))).getName());
-//            } else {
-//                setSimpleRegionEditorCaption();
-//            }
-//        }
-//        String group = isTabulated
-//                ? "selectEntityPropertiesForTableArea"
-//                : "selectEntityProperties";
-//        tipLabel.setValue(messages.formatMessage(group, rootNode.getLocalizedName()));
-//        tipLabel.setHtmlEnabled(true);
-//        initComponents();
+        //params.put("component$reportPropertyName", reportPropertyName);
+        //todo
+        //reportEntityTreeNodeDs.refresh(params);
+        //TODO add disallowing of classes selection in tree
+        if (!asViewEditor) {
+            if (isTabulated) {
+                setTabulatedRegionEditorCaption(rootNode.getName());
+            } else {
+                setSimpleRegionEditorCaption();
+            }
+        }
+        String group = isTabulated
+                ? "selectEntityPropertiesForTableArea"
+                : "selectEntityProperties";
+        tipLabel.setValue(messages.formatMessage(group, rootNode.getLocalizedName()));
+        tipLabel.setHtmlEnabled(true);
+        initComponents();
+    }
+
+    @Install(to = "addItemAction", subject = "enabledRule")
+    private boolean addItemActionEnabledRule() {
+        return isUpdatePermitted();
+    }
+
+    @Subscribe("addItemAction")
+    public void onAddItemAction(Action.ActionPerformedEvent event) {
+        @SuppressWarnings("unchecked")
+        List<EntityTreeNode> nodesList = CollectionUtils.transform(
+                reportRegionPropertiesTableDc.getItems(), o -> ((RegionProperty) o).getEntityTreeNode());
+
+        Set<EntityTreeNode> alreadyAddedNodes = new HashSet<>(nodesList);
+
+        Set<EntityTreeNode> selectedItems = entityTree.getSelected();
+        List<RegionProperty> addedItems = new ArrayList<>();
+        boolean alreadyAdded = false;
+        for (EntityTreeNode entityTreeNode : selectedItems) {
+            if (entityTreeNode.getWrappedMetaClass() != null) {
+                continue;
+            }
+            if (!alreadyAddedNodes.contains(entityTreeNode)) {
+                RegionProperty regionProperty = metadata.create(RegionProperty.class);
+                regionProperty.setEntityTreeNode(entityTreeNode);
+                regionProperty.setOrderNum((long) reportRegionPropertiesTableDc.getItems().size() + 1); //first element must be not zero cause later we do sorting by multiplying that values
+                reportRegionPropertiesTableDc.getMutableItems().add(regionProperty);
+                addedItems.add(regionProperty);
+            } else {
+                alreadyAdded = true;
+            }
+        }
+        if (addedItems.isEmpty()) {
+            if (alreadyAdded) {
+                notifications.create(Notifications.NotificationType.TRAY)
+                        .withCaption(messages.getMessage("elementsAlreadyAdded"))
+                        .show();
+            } else if (selectedItems.size() != 0) {
+                notifications.create(Notifications.NotificationType.HUMANIZED)
+                        .withCaption(messages.getMessage("selectPropertyFromEntity"))
+                        .show();
+            } else {
+                notifications.create(Notifications.NotificationType.TRAY)
+                        .withCaption(messages.getMessage("elementsWasNotAdded"))
+                        .show();
+            }
+        } else {
+            propertiesTable.setSelected(addedItems);
+        }
+    }
+
+    @Install(to = "removeItemAction", subject = "enabledRule")
+    private boolean removeItemActionEnabledRule() {
+        return isUpdatePermitted();
+    }
+
+    @Subscribe("removeItemAction")
+    public void onRemoveItemAction(Action.ActionPerformedEvent event) {
+        for (Entity item : propertiesTable.getSelected()) {
+            reportRegionPropertiesTableDc.getMutableItems().remove(item);
+            normalizeRegionPropertiesOrderNum();
+        }
     }
 
     protected void initComponents() {
@@ -118,32 +188,9 @@ public class RegionEditor extends StandardEditor<ReportRegion> {
         }
         entityTree.setSelectionMode(Tree.SelectionMode.MULTI);
 //        entityTree.expand(rootNode.getId());
-
-        Action search = new AbstractAction("search"/*TODO client config, configuration.getConfig(ClientConfig.class).getFilterApplyShortcut()*/) {
-            @Override
-            public void actionPerform(Component component) {
-//                reportEntityTreeNodeDs.refresh();
-//                if (!reportEntityTreeNodeDs.getItemIds().isEmpty()) {
-//                    entityTree.collapseTree();
-//                    entityTree.expand(rootNode.getId());
-//                } else {
-//                    notifications.create(Notifications.NotificationType.HUMANIZED)
-//                            .withCaption(messages.getMessage("valueNotFound"))
-//                            .show();
-//                }
-            }
-
-            @Override
-            public String getCaption() {
-                return null;
-            }
-        };
-        reportPropertyNameSearchButton.setAction(search);
     }
 
     protected void initAsViewEditor() {
-//        reportRegionDc.setAllowCommit(false);
-//        reportRegionPropertiesTableDc.setAllowCommit(false);
         if (isTabulated) {
             getWindow().setCaption(messages.getMessage("singleEntityDataSetViewEditor"));
         } else {
@@ -179,87 +226,8 @@ public class RegionEditor extends StandardEditor<ReportRegion> {
         }
     }
 
+
     protected void initControlBtnsActions() {
-        Action addAction = new ItemTrackingAction(entityTree, "addItem") {
-            @Override
-            public void actionPerform(Component component) {
-                @SuppressWarnings("unchecked")
-                List<EntityTreeNode> nodesList = CollectionUtils.transform(
-                        reportRegionPropertiesTableDc.getItems(), o -> ((RegionProperty) o).getEntityTreeNode());
-
-                Set<EntityTreeNode> alreadyAddedNodes = new HashSet<>(nodesList);
-
-                Set<EntityTreeNode> selectedItems = entityTree.getSelected();
-                List<RegionProperty> addedItems = new ArrayList<>();
-                boolean alreadyAdded = false;
-                for (EntityTreeNode entityTreeNode : selectedItems) {
-                    if (entityTreeNode.getWrappedMetaClass() != null) {
-                        continue;
-                    }
-                    if (!alreadyAddedNodes.contains(entityTreeNode)) {
-                        RegionProperty regionProperty = metadata.create(RegionProperty.class);
-                        regionProperty.setEntityTreeNode(entityTreeNode);
-                        regionProperty.setOrderNum((long) reportRegionPropertiesTableDc.getItems().size() + 1); //first element must be not zero cause later we do sorting by multiplying that values
-                        reportRegionPropertiesTableDc.getMutableItems().add(regionProperty);
-                        addedItems.add(regionProperty);
-                    } else {
-                        alreadyAdded = true;
-                    }
-                }
-                if (addedItems.isEmpty()) {
-                    if (alreadyAdded) {
-                        notifications.create(Notifications.NotificationType.TRAY)
-                                .withCaption(messages.getMessage("elementsAlreadyAdded"))
-                                .show();
-                    } else if (selectedItems.size() != 0) {
-                        notifications.create(Notifications.NotificationType.HUMANIZED)
-                                .withCaption(messages.getMessage("selectPropertyFromEntity"))
-                                .show();
-                    } else {
-                        notifications.create(Notifications.NotificationType.TRAY)
-                                .withCaption(messages.getMessage("elementsWasNotAdded"))
-                                .show();
-                    }
-                } else {
-                    propertiesTable.setSelected(addedItems);
-                }
-            }
-
-            @Override
-            public String getCaption() {
-                return "";
-            }
-
-            @Override
-            public boolean isEnabled() {
-                return super.isEnabled() && isUpdatePermitted();
-            }
-        };
-        entityTree.addAction(addAction);
-        addItem.setAction(addAction);
-
-        Action removeAction = new ItemTrackingAction(propertiesTable, "removeItem") {
-            @Override
-            public void actionPerform(Component component) {
-                for (Entity item : propertiesTable.getSelected()) {
-//                    reportRegionPropertiesTableDc.removeItem((RegionProperty) item);
-                    normalizeRegionPropertiesOrderNum();
-                }
-            }
-
-            @Override
-            public String getCaption() {
-                return "";
-            }
-
-            @Override
-            public boolean isEnabled() {
-                return super.isEnabled() && isUpdatePermitted();
-            }
-        };
-        propertiesTable.addAction(removeAction);
-        removeItem.setAction(removeAction);
-
         upItem.setAction(new OrderableItemMoveAction<Table<RegionProperty>, RegionProperty>("upItem", OrderableItemMoveAction.Direction.UP, propertiesTable) {
             @Override
             public boolean isEnabled() {

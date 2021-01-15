@@ -42,7 +42,9 @@
                             <label value="msg://parameters.alias" align="MIDDLE_LEFT"/>
                             <textField id="alias" dataContainer="parameterDc" property="alias" required="true"
                                        width="100%" requiredMessage="msg://parameters.aliasMsg">
-                                <validator class="io.jmix.reportsui.gui.report.validators.ReportParamAliasValidator"/>
+                                <validators>
+                                    <custom bean="report_ReportParamAliasValidator"/>
+                                </validators>
                             </textField>
                         </row>
                         <row>

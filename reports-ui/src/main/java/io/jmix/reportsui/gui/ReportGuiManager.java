@@ -20,6 +20,8 @@ import com.vaadin.spring.annotation.UIScope;
 import io.jmix.core.*;
 import io.jmix.core.common.util.ParamsMap;
 import io.jmix.core.metamodel.model.MetaClass;
+import io.jmix.core.security.Authenticator;
+import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.reports.ReportPrintHelper;
 import io.jmix.reports.ReportSecurityManager;
 import io.jmix.reports.app.ParameterPrototype;
@@ -100,6 +102,9 @@ public class ReportGuiManager {
 
     @Autowired
     protected Dialogs dialogs;
+
+    @Autowired
+    protected CurrentAuthentication currentAuthentication;
 
     /**
      * Open input parameters dialog if report has parameters otherwise print report

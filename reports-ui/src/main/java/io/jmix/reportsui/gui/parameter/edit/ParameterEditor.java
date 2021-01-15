@@ -173,7 +173,7 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
     }
 
     @Install(to = "localeTextField", subject = "contextHelpIconClickHandler")
-    private void localeTextFieldContextHelpIconClickHandler(HasContextHelp.ContextHelpIconClickEvent contextHelpIconClickEvent) {
+    protected void localeTextFieldContextHelpIconClickHandler(HasContextHelp.ContextHelpIconClickEvent contextHelpIconClickEvent) {
         dialogs.createMessageDialog()
                 .withCaption(messages.getMessage(getClass(), "localeText"))
                 .withMessage(messages.getMessage(getClass(), "parameter.localeTextHelp"))
@@ -184,7 +184,7 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
     }
 
     @Install(to = "transformationScript", subject = "contextHelpIconClickHandler")
-    private void transformationScriptContextHelpIconClickHandler(HasContextHelp.ContextHelpIconClickEvent contextHelpIconClickEvent) {
+    protected void transformationScriptContextHelpIconClickHandler(HasContextHelp.ContextHelpIconClickEvent contextHelpIconClickEvent) {
         dialogs.createMessageDialog()
                 .withCaption(messages.getMessage(getClass(), "transformationScript"))
                 .withMessage(messages.getMessage(getClass(), "parameter.transformationScriptHelp"))
@@ -195,7 +195,7 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
     }
 
     @Install(to = "validationScript", subject = "contextHelpIconClickHandler")
-    private void validationScriptContextHelpIconClickHandler(HasContextHelp.ContextHelpIconClickEvent contextHelpIconClickEvent) {
+    protected void validationScriptContextHelpIconClickHandler(HasContextHelp.ContextHelpIconClickEvent contextHelpIconClickEvent) {
         dialogs.createMessageDialog()
                 .withCaption(messages.getMessage(getClass(), "validationScript"))
                 .withMessage(messages.getMessage(getClass(), "validationScriptHelp"))
@@ -206,12 +206,12 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
     }
 
     @Subscribe("parameterTypeComboBox")
-    public void onTypeValueChange(HasValue.ValueChangeEvent<ParameterType> event) {
+    protected void onTypeValueChange(HasValue.ValueChangeEvent<ParameterType> event) {
         enableControlsByParamType(event.getValue());
     }
 
     @Subscribe(id = "parameterDc", target = Target.DATA_CONTAINER)
-    public void onParameterDcItemPropertyChange(InstanceContainer.ItemPropertyChangeEvent<ReportInputParameter> event) {
+    protected void onParameterDcItemPropertyChange(InstanceContainer.ItemPropertyChangeEvent<ReportInputParameter> event) {
         String property = event.getProperty();
 
         boolean typeChanged = property.equalsIgnoreCase("type");
@@ -242,7 +242,7 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
     }
 
     @Subscribe("lookup")
-    public void onLookupValueChange(HasValue.ValueChangeEvent<Boolean> event) {
+    protected void onLookupValueChange(HasValue.ValueChangeEvent<Boolean> event) {
         if (Boolean.TRUE.equals(event.getValue())) {
             if (tabsheet.getTab(LOOKUP_SETTINGS_TAB_ID) == null) {
                 tabsheet.addTab(LOOKUP_SETTINGS_TAB_ID, lookupSettingsTab);
@@ -342,7 +342,7 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
     }
 
     @Subscribe(id = "parameterDc", target = Target.DATA_CONTAINER)
-    public void onParameterDcItemChange(InstanceContainer.ItemChangeEvent<ReportInputParameter> event) {
+    protected void onParameterDcItemChange(InstanceContainer.ItemChangeEvent<ReportInputParameter> event) {
         ReportInputParameter reportInputParameter = event.getItem();
         ReportInputParameter newParameter = metadata.create(reportInputParameter.getClass());
         metadataTools.copy(reportInputParameter, newParameter);

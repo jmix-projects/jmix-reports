@@ -8,6 +8,7 @@ import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportTemplate;
 import io.jmix.security.constraint.PolicyStore;
 import io.jmix.security.constraint.SecureOperations;
+import io.jmix.ui.Actions;
 import io.jmix.ui.RemoveOperation;
 import io.jmix.ui.action.ItemTrackingAction;
 import io.jmix.ui.action.ListAction;
@@ -69,7 +70,7 @@ public class TemplatesFragment extends ScreenFragment {
 
     @Install(to = "templatesTable.remove", subject = "afterActionPerformedHandler")
     protected void templatesTableRemoveAfterActionPerformedHandler(RemoveOperation.AfterActionPerformedEvent<ReportTemplate> event) {
-        List selected = event.getItems();
+        List<ReportTemplate> selected = event.getItems();
 
         Report report = reportDc.getItem();
         ReportTemplate defaultTemplate = report.getDefaultTemplate();
@@ -133,7 +134,9 @@ public class TemplatesFragment extends ScreenFragment {
                     copy.setId(UuidProvider.createUuid());
 
                     String copyNamingPattern = messages.getMessage(getClass(), "template.copyNamingPattern");
-                    String copyCode = String.format(copyNamingPattern, StringUtils.isEmpty(copy.getCode()) ? StringUtils.EMPTY : copy.getCode());
+                    String copyCode = String.format(copyNamingPattern, StringUtils.isEmpty(copy.getCode())
+                            ? StringUtils.EMPTY
+                            : copy.getCode());
 
                     CollectionContainer<Object> container = ((ContainerDataUnit) target.getItems()).getContainer();
 

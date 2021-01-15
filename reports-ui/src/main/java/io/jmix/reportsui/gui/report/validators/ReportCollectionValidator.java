@@ -26,7 +26,7 @@ import org.springframework.util.ObjectUtils;
 
 @Component("report_ReportCollectionValidator")
 @Scope(BeanDefinition.SCOPE_PROTOTYPE)
-public class ReportCollectionValidator extends AbstractValidator {
+public class ReportCollectionValidator extends AbstractValidator<Object> {
 
     protected Field field;
 

@@ -104,7 +104,7 @@ public class InputParametersFragment extends ScreenFragment {
     }
 
     @Subscribe
-    public void onInit(InitEvent event) {
+    protected void onInit(InitEvent event) {
         ScreenOptions options = event.getOptions();
 
         if(options instanceof MapScreenOptions) {

@@ -60,9 +60,6 @@ public class InputParametersDialog extends Screen {
     protected ReportGuiManager reportGuiManager;
 
     @Autowired
-    protected Action printAction;
-
-    @Autowired
     protected InputParametersFragment inputParametersFrame;
 
     @Autowired
@@ -111,11 +108,10 @@ public class InputParametersDialog extends Screen {
             //noinspection unchecked
             selectedEntities = (Collection) parameters.get(inputParameter.getAlias());
         }
-        printAction.setShortcut(properties.getCommitShortcut());
     }
 
-    @Subscribe("printAction")
-    public void onPrint(Action.ActionPerformedEvent event) {
+    @Subscribe("printReportButton")
+    public void onPrintReportButtonClick(Button.ClickEvent event) {
         if (inputParametersFrame.getReport() != null) {
             ValidationErrors validationErrors = screenValidation.validateUiComponents(getWindow());
             if (validationErrors.isEmpty()) {
@@ -161,7 +157,7 @@ public class InputParametersDialog extends Screen {
     }
 
     @Subscribe("cancelButton")
-    public void cancel() {
-        close(StandardOutcome.CLOSE);
+    protected void cancel(Button.ClickEvent event) {
+        closeWithDefaultAction();
     }
 }

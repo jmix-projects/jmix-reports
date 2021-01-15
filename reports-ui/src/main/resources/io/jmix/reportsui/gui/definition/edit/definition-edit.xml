@@ -37,7 +37,9 @@
         <hbox spacing="true" id="propertiesBox">
             <label value="msg://definition.name" align="MIDDLE_LEFT"/>
             <textField id="name" dataContainer="bandsDc" property="name" width="${width}">
-                <validator class="io.jmix.reportsui.gui.report.validators.ReportBandNameValidator"/>
+                <validators>
+                    <custom bean="report_ReportBandNameValidator"/>
+                </validators>
             </textField>
             <label value="msg://definition.orientation" align="MIDDLE_LEFT"/>
             <comboBox id="orientation" dataContainer="bandsDc" property="orientation" width="${width}"/>

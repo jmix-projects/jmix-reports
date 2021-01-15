@@ -138,7 +138,7 @@ public class ReportRun extends StandardLookup<Report> {
     }
 
     @Subscribe("setFilterButton")
-    public void filterReports() {
+    protected void filterReports() {
         String nameFilterValue = StringUtils.lowerCase(nameFilter.getValue());
         String codeFilterValue = StringUtils.lowerCase(codeFilter.getValue());
         ReportGroup groupFilterValue = groupFilter.getValue();
@@ -189,7 +189,7 @@ public class ReportRun extends StandardLookup<Report> {
     }
 
     @Subscribe("clearFilterButton")
-    public void clearFilter() {
+    protected void clearFilter() {
         nameFilter.setValue(null);
         codeFilter.setValue(null);
         updatedDateFilter.setValue(null);

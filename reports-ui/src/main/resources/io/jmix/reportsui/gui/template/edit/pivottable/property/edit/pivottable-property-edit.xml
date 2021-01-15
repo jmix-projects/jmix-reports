@@ -35,17 +35,14 @@
                 <column width="100%">
                     <field property="name" width="337px"/>
                     <field property="caption" width="337px"/>
-                    <field property="type" required="true" width="337px"/>
-                    <field id="function" property="function" width="355px">
-                        <sourceCodeEditor id="sourceCodeEditor"
-                                          property="function"
-                                          datasource="propertyDs"
-                                          editable="true"
-                                          mode="JavaScript"
-                                          height="300px"
-                                          width="100%"/>
+                    <comboBox property="type" required="true" width="337px"/>
+                    <sourceCodeEditor id="sourceCodeEditor"
+                                      property="function"
+                                      editable="true"
+                                      mode="JavaScript"
+                                      height="300px"
+                                      width="100%"/>
 
-                    </field>
                 </column>
             </form>
         </groupBox>

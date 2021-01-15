@@ -55,7 +55,7 @@ public class ParametersFragment extends ScreenFragment {
     protected Messages messages;
 
     @Subscribe
-    public void onInit(InitEvent event) {
+    protected void onInit(InitEvent event) {
         upButton.setAction(new ListAction("generalFragment.up") {
             @Override
             public void actionPerform(Component component) {
@@ -153,7 +153,7 @@ public class ParametersFragment extends ScreenFragment {
     }
 
     @Install(to = "validationScriptCodeEditor", subject = "contextHelpIconClickHandler")
-    private void validationScriptCodeEditorContextHelpIconClickHandler(HasContextHelp.ContextHelpIconClickEvent contextHelpIconClickEvent) {
+    protected void validationScriptCodeEditorContextHelpIconClickHandler(HasContextHelp.ContextHelpIconClickEvent contextHelpIconClickEvent) {
         dialogs.createMessageDialog()
                 .withCaption(messages.getMessage(getClass(), "parameters.validationScript"))
                 .withMessage(messages.getMessage(getClass(), "parameters.crossFieldValidationScriptHelp"))

@@ -38,41 +38,41 @@
                 <row>
                     <label value="msg://AbstractChartDescription.type"
                            align="MIDDLE_LEFT" width="${typeCaptionWidth}"/>
-                    <comboBox id="type" width="${width}" required="true" align="MIDDLE_RIGHT"/>
+                    <comboBox id="typeField" width="${width}" required="true" align="MIDDLE_RIGHT"/>
                 </row>
                 <row>
-                    <form id="pieChartFieldGroup" dataContainer="pieChartDc" colspan="2">
+                    <form id="pieChartForm" dataContainer="pieChartDc" colspan="2">
                         <column width="${width}">
-                            <field id="pieBandName" property="bandName"/>
+                            <comboBox id="pieBandNameField" property="bandName"/>
                             <field id="titleField" property="titleField"/>
                             <field id="valueField" property="valueField"/>
                             <field id="colorField" property="colorField"/>
-                            <field id="units" property="units"/>
-                            <field id="showLegend" property="showLegend"/>
+                            <field id="unitsField" property="units"/>
+                            <field id="showLegendField" property="showLegend"/>
                         </column>
                     </form>
                 </row>
                 <row>
-                    <form id="serialChartFieldGroup" dataContainer="serialChartDc" colspan="2">
+                    <form id="serialChartForm" dataContainer="serialChartDc" colspan="2">
                         <column width="${width}">
-                            <field id="serialBandName" property="bandName"/>
+                            <comboBox id="serialBandNameField" property="bandName"/>
                             <field id="categoryField" property="categoryField"/>
-                            <field id="categoryAxisCaption" property="categoryAxisCaption"/>
-                            <field id="categoryAxisLabelRotation" property="categoryAxisLabelRotation"/>
-                            <field id="valueAxisCaption" property="valueAxisCaption"/>
-                            <field id="valueAxisUnits" property="valueAxisUnits"/>
-                            <field id="valueStackType" property="valueStackType"/>
-                            <field id="showLegend" property="showLegend"/>
+                            <field id="categoryAxisCaptionField" property="categoryAxisCaption"/>
+                            <field id="categoryAxisLabelRotationField" property="categoryAxisLabelRotation"/>
+                            <field id="valueAxisCaptionField" property="valueAxisCaption"/>
+                            <field id="valueAxisUnitsField" property="valueAxisUnits"/>
+                            <field id="valueStackTypeField" property="valueStackType"/>
+                            <field id="showLegendField" property="showLegend"/>
                         </column>
                     </form>
                 </row>
                 <row>
-                    <groupBox id="seriesBox" caption="msg://chartEdit.series" colspan="2">
+                    <groupBox id="seriesGroupBox" caption="msg://chartEdit.series" colspan="2">
                         <table id="seriesTable" dataContainer="seriesDc" editable="true" height="200px" width="100%"
                                sortable="false">
                             <actions>
-                                <action id="create"/>
-                                <action id="remove"/>
+                                <action id="create" type="create"/>
+                                <action id="remove" type="remove"/>
                                 <action id="up"/>
                                 <action id="down"/>
                             </actions>

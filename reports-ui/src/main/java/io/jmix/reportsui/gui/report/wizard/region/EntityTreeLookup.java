@@ -79,30 +79,6 @@ public class EntityTreeLookup extends StandardLookup {
 //            }
 //            return true;
 //        });
-
-        Action search = new AbstractAction("search"/* TODO filter apply shortcut, configuration.getConfig(ClientConfig.class).getFilterApplyShortcut()*/) {
-            @Override
-            public void actionPerform(Component component) {
-//                reportEntityTreeNodeDs.refresh();
-//                if (!reportEntityTreeNodeDs.getItemIds().isEmpty()) {
-//                    if (StringUtils.isEmpty(reportPropertyName.getValue())) {
-//                        entityTree.collapseTree();
-//                        entityTree.expand(rootNode.getId());
-//                    } else
-//                        entityTree.expandTree();
-//                } else {
-                notifications.create(Notifications.NotificationType.HUMANIZED)
-                        .withCaption(messages.getMessage("valueNotFound"))
-                        .show();
-//                }
-            }
-
-            @Override
-            public String getCaption() {
-                return null;
-            }
-        };
-        reportPropertyNameSearchButton.setAction(search);
     }
 
 }

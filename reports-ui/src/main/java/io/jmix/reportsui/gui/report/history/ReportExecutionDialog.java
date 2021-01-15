@@ -77,7 +77,7 @@ public class ReportExecutionDialog extends StandardLookup<Report> {
     }
 
     @Subscribe("clearFilterBtn")
-    public void onClearFilterBtnClick(Button.ClickEvent event) {
+    protected void onClearFilterBtnClick(Button.ClickEvent event) {
         filterName.setValue(null);
         filterCode.setValue(null);
         filterUpdatedDate.setValue(null);
@@ -86,7 +86,7 @@ public class ReportExecutionDialog extends StandardLookup<Report> {
     }
 
     @Subscribe("applyFilterBtn")
-    public void onApplyFilterBtnClick(Button.ClickEvent event) {
+    protected void onApplyFilterBtnClick(Button.ClickEvent event) {
         filterReports();
     }
 

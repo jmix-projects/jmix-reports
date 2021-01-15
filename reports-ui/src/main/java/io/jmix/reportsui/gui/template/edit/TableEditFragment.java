@@ -81,8 +81,6 @@ public class TableEditFragment extends DescriptionEditFragment {
     protected RemoveAction<TemplateTableColumn> columnsTableRemove;
     @Named("columnsTable.create")
     protected CreateAction<TemplateTableColumn> columnsTableCreate;
-    @Autowired
-    protected Actions actions;
     @Named("bandsTable.remove")
     protected RemoveAction<TemplateTableBand> bandsTableRemove;
     @Named("bandsTable.create")
@@ -124,7 +122,7 @@ public class TableEditFragment extends DescriptionEditFragment {
     }
 
     @Subscribe("bandsTable.create")
-    public void onBandsTableCreate(Action.ActionPerformedEvent event) {
+    protected void onBandsTableCreate(Action.ActionPerformedEvent event) {
         TemplateTableBand templateTableBand = metadata.create(TemplateTableBand.class);
         templateTableBand.setPosition(tableBandsDc.getItems().size());
 
@@ -132,12 +130,12 @@ public class TableEditFragment extends DescriptionEditFragment {
     }
 
     @Subscribe("bandsTable.downBand")
-    public void onBandsTableDownBand(Action.ActionPerformedEvent event) {
+    protected void onBandsTableDownBand(Action.ActionPerformedEvent event) {
         changeOrderBandsOfIndexes(DOWN);
     }
 
     @Install(to = "bandsTable.downBand", subject = "enabledRule")
-    private boolean bandsTableDownBandEnabledRule() {
+    protected boolean bandsTableDownBandEnabledRule() {
         TemplateTableBand item = bandsTable.getSingleSelected();
         if (item == null) {
             return false;
@@ -146,12 +144,12 @@ public class TableEditFragment extends DescriptionEditFragment {
     }
 
     @Subscribe("bandsTable.upBand")
-    public void onBandsTableUpBand(Action.ActionPerformedEvent event) {
+    protected void onBandsTableUpBand(Action.ActionPerformedEvent event) {
         changeOrderBandsOfIndexes(UP);
     }
 
     @Install(to = "bandsTable.upBand", subject = "enabledRule")
-    private boolean bandsTableUpBandEnabledRule() {
+    protected boolean bandsTableUpBandEnabledRule() {
         TemplateTableBand item = bandsTable.getSingleSelected();
         if (item == null) {
             return false;
@@ -160,7 +158,7 @@ public class TableEditFragment extends DescriptionEditFragment {
     }
 
     @Subscribe("columnsTable.create")
-    public void onColumnsTableCreate(Action.ActionPerformedEvent event) {
+    protected void onColumnsTableCreate(Action.ActionPerformedEvent event) {
         TemplateTableBand selectBand = bandsTable.getSingleSelected();
 
         if (selectBand != null) {
@@ -189,12 +187,12 @@ public class TableEditFragment extends DescriptionEditFragment {
     }
 
     @Subscribe("columnsTable.upColumn")
-    public void onColumnsTableUpColumn(Action.ActionPerformedEvent event) {
+    protected void onColumnsTableUpColumn(Action.ActionPerformedEvent event) {
         changeOrderColumnsOfIndexes(UP);
     }
 
     @Install(to = "columnsTable.upColumn", subject = "enabledRule")
-    private boolean columnsTableUpColumnEnabledRule() {
+    protected boolean columnsTableUpColumnEnabledRule() {
         TemplateTableColumn item = columnsTable.getSingleSelected();
         if (item == null) {
             return false;
@@ -203,12 +201,12 @@ public class TableEditFragment extends DescriptionEditFragment {
     }
 
     @Subscribe("columnsTable.downColumn")
-    public void onColumnsTableDownColumn(Action.ActionPerformedEvent event) {
+    protected void onColumnsTableDownColumn(Action.ActionPerformedEvent event) {
         changeOrderColumnsOfIndexes(DOWN);
     }
 
     @Install(to = "columnsTable.downColumn", subject = "enabledRule")
-    public boolean columnsTableDownColumnEnabledRule() {
+    protected boolean columnsTableDownColumnEnabledRule() {
         TemplateTableColumn item = columnsTable.getSingleSelected();
         if (item == null) {
             return false;

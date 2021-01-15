@@ -95,28 +95,28 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
     protected Label<String> customDefinedByLabel;
 
     @Autowired
-    protected CheckBox alterable;
+    protected CheckBox alterableField;
 
     @Autowired
     protected Label<String> alterableLabel;
 
     @Autowired
-    protected ComboBox<ReportOutputType> outputType;
+    protected ComboBox<ReportOutputType> outputTypeField;
 
     @Autowired
-    protected TextField<String> outputNamePattern;
+    protected TextField<String> outputNamePatternField;
 
     @Autowired
     protected Label<String> outputNamePatternLabel;
 
     @Autowired
-    protected ChartEditFragment chartEdit;
+    protected ChartEditFragment chartEditFragment;
 
     @Autowired
-    protected PivotTableEditFragment pivotTableEdit;
+    protected PivotTableEditFragment pivotTableEditFragment;
 
     @Autowired
-    protected TableEditFragment tableEdit;
+    protected TableEditFragment tableEditFragment;
 
     @Autowired
     protected InstanceContainer<ReportTemplate> templateDc;
@@ -159,7 +159,7 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
 
     @Subscribe
     protected void onInit(InitEvent event) {
-        outputNamePattern.setContextHelpIconClickHandler(e ->
+        outputNamePatternField.setContextHelpIconClickHandler(e ->
                 dialogs.createMessageDialog()
                         .withCaption(messages.getMessage(getClass(), "template.namePatternText"))
                         .withMessage(messages.getMessage(getClass(), "template.namePatternTextHelp"))
@@ -236,12 +236,12 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
     }
 
     @Subscribe("templateUploadField")
-    public void onTemplateUploadFieldFileUploadStart(UploadField.FileUploadStartEvent event) {
+    protected void onTemplateUploadFieldFileUploadStart(UploadField.FileUploadStartEvent event) {
         templateUploadField.setFileName(event.getFileName());
     }
 
     protected Collection<DescriptionEditFragment> getDescriptionEditFrames() {
-        return Arrays.asList(chartEdit, pivotTableEdit, tableEdit);
+        return Arrays.asList(chartEditFragment, pivotTableEditFragment, tableEditFragment);
     }
 
     protected boolean hasTemplateOutput(ReportOutputType reportOutputType) {
@@ -284,12 +284,12 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
         customDefinitionField.setRequiredMessage(messages.getMessage(getClass(), "templateEditor.classRequired"));
 
         boolean supportAlterableForTemplate = templateOutputVisibility && !enabled;
-        alterable.setVisible(supportAlterableForTemplate);
+        alterableField.setVisible(supportAlterableForTemplate);
         alterableLabel.setVisible(supportAlterableForTemplate);
 
         templateUploadField.setVisible(templateOutputVisibility);
         templateFileLabel.setVisible(templateOutputVisibility);
-        outputNamePattern.setVisible(templateOutputVisibility);
+        outputNamePatternField.setVisible(templateOutputVisibility);
         outputNamePatternLabel.setVisible(templateOutputVisibility);
 
         setupTemplateTypeVisibility(templateOutputVisibility);
@@ -337,11 +337,11 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
     }
 
     protected void updateOutputType() {
-        if (outputType.getValue() == null) {
+        if (outputTypeField.getValue() == null) {
             String extension = FilenameUtils.getExtension(templateUploadField.getFileName()).toUpperCase();
             ReportOutputType reportOutputType = ReportOutputType.getTypeFromExtension(extension);
             if (reportOutputType != null) {
-                outputType.setValue(reportOutputType);
+                outputTypeField.setValue(reportOutputType);
             }
         }
     }
@@ -356,7 +356,7 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
             outputTypes.remove(ReportOutputType.PIVOT_TABLE);
         }
 
-        outputType.setOptionsList(outputTypes);
+        outputTypeField.setOptionsList(outputTypes);
     }
 
     protected void initUploadField() {
@@ -465,7 +465,7 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
                 && name != null) {
             String inputType = name.contains(".") ? name.substring(name.lastIndexOf(".") + 1) : "";
 
-            ReportOutputType outputTypeValue = outputType.getValue();
+            ReportOutputType outputTypeValue = outputTypeField.getValue();
             if (!ReportPrintHelper.getInputOutputTypesMapping().containsKey(inputType) ||
                     !ReportPrintHelper.getInputOutputTypesMapping().get(inputType).contains(outputTypeValue)) {
                 notifications.create(Notifications.NotificationType.TRAY)
@@ -503,7 +503,7 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
     }
 
     @Subscribe("fullScreenLinkButton")
-    public void showGroovyScriptEditorDialog(Button.ClickEvent event) {
+    protected void showGroovyScriptEditorDialog(Button.ClickEvent event) {
         ScriptEditorDialog editorDialog = (ScriptEditorDialog) screenBuilders.screen(this)
                 .withScreenId("report_Editor.dialog")
                 .withOpenMode(OpenMode.DIALOG)
@@ -524,7 +524,7 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
     }
 
     @Subscribe("customDefinitionHelpLinkButton")
-    public void showCustomDefinitionHelp() {
+    protected void showCustomDefinitionHelp() {
         dialogs.createMessageDialog()
                 .withCaption(messages.getMessage(getClass(), "templateEditor.titleHelpGroovy"))
                 .withMessage(messages.getMessage(getClass(), "templateEditor.textHelpGroovy"))

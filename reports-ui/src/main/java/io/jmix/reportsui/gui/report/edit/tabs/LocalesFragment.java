@@ -21,7 +21,7 @@ public class LocalesFragment extends ScreenFragment {
     protected Messages messages;
 
     @Install(to = "localeTextField", subject = "contextHelpIconClickHandler")
-    private void localeTextFieldContextHelpIconClickHandler(HasContextHelp.ContextHelpIconClickEvent contextHelpIconClickEvent) {
+    protected void localeTextFieldContextHelpIconClickHandler(HasContextHelp.ContextHelpIconClickEvent contextHelpIconClickEvent) {
         dialogs.createMessageDialog()
                 .withCaption(messages.getMessage(getClass(), "localeText"))
                 .withMessage(messages.getMessage(getClass(), "report.localeTextHelp"))

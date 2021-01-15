@@ -17,12 +17,14 @@
 package io.jmix.reportsui.gui.components.actions;
 
 import io.jmix.core.Metadata;
+import io.jmix.core.Sort;
 import io.jmix.reports.entity.wizard.OrderableEntity;
 import io.jmix.ui.action.AbstractAction;
 import io.jmix.ui.component.Component;
 import io.jmix.ui.component.ListComponent;
 import io.jmix.ui.component.data.DataUnit;
 import io.jmix.ui.component.data.meta.ContainerDataUnit;
+import io.jmix.ui.model.CollectionContainer;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nullable;
@@ -120,12 +122,12 @@ public class OrderableItemMoveAction<T extends ListComponent<E>, E extends Order
     }
 
     protected void sortTableDsByItemsOrderNum() {
-//        if (listComponent.getDatasource() instanceof CollectionDatasource.Sortable) {
-//            CollectionDatasource.Sortable.SortInfo sortInfo = new CollectionDatasource.Sortable.SortInfo();
-//            sortInfo.setOrder(CollectionDatasource.Sortable.Order.ASC);
-//            sortInfo.setPropertyPath(metadata.getClass(listComponent.getSingleSelected()).getPropertyPath("orderNum"));
-//            ((CollectionDatasource.Sortable) listComponent.getDatasource()).sort(new CollectionDatasource.Sortable.SortInfo[]{sortInfo});
-//        }
+        DataUnit dataUnit = listComponent.getItems();
+        if(dataUnit instanceof ContainerDataUnit) {
+            ContainerDataUnit containerDataUnit = (ContainerDataUnit) dataUnit;
+            CollectionContainer collectionContainer = containerDataUnit.getContainer();
+            collectionContainer.getSorter().sort(Sort.by(Sort.Direction.ASC, "orderNum"));
+        }
     }
 
     /**

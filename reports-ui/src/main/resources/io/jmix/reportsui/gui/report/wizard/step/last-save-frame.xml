@@ -33,8 +33,9 @@
                         <label value="msg://outputFileName" align="MIDDLE_LEFT"/>
                         <textField id="outputFileName" width="100%" required="true"
                                    description="msg://outputFileNameHintMsg" maxLength="255">
-                            <validator
-                                    class="io.jmix.reportsui.gui.report.validators.OutputFileNameValidator"/>
+                            <validators>
+                                <custom bean="report_OutputFileNameValidator"/>
+                            </validators>
                         </textField>
                     </row>
                     <row>

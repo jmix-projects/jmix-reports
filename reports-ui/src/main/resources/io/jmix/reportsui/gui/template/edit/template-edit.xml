@@ -56,19 +56,21 @@
                         </row>
                         <row id="row4">
                             <label id="outputTypeLabel" value="msg://template.outputType" align="MIDDLE_LEFT"/>
-                            <comboBox id="outputType" dataContainer="templateDc"
-                                         textInputAllowed="false"
-                                         nullOptionVisible="true"
-                                         property="reportOutputType"
-                                         width="${width}" required="true"
-                                         pageLength="20"
-                                         requiredMessage="msg://template.outputTypeMsg"/>
+                            <comboBox id="outputTypeField" dataContainer="templateDc"
+                                      textInputAllowed="false"
+                                      nullOptionVisible="true"
+                                      property="reportOutputType"
+                                      width="${width}" required="true"
+                                      pageLength="20"
+                                      requiredMessage="msg://template.outputTypeMsg"/>
                         </row>
                         <row id="row5">
                             <label id="outputNamePatternLabel" value="msg://template.outputNamePattern" align="MIDDLE_LEFT"/>
-                            <textField id="outputNamePattern" dataContainer="templateDc" property="outputNamePattern"
+                            <textField id="outputNamePatternField" dataContainer="templateDc" property="outputNamePattern"
                                        width="${width}">
-                                <validator class="io.jmix.reportsui.gui.report.validators.OutputFileNameValidator"/>
+                                <validators>
+                                    <custom bean="report_OutputFileNameValidator"/>
+                                </validators>
                             </textField>
                         </row>
                         <row id="row6">
@@ -84,7 +86,7 @@
                         </row>
                         <row id="row8">
                             <label id="alterableLabel" value="msg://template.isAlterableOutput" align="MIDDLE_LEFT"/>
-                            <checkBox id="alterable" dataContainer="templateDc" property="alterable"
+                            <checkBox id="alterableField" dataContainer="templateDc" property="alterable"
                                       width="${width}"/>
                         </row>
                         <row id="row9">
@@ -110,9 +112,9 @@
                     </rows>
                 </gridLayout>
                 <hbox id="descriptionEditBox">
-                    <fragment id="chartEdit" screen="report_ChartEdit.fragment" visible="false" width="100%"/>
-                    <fragment id="pivotTableEdit" screen="report_PivotTableEdit.fragment" visible="false" width="100%"/>
-                    <fragment id="tableEdit" screen="report_TableEdit.fragment" visible="false" width="100%"/>
+                    <fragment id="chartEditFragment" screen="report_ChartEdit.fragment" visible="false" width="100%"/>
+                    <fragment id="pivotTableEditFragment" screen="report_PivotTableEdit.fragment" visible="false" width="100%"/>
+                    <fragment id="tableEditFragment" screen="report_TableEdit.fragment" visible="false" width="100%"/>
                 </hbox>
             </vbox>
             <vbox id="previewBox" visible="false"/>

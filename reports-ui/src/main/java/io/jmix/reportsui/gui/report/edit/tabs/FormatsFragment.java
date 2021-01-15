@@ -14,10 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class FormatsFragment extends ScreenFragment {
 
     @Autowired
-    private InstanceContainer<Report> reportDc;
+    protected InstanceContainer<Report> reportDc;
 
     @Install(to = "valuesFormatsTable.create", subject = "initializer")
-    private void valuesFormatsTableCreateInitializer(ReportValueFormat reportValueFormat) {
+    protected void valuesFormatsTableCreateInitializer(ReportValueFormat reportValueFormat) {
         reportValueFormat.setReport(reportDc.getItem());
     }
 }

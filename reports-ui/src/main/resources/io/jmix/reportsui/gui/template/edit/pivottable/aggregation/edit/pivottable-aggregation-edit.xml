@@ -35,15 +35,12 @@
                 <column>
                     <field property="mode" width="337px"/>
                     <field property="caption" width="337px"/>
-                    <field id="function" property="function" width="355px">
-                        <sourceCodeEditor id="sourceCodeEditor"
-                                          property="function"
-                                          datasource="aggregationDs"
-                                          editable="true"
-                                          mode="JavaScript"
-                                          height="300px"
-                                          width="100%"/>
-                    </field>
+                    <sourceCodeEditor id="sourceCodeEditor"
+                                      property="function"
+                                      editable="true"
+                                      mode="JavaScript"
+                                      width="355px"
+                                      height="300px"/>
                 </column>
             </form>
         </groupBox>

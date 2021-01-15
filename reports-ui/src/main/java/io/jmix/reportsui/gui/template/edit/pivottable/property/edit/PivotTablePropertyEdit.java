@@ -17,17 +17,14 @@
 package io.jmix.reportsui.gui.template.edit.pivottable.property.edit;
 
 import io.jmix.core.Messages;
-import io.jmix.ui.Dialogs;
-import io.jmix.ui.component.Form;
-import io.jmix.ui.component.SourceCodeEditor;
 import io.jmix.reports.entity.pivottable.PivotTableProperty;
 import io.jmix.reports.entity.pivottable.PivotTablePropertyType;
-
+import io.jmix.ui.Dialogs;
+import io.jmix.ui.component.Form;
+import io.jmix.ui.component.HasContextHelp;
+import io.jmix.ui.component.SourceCodeEditor;
 import io.jmix.ui.model.InstanceContainer;
-import io.jmix.ui.screen.StandardEditor;
-import io.jmix.ui.screen.Subscribe;
-import io.jmix.ui.screen.UiController;
-import io.jmix.ui.screen.UiDescriptor;
+import io.jmix.ui.screen.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @UiController("report_PivotTableProperty.edit")
@@ -45,20 +42,25 @@ public class PivotTablePropertyEdit extends StandardEditor<PivotTableProperty> {
     protected Dialogs dialogs;
 
     @Subscribe
-    protected void onAfterInit(AfterInitEvent event) {
+    protected void onBeforeShow(BeforeShowEvent event) {
         initFunctionField();
-        propertyDc.addItemPropertyChangeListener(e -> {
-            if ("type".equals(e.getProperty())) {
-                initFunctionField();
-            }
-        });
-        sourceCodeEditor.setContextHelpIconClickHandler(e ->
-                dialogs.createMessageDialog()
-                        .withCaption(messages.getMessage("pivotTable.functionHelpCaption"))
-                        .withMessage(messages.getMessage("pivotTable.propertyFunctionHelp"))
-                        .withModal(false)
-                        .withWidth("560px")
-                        .show());
+    }
+
+    @Subscribe(id = "propertyDc", target = Target.DATA_CONTAINER)
+    protected void onPropertyDcItemPropertyChange(InstanceContainer.ItemPropertyChangeEvent<PivotTableProperty> event) {
+        if ("type".equals(event.getProperty())) {
+            initFunctionField();
+        }
+    }
+
+    @Install(to = "sourceCodeEditor", subject = "contextHelpIconClickHandler")
+    protected void sourceCodeEditorContextHelpIconClickHandler(HasContextHelp.ContextHelpIconClickEvent contextHelpIconClickEvent) {
+        dialogs.createMessageDialog()
+                .withCaption(messages.getMessage("pivotTable.functionHelpCaption"))
+                .withMessage(messages.getMessage("pivotTable.propertyFunctionHelp"))
+                .withModal(false)
+                .withWidth("560px")
+                .show();
     }
 
     protected void initFunctionField() {

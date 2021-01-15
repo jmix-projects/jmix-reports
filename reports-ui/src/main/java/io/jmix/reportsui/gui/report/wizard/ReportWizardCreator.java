@@ -63,7 +63,7 @@ public class ReportWizardCreator extends Screen implements MainWizardFrame<Scree
     @Autowired
     protected InstanceContainer<ReportData> reportDataDs;
     @Autowired
-    protected CollectionContainer<ReportRegion> reportRegionsDs;
+    protected CollectionContainer<ReportRegion> reportRegionsDc;
     @Autowired
     protected CollectionContainer<ReportGroup> groupsDs;
     @Named("fwd")
@@ -127,7 +127,7 @@ public class ReportWizardCreator extends Screen implements MainWizardFrame<Scree
     @Named("saveStep.downloadTemplateFile")
     protected Button downloadTemplateFile;
     @Named("saveStep.diagramTypeLabel")
-    protected Label diagramTypeLabel;
+    protected Label<String> diagramTypeLabel;
     @Named("saveStep.diagramType")
     protected ComboBox<ChartType> diagramType;
     @Named("saveStep.chartPreviewBox")
@@ -173,7 +173,7 @@ public class ReportWizardCreator extends Screen implements MainWizardFrame<Scree
 
     @Subscribe
     @SuppressWarnings("unchecked")
-    public void onInit(InitEvent event) {
+    protected void onInit(InitEvent event) {
         reportDataDs.setItem(metadata.create(ReportData.class));
 
         wizardWidth = themeConstants.getInt("cuba.gui.report.ReportWizard.width");
@@ -192,13 +192,13 @@ public class ReportWizardCreator extends Screen implements MainWizardFrame<Scree
         stepFrameManager.showCurrentFrame();
         tipLabel.setValue(getMessage("enterMainParameters"));
 
-        reportRegionsDs.addCollectionChangeListener(e -> {
+        reportRegionsDc.addCollectionChangeListener(e -> {
             if (e.getChangeType().equals(CollectionChangeType.ADD_ITEMS)) {
                 regionsTable.setSelected((Collection) e.getChanges());
             }
         });
 
-        reportRegionsDs.addItemChangeListener(e -> {
+        reportRegionsDc.addItemChangeListener(e -> {
             if (regionsTable.getSingleSelected() != null) {
                 moveDownBtn.setEnabled(true);
                 moveUpBtn.setEnabled(true);
@@ -453,7 +453,7 @@ public class ReportWizardCreator extends Screen implements MainWizardFrame<Scree
     //todo
     //@Override
     public boolean preClose(String actionId) {
-        if (!COMMIT_ACTION_ID.equals(actionId) && reportRegionsDs.getItems() != null) {
+        if (!COMMIT_ACTION_ID.equals(actionId) && reportRegionsDc.getItems() != null) {
             dialogs.createOptionDialog()
                     .withCaption(messages.getMessage("dialogs.Confirmation"))
                     .withMessage(messages.getMessage("interruptConfirm"))

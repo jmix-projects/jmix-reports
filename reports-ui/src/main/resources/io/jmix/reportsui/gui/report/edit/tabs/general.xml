@@ -84,14 +84,15 @@
                                 <action id="create" type="create"/>
                                 <action id="remove" type="remove"/>
                                 <action id="refresh" type="refresh"/>
+                                <action id="upAction"/>
+                                <action id="downAction"/>
                             </actions>
                             <buttonsPanel>
                                 <button id="createBandDefinition" action="serviceTree.create" description="msg://description.createBand" icon="font-icon:PLUS"/>
                                 <button id="removeBandDefinition" action="serviceTree.remove" description="msg://description.removeBand" icon="font-icon:REMOVE"/>
-                                <button id="up" description="msg://description.moveUp" icon="font-icon:CARET_UP"/>
-                                <button id="down" description="msg://description.moveDown" icon="font-icon:CARET_DOWN"/>
+                                <button id="up" action="serviceTree.upAction" description="msg://description.moveUp" icon="font-icon:CARET_UP"/>
+                                <button id="down" action="serviceTree.downAction" description="msg://description.moveDown" icon="font-icon:CARET_DOWN"/>
                             </buttonsPanel>
-                            <!--                            <treechildren datasource="treeDs" captionProperty="name"/>-->
                         </tree>
                     </groupBox>
                 </vbox>

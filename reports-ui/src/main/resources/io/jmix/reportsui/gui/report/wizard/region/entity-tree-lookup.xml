@@ -19,7 +19,6 @@
         caption="msg://tabulatedLookup">
 
     <layout expand="entityTreeFrame" height="500px">
-        <frame id="entityTreeFrame" src="/io/jmix/reportsui/gui/report/wizard/region/entity-tree-frame.xml"
-               width="100%"/>
+        <fragment id="entityTreeFrame" screen="report_FirstDetails.fragment" width="100%"/>
     </layout>
 </window>

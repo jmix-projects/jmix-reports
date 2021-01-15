@@ -17,7 +17,6 @@
 package io.jmix.reportsui.gui.report.wizard.step;
 
 import io.jmix.ui.component.Frame;
-import io.jmix.ui.component.Window;
 
 import java.util.List;
 
