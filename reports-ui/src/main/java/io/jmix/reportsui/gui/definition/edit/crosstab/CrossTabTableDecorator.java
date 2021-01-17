@@ -34,12 +34,10 @@ import io.jmix.ui.model.CollectionContainer;
 import io.jmix.ui.model.InstanceContainer;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Objects;
-
 /**
  * Class presents decorator been for add some extra behavior on report band orientation change
  *
- * @see BandDefinitionEditor#initDataSetListeners()
+ * @see BandDefinitionEditor#initDataSetListeners() ()
  */
 public class CrossTabTableDecorator {
 
@@ -61,30 +59,28 @@ public class CrossTabTableDecorator {
     @Autowired
     protected Metadata metadata;
 
-    public void decorate(Table<DataSet> dataSets,
+    public void decorate(Table<DataSet> dataSetsTable,
                          final CollectionContainer<DataSet> dataSetsDc,
                          final InstanceContainer<BandDefinition> bandDefinitionDc) {
-        dataSets.addGeneratedColumn("name", entity -> {
+        dataSetsTable.addGeneratedColumn("name", entity -> {
             TextField<String> textField = uiComponents.create(TextField.class);
-            textField.setParent(dataSets);
+            textField.setParent(dataSetsTable);
             textField.setWidthFull();
             textField.setHeightAuto();
             textField.setValue(entity.getName());
-            textField.setValueSource(new ContainerValueSource<>(dataSets.getInstanceContainer(entity), "name"));
-
-            if (bandDefinitionDc != null) {
-                if (Orientation.CROSS == bandDefinitionDc.getItem().getOrientation() &&
-                        !Strings.isNullOrEmpty(entity.getName()) &&
-                        (entity.getName().endsWith(HORIZONTAL_TPL) || entity.getName().endsWith(VERTICAL_TPL))) {
-                    textField.setEditable(false);
-                }
-            }
-            textField.setEditable(isUpdatePermitted());
+            textField.setValueSource(new ContainerValueSource<>(dataSetsTable.getInstanceContainer(entity), "name"));
+            textField.setEditable(!isVerticalOrHorizontalCrossField(bandDefinitionDc, entity) && isUpdatePermitted());
             return textField;
         });
 
         bandDefinitionDc.addItemChangeListener(band -> onTableReady(dataSetsDc, bandDefinitionDc));
-        dataSetsDc.addItemChangeListener(e -> onTableReady(dataSetsDc, bandDefinitionDc));
+    }
+
+    protected boolean isVerticalOrHorizontalCrossField(InstanceContainer<BandDefinition> bandDefinitionDc,
+                                   DataSet dataSet) {
+        return Orientation.CROSS == bandDefinitionDc.getItem().getOrientation()
+                && !Strings.isNullOrEmpty(dataSet.getName())
+                && (dataSet.getName().endsWith(HORIZONTAL_TPL) || dataSet.getName().endsWith(VERTICAL_TPL));
     }
 
     protected boolean isUpdatePermitted() {
@@ -110,41 +106,44 @@ public class CrossTabTableDecorator {
             return;
         }
 
-        DataSet horizontal = null;
-        DataSet vertical = null;
-
-        for (DataSet dataSet : dataSetsDc.getItems()) {
-            if (horizontal == null && !Strings.isNullOrEmpty(dataSet.getName()) && dataSet.getName().endsWith(HORIZONTAL_TPL)) {
-                horizontal = dataSet;
-            }
-
-            if (vertical == null && !Strings.isNullOrEmpty(dataSet.getName()) && dataSet.getName().endsWith(VERTICAL_TPL)) {
-                vertical = dataSet;
-            }
-
-            if (horizontal != null && vertical != null) break;
-        }
-
-        if (horizontal == null) {
-            horizontal = dataSetFactory.createEmptyDataSet(bandDefinitionDc.getItem());
-            onHorizontalSetChange(horizontal);
-        }
-
-        if (vertical == null) {
-            vertical = dataSetFactory.createEmptyDataSet(bandDefinitionDc.getItem());
-            onVerticalSetChange(vertical);
-        }
-
-        initListeners(dataSetsDc, bandDefinitionDc, horizontal, vertical);
+        initListeners(dataSetsDc, bandDefinitionDc);
     }
 
-    protected void initListeners(CollectionContainer<DataSet> dataSetsDc,
-                                 InstanceContainer<BandDefinition> bandDefinitionDc,
-                                 DataSet horizontal, DataSet vertical) {
+    protected DataSet getCrossDataSet(CollectionContainer<DataSet> dataSetsDc, Orientation orientation) {
+        for (DataSet dataSet : dataSetsDc.getItems()) {
+            if (orientation == Orientation.HORIZONTAL) {
+                if (!Strings.isNullOrEmpty(dataSet.getName()) && dataSet.getName().endsWith(HORIZONTAL_TPL)) {
+                    return dataSet;
+                }
+            }
+
+            if (orientation == Orientation.VERTICAL) {
+                if (!Strings.isNullOrEmpty(dataSet.getName()) && dataSet.getName().endsWith(VERTICAL_TPL)) {
+                    return dataSet;
+                }
+            }
+        }
+        return null;
+    }
+
+    protected DataSet createDataSet(InstanceContainer<BandDefinition> bandDefinitionDc, Orientation orientation) {
+        DataSet dataSet = dataSetFactory.createEmptyDataSet(bandDefinitionDc.getItem());
+
+        if (Orientation.HORIZONTAL == orientation) {
+            onHorizontalSetChange(dataSet);
+        } else if (Orientation.VERTICAL == orientation) {
+            onVerticalSetChange(dataSet);
+        }
+
+        return dataSet;
+    }
+
+    protected void initListeners(CollectionContainer<DataSet> dataSetsDc, InstanceContainer<BandDefinition> bandDefinitionDc) {
         bandDefinitionDc.addItemPropertyChangeListener(e -> {
             if ("orientation".equals(e.getProperty())) {
                 Orientation orientation = (Orientation) e.getValue();
                 Orientation prevOrientation = (Orientation) e.getPrevValue();
+
                 if (orientation == prevOrientation) return;
 
                 if (Orientation.CROSS == orientation || Orientation.CROSS == prevOrientation) {
@@ -152,16 +151,29 @@ public class CrossTabTableDecorator {
                 }
 
                 if (Orientation.CROSS == orientation) {
+                    DataSet horizontal = getOrCreateDataSet(bandDefinitionDc, dataSetsDc, Orientation.HORIZONTAL);
+                    DataSet vertical = getOrCreateDataSet(bandDefinitionDc, dataSetsDc, Orientation.VERTICAL);
+
                     dataSetsDc.getMutableItems().add(horizontal);
                     dataSetsDc.getMutableItems().add(vertical);
                 }
             }
 
-            if (bandDefinitionDc.getItem().getOrientation() == Orientation.CROSS && "name".equals(e.getProperty())) {
+            if ("name".equals(e.getProperty()) && bandDefinitionDc.getItem().getOrientation() == Orientation.CROSS) {
+                DataSet horizontal = getOrCreateDataSet(bandDefinitionDc, dataSetsDc, Orientation.HORIZONTAL);
+                DataSet vertical = getOrCreateDataSet(bandDefinitionDc, dataSetsDc, Orientation.VERTICAL);
+
                 onHorizontalSetChange(horizontal);
                 onVerticalSetChange(vertical);
             }
         });
+    }
+
+    protected DataSet getOrCreateDataSet(InstanceContainer<BandDefinition> bandDefinitionDc,
+                                         CollectionContainer<DataSet> dataSetsDc,
+                                         Orientation orientation) {
+        DataSet dataSet = getCrossDataSet(dataSetsDc, orientation);
+        return dataSet != null ? dataSet : createDataSet(bandDefinitionDc, orientation);
     }
 
     protected void onOrientationChange(CollectionContainer<DataSet> dataSetsDc, InstanceContainer<BandDefinition> bandDefinitionDc) {

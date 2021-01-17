@@ -14,38 +14,47 @@
  * limitations under the License.
  */
 
-package io.jmix.reportsui.gui.definition.edit;
+package io.jmix.reportsui.gui.actions.list;
 
-import io.jmix.core.FetchPlan;
-import io.jmix.core.FetchPlanProperty;
-import io.jmix.core.FetchPlans;
-import io.jmix.core.Messages;
+import io.jmix.core.*;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.core.metamodel.model.MetaProperty;
 import io.jmix.reports.app.EntityTree;
+import io.jmix.reports.app.service.ReportService;
+import io.jmix.reports.app.service.ReportWizardService;
+import io.jmix.reports.entity.BandDefinition;
 import io.jmix.reports.entity.DataSet;
 import io.jmix.reports.entity.DataSetType;
+import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.wizard.ReportRegion;
+import io.jmix.reportsui.gui.definition.edit.BandDefinitionEditor;
 import io.jmix.reportsui.gui.report.wizard.region.RegionEditor;
+import io.jmix.security.constraint.PolicyStore;
+import io.jmix.security.constraint.SecureOperations;
 import io.jmix.ui.Notifications;
 import io.jmix.ui.ScreenBuilders;
-import io.jmix.ui.action.AbstractAction;
+import io.jmix.ui.action.ActionType;
+import io.jmix.ui.action.ListAction;
 import io.jmix.ui.component.Component;
+import io.jmix.ui.component.Table;
 import io.jmix.ui.component.Window;
+import io.jmix.ui.meta.StudioAction;
+import io.jmix.ui.model.CollectionContainer;
 import io.jmix.ui.screen.OpenMode;
 import io.jmix.ui.screen.Screen;
 import io.jmix.ui.screen.StandardCloseAction;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-@org.springframework.stereotype.Component("report_EditViewAction")
-@Scope("prototype")
-public class EditViewAction extends AbstractAction {
+@StudioAction(category = "Reports list actions", description = "Edit action for an entity band")
+@ActionType(EditViewAction.ID)
+public class EditViewAction extends ListAction {
+
+    public static final String ID = "editViewEntity";
 
     @Autowired
     protected ScreenBuilders screenBuilders;
@@ -59,28 +68,55 @@ public class EditViewAction extends AbstractAction {
     @Autowired
     protected Messages messages;
 
-    protected BandDefinitionEditor bandDefinitionEditor;
+    @Autowired
+    protected ReportService reportService;
 
-    public EditViewAction(BandDefinitionEditor bandDefinitionEditor) {
-        super("editView");
-        this.bandDefinitionEditor = bandDefinitionEditor;
+    @Autowired
+    protected ReportWizardService reportWizardService;
+
+    @Autowired
+    protected Metadata metadata;
+
+    @Autowired
+    protected SecureOperations secureOperations;
+
+    @Autowired
+    protected PolicyStore policyStore;
+
+    protected Table<DataSet> dataSetsTable;
+    protected CollectionContainer<BandDefinition> bandsDc;
+
+    public EditViewAction() {
+        this(ID);
+    }
+
+    public EditViewAction(String id) {
+        super(id);
+    }
+
+    public void setDataSetsTable(Table<DataSet> dataSetsTable) {
+        this.dataSetsTable = dataSetsTable;
+    }
+
+    public void setBandsDc(CollectionContainer<BandDefinition> bandsDc) {
+        this.bandsDc = bandsDc;
     }
 
     @Override
     public void actionPerform(Component component) {
-        if (bandDefinitionEditor.dataSets.getSingleSelected() != null) {
-            final DataSet dataSet = bandDefinitionEditor.dataSets.getSingleSelected();
+        if (dataSetsTable.getSingleSelected() != null) {
+            final DataSet dataSet = dataSetsTable.getSingleSelected();
             if (DataSetType.SINGLE == dataSet.getType() || DataSetType.MULTI == dataSet.getType()) {
                 MetaClass forEntityTreeModelMetaClass = findMetaClassByAlias(dataSet);
                 if (forEntityTreeModelMetaClass != null) {
 
-                    final EntityTree entityTree = bandDefinitionEditor.reportWizardService.buildEntityTree(forEntityTreeModelMetaClass);
+                    final EntityTree entityTree = reportWizardService.buildEntityTree(forEntityTreeModelMetaClass);
                     ReportRegion reportRegion = dataSetToReportRegion(dataSet, entityTree);
 
                     if (reportRegion != null) {
                         if (reportRegion.getRegionPropertiesRootNode() == null) {
                             notifications.create(Notifications.NotificationType.TRAY)
-                                    .withCaption(messages.getMessage("dataSet.entityAliasInvalid"))
+                                    .withCaption(messages.getMessage(getClass(), "dataSet.entityAliasInvalid"))
                                     .withDescription(getNameForEntityParameter(dataSet))
                                     .show();
                             //without that root node region editor form will not initialized correctly and became empty. just return
@@ -91,9 +127,9 @@ public class EditViewAction extends AbstractAction {
                             editorParams.put("asViewEditor", Boolean.TRUE);
                             editorParams.put("rootEntity", reportRegion.getRegionPropertiesRootNode());
                             editorParams.put("scalarOnly", Boolean.TRUE);
-                            editorParams.put("updateDisabled", !bandDefinitionEditor.isUpdatePermitted());
+                            editorParams.put("updateDisabled", !secureOperations.isEntityUpdatePermitted(metadata.getClass(Report.class), policyStore));
 
-                            Screen screen = screenBuilders.editor(ReportRegion.class, bandDefinitionEditor.getHostController())
+                            Screen screen = screenBuilders.editor(ReportRegion.class, dataSetsTable.getFrame().getFrameOwner())
                                     .editEntity(reportRegion)
                                     .withScreenClass(RegionEditor.class)
                                     .withOpenMode(OpenMode.DIALOG)
@@ -116,18 +152,18 @@ public class EditViewAction extends AbstractAction {
         String dataSetAlias = getNameForEntityParameter(dataSet);
         if (dataSetAlias == null) {
             notifications.create(Notifications.NotificationType.TRAY)
-                    .withCaption(messages.getMessage("dataSet.entityAliasNull"))
+                    .withCaption(messages.getMessage(getClass(), "dataSet.entityAliasNull"))
                     .show();
             return null;
         }
-        MetaClass byAliasMetaClass = bandDefinitionEditor.reportService.findMetaClassByDataSetEntityAlias(dataSetAlias, dataSet.getType(),
-                bandDefinitionEditor.bandsDc.getItem().getReport().getInputParameters());
+        MetaClass byAliasMetaClass = reportService.findMetaClassByDataSetEntityAlias(dataSetAlias, dataSet.getType(),
+                bandsDc.getItem().getReport().getInputParameters());
 
         //Lets return some value
         if (byAliasMetaClass == null) {
             //Can`t determine parameter and its metaClass by alias
             notifications.create(Notifications.NotificationType.TRAY)
-                    .withCaption(messages.formatMessage("dataSet.entityAliasInvalid", dataSetAlias))
+                    .withCaption(messages.formatMessage(getClass(), "dataSet.entityAliasInvalid", dataSetAlias))
                     .show();
             return null;
             //when byAliasMetaClass is null we return also null
@@ -135,11 +171,11 @@ public class EditViewAction extends AbstractAction {
             //Detect metaclass by current view for comparison
             MetaClass viewMetaClass = null;
             if (dataSet.getFetchPlan() != null) {
-                viewMetaClass = bandDefinitionEditor.metadata.getClass(dataSet.getFetchPlan().getEntityClass());
+                viewMetaClass = metadata.getClass(dataSet.getFetchPlan().getEntityClass());
             }
             if (viewMetaClass != null && !byAliasMetaClass.getName().equals(viewMetaClass.getName())) {
                 notifications.create(Notifications.NotificationType.TRAY)
-                        .withCaption(messages.formatMessage("dataSet.entityWasChanged", byAliasMetaClass.getName()))
+                        .withCaption(messages.formatMessage(getClass(), "dataSet.entityWasChanged", byAliasMetaClass.getName()))
                         .show();
             }
             return byAliasMetaClass;
@@ -161,7 +197,7 @@ public class EditViewAction extends AbstractAction {
                 collectionPropertyName = StringUtils.substringAfter(dataSet.getListEntitiesParamName(), "#");
                 if (StringUtils.isBlank(collectionPropertyName) && dataSet.getListEntitiesParamName().contains("#")) {
                     notifications.create(Notifications.NotificationType.TRAY)
-                            .withCaption(messages.formatMessage("dataSet.entityAliasInvalid", getNameForEntityParameter(dataSet)))
+                            .withCaption(messages.formatMessage(getClass(), "dataSet.entityAliasInvalid", getNameForEntityParameter(dataSet)))
                             .show();
                     return null;
                 }
@@ -180,7 +216,7 @@ public class EditViewAction extends AbstractAction {
                             view = fetchPlans.builder(metaProperty.getDomain().getJavaClass()).build();
                         } else {
                             notifications.create(Notifications.NotificationType.TRAY)
-                                    .withCaption(messages.formatMessage("dataSet.cantFindCollectionProperty",
+                                    .withCaption(messages.formatMessage(getClass(), "dataSet.cantFindCollectionProperty",
                                             collectionPropertyName, metaClass.getName()))
                                     .show();
                             return null;
@@ -193,12 +229,11 @@ public class EditViewAction extends AbstractAction {
             default:
                 return null;
         }
-        return bandDefinitionEditor.reportWizardService.createReportRegionByView(entityTree, isTabulatedRegion,
-                view, collectionPropertyName);
+        return reportWizardService.createReportRegionByView(entityTree, isTabulatedRegion, view, collectionPropertyName);
     }
 
     protected FetchPlan reportRegionToView(EntityTree entityTree, ReportRegion reportRegion) {
-        return bandDefinitionEditor.reportWizardService.createViewByReportRegions(entityTree.getEntityTreeRootNode(), Collections.singletonList(reportRegion));
+        return reportWizardService.createViewByReportRegions(entityTree.getEntityTreeRootNode(), Collections.singletonList(reportRegion));
     }
 
     public FetchPlan findSubViewByCollectionPropertyName(FetchPlan view, final String propertyName) {

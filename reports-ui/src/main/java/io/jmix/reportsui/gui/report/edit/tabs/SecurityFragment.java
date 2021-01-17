@@ -50,10 +50,10 @@ public class SecurityFragment extends ScreenFragment {
     protected Table<ReportScreen> screenTable;
 
     @Autowired
-    protected EntityComboBox<RoleModel> rolesComboBox;
+    protected EntityComboBox<RoleModel> rolesField;
 
     @Autowired
-    protected ComboBox<String> screenIdComboBox;
+    protected ComboBox<String> screenIdField;
 
     @Autowired
     protected Metadata metadata;
@@ -103,7 +103,7 @@ public class SecurityFragment extends ScreenFragment {
             String title = menuId.equals(localeMsg) ? id : id + " ( " + localeMsg + " )";
             screens.put(title, id);
         }
-        screenIdComboBox.setOptionsMap(screens);
+        screenIdField.setOptionsMap(screens);
     }
 
     @Subscribe
@@ -133,15 +133,15 @@ public class SecurityFragment extends ScreenFragment {
 
     @Subscribe("rolesTable.add")
     protected void onRolesTableAdd(Action.ActionPerformedEvent event) {
-        if (rolesComboBox.getValue() != null && !rolesDc.containsItem(roleModelsDc.getItem())) {
-            rolesDc.getMutableItems().add(rolesComboBox.getValue());
+        if (rolesField.getValue() != null && !rolesDc.containsItem(roleModelsDc.getItem())) {
+            rolesDc.getMutableItems().add(rolesField.getValue());
         }
     }
 
     @Subscribe("screenTable.add")
     public void onScreenTableAdd(Action.ActionPerformedEvent event) {
-        if (screenIdComboBox.getValue() != null) {
-            String screenId = screenIdComboBox.getValue();
+        if (screenIdField.getValue() != null) {
+            String screenId = screenIdField.getValue();
 
             boolean exists = false;
             for (ReportScreen item : reportScreensDc.getItems()) {

@@ -45,26 +45,34 @@
                 width="theme://cuba.gui.dialogSize.width.xlarge"
                 resizable="true"/>
 
-    <layout expand="table" spacing="true">
-        <filter id="genericFilter" dataLoader="reportDl" applyTo="table">
+    <layout expand="reportsTable" spacing="true">
+        <filter id="genericFilter" dataLoader="reportDl" applyTo="reportsTable">
             <properties include=".*"/>
         </filter>
-        <groupTable id="table" editable="false" multiselect="true" width="100%" dataContainer="reportDc">
+        <groupTable id="reportsTable" editable="false" multiselect="true" width="100%" dataContainer="reportDc">
             <actions>
-                <action id="create" type="create"/>
                 <action id="edit" type="edit"/>
                 <action id="remove" type="remove"/>
+                <action id="copy" type="itemTracking"/>
+                <action id="import"/>
+                <action id="export" type="itemTracking"/>
+                <action id="runReport" type="itemTracking"/>
+                <action id="executions"/>
             </actions>
             <buttonsPanel>
-                <button id="createBtn" action="table.create"/>
-                <popupButton id="popupCreateBtn" icon="FILE_O" caption="msg://report.create"/>
-                <button action="table.edit"/>
-                <button action="table.remove"/>
-                <button id="copy" icon="COPY"/>
-                <button id="import" icon="UPLOAD" description="msg://button.import"/>
-                <button id="export" icon="DOWNLOAD" description="msg://button.export"/>
-                <button id="runReport" icon="ANGLE_DOUBLE_RIGHT"/>
-                <button id="executionsButton" action="table.executions"/>
+                <popupButton id="popupCreateBtn" icon="FILE_O" caption="msg://report.create" >
+                    <actions>
+                        <action id="create" type="create" caption="msg://report.new"/>
+                        <action id="wizard" caption="msg://report.wizard"/>
+                    </actions>
+                </popupButton>
+                <button action="reportsTable.edit"/>
+                <button action="reportsTable.remove"/>
+                <button id="copy" action="reportsTable.copy" icon="COPY" caption="msg://copy"/>
+                <button id="import" action="reportsTable.import" icon="UPLOAD" description="msg://button.import"/>
+                <button id="export" action="reportsTable.export" icon="DOWNLOAD" description="msg://button.export"/>
+                <button id="runReport" action="reportsTable.runReport" icon="ANGLE_DOUBLE_RIGHT" caption="msg://runReport"/>
+                <button id="executionsButton" action="reportsTable.executions" caption="msg://report.browser.showExecutions"/>
             </buttonsPanel>
             <simplePagination/>
             <columns>

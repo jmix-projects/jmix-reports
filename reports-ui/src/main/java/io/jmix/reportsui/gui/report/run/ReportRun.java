@@ -113,21 +113,6 @@ public class ReportRun extends StandardLookup<Report> {
             reportsDc.getMutableItems().add(report);
         }
 
-        Action runAction = new ItemTrackingAction(RUN_ACTION_ID)
-                .withCaption(messages.getMessage(getClass(), "runReport"))
-                .withHandler(e -> {
-                    Report report = reportsTable.getSingleSelected();
-                    if (report != null) {
-                        report = dataManager.load(Id.of(report))
-                                .fetchPlan(ReportService.MAIN_VIEW_NAME)
-                                .one();
-                        reportGuiManager.runReport(report, ReportRun.this);
-                    }
-                });
-
-        reportsTable.addAction(runAction);
-        reportsTable.setItemClickAction(runAction);
-
         //TODO shortcut
 //        Action applyAction = new BaseAction("applyFilter")
 //                .withShortcut(clientConfig.getFilterApplyShortcut())
@@ -135,6 +120,17 @@ public class ReportRun extends StandardLookup<Report> {
 //                    filterReports();
 //                });
 //        reportsTable.addAction(applyAction);
+    }
+
+    @Subscribe("reportsTable.runReport")
+    protected void onReportsTableRunReport(Action.ActionPerformedEvent event) {
+        Report report = reportsTable.getSingleSelected();
+        if (report != null) {
+            report = dataManager.load(Id.of(report))
+                    .fetchPlan(ReportService.MAIN_VIEW_NAME)
+                    .one();
+            reportGuiManager.runReport(report, ReportRun.this);
+        }
     }
 
     @Subscribe("setFilterButton")

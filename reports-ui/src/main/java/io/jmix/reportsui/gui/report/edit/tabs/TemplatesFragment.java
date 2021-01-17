@@ -8,14 +8,9 @@ import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportTemplate;
 import io.jmix.security.constraint.PolicyStore;
 import io.jmix.security.constraint.SecureOperations;
-import io.jmix.ui.Actions;
 import io.jmix.ui.RemoveOperation;
-import io.jmix.ui.action.ItemTrackingAction;
-import io.jmix.ui.action.ListAction;
-import io.jmix.ui.component.Component;
+import io.jmix.ui.action.Action;
 import io.jmix.ui.component.Table;
-import io.jmix.ui.component.data.meta.ContainerDataUnit;
-import io.jmix.ui.model.CollectionContainer;
 import io.jmix.ui.model.CollectionPropertyContainer;
 import io.jmix.ui.model.InstanceContainer;
 import io.jmix.ui.screen.*;
@@ -63,11 +58,6 @@ public class TemplatesFragment extends ScreenFragment {
         }
     }
 
-    @Install(to = "templatesTable.create", subject = "initializer")
-    protected void templatesTableCreateInitializer(ReportTemplate reportTemplate) {
-        reportTemplate.setReport(reportDc.getItem());
-    }
-
     @Install(to = "templatesTable.remove", subject = "afterActionPerformedHandler")
     protected void templatesTableRemoveAfterActionPerformedHandler(RemoveOperation.AfterActionPerformedEvent<ReportTemplate> event) {
         List<ReportTemplate> selected = event.getItems();
@@ -85,85 +75,70 @@ public class TemplatesFragment extends ScreenFragment {
         }
     }
 
-    @Subscribe
-    public void onInit(InitEvent event) {
+    @Install(to = "templatesTable.copy", subject = "enabledRule")
+    protected boolean templatesTableCopyEnabledRule() {
+        if (templatesTable != null) {
+            Object selectedItem = templatesTable.getSingleSelected();
+            return selectedItem != null && isUpdatePermitted();
 
-        templatesTable.addAction(new ListAction("defaultTemplate") {
-            @Override
-            public String getCaption() {
-                return messages.getMessage(getClass(), "report.defaultTemplate");
-            }
+        }
+        return false;
+    }
 
-            @Override
-            public void actionPerform(Component component) {
-                ReportTemplate template = (ReportTemplate) target.getSingleSelected();
-                if (template != null) {
-                    reportDc.getItem().setDefaultTemplate(template);
+    @Subscribe("templatesTable.copy")
+    protected void onTemplatesTableCopy(Action.ActionPerformedEvent event) {
+        ReportTemplate template = templatesTable.getSingleSelected();
+        if (template != null) {
+
+            ReportTemplate copy = metadataTools.copy(template);
+            copy.setId(UuidProvider.createUuid());
+
+            String copyNamingPattern = messages.getMessage(getClass(), "template.copyNamingPattern");
+            String copyCode = String.format(copyNamingPattern, StringUtils.isEmpty(copy.getCode())
+                    ? StringUtils.EMPTY
+                    : copy.getCode());
+
+            List<String> codes = templatesDc.getItems().stream()
+                    .map(ReportTemplate::getCode)
+                    .filter(o -> !StringUtils.isEmpty(o))
+                    .collect(Collectors.toList());
+            if (codes.contains(copyCode)) {
+                String code = copyCode;
+                int i = 0;
+                while ((codes.contains(code))) {
+                    i += 1;
+                    code = copyCode + " " + i;
                 }
-
-                refreshState();
-
-                templatesTable.focus();
+                copyCode = code;
             }
+            copy.setCode(copyCode);
 
-            @Override
-            protected boolean isApplicable() {
-                if (target != null) {
-                    Object selectedItem = target.getSingleSelected();
-                    if (selectedItem != null) {
-                        return !Objects.equals(reportDc.getItem().getDefaultTemplate(), selectedItem);
-                    }
-                }
+            templatesDc.getMutableItems().add(copy);
+        }
+    }
 
-                return false;
+
+    @Install(to = "templatesTable.default", subject = "enabledRule")
+    protected boolean templatesTableDefaultEnabledRule() {
+        if (templatesTable != null) {
+            Object selectedItem = templatesTable.getSingleSelected();
+            if (selectedItem != null) {
+                return !Objects.equals(reportDc.getItem().getDefaultTemplate(), selectedItem) && isUpdatePermitted();
             }
+        }
 
-            @Override
-            public boolean isEnabled() {
-                return super.isEnabled() && isUpdatePermitted();
-            }
-        });
+        return false;
+    }
 
-        templatesTable.addAction(new ItemTrackingAction("copy") {
-            @Override
-            public void actionPerform(Component component) {
-                ReportTemplate template = (ReportTemplate) target.getSingleSelected();
-                if (template != null) {
+    @Subscribe("templatesTable.default")
+    protected void onTemplatesTableDefault(Action.ActionPerformedEvent event) {
+        ReportTemplate template = templatesTable.getSingleSelected();
+        if (template != null) {
+            reportDc.getItem().setDefaultTemplate(template);
+        }
+        event.getSource().refreshState();
 
-                    ReportTemplate copy = metadataTools.copy(template);
-                    copy.setId(UuidProvider.createUuid());
-
-                    String copyNamingPattern = messages.getMessage(getClass(), "template.copyNamingPattern");
-                    String copyCode = String.format(copyNamingPattern, StringUtils.isEmpty(copy.getCode())
-                            ? StringUtils.EMPTY
-                            : copy.getCode());
-
-                    CollectionContainer<Object> container = ((ContainerDataUnit) target.getItems()).getContainer();
-
-                    List<String> codes = container.getItems().stream()
-                            .map(o -> ((ReportTemplate) o).getCode())
-                            .filter(o -> !StringUtils.isEmpty(o))
-                            .collect(Collectors.toList());
-                    if (codes.contains(copyCode)) {
-                        String code = copyCode;
-                        int i = 0;
-                        while ((codes.contains(code))) {
-                            i += 1;
-                            code = copyCode + " " + i;
-                        }
-                        copyCode = code;
-                    }
-                    copy.setCode(copyCode);
-
-                    container.getMutableItems().add(copy);
-                }
-            }
-
-            @Override
-            public boolean isEnabled() {
-                return super.isEnabled() && isUpdatePermitted();
-            }
-        });
+        templatesTable.focus();
     }
 
     protected boolean isUpdatePermitted() {

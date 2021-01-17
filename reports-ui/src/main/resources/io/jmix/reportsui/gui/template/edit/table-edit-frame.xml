@@ -39,12 +39,12 @@
                             <actions>
                                 <action id="create" type="create"/>
                                 <action id="remove" type="remove"/>
-                                <action id="upBand"/>
-                                <action id="downBand"/>
+                                <action id="upBand" type="itemTracking"/>
+                                <action id="downBand" type="itemTracking"/>
                             </actions>
                             <buttonsPanel>
-                                <button action="bandsTable.create" icon="PLUS"/>
-                                <button action="bandsTable.remove" icon="REMOVE"/>
+                                <button action="bandsTable.create" caption="" icon="PLUS"/>
+                                <button action="bandsTable.remove" caption="" icon="REMOVE"/>
                                 <button action="bandsTable.upBand" icon="CARET_UP"/>
                                 <button action="bandsTable.downBand" icon="CARET_DOWN"/>
                             </buttonsPanel>
@@ -57,12 +57,12 @@
                             <actions>
                                 <action id="create" type="create"/>
                                 <action id="remove" type="remove"/>
-                                <action id="upColumn"/>
-                                <action id="downColumn"/>
+                                <action id="upColumn" type="itemTracking"/>
+                                <action id="downColumn" type="itemTracking"/>
                             </actions>
                             <buttonsPanel>
-                                <button action="columnsTable.create" icon="PLUS"/>
-                                <button action="columnsTable.remove" icon="REMOVE"/>
+                                <button action="columnsTable.create" caption="" icon="PLUS"/>
+                                <button action="columnsTable.remove" caption="" icon="REMOVE"/>
                                 <button action="columnsTable.upColumn" icon="CARET_UP"/>
                                 <button action="columnsTable.downColumn" icon="CARET_DOWN"/>
                             </buttonsPanel>

@@ -33,13 +33,15 @@
                 <action id="create" type="create"/>
                 <action id="remove" type="remove"/>
                 <action id="edit" type="edit"/>
+                <action id="up"/>
+                <action id="down"/>
             </actions>
             <buttonsPanel>
                 <button action="inputParametersTable.create"/>
                 <button action="inputParametersTable.edit"/>
                 <button action="inputParametersTable.remove"/>
-                <button id="upButton" icon="font-icon:CARET_UP"/>
-                <button id="downButton" icon="font-icon:CARET_DOWN"/>
+                <button id="upButton" action="inputParametersTable.up" icon="font-icon:CARET_UP"/>
+                <button id="downButton" action="inputParametersTable.down" icon="font-icon:CARET_DOWN"/>
             </buttonsPanel>
             <columns>
                 <column id="locName" caption="msg://parameters.caption"/>

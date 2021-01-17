@@ -159,19 +159,21 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
 
     @Subscribe
     protected void onInit(InitEvent event) {
-        outputNamePatternField.setContextHelpIconClickHandler(e ->
-                dialogs.createMessageDialog()
-                        .withCaption(messages.getMessage(getClass(), "template.namePatternText"))
-                        .withMessage(messages.getMessage(getClass(), "template.namePatternTextHelp"))
-                        .withContentMode(ContentMode.HTML)
-                        .withModal(false)
-                        .withWidth("560px")
-                        .show());
-
         Map<String, Boolean> groovyOptions = new HashMap<>();
         groovyOptions.put(messages.getMessage(getClass(), "template.freemarkerType"), Boolean.FALSE);
         groovyOptions.put(messages.getMessage(getClass(), "template.groovyType"), Boolean.TRUE);
         isGroovyRadioButtonGroup.setOptionsMap(groovyOptions);
+    }
+
+    @Install(to = "outputNamePatternLabel", subject = "contextHelpIconClickHandler")
+    protected void outputNamePatternLabelContextHelpIconClickHandler(HasContextHelp.ContextHelpIconClickEvent contextHelpIconClickEvent) {
+        dialogs.createMessageDialog()
+                .withCaption(messages.getMessage(getClass(), "template.namePatternText"))
+                .withMessage(messages.getMessage(getClass(), "template.namePatternTextHelp"))
+                .withContentMode(ContentMode.HTML)
+                .withModal(false)
+                .withWidth("560px")
+                .show();
     }
 
     @Subscribe
@@ -359,47 +361,52 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
         outputTypeField.setOptionsList(outputTypes);
     }
 
+    @Subscribe("templateUploadField")
+    protected void onTemplateUploadFieldFileUploadError(UploadField.FileUploadErrorEvent event) {
+        notifications.create(Notifications.NotificationType.WARNING)
+                .withCaption(messages.getMessage(getClass(), "templateEditor.uploadUnsuccess"))
+                .show();
+    }
+
+    @Subscribe("templateUploadField")
+    protected void onTemplateUploadFieldFileUploadSucceed(SingleFileUploadField.FileUploadSucceedEvent event) {
+        String fileName = templateUploadField.getFileName();
+        ReportTemplate reportTemplate = getEditedEntity();
+        reportTemplate.setName(fileName);
+
+        try {
+            byte[] data = IOUtils.toByteArray(templateUploadField.getFileContent());
+            reportTemplate.setContent(data);
+        } catch (IOException ex) {
+            throw new RuntimeException(
+                    String.format("An error occurred while uploading file for template [%s]", getEditedEntity().getCode()), ex);
+        }
+        initTemplateEditor(reportTemplate);
+        setupTemplateTypeVisibility(hasTemplateOutput(reportTemplate.getReportOutputType()));
+        updateOutputType();
+
+        notifications.create(Notifications.NotificationType.TRAY)
+                .withCaption(messages.getMessage(getClass(), "templateEditor.uploadSuccess"))
+                .show();
+    }
+
     protected void initUploadField() {
-        templateUploadField.addFileUploadErrorListener(e ->
-                notifications.create(Notifications.NotificationType.WARNING)
-                        .withCaption(messages.getMessage(getClass(), "templateEditor.uploadUnsuccess"))
-                        .show());
-        templateUploadField.addFileUploadSucceedListener(e -> {
-            String fileName = templateUploadField.getFileName();
-            ReportTemplate reportTemplate = getEditedEntity();
-            reportTemplate.setName(fileName);
-
-            try {
-                byte[] data = IOUtils.toByteArray(templateUploadField.getFileContent());
-                reportTemplate.setContent(data);
-            } catch (IOException ex) {
-                throw new RuntimeException(
-                        String.format("An error occurred while uploading file for template [%s]", getEditedEntity().getCode()), ex);
-            }
-            initTemplateEditor(reportTemplate);
-            setupTemplateTypeVisibility(hasTemplateOutput(reportTemplate.getReportOutputType()));
-            updateOutputType();
-
-            notifications.create(Notifications.NotificationType.TRAY)
-                    .withCaption(messages.getMessage(getClass(), "templateEditor.uploadSuccess"))
-                    .show();
-        });
-
         ReportTemplate reportTemplate = getEditedEntity();
         byte[] templateFile = reportTemplate.getContent();
         if (templateFile != null && !hasChartTemplateOutput(reportTemplate.getReportOutputType())) {
             templateUploadField.setContentProvider(() -> new ByteArrayInputStream(templateFile));
 
-            //todo
             temporaryStorage.saveFile(templateFile);
             templateUploadField.setValue(templateFile);
-            templateUploadField.setFileName(getEditedEntity().getName());
+            templateUploadField.setFileName(reportTemplate.getName());
         }
 
-        boolean updatePermitted = secureOperations.isEntityUpdatePermitted(metadata.getClass(reportTemplate), policyStore)
-                && secureOperations.isEntityAttrUpdatePermitted(metadata.getClass(reportTemplate).getPropertyPath("content"), policyStore);
+        templateUploadField.setEditable(isUpdatePermitted(reportTemplate));
+    }
 
-        templateUploadField.setEditable(updatePermitted);
+    protected boolean isUpdatePermitted(ReportTemplate reportTemplate) {
+        return secureOperations.isEntityUpdatePermitted(metadata.getClass(reportTemplate), policyStore)
+                && secureOperations.isEntityAttrUpdatePermitted(metadata.getClass(reportTemplate).getPropertyPath("content"), policyStore);
     }
 
     protected void initTemplateEditor(ReportTemplate reportTemplate) {

@@ -36,25 +36,29 @@
     <layout expand="split" spacing="true">
         <hbox spacing="true" id="propertiesBox">
             <label value="msg://definition.name" align="MIDDLE_LEFT"/>
-            <textField id="name" dataContainer="bandsDc" property="name" width="${width}">
+            <textField id="nameField" dataContainer="bandsDc" property="name" width="${width}">
                 <validators>
                     <custom bean="report_ReportBandNameValidator"/>
                 </validators>
             </textField>
             <label value="msg://definition.orientation" align="MIDDLE_LEFT"/>
-            <comboBox id="orientation" dataContainer="bandsDc" property="orientation" width="${width}"/>
+            <comboBox id="orientationField" dataContainer="bandsDc" property="orientation" width="${width}"/>
             <label value="msg://definition.parentBand" align="MIDDLE_LEFT"/>
-            <entityComboBox id="parentBand" dataContainer="bandsDc"
+            <entityComboBox id="parentBandField" dataContainer="bandsDc"
                             property="parentBandDefinition" width="${width}"/>
         </hbox>
 
         <split id="split" orientation="horizontal" pos="40" width="100%">
             <vbox margin="false;true;false;false" width="100%" height="100%">
-                <table id="dataSets" editable="true" width="100%" height="100%" columnControlVisible="false"
+                <table id="dataSetsTable" editable="true" width="100%" height="100%" columnControlVisible="false"
                        reorderingAllowed="false" presentations="false" dataContainer="dataSetsDc">
+                    <actions>
+                        <action id="create" type="create"/>
+                        <action id="remove" type="remove"/>
+                    </actions>
                     <buttonsPanel>
-                        <button action="dataSets.create" icon="PLUS"/>
-                        <button action="dataSets.remove" icon="REMOVE"/>
+                        <button action="dataSetsTable.create" icon="PLUS" caption="" description="msg://description.createDataSet"/>
+                        <button action="dataSetsTable.remove" icon="REMOVE" caption="" description="msg://description.removeDataSet"/>
                     </buttonsPanel>
                     <columns>
                         <column id="name" caption="msg://dataSet.name" editable="true"/>
@@ -64,7 +68,7 @@
             </vbox>
             <!-- Split -->
             <vbox id="editPane" margin="false;false;false;true" height="100%" spacing="true">
-                <vbox id="textBox" expand="text" height="100%" spacing="true">
+                <vbox id="dataSetScriptBox" expand="dataSetScriptField" height="100%" spacing="true">
                     <hbox spacing="true"
                           width="100%">
                         <label id="dataSetTextLabel"
@@ -73,7 +77,7 @@
                                     align="MIDDLE_RIGHT"
                                     caption="msg://dataSet.fullScreen"/>
                     </hbox>
-                    <sourceCodeEditor id="text" dataContainer="dataSetsDc" property="text"
+                    <sourceCodeEditor id="dataSetScriptField" dataContainer="dataSetsDc" property="text"
                                       mode="Text" width="100%"/>
 
                     <hbox id="textParamsBox" spacing="true">
@@ -82,12 +86,12 @@
                                    property="linkParameterName"
                                    caption="msg://dataSet.linkParameterName"/>
 
-                        <comboBox id="dataStore" width="${width}"
+                        <comboBox id="dataStoreField" width="${width}"
                                   dataContainer="dataSetsDc"
                                   property="dataStore"
                                   caption="msg://dataSet.dataStore"/>
                     </hbox>
-                    <checkBox id="processTemplate"
+                    <checkBox id="isProcessTemplateField"
                               dataContainer="dataSetsDc"
                               property="processTemplate"
                               caption="msg://dataSet.processTemplate"/>
@@ -100,12 +104,12 @@
                     <rows>
                         <row>
                             <label id="entitiesParamLabel" align="MIDDLE_LEFT" value="msg://dataSet.entitiesParamName"/>
-                            <comboBox id="entitiesParamLookup" dataContainer="dataSetsDc"
+                            <comboBox id="entitiesParamField" dataContainer="dataSetsDc"
                                       property="listEntitiesParamName"/>
                         </row>
                         <row>
                             <label id="entityParamLabel" align="MIDDLE_LEFT" value="msg://dataSet.entityParamName"/>
-                            <comboBox id="entityParamLookup" width="${width}" dataContainer="dataSetsDc"
+                            <comboBox id="entityParamField" width="${width}" dataContainer="dataSetsDc"
                                       property="entityParamName"/>
                         </row>
                         <row>
@@ -114,11 +118,11 @@
                         </row>
                         <row>
                             <label id="viewNameLabel" value="msg://dataSet.viewName"/>
-                            <comboBox id="viewNameComboBox" dataContainer="dataSetsDc" property="viewName"
+                            <comboBox id="viewNameField" dataContainer="dataSetsDc" property="viewName"
                                       width="${width}"/>
                         </row>
                         <row>
-                            <checkBox id="useExistingViewCheckbox" dataContainer="dataSetsDc"
+                            <checkBox id="isUseExistingViewField" dataContainer="dataSetsDc"
                                       property="useExistingView" caption="msg://dataSet.useExistingView"/>
                             <label id="checkboxEmptyElement"/>
                         </row>
@@ -168,7 +172,7 @@
                                         nullOptionVisible="false"/>
                     </vbox>
                 </vbox>
-                <label id="spacer"/>
+                <label id="spacerLabel"/>
             </vbox>
         </split>
     </layout>

@@ -52,17 +52,16 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
     protected Label<String> defaultValueLabel;
     @Autowired
     protected BoxLayout defaultValueBox;
-
     @Autowired
-    protected ComboBox<String> screen;
+    protected ComboBox<String> screenField;
     @Autowired
-    protected ComboBox<String> enumeration;
+    protected ComboBox<String> enumerationField;
     @Autowired
-    protected ComboBox<ParameterType> parameterTypeComboBox;
+    protected ComboBox<ParameterType> parameterTypeField;
     @Autowired
-    protected ComboBox<String> metaClassComboBox;
+    protected ComboBox<String> metaClassField;
     @Autowired
-    protected CheckBox lookup;
+    protected CheckBox isLookupField;
     @Autowired
     protected Label<String> lookupLabel;
     @Autowired
@@ -86,7 +85,7 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
     protected GridLayout predefinedTransformationBox;
 
     @Autowired
-    protected CheckBox predefinedTransformation;
+    protected CheckBox isPredefinedTransformationField;
 
     @Autowired
     protected SourceCodeEditor transformationScript;
@@ -98,13 +97,13 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
     protected Label<String> transformationScriptLabel;
 
     @Autowired
-    protected ComboBox<PredefinedTransformation> wildcards;
+    protected ComboBox<PredefinedTransformation> wildcardsField;
 
     @Autowired
     protected Label<String> wildcardsLabel;
 
     @Autowired
-    protected CheckBox defaultDateIsCurrentCheckBox;
+    protected CheckBox isDefaultDateIsCurrentField;
 
     @Autowired
     protected Label<String> defaultDateIsCurrentLabel;
@@ -113,7 +112,7 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
     protected Label<String> requiredLabel;
 
     @Autowired
-    protected CheckBox required;
+    protected CheckBox isRequiredField;
 
     @Autowired
     protected Metadata metadata;
@@ -140,7 +139,7 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
     protected ParameterClassResolver parameterClassResolver;
 
     @Autowired
-    protected TextArea<String> localeTextField;
+    protected TextArea<String> localeField;
 
     @Autowired
     protected JpqlSuggestionFactory jpqlSuggestionFactory;
@@ -164,7 +163,7 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
 
     @Subscribe
     protected void onInit(Screen.InitEvent event) {
-        parameterTypeComboBox.setOptionsList(Arrays.asList(ParameterType.TEXT, ParameterType.NUMERIC, ParameterType.BOOLEAN, ParameterType.ENUMERATION,
+        parameterTypeField.setOptionsList(Arrays.asList(ParameterType.TEXT, ParameterType.NUMERIC, ParameterType.BOOLEAN, ParameterType.ENUMERATION,
                 ParameterType.DATE, ParameterType.TIME, ParameterType.DATETIME, ParameterType.ENTITY, ParameterType.ENTITY_LIST));
 
         initMetaClassLookup();
@@ -172,7 +171,7 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
         initCodeEditors();
     }
 
-    @Install(to = "localeTextField", subject = "contextHelpIconClickHandler")
+    @Install(to = "localeField", subject = "contextHelpIconClickHandler")
     protected void localeTextFieldContextHelpIconClickHandler(HasContextHelp.ContextHelpIconClickEvent contextHelpIconClickEvent) {
         dialogs.createMessageDialog()
                 .withCaption(messages.getMessage(getClass(), "localeText"))
@@ -205,7 +204,7 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
                 .show();
     }
 
-    @Subscribe("parameterTypeComboBox")
+    @Subscribe("parameterTypeField")
     protected void onTypeValueChange(HasValue.ValueChangeEvent<ParameterType> event) {
         enableControlsByParamType(event.getValue());
     }
@@ -241,7 +240,7 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
         }
     }
 
-    @Subscribe("lookup")
+    @Subscribe("isLookupField")
     protected void onLookupValueChange(HasValue.ValueChangeEvent<Boolean> event) {
         if (Boolean.TRUE.equals(event.getValue())) {
             if (tabsheet.getTab(LOOKUP_SETTINGS_TAB_ID) == null) {
@@ -268,7 +267,7 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
             Class clazz = parameterClassResolver.resolveClass(parameter);
             if (clazz != null) {
                 Map<String, String> screensMap = screensHelper.getAvailableBrowserScreens(clazz);
-                screen.setOptionsMap(screensMap);
+                screenField.setOptionsMap(screensMap);
             }
         }
     }
@@ -279,7 +278,7 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
             String enumLocalizedName = messages.getMessage(enumClass, enumClass.getSimpleName());
             enumsOptionsMap.put(enumLocalizedName + " (" + enumClass.getSimpleName() + ")", enumClass.getCanonicalName());
         }
-        enumeration.setOptionsMap(enumsOptionsMap);
+        enumerationField.setOptionsMap(enumsOptionsMap);
     }
 
     protected void initMetaClassLookup() {
@@ -291,13 +290,13 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
                 metaClassesOptionsMap.put(caption, clazz.getName());
             }
         }
-        metaClassComboBox.setOptionsMap(metaClassesOptionsMap);
+        metaClassField.setOptionsMap(metaClassesOptionsMap);
     }
 
 
     @Subscribe
     protected void onBeforeCommit(BeforeCommitChangesEvent event) {
-        if (!(getEditedEntity().getType() == ParameterType.ENTITY && Boolean.TRUE.equals(lookup.getValue()))) {
+        if (!(getEditedEntity().getType() == ParameterType.ENTITY && Boolean.TRUE.equals(isLookupField.getValue()))) {
             lookupWhere.setValue(null);
             lookupJoin.setValue(null);
         }
@@ -359,7 +358,7 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
     protected void initCurrentDateTimeField() {
         boolean parameterDateOrTime = isParameterDateOrTime();
         defaultDateIsCurrentLabel.setVisible(parameterDateOrTime);
-        defaultDateIsCurrentCheckBox.setVisible(parameterDateOrTime);
+        isDefaultDateIsCurrentField.setVisible(parameterDateOrTime);
     }
 
     protected boolean canHaveDefaultValue() {
@@ -381,12 +380,12 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
         boolean isEnum = type == ParameterType.ENUMERATION;
         boolean isText = type == ParameterType.TEXT;
 
-        metaClassComboBox.setVisible(isEntity);
+        metaClassField.setVisible(isEntity);
         metaClassLabel.setVisible(isEntity);
 
-        lookup.setVisible(isSingleEntity);
+        isLookupField.setVisible(isSingleEntity);
         lookupLabel.setVisible(isSingleEntity);
-        if (isSingleEntity && Boolean.TRUE.equals(lookup.getValue())) {
+        if (isSingleEntity && Boolean.TRUE.equals(isLookupField.getValue())) {
             if (tabsheet.getTab(LOOKUP_SETTINGS_TAB_ID) == null) {
                 tabsheet.addTab(LOOKUP_SETTINGS_TAB_ID, lookupSettingsTab);
             }
@@ -396,10 +395,10 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
             }
         }
 
-        screen.setVisible(isEntity);
+        screenField.setVisible(isEntity);
         screenLabel.setVisible(isEntity);
 
-        enumeration.setVisible(isEnum);
+        enumerationField.setVisible(isEnum);
         enumerationLabel.setVisible(isEnum);
 
         predefinedTransformationBox.setVisible(isText);
@@ -410,9 +409,9 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
 
     protected void initTransformations() {
         ReportInputParameter parameter = getEditedEntity();
-        predefinedTransformation.setValue(parameter.getPredefinedTransformation() != null);
+        isPredefinedTransformationField.setValue(parameter.getPredefinedTransformation() != null);
         enableControlsByTransformationType(parameter.getPredefinedTransformation() != null);
-        predefinedTransformation.addValueChangeListener(e -> {
+        isPredefinedTransformationField.addValueChangeListener(e -> {
             boolean hasPredefinedTransformation = e.getValue() != null && e.getValue();
 
             enableControlsByTransformationType(hasPredefinedTransformation);
@@ -422,13 +421,13 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
                 parameter.setPredefinedTransformation(null);
             }
         });
-        predefinedTransformation.setEditable(secureOperations.isEntityUpdatePermitted(metadata.getClass(ReportInputParameter.class), policyStore));
+        isPredefinedTransformationField.setEditable(secureOperations.isEntityUpdatePermitted(metadata.getClass(ReportInputParameter.class), policyStore));
     }
 
     protected void enableControlsByTransformationType(boolean hasPredefinedTransformation) {
         transformationScript.setVisible(!hasPredefinedTransformation);
         transformationScriptLabel.setVisible(!hasPredefinedTransformation);
-        wildcards.setVisible(hasPredefinedTransformation);
+        wildcardsField.setVisible(hasPredefinedTransformation);
         wildcardsLabel.setVisible(hasPredefinedTransformation);
     }
 

@@ -27,16 +27,13 @@ import io.jmix.reportsui.gui.report.history.ReportExecutionBrowser;
 import io.jmix.reportsui.gui.report.importdialog.ReportImportDialog;
 import io.jmix.reportsui.gui.report.run.InputParametersDialog;
 import io.jmix.reportsui.gui.report.wizard.ReportWizardCreator;
-import io.jmix.ui.*;
-import io.jmix.ui.action.AbstractAction;
+import io.jmix.ui.Notifications;
+import io.jmix.ui.ScreenBuilders;
+import io.jmix.ui.Screens;
+import io.jmix.ui.UiProperties;
 import io.jmix.ui.action.Action;
-import io.jmix.ui.action.BaseAction;
-import io.jmix.ui.action.ItemTrackingAction;
 import io.jmix.ui.action.list.CreateAction;
-import io.jmix.ui.component.Button;
-import io.jmix.ui.component.Component;
 import io.jmix.ui.component.GroupTable;
-import io.jmix.ui.component.PopupButton;
 import io.jmix.ui.download.ByteArrayDataProvider;
 import io.jmix.ui.download.DownloadFormat;
 import io.jmix.ui.download.Downloader;
@@ -65,25 +62,15 @@ public class ReportBrowser extends StandardLookup<Report> {
     @Autowired
     protected UiProperties uiProperties;
     @Autowired
-    private CollectionLoader<Report> reportDl;
+    protected CollectionLoader<Report> reportDl;
     @Autowired
     protected CoreProperties coreProperties;
     @Autowired
-    private CollectionContainer<Report> reportDc;
+    protected CollectionContainer<Report> reportDc;
     @Autowired
-    protected Button runReport;
-    @Named("import")
-    protected Button importReport;
-    @Named("export")
-    protected Button exportReport;
-    @Named("copy")
-    protected Button copyReport;
-    @Named("table")
     protected GroupTable<Report> reportsTable;
-
     @Autowired
     protected DataManager dataManager;
-
     @Autowired
     protected AccessManager accessManager;
     @Autowired
@@ -95,8 +82,6 @@ public class ReportBrowser extends StandardLookup<Report> {
     @Autowired
     protected Screens screens;
     @Autowired
-    protected Actions actions;
-    @Autowired
     protected FetchPlanRepository fetchPlanRepository;
     @Autowired
     protected Notifications notifications;
@@ -104,145 +89,146 @@ public class ReportBrowser extends StandardLookup<Report> {
     protected Downloader downloader;
     @Autowired
     protected ScreenBuilders screenBuilders;
-    @Autowired
-    protected PopupButton popupCreateBtn;
-    @Autowired
-    protected Button createBtn;
+
+    @Named("popupCreateBtn.create")
+    protected CreateAction popupCreateBtnCreate;
 
     @Subscribe
-    protected void onInit(InitEvent initEvent) {
+    protected void onInit(InitEvent event) {
+        popupCreateBtnCreate.setTarget(reportsTable);
+    }
+
+    @Install(to = "popupCreateBtn.create", subject = "afterCloseHandler")
+    protected void popupCreateBtnCreateAfterCloseHandler(AfterCloseEvent event) {
+        if (event.closedWith(StandardOutcome.COMMIT)) {
+            Report newReport = (Report) ((EditorScreen) event.getScreen()).getEditedEntity();
+
+            if (!entityStates.isNew(newReport)) {
+                Report reloadedReport = reloadReport(newReport, reportDl.getFetchPlan());
+                reportDc.getMutableItems().add(reloadedReport);
+            }
+        }
+    }
+
+    @Subscribe("popupCreateBtn.wizard")
+    protected void onPopupCreateBtnWizard(Action.ActionPerformedEvent event) {
+        ReportWizardCreator wizard = screens.create(ReportWizardCreator.class, OpenMode.DIALOG);
+        wizard.addAfterCloseListener(e -> {
+            if (e.closedWith(StandardOutcome.COMMIT)) {
+                Report item = wizard.getItem().getGeneratedReport();
+                reportDc.getMutableItems().add(item);
+                reportsTable.setSelected(item);
+                ReportEditor reportEditor = (ReportEditor) screenBuilders.editor(reportsTable)
+                        .withOpenMode(OpenMode.THIS_TAB)
+                        .build();
+                reportEditor.show()
+                        .addAfterCloseListener(closeEvent -> {
+                            if (closeEvent.closedWith(StandardOutcome.COMMIT)) {
+                                Report item1 = reportEditor.getEditedEntity();
+                                if (item1 != null) {
+                                    reportDc.replaceItem(item1);
+                                }
+                            }
+                            UUID newReportId = reportEditor.getEditedEntity().getId();
+                            reportsTable.expandPath(reportDc.getItem(newReportId));
+                        });
+            }
+        });
+        wizard.show();
+    }
+
+    private boolean isPermissionsToCreateReports() {
         CrudEntityContext showScreenContext = new CrudEntityContext(metadata.getClass(Report.class));
         accessManager.applyRegisteredConstraints(showScreenContext);
 
-        boolean hasPermissionsToCreateReports = showScreenContext.isCreatePermitted();
+        return showScreenContext.isCreatePermitted();
+    }
 
-        Action copyAction = actions.create(ItemTrackingAction.class, "copy")
-                .withCaption(messages.getMessage(getClass(), "copy"))
-                .withHandler(event -> {
-                    Report report = reportsTable.getSingleSelected();
-                    if (report != null) {
-                        reportService.copyReport(report);
-                        reportDl.load();
-                    } else {
-                        notifications.create(Notifications.NotificationType.HUMANIZED)
-                                .withCaption(messages.getMessage(getClass(), "notification.selectReport"))
-                                .show();
-                    }
-                });
-        copyAction.setEnabled(hasPermissionsToCreateReports);
-        copyReport.setAction(copyAction);
+    @Install(to = "reportsTable.import", subject = "enabledRule")
+    protected boolean tableImportEnabledRule() {
+        return isPermissionsToCreateReports();
+    }
 
-        runReport.setAction(new ItemTrackingAction("runReport")
-                .withCaption(messages.getMessage(getClass(), "runReport"))
-                .withHandler(event -> {
-                    Report report = reportsTable.getSingleSelected();
-                    if (report != null) {
-                        report = reloadReport(report, fetchPlanRepository.findFetchPlan(
-                                metadata.getClass(Report.class), "report.edit"));
-                        if (report.getInputParameters() != null && report.getInputParameters().size() > 0 ||
-                                reportGuiManager.inputParametersRequiredByTemplates(report)) {
-                            screens.create(InputParametersDialog.class, OpenMode.DIALOG,
-                                    new MapScreenOptions(ParamsMap.of("report", report)))
-                                    .show()
-                                    .addAfterCloseListener(e -> {
-                                        reportsTable.focus();
-                                    });
-                        } else {
-                            reportGuiManager.printReport(report, Collections.emptyMap(), ReportBrowser.this);
-                        }
-                    }
-                }));
-
-        BaseAction importAction = new BaseAction("import")
-                .withHandler(event -> {
-                    screens.create(ReportImportDialog.class, OpenMode.DIALOG)
-                            .show()
-                            .addAfterCloseListener(e -> {
-                                if (e.closedWith(StandardOutcome.COMMIT)) {
-                                    reportDl.load();
-                                }
-                            });
-                });
-
-        importAction.setEnabled(hasPermissionsToCreateReports);
-        importReport.setAction(importAction);
-
-        Action exportAction = actions.create(ItemTrackingAction.class, "export")
-                .withHandler(event -> {
-                    Set<Report> reports = reportsTable.getSelected();
-                    if ((reports != null) && (!reports.isEmpty())) {
-                        ByteArrayDataProvider provider = new ByteArrayDataProvider(reportService.exportReports(reports), uiProperties.getSaveExportedByteArrayDataThresholdBytes(), coreProperties.getTempDir());
-                        if (reports.size() > 1) {
-                            downloader.download(provider, "Reports", DownloadFormat.ZIP);
-                        } else if (reports.size() == 1) {
-                            downloader.download(provider, reports.iterator().next().getName(), DownloadFormat.ZIP);
-                        }
-                    }
-                });
-
-        exportReport.setAction(exportAction);
-
-        reportsTable.addAction(copyReport.getAction());
-        reportsTable.addAction(exportReport.getAction());
-        reportsTable.addAction(runReport.getAction());
-        reportsTable.addAction(new ShowExecutionsAction());
-
-        CreateAction<Report> createReportAction = actions.create(CreateAction.class);
-        createReportAction.setTarget(reportsTable);
-        createReportAction.setAfterCommitHandler(e -> reportsTable.expandPath(e));
-
-        reportsTable.addAction(createReportAction);
-        subscribeCreateActionCloseHandler(createReportAction);
-
-        reportsTable.getButtonsPanel().remove(createBtn);
-
-        CreateAction<Report> popupCreateReportAction = actions.create(CreateAction.class);
-        popupCreateReportAction.setTarget(reportsTable);
-        popupCreateReportAction.withCaption(messages.getMessage(getClass(), "report.new"));
-        popupCreateReportAction.setAfterCommitHandler(e -> reportsTable.expandPath(e));
-
-        popupCreateBtn.addAction(popupCreateReportAction);
-        subscribeCreateActionCloseHandler(popupCreateReportAction);
-
-        popupCreateBtn.addAction(new AbstractAction("wizard") {
-            @Override
-            public void actionPerform(Component component) {
-                ReportWizardCreator wizard = screens.create(ReportWizardCreator.class, OpenMode.DIALOG);
-                wizard.addAfterCloseListener(e -> {
-                    if (e.closedWith(StandardOutcome.COMMIT)) {
-                        Report item = wizard.getItem().getGeneratedReport();
-                        reportDc.getMutableItems().add(item);
-                        reportsTable.setSelected(item);
-                        ReportEditor reportEditor = (ReportEditor) screenBuilders.editor(reportsTable)
-                                .withOpenMode(OpenMode.THIS_TAB)
-                                .build();
-                        reportEditor.show()
-                                .addAfterCloseListener(closeEvent -> {
-                                    if (closeEvent.closedWith(StandardOutcome.COMMIT)) {
-                                        Report item1 = reportEditor.getEditedEntity();
-                                        if (item1 != null) {
-                                            reportDc.replaceItem(item1);
-                                        }
-                                    }
-                                    UUID newReportId = reportEditor.getEditedEntity().getId();
-                                    reportsTable.expandPath(reportDc.getItem(newReportId));
-                                });
-                    }
-                });
-                wizard.show();
+    @Subscribe("reportsTable.runReport")
+    protected void onTableRunReport(Action.ActionPerformedEvent event) {
+        Report report = reportsTable.getSingleSelected();
+        if (report != null) {
+            report = reloadReport(report, fetchPlanRepository.findFetchPlan(
+                    metadata.getClass(Report.class), "report.edit"));
+            if (report.getInputParameters() != null && report.getInputParameters().size() > 0 ||
+                    reportGuiManager.inputParametersRequiredByTemplates(report)) {
+                screens.create(InputParametersDialog.class, OpenMode.DIALOG,
+                        new MapScreenOptions(ParamsMap.of("report", report)))
+                        .show()
+                        .addAfterCloseListener(e -> {
+                            reportsTable.focus();
+                        });
+            } else {
+                reportGuiManager.printReport(report, Collections.emptyMap(), ReportBrowser.this);
             }
+        }
+    }
 
-            @Override
-            public String getCaption() {
-                return messages.getMessage(getClass(), "report.wizard");
+    @Subscribe("reportsTable.import")
+    protected void onTableImport(Action.ActionPerformedEvent event) {
+        ReportImportDialog reportImportDialog = screenBuilders.screen(this)
+                .withScreenClass(ReportImportDialog.class)
+                .withOpenMode(OpenMode.DIALOG)
+                .build();
+        reportImportDialog.addAfterCloseListener(e -> {
+            if (e.closedWith(StandardOutcome.COMMIT)) {
+                reportDl.load();
             }
         });
+        reportImportDialog.show();
+    }
 
-        popupCreateBtn.setEnabled(hasPermissionsToCreateReports);
+    @Subscribe("reportsTable.export")
+    protected void onTableExport(Action.ActionPerformedEvent event) {
+        Set<Report> reports = reportsTable.getSelected();
+        if (!reports.isEmpty()) {
+            ByteArrayDataProvider provider = new ByteArrayDataProvider(reportService.exportReports(reports), uiProperties.getSaveExportedByteArrayDataThresholdBytes(), coreProperties.getTempDir());
+            if (reports.size() > 1) {
+                downloader.download(provider, "Reports", DownloadFormat.ZIP);
+            } else if (reports.size() == 1) {
+                downloader.download(provider, reports.iterator().next().getName(), DownloadFormat.ZIP);
+            }
+        }
+    }
+
+    @Subscribe("reportsTable.copy")
+    protected void onTableCopy(Action.ActionPerformedEvent event) {
+        Report report = reportsTable.getSingleSelected();
+        if (report != null) {
+            reportService.copyReport(report);
+            reportDl.load();
+        } else {
+            notifications.create(Notifications.NotificationType.HUMANIZED)
+                    .withCaption(messages.getMessage(getClass(), "notification.selectReport"))
+                    .show();
+        }
+    }
+
+    @Install(to = "reportsTable.copy", subject = "enabledRule")
+    protected boolean tableCopyEnabledRule() {
+        Report report = reportsTable.getSingleSelected();
+        return report != null && isPermissionsToCreateReports();
+    }
+
+
+    @Subscribe("reportsTable.executions")
+    protected void onTableExecutions(Action.ActionPerformedEvent event) {
+        Set<Report> selectedReports = reportsTable.getSelected();
+        screenBuilders.screen(ReportBrowser.this)
+                .withScreenClass(ReportExecutionBrowser.class)
+                .withOptions(new MapScreenOptions(
+                        ParamsMap.of(ReportExecutionBrowser.REPORTS_PARAMETER, new ArrayList<>(selectedReports))
+                ))
+                .show();
     }
 
     private Report reloadReport(Report report, FetchPlan fetchPlan) {
-        MetaClass metaClass = metadata.findClass(Report.class);
+        MetaClass metaClass = metadata.getClass(Report.class);
         LoadContext<Report> lc = new LoadContext<>(metaClass);
         lc.setId(report.getId());
         lc.setFetchPlan(fetchPlan);
@@ -250,52 +236,26 @@ public class ReportBrowser extends StandardLookup<Report> {
         return report;
     }
 
-    @Install(to = "table.edit", subject = "afterCloseHandler")
+    @Install(to = "reportsTable.edit", subject = "afterCloseHandler")
     protected void tableEditAfterCloseHandler(AfterCloseEvent event) {
         if (event.closedWith(StandardOutcome.COMMIT)) {
             Report editedReport = (Report) ((EditorScreen) event.getScreen()).getEditedEntity();
             Report currentItem = reportDc.getItem(editedReport.getId());
 
-            if (currentItem != null && !editedReport.getVersion().equals(currentItem.getVersion())) {
+            if (!editedReport.getVersion().equals(currentItem.getVersion())) {
                 Report reloadedReport = reloadReport(currentItem, reportDl.getFetchPlan());
                 reportDc.replaceItem(reloadedReport);
             }
         }
     }
 
-    protected void subscribeCreateActionCloseHandler(CreateAction<Report> createAction) {
-        createAction.setAfterCloseHandler(closeEvent -> {
-            if (closeEvent.closedWith(StandardOutcome.COMMIT)) {
-                Report newReport = (Report) ((EditorScreen) closeEvent.getScreen()).getEditedEntity();
-
-                if (!entityStates.isNew(newReport)) {
-                    Report reloadedReport = reloadReport(newReport, reportDl.getFetchPlan());
-                    reportDc.getMutableItems().add(reloadedReport);
-                }
-            }
-        });
+    @Install(to = "popupCreateBtn.create", subject = "enabledRule")
+    protected boolean popupCreateBtnCreateEnabledRule() {
+        return isPermissionsToCreateReports();
     }
 
-    public class ShowExecutionsAction extends BaseAction {
-
-        public ShowExecutionsAction() {
-            super("executions");
-        }
-
-        @Override
-        public String getCaption() {
-            return messages.getMessage(getClass(), "report.browser.showExecutions");
-        }
-
-        @Override
-        public void actionPerform(Component component) {
-            Set<Report> selectedReports = reportsTable.getSelected();
-            screenBuilders.screen(ReportBrowser.this)
-                    .withScreenClass(ReportExecutionBrowser.class)
-                    .withOptions(new MapScreenOptions(
-                            ParamsMap.of(ReportExecutionBrowser.REPORTS_PARAMETER, new ArrayList<>(selectedReports))
-                    ))
-                    .show();
-        }
+    @Install(to = "popupCreateBtn.wizard", subject = "enabledRule")
+    protected boolean popupCreateBtnWizardEnabledRule() {
+        return isPermissionsToCreateReports();
     }
 }

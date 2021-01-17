@@ -56,9 +56,6 @@ public class ReportEditor extends StandardEditor<Report> {
     @Named("generalFragment.bandEditor")
     protected BandDefinitionEditor bandEditor;
 
-    @Named("run")
-    protected Button run;
-
     @Named("generalFragment.serviceTree")
     protected Tree<BandDefinition> bandTree;
 
@@ -94,9 +91,6 @@ public class ReportEditor extends StandardEditor<Report> {
 
     @Autowired
     protected CollectionContainer<DataSet> dataSetsDc;
-
-//    @Autowired
-//    protected CollectionContainer<BandDefinition> treeDc;
 
     @Autowired
     protected CollectionContainer<ReportTemplate> templatesDc;
@@ -138,9 +132,6 @@ public class ReportEditor extends StandardEditor<Report> {
     protected Dialogs dialogs;
 
     @Autowired
-    protected EntityStates entityStates;
-
-    @Autowired
     protected ScreenBuilders screenBuilders;
 
     @Autowired
@@ -176,8 +167,10 @@ public class ReportEditor extends StandardEditor<Report> {
         bandTree.setSelected(getEditedEntity().getRootBandDefinition());
 
         //setupDropZoneForTemplate();
-        //initValidationScriptGroupBoxCaption();
+        setScreenCaption();
+    }
 
+    protected void setScreenCaption() {
         if (!StringUtils.isEmpty(getEditedEntity().getName())) {
             getWindow().setCaption(messages.formatMessage(getClass(), "reportEditor.format", getEditedEntity().getName()));
         }
@@ -185,10 +178,6 @@ public class ReportEditor extends StandardEditor<Report> {
 
     @Subscribe
     protected void onAfterInit(AfterInitEvent event) {
-
-//        ((CollectionPropertyDatasourceImpl) treeDc).setModified(false);
-//        ((DatasourceImpl) reportDc).setModified(false);
-
         bandTree.expandTree();
 
         //bandEditor.setBandDefinition(bandTree.getSingleSelected());
@@ -236,15 +225,6 @@ public class ReportEditor extends StandardEditor<Report> {
         return secureOperations.isEntityUpdatePermitted(metadata.getClass(Report.class), policyStore);
     }
 
-    protected void setupDropZoneForTemplate() {
-        final ReportTemplate defaultTemplate = getEditedEntity().getDefaultTemplate();
-        if (defaultTemplate != null) {
-            invisibleFileUpload.setDropZone(new UploadField.DropZone(reportFields));
-        } else {
-            invisibleFileUpload.setDropZone(null);
-        }
-    }
-
     protected boolean validateInputOutputFormats() {
         ReportTemplate template = getEditedEntity().getDefaultTemplate();
         if (template != null && !template.isCustom()
@@ -266,16 +246,13 @@ public class ReportEditor extends StandardEditor<Report> {
     @Subscribe
     protected void onBeforeCommit(BeforeCommitChangesEvent event) {
         addCommitListeners();
-
-        if (entityStates.isNew(getEditedEntity())) {
-//            ((CollectionPropertyDatasourceImpl) treeDc).setModified(true);
-        }
     }
 
     protected void addCommitListeners() {
         String xml = reportService.convertToString(getEditedEntity());
         getEditedEntity().setXml(xml);
 
+        //TODO
 //        reportDc.getDsContext().addBeforeCommitListener(context -> {
 //            context.getCommitInstances()
 //                    .removeIf(entity ->
@@ -335,16 +312,13 @@ public class ReportEditor extends StandardEditor<Report> {
         }
     }
 
-    protected void initValidationScriptGroupBoxCaption() {
-        setValidationScriptGroupBoxCaption(getEditedEntity().getValidationOn());
+    @Subscribe(id = "reportDc", target = Target.DATA_CONTAINER)
+    protected void onReportDcItemPropertyChange(InstanceContainer.ItemPropertyChangeEvent<Report> event) {
+        boolean validationOnChanged = event.getProperty().equalsIgnoreCase("validationOn");
 
-        reportDc.addItemPropertyChangeListener(e -> {
-            boolean validationOnChanged = e.getProperty().equalsIgnoreCase("validationOn");
-
-            if (validationOnChanged) {
-                setValidationScriptGroupBoxCaption(e.getItem().getValidationOn());
-            }
-        });
+        if (validationOnChanged) {
+            setValidationScriptGroupBoxCaption(event.getItem().getValidationOn());
+        }
     }
 
     protected void setValidationScriptGroupBoxCaption(Boolean onOffFlag) {

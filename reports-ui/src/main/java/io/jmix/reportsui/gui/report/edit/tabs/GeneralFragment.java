@@ -1,19 +1,20 @@
 package io.jmix.reportsui.gui.report.edit.tabs;
 
-import io.jmix.core.EntityStates;
-import io.jmix.core.Messages;
-import io.jmix.core.Metadata;
-import io.jmix.core.Sort;
+import io.jmix.core.*;
 import io.jmix.reports.entity.*;
 import io.jmix.reportsui.gui.definition.edit.BandDefinitionEditor;
 import io.jmix.security.constraint.PolicyStore;
 import io.jmix.security.constraint.SecureOperations;
 import io.jmix.ui.Notifications;
+import io.jmix.ui.ScreenBuilders;
+import io.jmix.ui.Screens;
+import io.jmix.ui.UiProperties;
 import io.jmix.ui.action.Action;
-import io.jmix.ui.component.Button;
-import io.jmix.ui.component.FileUploadField;
-import io.jmix.ui.component.SingleFileUploadField;
-import io.jmix.ui.component.Tree;
+import io.jmix.ui.app.file.FileUploadDialog;
+import io.jmix.ui.component.*;
+import io.jmix.ui.download.ByteArrayDataProvider;
+import io.jmix.ui.download.DownloadFormat;
+import io.jmix.ui.download.Downloader;
 import io.jmix.ui.model.CollectionContainer;
 import io.jmix.ui.model.CollectionPropertyContainer;
 import io.jmix.ui.model.InstanceContainer;
@@ -44,6 +45,9 @@ public class GeneralFragment extends ScreenFragment {
     protected CollectionContainer<BandDefinition> availableParentBandsDc;
 
     @Autowired
+    protected CollectionPropertyContainer<ReportTemplate> templatesDc;
+
+    @Autowired
     protected Metadata metadata;
 
     @Autowired
@@ -65,13 +69,37 @@ public class GeneralFragment extends ScreenFragment {
     protected Messages messages;
 
     @Autowired
+    protected Downloader downloader;
+
+    @Autowired
+    protected UiProperties uiProperties;
+
+    @Autowired
+    protected CoreProperties coreProperties;
+
+    @Autowired
+    protected Screens screens;
+
+    @Autowired
+    protected ScreenBuilders screenBuilders;
+
+    @Autowired
     protected BandDefinitionEditor bandEditor;
+
+    @Autowired
+    protected FileUploadField invisibleFileUpload;
+
+    @Autowired
+    private HBoxLayout reportFields;
 
     @Autowired
     protected Button up;
 
     @Autowired
     protected Button down;
+
+    @Autowired
+    protected EntityComboBox<ReportTemplate> defaultTemplateField;
 
     @Subscribe("invisibleFileUpload")
     protected void onInvisibleFileUploadFileUploadSucceed(SingleFileUploadField.FileUploadSucceedEvent event) {
@@ -141,229 +169,165 @@ public class GeneralFragment extends ScreenFragment {
 
     @Subscribe
     protected void onInit(InitEvent event) {
-        //        propertiesFieldGroup.add("defaultTemplate", new FieldGroup.CustomFieldGenerator() {
-//            @Override
-//            public Component generateField(Datasource datasource, String propertyId) {
-//                EntityComboBox entityComboBox = uiComponents.create(EntityComboBox.class);
-//
-////                entityComboBox.setOptionsDatasource(templatesDc);
-////                entityComboBox.setDatasource(datasource, propertyId);
-//
-//                entityComboBox.addAction(new AbstractAction("download") {
-//
-//                    @Override
-//                    public String getDescription() {
-//                        return messages.getMessage("description.downloadTemplate");
-//                    }
-//
-//                    @Override
-//                    public String getCaption() {
-//                        return null;
-//                    }
-//
-//                    @Override
-//                    public String getIcon() {
-//                        return "icons/reports-template-download.png";
-//                    }
-//
-//                    @Override
-//                    public void actionPerform(Component component) {
-//                        ReportTemplate defaultTemplate = getEditedEntity().getDefaultTemplate();
-//                        if (defaultTemplate != null) {
-//                            if (defaultTemplate.isCustom()) {
-//                                notifications.create(Notifications.NotificationType.HUMANIZED)
-//                                        .withCaption(messages.getMessage("unableToSaveTemplateWhichDefinedWithClass"))
-//                                        .show();
-//                            } else if (isTemplateWithoutFile(defaultTemplate)) {
-//                                notifications.create(Notifications.NotificationType.HUMANIZED)
-//                                        .withCaption(messages.getMessage("notification.fileIsNotAllowedForSpecificTypes"))
-//                                        .show();
-//                            } else {
-//                                byte[] reportTemplate = defaultTemplate.getContent();
-//                                downloader.download(new ByteArrayDataProvider(reportTemplate, uiProperties.getSaveExportedByteArrayDataThresholdBytes(), coreProperties.getTempDir()),
-//                                        defaultTemplate.getName(), DownloadFormat.getByExtension(defaultTemplate.getExt()));
-//                            }
-//                        } else {
-//                            notifications.create(Notifications.NotificationType.HUMANIZED)
-//                                    .withCaption(messages.getMessage("notification.defaultTemplateIsEmpty"))
-//                                    .show();
-//                        }
-//
-//                        entityComboBox.focus();
-//                    }
-//                });
-//
-//                entityComboBox.addAction(new AbstractAction("upload") {
-//                    @Override
-//                    public String getDescription() {
-//                        return messages.getMessage("description.uploadTemplate");
-//                    }
-//
-//                    @Override
-//                    public String getCaption() {
-//                        return null;
-//                    }
-//
-//                    @Override
-//                    public String getIcon() {
-//                        return "icons/reports-template-upload.png";
-//                    }
-//
-//                    @Override
-//                    public void actionPerform(Component component) {
-//                        final ReportTemplate defaultTemplate = getEditedEntity().getDefaultTemplate();
-//                        if (defaultTemplate != null) {
-//                            if (!isTemplateWithoutFile(defaultTemplate)) {
-//                                FileUploadDialog fileUploadDialog = (FileUploadDialog) screens.create("fileUploadDialog", OpenMode.DIALOG);
-//                                fileUploadDialog.addAfterCloseListener(event -> {
-//                                    StandardCloseAction standardCloseAction = (StandardCloseAction) event.getCloseAction();
-//                                    if (Window.COMMIT_ACTION_ID.equals(standardCloseAction.getActionId())) {
-//                                        //todo
-////                                        File file = fileUpload.getFile(fileUploadDialog.getFileId());
-////                                        try {
-////                                            byte[] data = FileUtils.readFileToByteArray(file);
-////                                            defaultTemplate.setContent(data);
-////                                            defaultTemplate.setName(fileUploadDialog.getFileName());
-////                                            //todo
-////                                            //templatesDc.modifyItem(defaultTemplate);
-////                                        } catch (IOException e) {
-////                                            throw new RuntimeException(String.format(
-////                                                    "An error occurred while uploading file for template [%s]",
-////                                                    defaultTemplate.getCode()));
-////                                        }
-//                                    }
-//                                    entityComboBox.focus();
-//                                });
-//                                fileUploadDialog.show();
-//
-//                            } else {
-//                                notifications.create(Notifications.NotificationType.HUMANIZED)
-//                                        .withCaption(messages.getMessage("notification.fileIsNotAllowedForSpecificTypes"))
-//                                        .show();
-//                            }
-//                        } else {
-//                            notifications.create(Notifications.NotificationType.HUMANIZED)
-//                                    .withCaption(messages.getMessage("notification.defaultTemplateIsEmpty"))
-//                                    .show();
-//                        }
-//                    }
-//
-//                    @Override
-//                    public boolean isEnabled() {
-//                        return super.isEnabled() && isUpdatePermitted();
-//                    }
-//                });
-//
-//                entityComboBox.addAction(new AbstractAction("create") {
-//
-//                    @Override
-//                    public String getDescription() {
-//                        return messages.getMessage("description.createTemplate");
-//                    }
-//
-//                    @Override
-//                    public String getIcon() {
-//                        return "icons/plus-btn.png";
-//                    }
-//
-//                    @Override
-//                    public void actionPerform(Component component) {
-//                        ReportTemplate template = metadata.create(ReportTemplate.class);
-//                        template.setReport(getEditedEntity());
-//
-//                        StandardEditor editor = (StandardEditor) screenBuilders.editor(entityComboBox)
-//                                .withScreenId("report_ReportTemplate.edit")
-//                                .withContainer(templatesDc)
-//                                .editEntity(template)
-//                                .build();
-//                        editor.addAfterCloseListener(e -> {
-//                            StandardCloseAction standardCloseAction = (StandardCloseAction) e.getCloseAction();
-//                            if (Window.COMMIT_ACTION_ID.equals(standardCloseAction.getActionId())) {
-//                                ReportTemplate item = (ReportTemplate) editor.getEditedEntity();
-//                                templatesDc.getItems().add(item);
-//                                getEditedEntity().setDefaultTemplate(item);
-//                                //Workaround to disable button after default template setting
-//                                Action defaultTemplate = templatesTable.getActionNN("defaultTemplate");
-//                                defaultTemplate.refreshState();
-//                            }
-//                            entityComboBox.focus();
-//                        });
-//
-//                        editor.show();
-//                    }
-//
-//                    @Override
-//                    public boolean isEnabled() {
-//                        return super.isEnabled() && isUpdatePermitted();
-//                    }
-//                });
-//
-//                entityComboBox.addAction(new AbstractAction("edit") {
-//                    @Override
-//                    public String getDescription() {
-//                        return messages.getMessage("description.editTemplate");
-//                    }
-//
-//                    @Override
-//                    public String getIcon() {
-//                        return "icons/reports-template-view.png";
-//                    }
-//
-//                    @Override
-//                    public void actionPerform(Component component) {
-//                        ReportTemplate defaultTemplate = getEditedEntity().getDefaultTemplate();
-//                        if (defaultTemplate != null) {
-//                            StandardEditor editor = (StandardEditor) screenBuilders.editor(entityComboBox)
-//                                    .withScreenId("report_ReportTemplate.edit")
-//                                    .withOpenMode(OpenMode.DIALOG)
-//                                    .withContainer(templatesDc)
-//                                    .build();
-//                            editor.addAfterCloseListener(e -> {
-//                                StandardCloseAction standardCloseAction = (StandardCloseAction) e.getCloseAction();
-//                                if (Window.COMMIT_ACTION_ID.equals(standardCloseAction.getActionId())) {
-//                                    ReportTemplate item = (ReportTemplate) editor.getEditedEntity();
-//                                    getEditedEntity().setDefaultTemplate(item);
-//                                    //todo
-//                                    //templatesDc.modifyItem(item);
-//                                }
-//                                entityComboBox.focus();
-//                            });
-//                            editor.show();
-//                        } else {
-//                            notifications.create(Notifications.NotificationType.HUMANIZED)
-//                                    .withCaption(messages.getMessage("notification.defaultTemplateIsEmpty"))
-//                                    .show();
-//                        }
-//                    }
-//
-//                    @Override
-//                    public boolean isEnabled() {
-//                        return super.isEnabled() && isUpdatePermitted();
-//                    }
-//                });
-//
-//                entityComboBox.addValueChangeListener(event -> {
-//                    setupDropZoneForTemplate();
-//                });
-//
-//                entityComboBox.setEditable(isUpdatePermitted());
-//
-//                return entityComboBox;
-//            }
-//        });
+        defaultTemplateField.setEditable(isUpdatePermitted());
     }
 
+    @Subscribe("defaultTemplateField.create")
+    protected void onDefaultTemplateFieldCreate(Action.ActionPerformedEvent event) {
+        Report report = reportDc.getItem();
+        ReportTemplate template = metadata.create(ReportTemplate.class);
+        template.setReport(report);
+
+        StandardEditor editor = (StandardEditor) screenBuilders.editor(defaultTemplateField)
+                .withScreenId("report_ReportTemplate.edit")
+                .withContainer(templatesDc)
+                .withOpenMode(OpenMode.DIALOG)
+                .editEntity(template)
+                .build();
+
+        editor.addAfterCloseListener(e -> {
+            StandardCloseAction standardCloseAction = (StandardCloseAction) e.getCloseAction();
+            if (Window.COMMIT_ACTION_ID.equals(standardCloseAction.getActionId())) {
+                ReportTemplate item = (ReportTemplate) editor.getEditedEntity();
+                templatesDc.getMutableItems().add(item);
+                report.setDefaultTemplate(item);
+                //Workaround to disable button after default template
+                //TODO
+//                Action defaultTemplate = templatesTable.getActionNN("defaultTemplate");
+//                defaultTemplate.refreshState();
+            }
+            defaultTemplateField.focus();
+        });
+        editor.show();
+    }
+
+    @Install(to = "defaultTemplateField.create", subject = "enabledRule")
+    protected boolean defaultTemplateFieldCreateEnabledRule() {
+        return isUpdatePermitted();
+    }
+
+    @Install(to = "defaultTemplateField.edit", subject = "enabledRule")
+    protected boolean defaultTemplateFieldEditEnabledRule() {
+        return isUpdatePermitted();
+    }
+
+    @Subscribe("defaultTemplateField.edit")
+    protected void onDefaultTemplateFieldEdit(Action.ActionPerformedEvent event) {
+        Report report = reportDc.getItem();
+        ReportTemplate defaultTemplate = report.getDefaultTemplate();
+        if (defaultTemplate != null) {
+            StandardEditor editor = (StandardEditor) screenBuilders.editor(defaultTemplateField)
+                    .withScreenId("report_ReportTemplate.edit")
+                    .withOpenMode(OpenMode.DIALOG)
+                    .withContainer(templatesDc)
+                    .editEntity(defaultTemplate)
+                    .build();
+
+            editor.addAfterCloseListener(e -> {
+                StandardCloseAction standardCloseAction = (StandardCloseAction) e.getCloseAction();
+                if (Window.COMMIT_ACTION_ID.equals(standardCloseAction.getActionId())) {
+                    ReportTemplate item = (ReportTemplate) editor.getEditedEntity();
+                    report.setDefaultTemplate(item);
+                }
+                defaultTemplateField.focus();
+            });
+            editor.show();
+        } else {
+            notifications.create(Notifications.NotificationType.HUMANIZED)
+                    .withCaption(messages.getMessage(getClass(), "notification.defaultTemplateIsEmpty"))
+                    .show();
+        }
+    }
+
+    @Subscribe("defaultTemplateField")
+    protected void onDefaultTemplateFieldValueChange(HasValue.ValueChangeEvent<ReportTemplate> event) {
+        setupDropZoneForTemplate();
+    }
+
+    @Subscribe("defaultTemplateField.upload")
+    protected void onDefaultTemplateUpload(Action.ActionPerformedEvent event) {
+        final ReportTemplate defaultTemplate = reportDc.getItem().getDefaultTemplate();
+        if (defaultTemplate != null) {
+            if (!isTemplateWithoutFile(defaultTemplate)) {
+                FileUploadDialog fileUploadDialog = (FileUploadDialog) screenBuilders.screen(getFragment().getFrameOwner())
+                        .withScreenId("singleFileUploadDialog")
+                        .withOpenMode(OpenMode.DIALOG)
+                        .build();
+
+                fileUploadDialog.addAfterCloseListener(closeEvent -> {
+                    StandardCloseAction standardCloseAction = (StandardCloseAction) closeEvent.getCloseAction();
+                    if (Window.COMMIT_ACTION_ID.equals(standardCloseAction.getActionId())) {
+                        //todo
+//                                        File file = fileUpload.getFile(fileUploadDialog.getFileId());
+//                                        try {
+//                                            byte[] data = FileUtils.readFileToByteArray(file);
+//                                            defaultTemplate.setContent(data);
+//                                            defaultTemplate.setName(fileUploadDialog.getFileName());
+//                                            //todo
+//                                            //templatesDc.modifyItem(defaultTemplate);
+//                                        } catch (IOException e) {
+//                                            throw new RuntimeException(String.format(
+//                                                    "An error occurred while uploading file for template [%s]",
+//                                                    defaultTemplate.getCode()));
+//                                        }
+                    }
+                    defaultTemplateField.focus();
+                });
+                fileUploadDialog.show();
+
+            } else {
+                notifications.create(Notifications.NotificationType.HUMANIZED)
+                        .withCaption(messages.getMessage(getClass(), "notification.fileIsNotAllowedForSpecificTypes"))
+                        .show();
+            }
+        } else {
+            notifications.create(Notifications.NotificationType.HUMANIZED)
+                    .withCaption(messages.getMessage(getClass(), "notification.defaultTemplateIsEmpty"))
+                    .show();
+        }
+    }
+
+    @Install(to = "defaultTemplateField.upload", subject = "enabledRule")
+    protected boolean defaultTemplateFieldUploadEnabledRule() {
+        return isUpdatePermitted();
+    }
+
+    @Subscribe("defaultTemplateField.download")
+    protected void onDefaultTemplateDownload(Action.ActionPerformedEvent event) {
+        ReportTemplate defaultTemplate = reportDc.getItem().getDefaultTemplate();
+        if (defaultTemplate != null) {
+            if (defaultTemplate.isCustom()) {
+                notifications.create(Notifications.NotificationType.HUMANIZED)
+                        .withCaption(messages.getMessage(getClass(), "unableToSaveTemplateWhichDefinedWithClass"))
+                        .show();
+            } else if (isTemplateWithoutFile(defaultTemplate)) {
+                notifications.create(Notifications.NotificationType.HUMANIZED)
+                        .withCaption(messages.getMessage(getClass(), "notification.fileIsNotAllowedForSpecificTypes"))
+                        .show();
+            } else {
+                byte[] reportTemplate = defaultTemplate.getContent();
+                downloader.download(new ByteArrayDataProvider(reportTemplate, uiProperties.getSaveExportedByteArrayDataThresholdBytes(), coreProperties.getTempDir()),
+                        defaultTemplate.getName(), DownloadFormat.getByExtension(defaultTemplate.getExt()));
+            }
+        } else {
+            notifications.create(Notifications.NotificationType.HUMANIZED)
+                    .withCaption(messages.getMessage(getClass(), "notification.defaultTemplateIsEmpty"))
+                    .show();
+        }
+
+        defaultTemplateField.focus();
+    }
+
+
     @Install(to = "serviceTree.upAction", subject = "enabledRule")
-    private boolean serviceTreeUpActionEnabledRule() {
+    protected boolean serviceTreeUpActionEnabledRule() {
         return isUpButtonEnabled();
     }
 
     @Install(to = "serviceTree.downAction", subject = "enabledRule")
-    private boolean serviceTreeDownActionEnabledRule() {
+    protected boolean serviceTreeDownActionEnabledRule() {
         return isDownButtonEnabled();
     }
-
-
 
     protected void sortBandDefinitionsTableByPosition() {
         bandsDc.getSorter().sort(Sort.by(Sort.Direction.ASC, "position"));
@@ -546,6 +510,15 @@ public class GeneralFragment extends ScreenFragment {
             return isChildOrEqual(definition, child.getParentBandDefinition());
         } else {
             return false;
+        }
+    }
+
+    protected void setupDropZoneForTemplate() {
+        final ReportTemplate defaultTemplate = reportDc.getItem().getDefaultTemplate();
+        if (defaultTemplate != null) {
+            invisibleFileUpload.setDropZone(new UploadField.DropZone(reportFields));
+        } else {
+            invisibleFileUpload.setDropZone(null);
         }
     }
 }

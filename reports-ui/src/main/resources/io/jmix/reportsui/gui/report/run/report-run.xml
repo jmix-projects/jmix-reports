@@ -65,8 +65,11 @@
                     editable="false"
                     width="100%"
                     dataContainer="reportsDc">
+            <actions>
+                <action id="runReport" type="itemTracking"/>
+            </actions>
             <buttonsPanel>
-                <button id="runReport" action="reportsTable.runReport" icon="ANGLE_DOUBLE_RIGHT"/>
+                <button id="runReport" action="reportsTable.runReport" caption="msg://runReport" icon="ANGLE_DOUBLE_RIGHT"/>
             </buttonsPanel>
             <columns>
                 <column id="group"/>

@@ -23,6 +23,7 @@ import io.jmix.reports.app.service.ReportWizardService;
 import io.jmix.reports.entity.*;
 import io.jmix.reports.util.DataSetFactory;
 import io.jmix.reportsui.gui.ReportingClientConfig;
+import io.jmix.reportsui.gui.actions.list.EditViewAction;
 import io.jmix.reportsui.gui.definition.edit.crosstab.CrossTabTableDecorator;
 import io.jmix.reportsui.gui.definition.edit.scripteditordialog.ScriptEditorDialog;
 import io.jmix.security.constraint.PolicyStore;
@@ -31,8 +32,6 @@ import io.jmix.ui.Actions;
 import io.jmix.ui.Dialogs;
 import io.jmix.ui.ScreenBuilders;
 import io.jmix.ui.action.Action;
-import io.jmix.ui.action.list.CreateAction;
-import io.jmix.ui.action.list.RemoveAction;
 import io.jmix.ui.component.*;
 import io.jmix.ui.component.autocomplete.AutoCompleteSupport;
 import io.jmix.ui.component.autocomplete.JpqlSuggestionFactory;
@@ -46,7 +45,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Nullable;
-import javax.inject.Named;
 import java.util.*;
 
 @UiController("report_BandDefinitionEditor.fragment")
@@ -54,7 +52,7 @@ import java.util.*;
 public class BandDefinitionEditor extends ScreenFragment implements Suggester {
 
     @Autowired
-    protected InstanceContainer<BandDefinition> bandsDc;
+    protected CollectionContainer<BandDefinition> bandsDc;
     @Autowired
     protected CollectionContainer<DataSet> dataSetsDc;
     @Autowired
@@ -62,13 +60,13 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
     @Autowired
     protected CollectionContainer<ReportInputParameter> parametersDc;
     @Autowired
-    protected Table<DataSet> dataSets;
-    @Named("text")
+    protected Table<DataSet> dataSetsTable;
+    @Autowired
     protected SourceCodeEditor dataSetScriptField;
     @Autowired
     protected SourceCodeEditor jsonGroovyCodeEditor;
     @Autowired
-    protected BoxLayout textBox;
+    protected BoxLayout dataSetScriptBox;
     @Autowired
     protected Label<String> entitiesParamLabel;
     @Autowired
@@ -92,23 +90,23 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
     @Autowired
     protected Label<String> viewNameLabel;
     @Autowired
-    protected ComboBox<Orientation> orientation;
+    protected ComboBox<Orientation> orientationField;
     @Autowired
-    protected ComboBox<BandDefinition> parentBand;
+    protected ComboBox<BandDefinition> parentBandField;
     @Autowired
-    protected TextField<String> name;
+    protected TextField<String> nameField;
     @Autowired
-    protected ComboBox<String> viewNameComboBox;
+    protected ComboBox<String> viewNameField;
     @Autowired
-    protected ComboBox entitiesParamLookup;
+    protected ComboBox entitiesParamField;
     @Autowired
-    protected ComboBox entityParamLookup;
+    protected ComboBox entityParamField;
     @Autowired
-    protected ComboBox dataStore;
+    protected ComboBox dataStoreField;
     @Autowired
-    protected CheckBox processTemplate;
+    protected CheckBox isProcessTemplateField;
     @Autowired
-    protected CheckBox useExistingViewCheckbox;
+    protected CheckBox isUseExistingViewField;
     @Autowired
     protected Button viewEditButton;
     @Autowired
@@ -116,7 +114,7 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
     @Autowired
     protected Label<String> checkboxEmptyElement;
     @Autowired
-    protected Label<String> spacer;
+    protected Label<String> spacerLabel;
     @Autowired
     protected Metadata metadata;
     @Autowired
@@ -208,7 +206,7 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
         if (bandDefinition != null) {
             bandsDc.setItem(bandDefinition);
         }
-        name.setEditable((bandDefinition == null || bandDefinition.getParent() != null)
+        nameField.setEditable((bandDefinition == null || bandDefinition.getParent() != null)
                 && isUpdatePermitted());
     }
 
@@ -236,8 +234,6 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
     @Subscribe
     protected void onInit(InitEvent event) {
         initDataSetListeners();
-
-        initParametersListeners();
 
         initActions();
 
@@ -293,8 +289,8 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
                 break;
             case PARAMETER:
                 jsonDataSetTypeVBox.add(jsonSourceParameterCodeVBox);
-                jsonDataSetTypeVBox.add(spacer);
-                jsonDataSetTypeVBox.expand(spacer);
+                jsonDataSetTypeVBox.add(spacerLabel);
+                jsonDataSetTypeVBox.expand(spacerLabel);
                 break;
         }
     }
@@ -305,56 +301,49 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
         for (String additional : stores.getAdditional()) {
             all.put(additional, additional);
         }
-        dataStore.setOptionsMap(all);
+        dataStoreField.setOptionsMap(all);
+    }
+
+    @Subscribe("dataSetsTable.create")
+    protected void onDataSetsCreate(Action.ActionPerformedEvent event) {
+        BandDefinition selectedBand = bandsDc.getItem();
+        if (selectedBand != null) {
+            DataSet dataset = dataSetFactory.createEmptyDataSet(selectedBand);
+            selectedBand.getDataSets().add(dataset);
+            dataSetsDc.getMutableItems().add(dataset);
+            dataSetsDc.setItem(dataset);
+            dataSetsTable.setSelected(dataset);
+        }
+    }
+
+    @Install(to = "dataSetsTable.create", subject = "enabledRule")
+    protected boolean dataSetsCreateEnabledRule() {
+        return isUpdatePermitted();
     }
 
     protected void initActions() {
-        RemoveAction removeAction = (RemoveAction) actions.create(RemoveAction.class)
-                .withCaption("")
-                .withDescription(messages.getMessage(getClass(), "description.removeDataSet"));
-        dataSets.addAction(removeAction);
+        EditViewAction editViewAction = (EditViewAction) actions.create(EditViewAction.ID);
+        editViewAction.setDataSetsTable(dataSetsTable);
+        editViewAction.setBandsDc(bandsDc);
+        viewEditButton.setAction(editViewAction);
 
+        viewNameField.setOptionsMap(new HashMap<>());
 
-        CreateAction createAction = (CreateAction) actions.create(CreateAction.class)
-                .withCaption("")
-                .withDescription(messages.getMessage(getClass(), "description.createDataSet"))
-                .withHandler(handle -> {
-                    BandDefinition selectedBand = bandsDc.getItem();
-                    if (selectedBand != null) {
-                        DataSet dataset = dataSetFactory.createEmptyDataSet(selectedBand);
-                        selectedBand.getDataSets().add(dataset);
-                        dataSetsDc.getMutableItems().add(dataset);
-                        dataSetsDc.setItem(dataset);
-                        dataSets.setSelected(dataset);
-                    }
-                });
-        createAction.setEnabled(createAction.isEnabled() && isUpdatePermitted());
-        dataSets.addAction(createAction);
-
-        Action editDataSetViewAction = new EditViewAction(this);
-        viewEditButton.setAction(editDataSetViewAction);
-
-        viewNameComboBox.setOptionsMap(new HashMap<>());
-
-        //todo
-//        entitiesParamLookup.setNewOptionAllowed(true);
-//        entityParamLookup.setNewOptionAllowed(true);
-//        viewNameLookup.setNewOptionAllowed(true);
-        entitiesParamLookup.setNewOptionHandler(LinkedWithPropertyNewOptionHandler.handler(dataSetsDc, "listEntitiesParamName"));
-        entityParamLookup.setNewOptionHandler(LinkedWithPropertyNewOptionHandler.handler(dataSetsDc, "entityParamName"));
-        viewNameComboBox.setNewOptionHandler(LinkedWithPropertyNewOptionHandler.handler(dataSetsDc, "viewName"));
+        entitiesParamField.setNewOptionHandler(LinkedWithPropertyNewOptionHandler.handler(dataSetsDc, "listEntitiesParamName"));
+        entityParamField.setNewOptionHandler(LinkedWithPropertyNewOptionHandler.handler(dataSetsDc, "entityParamName"));
+        viewNameField.setNewOptionHandler(LinkedWithPropertyNewOptionHandler.handler(dataSetsDc, "viewName"));
     }
 
-    protected void initParametersListeners() {
-        parametersDc.addCollectionChangeListener(e -> {
-            Map<String, Object> paramAliases = new HashMap<>();
+    @Subscribe(id = "parametersDc", target = Target.DATA_CONTAINER)
+    protected void onParametersDcCollectionChange(CollectionContainer.CollectionChangeEvent<ReportInputParameter> event) {
 
-            for (ReportInputParameter item : e.getSource().getItems()) {
-                paramAliases.put(item.getName(), item.getAlias());
-            }
-            entitiesParamLookup.setOptionsMap(paramAliases);
-            entityParamLookup.setOptionsMap(paramAliases);
-        });
+        Map<String, Object> paramAliases = new HashMap<>();
+
+        for (ReportInputParameter item : event.getSource().getItems()) {
+            paramAliases.put(item.getName(), item.getAlias());
+        }
+        entitiesParamField.setOptionsMap(paramAliases);
+        entityParamField.setOptionsMap(paramAliases);
     }
 
     @Subscribe(id = "bandsDc", target = Target.DATA_CONTAINER)
@@ -403,10 +392,8 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
     }
 
     protected void initDataSetListeners() {
-        tabOrientationTableDecorator.decorate(dataSets, dataSetsDc, bandsDc);
-
+        tabOrientationTableDecorator.decorate(dataSetsTable, dataSetsDc, bandsDc);
         dataSetScriptField.resetEditHistory();
-
         hideAllDataSetEditComponents();
     }
 
@@ -416,9 +403,9 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
 
     protected void updateRequiredIndicators(BandDefinition item) {
         boolean required = !(item == null || reportDc.getItem().getRootBandDefinition().equals(item));
-        parentBand.setRequired(required);
-        orientation.setRequired(required);
-        name.setRequired(item != null);
+        parentBandField.setRequired(required);
+        orientationField.setRequired(required);
+        nameField.setRequired(item != null);
     }
 
     @Nullable
@@ -442,12 +429,12 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
                 }
                 fetchPlans.put(FetchPlan.LOCAL, FetchPlan.LOCAL);
                 fetchPlans.put(FetchPlan.INSTANCE_NAME, FetchPlan.INSTANCE_NAME);
-                viewNameComboBox.setOptionsMap(fetchPlans);
+                viewNameField.setOptionsMap(fetchPlans);
                 return;
             }
         }
 
-        viewNameComboBox.setOptionsMap(new HashMap<>());
+        viewNameField.setOptionsMap(new HashMap<>());
     }
 
     protected void applyVisibilityRules(DataSet item) {
@@ -464,22 +451,22 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
             switch (dataSet.getType()) {
                 case SQL:
                 case JPQL:
-                    textParamsBox.add(dataStore);
-                    textBox.add(processTemplate);
+                    textParamsBox.add(dataStoreField);
+                    dataSetScriptBox.add(isProcessTemplateField);
                 case GROOVY:
-                    editPane.add(textBox);
+                    editPane.add(dataSetScriptBox);
                     break;
                 case SINGLE:
                     editPane.add(commonEntityGrid);
                     setCommonEntityGridVisiblity(true, false);
-                    editPane.add(spacer);
-                    editPane.expand(spacer);
+                    editPane.add(spacerLabel);
+                    editPane.expand(spacerLabel);
                     break;
                 case MULTI:
                     editPane.add(commonEntityGrid);
                     setCommonEntityGridVisiblity(false, true);
-                    editPane.add(spacer);
-                    editPane.expand(spacer);
+                    editPane.add(spacerLabel);
+                    editPane.expand(spacerLabel);
                     break;
                 case JSON:
                     initJsonDataSetOptions(dataSet);
@@ -511,7 +498,7 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
 
                 case JPQL:
                     dataSetScriptFieldMode = SourceCodeEditor.Mode.Text;
-                    dataSetScriptField.setSuggester(processTemplate.isChecked() ? null : this);
+                    dataSetScriptField.setSuggester(isProcessTemplateField.isChecked() ? null : this);
                     dataSetScriptField.setMode(SourceCodeEditor.Mode.Text);
                     dataSetScriptField.setContextHelpIconClickHandler(null);
                     break;
@@ -528,41 +515,41 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
 
     protected void applyVisibilityRulesForEntityType(DataSet item) {
         commonEntityGrid.remove(viewNameLabel);
-        commonEntityGrid.remove(viewNameComboBox);
+        commonEntityGrid.remove(viewNameField);
         commonEntityGrid.remove(viewEditButton);
         commonEntityGrid.remove(buttonEmptyElement);
-        commonEntityGrid.remove(useExistingViewCheckbox);
+        commonEntityGrid.remove(isUseExistingViewField);
         commonEntityGrid.remove(checkboxEmptyElement);
 
         if (Boolean.TRUE.equals(item.getUseExistingView())) {
             commonEntityGrid.add(viewNameLabel);
-            commonEntityGrid.add(viewNameComboBox);
+            commonEntityGrid.add(viewNameField);
         } else {
             commonEntityGrid.add(viewEditButton);
             commonEntityGrid.add(buttonEmptyElement);
         }
 
-        commonEntityGrid.add(useExistingViewCheckbox);
+        commonEntityGrid.add(isUseExistingViewField);
         commonEntityGrid.add(checkboxEmptyElement);
     }
 
     protected void hideAllDataSetEditComponents() {
         // do not use setVisible(false) due to web legacy (Vaadin 6) layout problems #PL-3916
-        textParamsBox.remove(dataStore);
-        textBox.remove(processTemplate);
-        editPane.remove(textBox);
+        textParamsBox.remove(dataStoreField);
+        dataSetScriptBox.remove(isProcessTemplateField);
+        editPane.remove(dataSetScriptBox);
         editPane.remove(commonEntityGrid);
         editPane.remove(jsonDataSetTypeVBox);
-        editPane.remove(spacer);
+        editPane.remove(spacerLabel);
     }
 
     protected void selectFirstDataSet() {
 //        dataSetDc.refresh();
         if (!dataSetsDc.getItems().isEmpty()) {
             DataSet item = dataSetsDc.getItems().iterator().next();
-            dataSets.setSelected(item);
+            dataSetsTable.setSelected(item);
         } else {
-            dataSets.setSelected((DataSet) null);
+            dataSetsTable.setSelected((DataSet) null);
         }
     }
 
@@ -581,8 +568,8 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
 
     protected void setCommonEntityGridVisiblity(boolean visibleEntityGrid, boolean visibleEntitiesGrid) {
         entityParamLabel.setVisible(visibleEntityGrid);
-        entityParamLookup.setVisible(visibleEntityGrid);
+        entityParamField.setVisible(visibleEntityGrid);
         entitiesParamLabel.setVisible(visibleEntitiesGrid);
-        entitiesParamLookup.setVisible(visibleEntitiesGrid);
+        entitiesParamField.setVisible(visibleEntitiesGrid);
     }
 }

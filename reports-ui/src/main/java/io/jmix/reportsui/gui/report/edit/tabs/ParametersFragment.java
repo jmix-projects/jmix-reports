@@ -9,6 +9,7 @@ import io.jmix.security.constraint.PolicyStore;
 import io.jmix.security.constraint.SecureOperations;
 import io.jmix.ui.Dialogs;
 import io.jmix.ui.RemoveOperation;
+import io.jmix.ui.action.Action;
 import io.jmix.ui.action.ListAction;
 import io.jmix.ui.component.*;
 import io.jmix.ui.model.CollectionPropertyContainer;
@@ -34,12 +35,6 @@ public class ParametersFragment extends ScreenFragment {
     protected Table<ReportInputParameter> inputParametersTable;
 
     @Autowired
-    protected Button upButton;
-
-    @Autowired
-    protected Button downButton;
-
-    @Autowired
     protected Metadata metadata;
 
     @Autowired
@@ -54,86 +49,76 @@ public class ParametersFragment extends ScreenFragment {
     @Autowired
     protected Messages messages;
 
-    @Subscribe
-    protected void onInit(InitEvent event) {
-        upButton.setAction(new ListAction("generalFragment.up") {
-            @Override
-            public void actionPerform(Component component) {
-                ReportInputParameter parameter = (ReportInputParameter) target.getSingleSelected();
-                if (parameter != null) {
-                    List<ReportInputParameter> inputParameters = reportDc.getItem().getInputParameters();
-                    int index = parameter.getPosition();
-                    if (index > 0) {
-                        ReportInputParameter previousParameter = null;
-                        for (ReportInputParameter _param : inputParameters) {
-                            if (_param.getPosition() == index - 1) {
-                                previousParameter = _param;
-                                break;
-                            }
-                        }
-                        if (previousParameter != null) {
-                            parameter.setPosition(previousParameter.getPosition());
-                            previousParameter.setPosition(index);
+    @Install(to = "inputParametersTable.up", subject = "enabledRule")
+    protected boolean inputParametersTableUpEnabledRule() {
+        if (inputParametersTable != null) {
+            ReportInputParameter item = inputParametersTable.getSingleSelected();
+            if (item != null && parametersDc.getItem() == item) {
+                return item.getPosition() > 0 && isUpdatePermitted();
+            }
+        }
 
-                            sortParametersByPosition();
-                        }
+        return false;
+    }
+
+    @Subscribe("inputParametersTable.up")
+    protected void onInputParametersTableUp(Action.ActionPerformedEvent event) {
+        ReportInputParameter parameter = inputParametersTable.getSingleSelected();
+        if (parameter != null) {
+            List<ReportInputParameter> inputParameters = reportDc.getItem().getInputParameters();
+            int index = parameter.getPosition();
+            if (index > 0) {
+                ReportInputParameter previousParameter = null;
+                for (ReportInputParameter _param : inputParameters) {
+                    if (_param.getPosition() == index - 1) {
+                        previousParameter = _param;
+                        break;
                     }
                 }
-            }
+                if (previousParameter != null) {
+                    parameter.setPosition(previousParameter.getPosition());
+                    previousParameter.setPosition(index);
 
-            @Override
-            protected boolean isApplicable() {
-                if (target != null) {
-                    ReportInputParameter item = (ReportInputParameter) target.getSingleSelected();
-                    if (item != null && parametersDc.getItem() == item) {
-                        return item.getPosition() > 0 && isUpdatePermitted();
-                    }
-                }
-
-                return false;
-            }
-        });
-
-        downButton.setAction(new ListAction("generalFragment.down") {
-            @Override
-            public void actionPerform(Component component) {
-                ReportInputParameter parameter = (ReportInputParameter) target.getSingleSelected();
-                if (parameter != null) {
-                    List<ReportInputParameter> inputParameters = reportDc.getItem().getInputParameters();
-                    int index = parameter.getPosition();
-                    if (index < parametersDc.getItems().size() - 1) {
-                        ReportInputParameter nextParameter = null;
-                        for (ReportInputParameter _param : inputParameters) {
-                            if (_param.getPosition() == index + 1) {
-                                nextParameter = _param;
-                                break;
-                            }
-                        }
-                        if (nextParameter != null) {
-                            parameter.setPosition(nextParameter.getPosition());
-                            nextParameter.setPosition(index);
-
-                            sortParametersByPosition();
-                        }
-                    }
+                    sortParametersByPosition();
                 }
             }
+        }
+    }
 
-            @Override
-            protected boolean isApplicable() {
-                if (target != null) {
-                    ReportInputParameter item = (ReportInputParameter) target.getSingleSelected();
-                    if (item != null && parametersDc.getItem() == item) {
-                        return item.getPosition() < parametersDc.getItems().size() - 1 && isUpdatePermitted();
+    @Install(to = "inputParametersTable.down", subject = "enabledRule")
+    protected boolean inputParametersTableDownEnabledRule() {
+        if (inputParametersTable != null) {
+            ReportInputParameter item = inputParametersTable.getSingleSelected();
+            if (item != null && parametersDc.getItem() == item) {
+                return item.getPosition() < parametersDc.getItems().size() - 1 && isUpdatePermitted();
+            }
+        }
+
+        return false;
+    }
+
+    @Subscribe("inputParametersTable.down")
+    protected void onInputParametersTableDown(Action.ActionPerformedEvent event) {
+        ReportInputParameter parameter = inputParametersTable.getSingleSelected();
+        if (parameter != null) {
+            List<ReportInputParameter> inputParameters = reportDc.getItem().getInputParameters();
+            int index = parameter.getPosition();
+            if (index < parametersDc.getItems().size() - 1) {
+                ReportInputParameter nextParameter = null;
+                for (ReportInputParameter _param : inputParameters) {
+                    if (_param.getPosition() == index + 1) {
+                        nextParameter = _param;
+                        break;
                     }
                 }
+                if (nextParameter != null) {
+                    parameter.setPosition(nextParameter.getPosition());
+                    nextParameter.setPosition(index);
 
-                return false;
+                    sortParametersByPosition();
+                }
             }
-        });
-
-        inputParametersTable.addAction(upButton.getAction());
-        inputParametersTable.addAction(downButton.getAction());
+        }
     }
 
     @Install(to = "inputParametersTable.create", subject = "initializer")

@@ -77,15 +77,6 @@ public class TableEditFragment extends DescriptionEditFragment {
     @Autowired
     protected Notifications notifications;
 
-    @Named("columnsTable.remove")
-    protected RemoveAction<TemplateTableColumn> columnsTableRemove;
-    @Named("columnsTable.create")
-    protected CreateAction<TemplateTableColumn> columnsTableCreate;
-    @Named("bandsTable.remove")
-    protected RemoveAction<TemplateTableBand> bandsTableRemove;
-    @Named("bandsTable.create")
-    protected CreateAction<TemplateTableBand> bandsTableCreate;
-
     public ReportTemplate getReportTemplate() {
         return reportTemplate;
     }
@@ -93,15 +84,6 @@ public class TableEditFragment extends DescriptionEditFragment {
     @Subscribe
     protected void onInit(InitEvent event) {
         super.onInit(event);
-
-        clearCaption();
-    }
-
-    private void clearCaption() {
-        columnsTableCreate.setCaption("");
-        columnsTableRemove.setCaption("");
-        bandsTableCreate.setCaption("");
-        bandsTableRemove.setCaption("");
     }
 
     protected void sortParametersByPosition(CollectionContainer collectionContainer) {
