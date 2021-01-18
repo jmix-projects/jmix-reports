@@ -51,7 +51,7 @@ import java.util.UUID;
 
 @UiController("report_Report.browse")
 @UiDescriptor("report-browse.xml")
-@LookupComponent("table")
+@LookupComponent("reportsTable")
 @Route("reports")
 public class ReportBrowser extends StandardLookup<Report> {
 

@@ -15,7 +15,8 @@
   -->
 
 <window xmlns="http://jmix.io/schema/ui/window"
-        caption="msg://reportEditor">
+        caption="msg://reportEditor"
+        focusComponent="generalFragment.propertiesForm">
 
     <data>
         <instance id="reportDc"

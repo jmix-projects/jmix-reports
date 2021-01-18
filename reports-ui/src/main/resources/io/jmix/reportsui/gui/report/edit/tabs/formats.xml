@@ -40,8 +40,8 @@
                 <button action="valuesFormatsTable.remove"/>
             </buttonsPanel>
             <columns>
-                <column id="valueName" caption="msg://valuesFormats.name"/>
-                <column id="formatString" caption="msg://valuesFormats.format"/>
+                <column id="valueName"/>
+                <column id="formatString"/>
             </columns>
         </table>
     </layout>

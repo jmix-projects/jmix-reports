@@ -33,10 +33,9 @@
                     <form id="formatForm" dataContainer="valuesFormatsDc" width="100%">
                         <column>
                             <textField id="valueNameField" property="valueName" required="true" width="100%"
-                                       caption="msg://valuesFormats.name"
                                        requiredMessage="msg://valueNameMsg"/>
                             <comboBox id="formatField" required="true"
-                                      caption="msg://valuesFormats.format" width="100%"
+                                      width="100%"
                                       property="formatString"
                                       requiredMessage="msg://formatStringMsg"/>
                         </column>
@@ -44,7 +43,6 @@
                 </row>
                 <row>
                     <checkBox id="groovyField" dataContainer="valuesFormatsDc" property="groovyScript"
-                              caption="msg://valuesFormats.groovyScript"
                               align="MIDDLE_LEFT"/>
                 </row>
                 <row>
@@ -54,7 +52,7 @@
                             <label value="msg://valuesFormats.groovyScript"/>
                             <linkButton id="groovyFullScreenLinkButton"
                                         align="MIDDLE_RIGHT"
-                                        caption="msg://dataSet.fullScreen"/>
+                                        caption="msg://fullScreen"/>
                         </hbox>
                         <sourceCodeEditor id="groovyCodeEditor" height="200px" width="100%"
                                           required="true"

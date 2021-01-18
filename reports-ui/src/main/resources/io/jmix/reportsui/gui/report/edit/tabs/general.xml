@@ -38,7 +38,7 @@
 
     <layout expand="bands" spacing="true" margin="true;true;false;true">
         <hbox id="reportFields" spacing="true">
-            <form id="propertiesFieldGroup" dataContainer="reportDc">
+            <form id="propertiesForm" dataContainer="reportDc">
                 <column>
                     <textField id="name" required="true" property="name"
                                requiredMessage="msg://report.nameMsg"/>

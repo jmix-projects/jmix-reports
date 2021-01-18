@@ -61,8 +61,8 @@
                         <button action="dataSetsTable.remove" icon="REMOVE" caption="" description="msg://description.removeDataSet"/>
                     </buttonsPanel>
                     <columns>
-                        <column id="name" caption="msg://dataSet.name" editable="true"/>
-                        <column id="type" caption="msg://dataSet.type" editable="true" required="true"/>
+                        <column id="name" editable="true"/>
+                        <column id="type" editable="true" required="true"/>
                     </columns>
                 </table>
             </vbox>
@@ -83,18 +83,15 @@
                     <hbox id="textParamsBox" spacing="true">
                         <textField id="linkParameterName" width="${width}"
                                    dataContainer="dataSetsDc"
-                                   property="linkParameterName"
-                                   caption="msg://dataSet.linkParameterName"/>
+                                   property="linkParameterName"/>
 
                         <comboBox id="dataStoreField" width="${width}"
                                   dataContainer="dataSetsDc"
-                                  property="dataStore"
-                                  caption="msg://dataSet.dataStore"/>
+                                  property="dataStore"/>
                     </hbox>
                     <checkBox id="isProcessTemplateField"
                               dataContainer="dataSetsDc"
-                              property="processTemplate"
-                              caption="msg://dataSet.processTemplate"/>
+                              property="processTemplate"/>
                 </vbox>
                 <gridLayout id="commonEntityGrid" spacing="true" width="100%">
                     <columns>
@@ -123,7 +120,7 @@
                         </row>
                         <row>
                             <checkBox id="isUseExistingViewField" dataContainer="dataSetsDc"
-                                      property="useExistingView" caption="msg://dataSet.useExistingView"/>
+                                      property="useExistingView"/>
                             <label id="checkboxEmptyElement"/>
                         </row>
                     </rows>

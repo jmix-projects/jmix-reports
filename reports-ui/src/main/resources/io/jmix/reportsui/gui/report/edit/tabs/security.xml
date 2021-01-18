@@ -74,7 +74,7 @@
                                 icon="font-icon:REMOVE"/>
                     </buttonsPanel>
                     <columns>
-                        <column id="screenId" caption="msg://screens.screenId"/>
+                        <column id="screenId"/>
                     </columns>
                 </table>
             </vbox>

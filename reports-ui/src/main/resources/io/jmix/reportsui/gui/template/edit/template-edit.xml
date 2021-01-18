@@ -104,7 +104,7 @@
                             <vbox spacing="true" width="100%">
                                 <linkButton id="fullScreenLinkButton"
                                             align="MIDDLE_RIGHT"
-                                            caption="msg://dataSet.fullScreen"/>
+                                            caption="msg://template.fullScreen"/>
                                 <textArea id="customDefinitionField" dataContainer="templateDc" property="customDefinition"
                                           width="${width}"/>
                             </vbox>

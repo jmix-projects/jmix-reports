@@ -49,7 +49,7 @@
                                 <button action="bandsTable.downBand" icon="CARET_DOWN"/>
                             </buttonsPanel>
                             <columns>
-                                <column id="bandName" caption="msg://template.band" editable="true" required="true"/>
+                                <column id="bandName" editable="true" required="true"/>
                             </columns>
                         </table>
                         <table id="columnsTable" dataContainer="tableColumnsDc" width="100%" height="300px" multiselect="false"
@@ -67,8 +67,8 @@
                                 <button action="columnsTable.downColumn" icon="CARET_DOWN"/>
                             </buttonsPanel>
                             <columns>
-                                <column id="key" caption="msg://template.column" editable="true" required="true"/>
-                                <column id="caption" caption="msg://template.columnName" editable="true" required="true"/>
+                                <column id="key" editable="true" required="true"/>
+                                <column id="caption" editable="true" required="true"/>
                             </columns>
                         </table>
                     </row>

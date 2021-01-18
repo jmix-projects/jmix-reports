@@ -60,7 +60,7 @@
                 </row>
                 <row>
                     <label value="msg://io.jmix.reportsui.gui.report.run/report.reportRunFilterGroup" align="MIDDLE_RIGHT"/>
-                    <comboBox id="filterGroup"
+                    <entityComboBox id="filterGroup"
                                  optionsContainer="reportGroupsDc"
                                  width="250px"/>
 

@@ -58,7 +58,7 @@ public class ReportExecutionDialog extends StandardLookup<Report> {
     @Autowired
     protected TextField<String> filterCode;
     @Autowired
-    protected ComboBox<ReportGroup> filterGroup;
+    protected EntityComboBox<ReportGroup> filterGroup;
     @Autowired
     protected DateField<Date> filterUpdatedDate;
     @Autowired

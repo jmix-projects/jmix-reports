@@ -15,7 +15,8 @@
   -->
 
 <window xmlns="http://jmix.io/schema/ui/window"
-        caption="msg://reportImportDialog.caption">
+        caption="msg://reportImportDialog.caption"
+        focusComponent="fileUpload">
 
     <dialogMode width="400px"/>
 

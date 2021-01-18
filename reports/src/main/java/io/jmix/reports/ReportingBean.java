@@ -224,7 +224,7 @@ public class ReportingBean implements ReportingApi {
 //            tx.end();
 //        }
 
-        FetchPlan reportEditView = fetchPlanRepository.getFetchPlan(metadata.getClass(savedReport), "report.edit");
+        FetchPlan reportEditView = fetchPlanRepository.getFetchPlan(metadata.getClass(savedReport), REPORT_EDIT_VIEW_NAME);
         return dataManager.load(Id.of(savedReport))
                 .fetchPlan(reportEditView)
                 .one();

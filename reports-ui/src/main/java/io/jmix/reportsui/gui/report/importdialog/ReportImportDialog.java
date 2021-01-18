@@ -35,7 +35,6 @@ import java.util.UUID;
 
 @UiController("report_ReportImport.dialog")
 @UiDescriptor("report-import-dialog.xml")
-@LookupComponent("fileUpload")
 public class ReportImportDialog extends Screen {
 
     @Autowired
