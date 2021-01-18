@@ -36,6 +36,7 @@ import io.jmix.ui.*;
 import io.jmix.ui.component.*;
 import io.jmix.ui.model.CollectionContainer;
 import io.jmix.ui.model.CollectionLoader;
+import io.jmix.ui.model.DataContext;
 import io.jmix.ui.model.InstanceContainer;
 import io.jmix.ui.screen.*;
 import org.apache.commons.collections4.CollectionUtils;
@@ -168,6 +169,13 @@ public class ReportEditor extends StandardEditor<Report> {
 
         //setupDropZoneForTemplate();
         setScreenCaption();
+    }
+
+    @Subscribe(target = Target.DATA_CONTEXT)
+    protected void onPostCommit(DataContext.PostCommitEvent event) {
+        notifications.create(Notifications.NotificationType.TRAY)
+                .withCaption(messages.getMessage(getClass(), "notification.completeSuccessfully"))
+                .show();
     }
 
     protected void setScreenCaption() {

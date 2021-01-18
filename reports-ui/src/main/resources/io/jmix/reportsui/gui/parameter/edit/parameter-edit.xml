@@ -64,7 +64,7 @@
                         <row>
                             <label id="lookupLabel" value="msg://parameters.lookup" align="MIDDLE_LEFT"/>
                             <checkBox id="isLookupField" dataContainer="parameterDc" property="lookup"
-                                      contextHelpText="mainMsg://parameters.lookupHelp"/>
+                                      contextHelpText="msg://parameters.lookupHelp"/>
                         </row>
                         <row>
                             <label id="metaClassLabel" value="msg://parameters.metaClass" align="MIDDLE_LEFT"/>

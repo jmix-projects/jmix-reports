@@ -43,6 +43,7 @@
                 </row>
                 <row>
                     <checkBox id="groovyField" dataContainer="valuesFormatsDc" property="groovyScript"
+                              caption="msg://valuesFormats.groovyScript"
                               align="MIDDLE_LEFT"/>
                 </row>
                 <row>

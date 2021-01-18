@@ -83,14 +83,17 @@
                     <hbox id="textParamsBox" spacing="true">
                         <textField id="linkParameterName" width="${width}"
                                    dataContainer="dataSetsDc"
+                                   caption="msg://dataSet.linkParameterName"
                                    property="linkParameterName"/>
 
                         <comboBox id="dataStoreField" width="${width}"
                                   dataContainer="dataSetsDc"
+                                  caption="msg://dataSet.dataStore"
                                   property="dataStore"/>
                     </hbox>
                     <checkBox id="isProcessTemplateField"
                               dataContainer="dataSetsDc"
+                              caption="msg://dataSet.processTemplate"
                               property="processTemplate"/>
                 </vbox>
                 <gridLayout id="commonEntityGrid" spacing="true" width="100%">
@@ -120,7 +123,7 @@
                         </row>
                         <row>
                             <checkBox id="isUseExistingViewField" dataContainer="dataSetsDc"
-                                      property="useExistingView"/>
+                                      property="useExistingView" caption="msg://dataSet.useExistingView"/>
                             <label id="checkboxEmptyElement"/>
                         </row>
                     </rows>
