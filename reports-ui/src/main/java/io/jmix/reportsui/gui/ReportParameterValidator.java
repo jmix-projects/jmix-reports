@@ -19,6 +19,7 @@ package io.jmix.reportsui.gui;
 import io.jmix.core.DataManager;
 import io.jmix.core.Metadata;
 import io.jmix.core.common.util.ParamsMap;
+import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportInputParameter;
 import io.jmix.reports.exception.ReportParametersValidationException;
@@ -41,12 +42,10 @@ public class ReportParameterValidator {
     protected Metadata metadata;
     @Autowired
     protected DataManager dataManager;
-//    @Autowired
-//    protected Security security;
     @Autowired
     protected ScriptEvaluator scripting;
-//    @Autowired
-//    protected UserSessionSource userSessionSource;
+    @Autowired
+    protected CurrentAuthentication currentAuthentication;
 
     /**
      * Checking validation for an input parameter field before running the report.
@@ -93,11 +92,8 @@ public class ReportParameterValidator {
     }
 
     protected void addCommonContext(Map<String, Object> context) {
-        //todo userSession
-//        context.put("userSession", userSessionSource.getUserSession());
+        context.put("user", currentAuthentication.getUser());
         context.put("dataManager", dataManager);
-        //todo security
-//        context.put("security", security);
         context.put("metadata", metadata);
         context.put("invalid", new MethodClosure(this, "invalidThrowMethod"));
     }

@@ -25,7 +25,6 @@ import io.jmix.reportsui.gui.ReportGuiManager;
 import io.jmix.reportsui.gui.ReportParameterValidator;
 import io.jmix.ui.Notifications;
 import io.jmix.ui.UiProperties;
-import io.jmix.ui.action.Action;
 import io.jmix.ui.component.Button;
 import io.jmix.ui.component.ValidationErrors;
 import io.jmix.ui.screen.*;
@@ -35,7 +34,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Collection;
 import java.util.Map;
 
-@DialogMode(width = "AUTO", forceDialog = true)
 @UiController("report_InputParameters.dialog")
 @UiDescriptor("input-parameters.xml")
 public class InputParametersDialog extends Screen {

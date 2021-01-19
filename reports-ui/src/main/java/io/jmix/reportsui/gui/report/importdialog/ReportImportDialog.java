@@ -22,11 +22,13 @@ import io.jmix.reports.entity.ReportImportOption;
 import io.jmix.reports.entity.ReportImportResult;
 import io.jmix.ui.Notifications;
 import io.jmix.ui.component.*;
-import io.jmix.ui.screen.LookupComponent;
+import io.jmix.ui.download.DownloadFormat;
 import io.jmix.ui.screen.*;
 import io.jmix.ui.upload.TemporaryStorage;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.File;
@@ -38,7 +40,7 @@ import java.util.UUID;
 public class ReportImportDialog extends Screen {
 
     @Autowired
-    protected FileStorageUploadField fileUpload;
+    protected FileStorageUploadField fileUploadField;
     @Autowired
     protected Label<String> fileName;
     @Autowired
@@ -53,31 +55,39 @@ public class ReportImportDialog extends Screen {
     protected Messages messages;
     @Autowired
     protected Notifications notifications;
+    @Autowired
+    protected ScreenValidation screenValidation;
 
     @Subscribe
     protected void onInit(InitEvent event) {
         importRoles.setValue(Boolean.TRUE);
     }
 
-    @Subscribe("fileUpload")
+    @Subscribe("fileUploadField")
     protected void onFileUploadFileUploadSucceed(SingleFileUploadField.FileUploadSucceedEvent event) {
-        fileName.setValue(fileUpload.getFileName());
+        fileName.setValue(fileUploadField.getFileName());
     }
 
-    @Subscribe("windowClose")
-    public void onWindowCloseClick(Button.ClickEvent event) {
+    @Subscribe("closeBtn")
+    public void onCloseBtnClick(Button.ClickEvent event) {
         closeWithDefaultAction();
     }
 
-    @Subscribe("windowCommit")
-    public void onWindowCommitClick(Button.ClickEvent event) {
-        importReport();
-        closeWithDefaultAction();
+    @Subscribe("commitBtn")
+    public void onCommitBtnClick(Button.ClickEvent event) {
+        ValidationErrors validationErrors = getValidationErrors();
+
+        if(validationErrors.isEmpty()) {
+            importReport();
+            closeWithDefaultAction();
+        }
+
+        screenValidation.showValidationErrors(getWindow().getFrameOwner(), validationErrors);
     }
 
     protected void importReport() {
         try {
-            UUID fileID = fileUpload.getFileId();
+            UUID fileID = fileUploadField.getFileId();
             File file = temporaryStorage.getFile(fileID);
             byte[] bytes = FileUtils.readFileToByteArray(file);
             temporaryStorage.deleteFile(fileID);
@@ -102,18 +112,16 @@ public class ReportImportDialog extends Screen {
     }
 
 
-    //TODO
-//    @Override
-//    protected void validateAdditionalRules(ValidationErrors errors) {
-//        if (fileUpload.getFileId() == null) {
-//            errors.add(messages.getMessage(getClass(), "reportException.noFile"));
-//            return;
-//        }
-//        String extension = FilenameUtils.getExtension(fileUpload.getFileName());
-//        if (!StringUtils.equalsIgnoreCase(extension, DownloadFormat.ZIP.getFileExt())) {
-//            errors.add(messages.formatMessage(getClass(), "reportException.wrongFileType", extension));
-//        }
-//
-//        super.validateAdditionalRules(errors);
-//    }
+    protected ValidationErrors getValidationErrors() {
+        ValidationErrors errors = screenValidation.validateUiComponents(getWindow());
+        if (fileUploadField.getFileId() == null) {
+            errors.add(messages.getMessage(getClass(), "reportException.noFile"));
+            return errors;
+        }
+        String extension = FilenameUtils.getExtension(fileUploadField.getFileName());
+        if (!StringUtils.equalsIgnoreCase(extension, DownloadFormat.ZIP.getFileExt())) {
+            errors.add(messages.formatMessage(getClass(), "reportException.wrongFileType", extension));
+        }
+        return errors;
+    }
 }

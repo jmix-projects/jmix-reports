@@ -10,8 +10,9 @@ import io.jmix.security.constraint.SecureOperations;
 import io.jmix.ui.Dialogs;
 import io.jmix.ui.RemoveOperation;
 import io.jmix.ui.action.Action;
-import io.jmix.ui.action.ListAction;
-import io.jmix.ui.component.*;
+import io.jmix.ui.component.ContentMode;
+import io.jmix.ui.component.HasContextHelp;
+import io.jmix.ui.component.Table;
 import io.jmix.ui.model.CollectionPropertyContainer;
 import io.jmix.ui.model.InstanceContainer;
 import io.jmix.ui.screen.*;
@@ -20,7 +21,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.ArrayList;
 import java.util.List;
 
-@DialogMode(forceDialog = true)
 @UiController("report_ReportEditParameters.fragment")
 @UiDescriptor("parameters.xml")
 public class ParametersFragment extends ScreenFragment {

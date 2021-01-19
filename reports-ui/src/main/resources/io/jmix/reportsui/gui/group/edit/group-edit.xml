@@ -30,6 +30,8 @@
         <dataLoadCoordinator auto="true"/>
     </facets>
 
+    <dialogMode width="400"/>
+
     <layout spacing="true">
         <form id="groupProps" dataContainer="groupDc" width="100%">
             <textField id="title" property="title" required="true" width="100%"/>

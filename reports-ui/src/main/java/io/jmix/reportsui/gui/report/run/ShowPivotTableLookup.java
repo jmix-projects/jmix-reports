@@ -117,13 +117,6 @@ public class ShowPivotTableLookup extends StandardLookup {
 
     @Subscribe
     protected void onInit(InitEvent event) {
-        //TODO dialog options
-//        getDialogOptions()
-//                .setWidth(themeConstants.get("cuba.gui.report.ShowPivotTable.width"))
-//                .setHeight(themeConstants.get("cuba.gui.report.ShowPivotTable.height"))
-//                .setResizable(true)
-//                .center();
-
         if (report != null) {
             reportSelectorBox.setVisible(false);
             if (pivotTableData != null) {

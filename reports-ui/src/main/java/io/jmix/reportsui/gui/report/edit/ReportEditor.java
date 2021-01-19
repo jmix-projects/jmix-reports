@@ -18,7 +18,6 @@ package io.jmix.reportsui.gui.report.edit;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.haulmont.yarg.structure.BandOrientation;
-import io.jmix.core.EntityStates;
 import io.jmix.core.Messages;
 import io.jmix.core.Metadata;
 import io.jmix.core.MetadataTools;
@@ -174,7 +173,7 @@ public class ReportEditor extends StandardEditor<Report> {
     @Subscribe(target = Target.DATA_CONTEXT)
     protected void onPostCommit(DataContext.PostCommitEvent event) {
         notifications.create(Notifications.NotificationType.TRAY)
-                .withCaption(messages.getMessage(getClass(), "notification.completeSuccessfully"))
+                .withCaption(messages.formatMessage(getClass(), "notification.completeSuccessfully", getEditedEntity().getName()))
                 .show();
     }
 

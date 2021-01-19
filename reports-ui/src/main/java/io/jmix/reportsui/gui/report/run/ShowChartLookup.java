@@ -108,12 +108,6 @@ public class ShowChartLookup extends StandardLookup {
 
     @Subscribe
     protected void onInit(InitEvent event) {
-        //TODO get dialog options
-//        getDialogOptions()
-//                .setWidth(themeConstants.get("cuba.gui.report.ShowChartController.width"))
-//                .setHeight(themeConstants.get("cuba.gui.report.ShowChartController.height"))
-//                .setResizable(true);
-
         if (!windowConfig.hasWindow(JSON_CHART_SCREEN_ID)) {
             showChartsNotIncluded();
             return;

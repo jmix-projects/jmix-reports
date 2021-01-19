@@ -25,6 +25,9 @@
         </instance>
     </data>
 
+    <dialogMode width="AUTO"
+                forceDialog="true"/>
+
     <layout spacing="true">
         <gridLayout id="gridLayout" spacing="true" width="700px">
             <columns count="1"/>

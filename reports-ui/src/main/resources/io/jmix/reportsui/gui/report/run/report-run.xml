@@ -28,7 +28,7 @@
         </collection>
     </data>
 
-    <dialogMode width="800px" height="480px" resizable="true"/>
+    <dialogMode width="800" height="480" resizable="true"/>
 
     <layout expand="reportsTable" spacing="true">
         <gridLayout id="gridFilter" spacing="true">

@@ -32,7 +32,6 @@ import io.jmix.ui.ScreenBuilders;
 import io.jmix.ui.Screens;
 import io.jmix.ui.UiProperties;
 import io.jmix.ui.action.Action;
-import io.jmix.ui.action.list.CreateAction;
 import io.jmix.ui.component.GroupTable;
 import io.jmix.ui.download.ByteArrayDataProvider;
 import io.jmix.ui.download.DownloadFormat;
@@ -43,7 +42,6 @@ import io.jmix.ui.navigation.Route;
 import io.jmix.ui.screen.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.inject.Named;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Set;
@@ -90,16 +88,8 @@ public class ReportBrowser extends StandardLookup<Report> {
     @Autowired
     protected ScreenBuilders screenBuilders;
 
-    @Named("popupCreateBtn.create")
-    protected CreateAction popupCreateBtnCreate;
-
-    @Subscribe
-    protected void onInit(InitEvent event) {
-        popupCreateBtnCreate.setTarget(reportsTable);
-    }
-
-    @Install(to = "popupCreateBtn.create", subject = "afterCloseHandler")
-    protected void popupCreateBtnCreateAfterCloseHandler(AfterCloseEvent event) {
+    @Install(to = "reportsTable.create", subject = "afterCloseHandler")
+    protected void reportsTableCreateAfterCloseHandler(AfterCloseEvent event) {
         if (event.closedWith(StandardOutcome.COMMIT)) {
             Report newReport = (Report) ((EditorScreen) event.getScreen()).getEditedEntity();
 
@@ -249,8 +239,8 @@ public class ReportBrowser extends StandardLookup<Report> {
         }
     }
 
-    @Install(to = "popupCreateBtn.create", subject = "enabledRule")
-    protected boolean popupCreateBtnCreateEnabledRule() {
+    @Install(to = "reportsTable.create", subject = "enabledRule")
+    protected boolean reportsTableCreateEnabledRule() {
         return isPermissionsToCreateReports();
     }
 

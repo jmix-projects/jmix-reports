@@ -16,16 +16,16 @@
 
 <window xmlns="http://jmix.io/schema/ui/window"
         caption="msg://reportImportDialog.caption"
-        focusComponent="fileUpload">
+        focusComponent="fileUploadField">
 
-    <dialogMode width="400px"/>
+    <dialogMode width="400"/>
 
     <layout spacing="true" stylename="c-report-upload">
         <hbox id="dropZone" width="100%" height="150px" stylename="dropzone-container" visible="false">
             <label stylename="dropzone-description" value="msg://uploadDescription" align="MIDDLE_CENTER"/>
         </hbox>
         <hbox spacing="true">
-            <fileStorageUpload id="fileUpload" dropZone="dropZone" showFileName="true"/>
+            <fileStorageUpload id="fileUploadField" dropZone="dropZone" showFileName="true"/>
             <label id="fileName" align="MIDDLE_LEFT"/>
         </hbox>
         <hbox spacing="true">
@@ -33,8 +33,8 @@
             <checkBox id="importRoles"/>
         </hbox>
         <hbox spacing="true" stylename="c-edit-window-actions">
-            <button id="windowCommit" icon="EDITOR_OK"/>
-            <button id="windowClose" icon="EDITOR_CANCEL"/>
+            <button id="commitBtn" caption="msg:///actions.Ok" icon="EDITOR_OK"/>
+            <button id="closeBtn" caption="msg:///actions.Cancel" icon="EDITOR_CANCEL"/>
         </hbox>
     </layout>
 </window>

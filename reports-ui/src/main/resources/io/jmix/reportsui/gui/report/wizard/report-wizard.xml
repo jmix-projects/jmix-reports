@@ -30,6 +30,8 @@
         </collection>
     </data>
 
+    <dialogMode width="800"/>
+
     <layout expand="editAreaVbox" spacing="true">
         <label id="tipLabel"
                stylename="report-wizard-tip-label"

@@ -20,7 +20,6 @@ import io.jmix.reports.entity.ReportGroup;
 import io.jmix.ui.navigation.Route;
 import io.jmix.ui.screen.*;
 
-@DialogMode(width = "400px")
 @UiController("report_ReportGroup.edit")
 @UiDescriptor("group-edit.xml")
 @EditedEntityContainer("groupDc")

@@ -25,6 +25,8 @@
         </instance>
     </data>
 
+    <dialogMode width="950"/>
+
     <actions>
         <action id="addItemAction"/>
         <action id="removeItemAction"/>

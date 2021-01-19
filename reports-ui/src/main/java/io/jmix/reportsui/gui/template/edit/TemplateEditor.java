@@ -48,7 +48,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-@DialogMode(width = "AUTO", forceDialog = true)
 @UiController("report_ReportTemplate.edit")
 @UiDescriptor("template-edit.xml")
 @EditedEntityContainer("templateDc")
@@ -500,7 +499,7 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
             }
 
             notifications.create(Notifications.NotificationType.TRAY)
-                    .withCaption(messages.getMessage(getClass(), "validationFail.caption"))
+                    .withCaption(messages.getMessage("validationFail.caption"))
                     .withDescription(notification.toString())
                     .show();
 

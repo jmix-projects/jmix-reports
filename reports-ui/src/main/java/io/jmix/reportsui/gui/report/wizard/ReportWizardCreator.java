@@ -75,7 +75,7 @@ public class ReportWizardCreator extends Screen implements MainWizardFrame<Scree
     @Named("save")
     protected Button saveBtn;
     @Autowired
-    protected Label tipLabel;
+    protected Label<String> tipLabel;
     @Autowired
     protected BoxLayout editAreaVbox;
     @Autowired
@@ -168,20 +168,11 @@ public class ReportWizardCreator extends Screen implements MainWizardFrame<Scree
     protected String query;
     protected String dataStore;
     protected List<ReportData.Parameter> queryParameters;
-    protected int wizardWidth;
-    protected int wizardHeight;
 
     @Subscribe
     @SuppressWarnings("unchecked")
     protected void onInit(InitEvent event) {
         reportDataDs.setItem(metadata.create(ReportData.class));
-
-        wizardWidth = themeConstants.getInt("cuba.gui.report.ReportWizard.width");
-        wizardHeight = themeConstants.getInt("cuba.gui.report.ReportWizard.height");
-        //TODO dialog options
-//        getDialogOptions()
-//                .setWidth(wizardWidth).setWidthUnit(SizeUnit.PIXELS)
-//                .setHeight(wizardHeight).setHeightUnit(SizeUnit.PIXELS);
 
         stepFrameManager = new StepFrameManager(this, getStepFrames());
 

@@ -24,8 +24,8 @@
         </instance>
     </data>
 
-    <dialogMode height="500px"
-                width="600px"
+    <dialogMode height="500"
+                width="600"
                 resizable="true"
                 modal="true"/>
 

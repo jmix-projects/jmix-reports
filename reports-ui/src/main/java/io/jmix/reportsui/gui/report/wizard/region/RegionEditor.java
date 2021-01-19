@@ -74,7 +74,6 @@ public class RegionEditor extends StandardEditor<ReportRegion> {
     protected Notifications notifications;
 
     protected boolean isTabulated;//if true then user perform add tabulated region action
-    protected int regionEditorWindowWidth = 950;
     protected boolean asViewEditor;
     protected EntityTreeNode rootNode;
     protected boolean updatePermission;
@@ -181,8 +180,7 @@ public class RegionEditor extends StandardEditor<ReportRegion> {
     protected void initComponents() {
         initControlBtnsActions();
         addRegionPropertiesDsListener();
-//TODO dialog options
-//        getDialogOptions().setWidth(regionEditorWindowWidth).setWidthUnit(SizeUnit.PIXELS);
+
         if (asViewEditor) {
             initAsViewEditor();
         }

@@ -40,7 +40,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.inject.Named;
 import java.util.*;
 
-@DialogMode(forceDialog = true)
 @UiController("report_ReportInputParameter.edit")
 @UiDescriptor("parameter-edit.xml")
 @EditedEntityContainer("parameterDc")

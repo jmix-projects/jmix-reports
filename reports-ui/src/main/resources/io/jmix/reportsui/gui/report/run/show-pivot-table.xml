@@ -27,8 +27,8 @@
         </collection>
     </data>
 
-    <dialogMode height="AUTO"
-                width="AUTO"
+    <dialogMode height="800"
+                width="1024"
                 resizable="true"/>
 
     <layout expand="reportBox" spacing="true">

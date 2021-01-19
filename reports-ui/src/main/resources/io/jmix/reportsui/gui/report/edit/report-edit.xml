@@ -51,8 +51,8 @@
         <dataLoadCoordinator auto="true"/>
     </facets>
 
-    <dialogMode height="theme://cuba.gui.dialogSize.height.xlarge"
-                width="theme://cuba.gui.report.report-edit.dialogSize.width"
+    <dialogMode height="768"
+                width="1200"
                 resizable="true"/>
 
     <layout expand="tabsheet" spacing="true">

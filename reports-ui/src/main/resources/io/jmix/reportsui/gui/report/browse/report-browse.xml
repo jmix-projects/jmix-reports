@@ -41,8 +41,8 @@
         <dataLoadCoordinator auto="true"/>
     </facets>
 
-    <dialogMode height="theme://cuba.gui.dialogSize.height.xlarge"
-                width="theme://cuba.gui.dialogSize.width.xlarge"
+    <dialogMode height="768"
+                width="1024"
                 resizable="true"/>
 
     <layout expand="reportsTable" spacing="true">
@@ -51,6 +51,7 @@
         </filter>
         <groupTable id="reportsTable" editable="false" multiselect="true" width="100%" dataContainer="reportDc">
             <actions>
+                <action id="create" type="create"/>
                 <action id="edit" type="edit"/>
                 <action id="remove" type="remove"/>
                 <action id="copy" type="itemTracking"/>
@@ -62,7 +63,7 @@
             <buttonsPanel>
                 <popupButton id="popupCreateBtn" icon="FILE_O" caption="msg://report.create" >
                     <actions>
-                        <action id="create" type="create" caption="msg://report.new"/>
+                        <action id="reportsTable.create" caption="msg://report.new"/>
                         <action id="wizard" caption="msg://report.wizard"/>
                     </actions>
                 </popupButton>

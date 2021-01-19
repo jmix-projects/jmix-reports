@@ -22,7 +22,8 @@
         <instance id="parameterDc" class="io.jmix.reports.entity.ReportInputParameter"/>
     </data>
 
-    <dialogMode width="640px"/>
+    <dialogMode width="640"
+                forceDialog="true"/>
 
     <layout spacing="true">
         <tabSheet id="tabsheet" width="100%">
@@ -49,7 +50,8 @@
                         </row>
                         <row>
                             <label value="msg://parameters.type" align="MIDDLE_LEFT"/>
-                            <comboBox id="parameterTypeField" dataContainer="parameterDc" property="type" required="true"
+                            <comboBox id="parameterTypeField" dataContainer="parameterDc" property="type"
+                                      required="true"
                                       textInputAllowed="false"
                                       width="100%" requiredMessage="msg://parameters.typeMsg"/>
                         </row>
@@ -109,7 +111,8 @@
                         </row>
                         <row>
                             <label id="wildcardsLabel" value="msg://parameters.wildcards" align="MIDDLE_LEFT"/>
-                            <comboBox id="wildcardsField" dataContainer="parameterDc" property="predefinedTransformation"
+                            <comboBox id="wildcardsField" dataContainer="parameterDc"
+                                      property="predefinedTransformation"
                                       width="200px"/>
                         </row>
                     </rows>

@@ -27,8 +27,8 @@
         </collection>
     </data>
 
-    <dialogMode height="theme://cuba.gui.dialogSize.height.large"
-                width="theme://cuba.gui.dialogSize.width.large"
+    <dialogMode height="800"
+                width="1024"
                 resizable="true"/>
 
     <layout expand="chartBox" spacing="true">

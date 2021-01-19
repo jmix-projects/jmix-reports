@@ -28,8 +28,8 @@
         </collection>
     </data>
 
-    <dialogMode height="theme://cuba.gui.dialogSize.height.medium"
-                width="theme://cuba.gui.dialogSize.width.medium"
+    <dialogMode height="600"
+                width="800"
                 resizable="true"/>
 
     <facets>

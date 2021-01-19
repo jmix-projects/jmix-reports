@@ -16,11 +16,6 @@
 
 package io.jmix.reports.libintegration;
 
-//import com.haulmont.cuba.core.Persistence;
-//import com.haulmont.cuba.core.Transaction;
-//import com.haulmont.cuba.core.TransactionParams;
-//import com.haulmont.cuba.core.global.Security;
-//import com.haulmont.cuba.core.global.UserSessionSource;
 
 import com.haulmont.yarg.exception.ValidationException;
 import com.haulmont.yarg.structure.BandData;
@@ -28,7 +23,7 @@ import com.haulmont.yarg.structure.ReportQuery;
 import io.jmix.core.DataManager;
 import io.jmix.core.Metadata;
 import io.jmix.core.TimeSource;
-import io.jmix.core.session.SessionData;
+import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.reports.ReportingConfig;
 import org.codehaus.groovy.runtime.MethodClosure;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,23 +38,14 @@ public class JmixGroovyScriptParametersProvider implements GroovyScriptParameter
     @Autowired
     protected ReportingConfig reportingConfig;
 
-//    @Autowired
-//    protected SessionData sessionData;
-
-//    @Autowired
-//    protected Persistence persistence;
-
     @Autowired
     protected Metadata metadata;
 
     @Autowired
     protected DataManager dataManager;
 
-//    @Autowired
-//    protected UserSessionSource sessionSource;
-//
-//    @Autowired
-//    protected Security security;
+    @Autowired
+    protected CurrentAuthentication currentAuthentication;
 
     @Autowired
     protected TimeSource timeSource;
@@ -71,13 +57,10 @@ public class JmixGroovyScriptParametersProvider implements GroovyScriptParameter
         scriptParams.put("reportQuery", reportQuery);
         scriptParams.put("parentBand", parentBand);
         scriptParams.put("params", reportParameters);
-//        scriptParams.put("persistence", persistence);
+        scriptParams.put("user", currentAuthentication.getUser());
         scriptParams.put("metadata", metadata);
         scriptParams.put("dataManager", dataManager);
-//        scriptParams.put("security", security);
         scriptParams.put("timeSource", timeSource);
-//        scriptParams.put("userSession", sessionData.getHttpSession());
-//        scriptParams.put("sessionData", sessionData);
 //        scriptParams.put("transactional", new MethodClosure(this, "transactional"));
         scriptParams.put("validationException", new MethodClosure(this, "validationException"));
 

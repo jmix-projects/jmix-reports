@@ -107,12 +107,6 @@ public class ShowReportTableLookup extends StandardLookup {
     protected void onInit(InitEvent event) {
         //dsContext = new DsContextImpl(getDsContext().getDataSupplier());
 
-        //TODO dialog options
-//        getDialogOptions()
-//                .setWidth(themeConstants.get("cuba.gui.report.ShowReportTable.width"))
-//                .setHeight(themeConstants.get("cuba.gui.report.ShowReportTable.height"))
-//                .setResizable(true);
-
         if (report != null) {
             reportSelectorBox.setVisible(false);
             JmixTableData dto = (JmixTableData) serialization.deserialize(tableData);
