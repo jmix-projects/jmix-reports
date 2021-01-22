@@ -29,7 +29,7 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateScalarModel;
 import io.jmix.core.*;
 import io.jmix.localfs.LocalFileStorage;
-import io.jmix.reports.ReportingConfig;
+import io.jmix.reports.ReportsProperties;
 import io.jmix.ui.upload.TemporaryStorage;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -37,6 +37,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 import org.xhtmlrenderer.pdf.ITextFSImage;
 import org.xhtmlrenderer.pdf.ITextOutputDevice;
 import org.xhtmlrenderer.pdf.ITextRenderer;
@@ -54,6 +57,8 @@ import java.util.regex.Pattern;
 
 import static java.lang.String.format;
 
+@Component("report_JmixHtmlFormatter")
+@Scope(BeanDefinition.SCOPE_PROTOTYPE)
 public class JmixHtmlFormatter extends HtmlFormatter {
     protected static final String CUBA_FONTS_DIR = "/cuba/fonts";
 
@@ -66,7 +71,7 @@ public class JmixHtmlFormatter extends HtmlFormatter {
     @Autowired
     protected Messages messages;
     @Autowired
-    protected ReportingConfig reportingConfig;
+    protected ReportsProperties reportsProperties;
     @Autowired
     protected CoreProperties coreProperties;
     @Autowired
@@ -126,8 +131,8 @@ public class JmixHtmlFormatter extends HtmlFormatter {
         loadFontsFromDirectory(renderer, fontsDir);
 
 
-        if (StringUtils.isNotBlank(reportingConfig.getPdfFontsDirectory())) {
-            File systemFontsDir = new File(reportingConfig.getPdfFontsDirectory());
+        if (StringUtils.isNotBlank(reportsProperties.getPdfFontsDirectory())) {
+            File systemFontsDir = new File(reportsProperties.getPdfFontsDirectory());
             loadFontsFromDirectory(renderer, systemFontsDir);
         }
     }
@@ -265,7 +270,7 @@ public class JmixHtmlFormatter extends HtmlFormatter {
             try {
                 URL url = new URL(uri);
                 URLConnection urlConnection = url.openConnection();
-                urlConnection.setConnectTimeout(reportingConfig.getHtmlExternalResourcesTimeoutSec() * 1000);
+                urlConnection.setConnectTimeout(reportsProperties.getHtmlExternalResourcesTimeoutSec() * 1000);
                 inputStream = urlConnection.getInputStream();
             } catch (java.net.SocketTimeoutException e) {
                 throw new ReportFormattingException(format("Loading resource [%s] has been stopped by timeout", uri), e);
