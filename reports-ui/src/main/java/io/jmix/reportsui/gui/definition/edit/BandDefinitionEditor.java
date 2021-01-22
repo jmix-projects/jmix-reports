@@ -22,7 +22,7 @@ import io.jmix.reports.app.service.ReportService;
 import io.jmix.reports.app.service.ReportWizardService;
 import io.jmix.reports.entity.*;
 import io.jmix.reports.util.DataSetFactory;
-import io.jmix.reportsui.gui.ReportingClientConfig;
+import io.jmix.reportsui.gui.ReportsClientProperties;
 import io.jmix.reportsui.gui.actions.list.EditViewAction;
 import io.jmix.reportsui.gui.definition.edit.crosstab.CrossTabTableDecorator;
 import io.jmix.reportsui.gui.definition.edit.scripteditordialog.ScriptEditorDialog;
@@ -140,7 +140,7 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
     @Autowired
     protected Stores stores;
     @Autowired
-    protected ReportingClientConfig reportingClientConfig;
+    protected ReportsClientProperties reportsClientProperties;
     @Autowired
     protected Messages messages;
     @Autowired
@@ -263,7 +263,7 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
     }
 
     protected void initSourceCodeOptions() {
-        boolean enableTabSymbolInDataSetEditor = reportingClientConfig.getEnableTabSymbolInDataSetEditor();
+        boolean enableTabSymbolInDataSetEditor = reportsClientProperties.getEnableTabSymbolInDataSetEditor();
         jsonGroovyCodeEditor.setHandleTabKey(enableTabSymbolInDataSetEditor);
         dataSetScriptField.setHandleTabKey(enableTabSymbolInDataSetEditor);
     }

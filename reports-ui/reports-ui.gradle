@@ -29,7 +29,6 @@ dependencies {
     api 'io.jmix.data:jmix-data'
     api 'io.jmix.ui:jmix-ui'
     api 'io.jmix.ui:jmix-ui-data'
-    api 'io.jmix.rest:jmix-rest'
     api 'io.jmix.security:jmix-security'
 //    api 'io.jmix.dynattr:jmix-dynattr'
 //    api 'io.jmix.dynattr:jmix-dynattr-ui'
@@ -47,8 +46,6 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-annotations'
     implementation 'com.fasterxml.jackson.core:jackson-databind'
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
-
-    implementation 'com.thoughtworks.xstream:xstream:1.4.11.1'
 
     testImplementation 'io.jmix.ui:jmix-ui-test-assist'
 

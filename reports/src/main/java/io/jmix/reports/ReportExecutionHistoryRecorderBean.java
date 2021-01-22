@@ -44,7 +44,7 @@ public class ReportExecutionHistoryRecorderBean implements ReportExecutionHistor
 //    @Autowired
 //    protected ServerInfoAPI serverInfoAPI;
     @Autowired
-    protected ReportingConfig reportingConfig;
+    protected ReportsProperties reportsProperties;
     @Autowired
     protected TransactionTemplate transaction;
     @PersistenceContext
@@ -145,7 +145,7 @@ public class ReportExecutionHistoryRecorderBean implements ReportExecutionHistor
                 JmixReportOutputType.chart.getId(),
                 JmixReportOutputType.table.getId(),
                 JmixReportOutputType.pivot.getId());
-        return reportingConfig.isSaveOutputDocumentsToHistory() && !outputTypesWithoutDocument.contains(type.getId());
+        return reportsProperties.isSaveOutputDocumentsToHistory() && !outputTypesWithoutDocument.contains(type.getId());
     }
 
     protected URI saveDocument(ReportOutputDocument document) throws FileStorageException {
@@ -184,7 +184,7 @@ public class ReportExecutionHistoryRecorderBean implements ReportExecutionHistor
     }
 
     private int deleteHistoryByDays() {
-        int historyCleanupMaxDays = reportingConfig.getHistoryCleanupMaxDays();
+        int historyCleanupMaxDays = reportsProperties.getHistoryCleanupMaxDays();
         if (historyCleanupMaxDays <= 0) {
             return 0;
         }
@@ -227,7 +227,7 @@ public class ReportExecutionHistoryRecorderBean implements ReportExecutionHistor
     }
 
     private int deleteHistoryGroupedByReport() {
-        int maxItemsPerReport = reportingConfig.getHistoryCleanupMaxItemsPerReport();
+        int maxItemsPerReport = reportsProperties.getHistoryCleanupMaxItemsPerReport();
         if (maxItemsPerReport <= 0) {
             return 0;
         }

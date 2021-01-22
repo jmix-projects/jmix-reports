@@ -21,7 +21,7 @@ import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.core.metamodel.model.MetaProperty;
 import io.jmix.reports.ReportingApi;
 import io.jmix.reports.ReportingBean;
-import io.jmix.reports.ReportingConfig;
+import io.jmix.reports.ReportsProperties;
 import io.jmix.reports.app.EntityTree;
 import io.jmix.reports.app.service.ReportService;
 import io.jmix.reports.entity.*;
@@ -54,7 +54,7 @@ public class ReportingWizardBean implements ReportingWizardApi {
     @Autowired
     protected ReportingApi reportingApi;
     @Autowired
-    protected ReportingConfig reportingConfig;
+    protected ReportsProperties reportsProperties;
     @Autowired
     protected ExtendedEntities extendedEntities;
     @Autowired
@@ -476,8 +476,8 @@ public class ReportingWizardBean implements ReportingWizardApi {
     @Override
     public boolean isPropertyAllowedForReportWizard(MetaClass metaClass, MetaProperty metaProperty) {
         //here we can`t just to determine metaclass using property argument cause it can be an ancestor of it
-        List<String> propertiesBlackList = reportingConfig.getWizardPropertiesBlackList();
-        List<String> wizardPropertiesExcludedBlackList = reportingConfig.getWizardPropertiesExcludedBlackList();
+        List<String> propertiesBlackList = reportsProperties.getWizardPropertiesBlackList();
+        List<String> wizardPropertiesExcludedBlackList = reportsProperties.getWizardPropertiesExcludedBlackList();
 
         MetaClass originalMetaClass = getOriginalMetaClass(metaClass);
         MetaClass originalDomainMetaClass = getOriginalMetaClass(metaProperty.getDomain());
@@ -488,12 +488,12 @@ public class ReportingWizardBean implements ReportingWizardApi {
     }
 
     protected List<String> getWizardBlackListedEntities() {
-        List<String> entitiesBlackList = reportingConfig.getWizardEntitiesBlackList();
+        List<String> entitiesBlackList = reportsProperties.getWizardEntitiesBlackList();
         return getEffectiveEntities(entitiesBlackList);
     }
 
     protected List<String> getWizardWhiteListedEntities() {
-        List<String> entitiesWhiteList = reportingConfig.getWizardEntitiesWhiteList();
+        List<String> entitiesWhiteList = reportsProperties.getWizardEntitiesWhiteList();
         return getEffectiveEntities(entitiesWhiteList);
     }
 
@@ -507,11 +507,11 @@ public class ReportingWizardBean implements ReportingWizardApi {
     }
 
     protected List<String> getWizardBlackListedProperties() {
-        return reportingConfig.getWizardPropertiesBlackList();
+        return reportsProperties.getWizardPropertiesBlackList();
     }
 
     protected List<String> getWizardPropertiesExcludedBlackList() {
-        return reportingConfig.getWizardPropertiesExcludedBlackList();
+        return reportsProperties.getWizardPropertiesExcludedBlackList();
     }
 
     protected MetaClass getOriginalMetaClass(MetaClass metaClass) {

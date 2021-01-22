@@ -92,7 +92,7 @@ public class ReportingBean implements ReportingApi {
 //    @Autowired
 //    protected GlobalConfig globalConfig;
     @Autowired
-    protected ReportingConfig reportingConfig;
+    protected ReportsProperties reportsProperties;
 
     @Autowired
     protected DataManager dataManager;
@@ -351,7 +351,7 @@ public class ReportingBean implements ReportingApi {
     }
 
     protected ReportOutputDocument createReportDocument(ReportRunParams reportRunParams) {
-        if (!reportingConfig.isHistoryRecordingEnabled()) {
+        if (!reportsProperties.isHistoryRecordingEnabled()) {
             return createReportDocumentInternal(reportRunParams);
         }
 

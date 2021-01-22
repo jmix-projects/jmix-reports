@@ -38,7 +38,7 @@ public class PrototypesLoader {
     protected DataManager dataManager;
 
     @Autowired
-    protected ReportingConfig reportingConfig;
+    protected ReportsProperties reportsProperties;
 
     @Autowired
     protected Metadata metadata;
@@ -66,7 +66,7 @@ public class PrototypesLoader {
         if (parameterPrototype.getMaxResults() != null && !parameterPrototype.getMaxResults().equals(0)) {
             query.setMaxResults(parameterPrototype.getMaxResults());
         } else {
-            query.setMaxResults(reportingConfig.getParameterPrototypeQueryLimit());
+            query.setMaxResults(reportsProperties.getParameterPrototypeQueryLimit());
         }
 
         loadContext.setFetchPlan(queryView);

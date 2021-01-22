@@ -20,7 +20,7 @@ import com.haulmont.yarg.formatters.CustomReport;
 import com.haulmont.yarg.structure.BandData;
 import io.jmix.core.ClassManager;
 import io.jmix.core.CoreProperties;
-import io.jmix.reports.ReportingConfig;
+import io.jmix.reports.ReportsProperties;
 import io.jmix.reports.entity.CustomTemplateDefinedBy;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportTemplate;
@@ -63,7 +63,7 @@ public class CustomFormatter implements CustomReport {
     protected ClassManager classManager;
 
     @Autowired
-    protected ReportingConfig reportingConfig;
+    protected ReportsProperties reportsProperties;
 
     @Autowired
     protected CoreProperties coreProperties;
@@ -169,7 +169,7 @@ public class CustomFormatter implements CustomReport {
                     doReadBytesFromUrl(url)
             );
 
-            byte[] bytes = future.get(reportingConfig.getCurlTimeout(), TimeUnit.SECONDS);
+            byte[] bytes = future.get(reportsProperties.getCurlTimeout(), TimeUnit.SECONDS);
 
             return bytes;
         } catch (InterruptedException e) {
@@ -201,8 +201,8 @@ public class CustomFormatter implements CustomReport {
         Process proc = null;
         try {
             Runtime runtime = Runtime.getRuntime();
-            String curlToolPath = reportingConfig.getCurlPath();
-            String curlToolParams = reportingConfig.getCurlParams();
+            String curlToolPath = reportsProperties.getCurlPath();
+            String curlToolParams = reportsProperties.getCurlParams();
             String command = format("%s %s %s", curlToolPath, curlToolParams, url);
             log.info("Reporting::CustomFormatter::Trying to load report from URL: [{}]", url);
             proc = runtime.exec(command);

@@ -20,7 +20,6 @@ import com.vaadin.spring.annotation.UIScope;
 import io.jmix.core.*;
 import io.jmix.core.common.util.ParamsMap;
 import io.jmix.core.metamodel.model.MetaClass;
-import io.jmix.core.security.Authenticator;
 import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.reports.ReportPrintHelper;
 import io.jmix.reports.ReportSecurityManager;
@@ -89,7 +88,7 @@ public class ReportGuiManager {
     protected Downloader downloader;
 
     @Autowired
-    protected ReportingClientConfig reportingClientConfig;
+    protected ReportsClientProperties reportingClientConfig;
 
     @Autowired
     protected FetchPlans fetchPlans;

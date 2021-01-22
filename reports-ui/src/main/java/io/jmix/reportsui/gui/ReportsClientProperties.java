@@ -22,7 +22,7 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
 
 @ConfigurationProperties(prefix = "jmix.reports.client")
 @ConstructorBinding
-public class ReportingClientConfig {
+public class ReportsClientProperties {
 
     boolean useBackgroundReportProcessing;
 
@@ -30,9 +30,9 @@ public class ReportingClientConfig {
 
     boolean enableTabSymbolInDataSetEditor;
 
-    public ReportingClientConfig(@DefaultValue("false") boolean useBackgroundReportProcessing,
-                                 @DefaultValue("10000") long backgroundReportProcessingTimeoutMs,
-                                 @DefaultValue("false") boolean enableTabSymbolInDataSetEditor) {
+    public ReportsClientProperties(@DefaultValue("false") boolean useBackgroundReportProcessing,
+                                   @DefaultValue("10000") long backgroundReportProcessingTimeoutMs,
+                                   @DefaultValue("false") boolean enableTabSymbolInDataSetEditor) {
         this.useBackgroundReportProcessing = useBackgroundReportProcessing;
         this.backgroundReportProcessingTimeoutMs = backgroundReportProcessingTimeoutMs;
         this.enableTabSymbolInDataSetEditor = enableTabSymbolInDataSetEditor;

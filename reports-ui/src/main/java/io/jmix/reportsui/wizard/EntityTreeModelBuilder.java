@@ -22,7 +22,7 @@ import io.jmix.core.Metadata;
 import io.jmix.core.MetadataTools;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.core.metamodel.model.MetaProperty;
-import io.jmix.reports.ReportingConfig;
+import io.jmix.reports.ReportsProperties;
 import io.jmix.reports.app.EntityTree;
 import io.jmix.reports.app.EntityTreeStructureInfo;
 import io.jmix.reports.entity.wizard.EntityTreeNode;
@@ -45,7 +45,7 @@ public class EntityTreeModelBuilder implements EntityTreeModelBuilderApi {
     protected ReportingWizardApi reportingWizardApi;
 
     @Autowired
-    protected ReportingConfig reportingConfig;
+    protected ReportsProperties reportsProperties;
 
     @Autowired
     protected Metadata metadata;
@@ -56,7 +56,7 @@ public class EntityTreeModelBuilder implements EntityTreeModelBuilderApi {
     @Autowired
     protected MetadataTools metadataTools;
 
-    protected int entityTreeModelMaxDeep = reportingConfig.getEntityTreeModelMaxDeep();
+    protected int entityTreeModelMaxDeep = reportsProperties.getEntityTreeModelMaxDeep();
 
     public int getEntityTreeModelMaxDeep() {
         return entityTreeModelMaxDeep;

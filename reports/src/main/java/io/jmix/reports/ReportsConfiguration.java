@@ -37,7 +37,7 @@ public class ReportsConfiguration {
     protected DataSource dataSource;
 
     @Autowired
-    protected ReportingConfig reportingConfig;
+    protected ReportsProperties reportsProperties;
 
     @Autowired
     protected CoreProperties coreProperties;
@@ -96,11 +96,11 @@ public class ReportsConfiguration {
 
     @Bean("reporting_lib_OfficeIntegration")
     public JmixOfficeIntegration officeIntegration() {
-        JmixOfficeIntegration officeIntegration = new JmixOfficeIntegration(reportingConfig.getOfficePath(), reportingConfig.getOfficePorts());
-        officeIntegration.setDisplayDeviceAvailable(reportingConfig.getDisplayDeviceAvailable());
-        officeIntegration.setTimeoutInSeconds(reportingConfig.getDocFormatterTimeout());
+        JmixOfficeIntegration officeIntegration = new JmixOfficeIntegration(reportsProperties.getOfficePath(), reportsProperties.getOfficePorts());
+        officeIntegration.setDisplayDeviceAvailable(reportsProperties.getDisplayDeviceAvailable());
+        officeIntegration.setTimeoutInSeconds(reportsProperties.getDocFormatterTimeout());
         officeIntegration.setTemporaryDirPath(Paths.get(coreProperties.getTempDir(), "reporting").toString());
-        officeIntegration.setCountOfRetry(reportingConfig.getCountOfRetry());
+        officeIntegration.setCountOfRetry(reportsProperties.getCountOfRetry());
         return officeIntegration;
     }
 
@@ -117,7 +117,7 @@ public class ReportsConfiguration {
     @Bean("reporting_lib_FormatterFactory")
     public JmixFormatterFactory formatterFactory() {
         JmixFormatterFactory formatterFactory = new JmixFormatterFactory();
-        formatterFactory.setUseOfficeForDocumentConversion(reportingConfig.isUseOfficeForDocumentConversion());
+        formatterFactory.setUseOfficeForDocumentConversion(reportsProperties.isUseOfficeForDocumentConversion());
         formatterFactory.setInlinersProvider(inlinersProvider());
         formatterFactory.setDefaultFormatProvider(fieldFormatProvider());
         formatterFactory.setOfficeIntegration(officeIntegration());

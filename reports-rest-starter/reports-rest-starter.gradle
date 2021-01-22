@@ -15,10 +15,10 @@
  */
 
 group = 'io.jmix.reports'
-archivesBaseName = 'jmix-reports-starter'
+archivesBaseName = 'jmix-reports-rest-starter'
 
 dependencies {
-    api project(':reports')
+    api project(':reports-rest')
 
     api 'org.springframework.boot:spring-boot-autoconfigure'
 }

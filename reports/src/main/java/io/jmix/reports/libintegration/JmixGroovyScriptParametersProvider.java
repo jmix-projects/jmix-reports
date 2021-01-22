@@ -24,7 +24,7 @@ import io.jmix.core.DataManager;
 import io.jmix.core.Metadata;
 import io.jmix.core.TimeSource;
 import io.jmix.core.security.CurrentAuthentication;
-import io.jmix.reports.ReportingConfig;
+import io.jmix.reports.ReportsProperties;
 import org.codehaus.groovy.runtime.MethodClosure;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -36,7 +36,7 @@ import java.util.Map;
 public class JmixGroovyScriptParametersProvider implements GroovyScriptParametersProvider {
 
     @Autowired
-    protected ReportingConfig reportingConfig;
+    protected ReportsProperties reportsProperties;
 
     @Autowired
     protected Metadata metadata;

@@ -27,7 +27,7 @@ import java.util.List;
  */
 @ConfigurationProperties(prefix = "jmix.reports")
 @ConstructorBinding
-public class ReportingConfig {
+public class ReportsProperties {
 
     String officePath;
 
@@ -75,29 +75,29 @@ public class ReportingConfig {
 
     boolean useOfficeForDocumentConversion;
 
-    public ReportingConfig(@DefaultValue("/") String officePath,
-                           @DefaultValue("8100,8101,8102,8103") List<Integer> officePorts,
-                           @DefaultValue("20") int docFormatterTimeout,
-                           @DefaultValue("false") boolean displayDeviceAvailable,
-                           String pdfFontsDirectory,
-                           @DefaultValue("true") boolean putEmptyRowIfNoDataSelected,
-                           @DefaultValue("1000") int parameterPrototypeQueryLimit,
-                           @DefaultValue("") List<String> wizardEntitiesBlackList,
-                           @DefaultValue("") List<String> wizardEntitiesWhiteList,
-                           @DefaultValue("") List<String> wizardPropertiesBlackList,
-                           @DefaultValue("") List<String> wizardPropertiesExcludedBlackList,
-                           @DefaultValue("3") int entityTreeModelMaxDeep,
-                           @DefaultValue("5") int htmlExternalResourcesTimeoutSec,
-                           @DefaultValue("curl") String curlPath,
-                           @DefaultValue("") String curlParams,
-                           @DefaultValue("10") int curlTimeout,
-                           @DefaultValue("true") boolean useReadOnlyTransactionForGroovy,
-                           @DefaultValue("false") boolean historyRecordingEnabled,
-                           @DefaultValue("false") boolean saveOutputDocumentsToHistory,
-                           @DefaultValue("730") int historyCleanupMaxDays,
-                           @DefaultValue("1000") int historyCleanupMaxItemsPerReport,
-                           @DefaultValue("3") int countOfRetry,
-                           @DefaultValue("false") boolean useOfficeForDocumentConversion) {
+    public ReportsProperties(@DefaultValue("/") String officePath,
+                             @DefaultValue("8100,8101,8102,8103") List<Integer> officePorts,
+                             @DefaultValue("20") int docFormatterTimeout,
+                             @DefaultValue("false") boolean displayDeviceAvailable,
+                             String pdfFontsDirectory,
+                             @DefaultValue("true") boolean putEmptyRowIfNoDataSelected,
+                             @DefaultValue("1000") int parameterPrototypeQueryLimit,
+                             @DefaultValue("") List<String> wizardEntitiesBlackList,
+                             @DefaultValue("") List<String> wizardEntitiesWhiteList,
+                             @DefaultValue("") List<String> wizardPropertiesBlackList,
+                             @DefaultValue("") List<String> wizardPropertiesExcludedBlackList,
+                             @DefaultValue("3") int entityTreeModelMaxDeep,
+                             @DefaultValue("5") int htmlExternalResourcesTimeoutSec,
+                             @DefaultValue("curl") String curlPath,
+                             @DefaultValue("") String curlParams,
+                             @DefaultValue("10") int curlTimeout,
+                             @DefaultValue("true") boolean useReadOnlyTransactionForGroovy,
+                             @DefaultValue("false") boolean historyRecordingEnabled,
+                             @DefaultValue("false") boolean saveOutputDocumentsToHistory,
+                             @DefaultValue("730") int historyCleanupMaxDays,
+                             @DefaultValue("1000") int historyCleanupMaxItemsPerReport,
+                             @DefaultValue("3") int countOfRetry,
+                             @DefaultValue("false") boolean useOfficeForDocumentConversion) {
         this.officePath = officePath;
         this.officePorts = officePorts;
         this.docFormatterTimeout = docFormatterTimeout;
@@ -208,7 +208,7 @@ public class ReportingConfig {
     /**
      * Entity properties that will not to be excluded by {@code reporting.wizardPropertiesBlackList} setting
      *
-     * @see ReportingConfig#getWizardPropertiesBlackList()
+     * @see ReportsProperties#getWizardPropertiesBlackList()
      */
     public List<String> getWizardPropertiesExcludedBlackList() {
         return wizardPropertiesExcludedBlackList;
