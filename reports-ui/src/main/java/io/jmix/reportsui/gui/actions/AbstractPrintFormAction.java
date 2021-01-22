@@ -39,7 +39,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public abstract class AbstractPrintFormAction extends AbstractAction implements Action.HasBeforeActionPerformedHandler {
+public abstract class AbstractPrintFormAction extends AbstractAction {
 
     @Autowired
     protected ReportGuiManager reportGuiManager;
@@ -58,8 +58,6 @@ public abstract class AbstractPrintFormAction extends AbstractAction implements 
 
     @Autowired
     protected CurrentAuthentication currentAuthentication;
-
-    protected BeforeActionPerformedHandler beforeActionPerformedHandler;
 
     protected AbstractPrintFormAction(String id) {
         super(id);
@@ -119,16 +117,6 @@ public abstract class AbstractPrintFormAction extends AbstractAction implements 
 
         throw new ReportingException(String.format("Selected report [%s] doesn't have parameter with class [%s].",
                 report.getName(), inputValueMetaClass));
-    }
-
-    @Override
-    public BeforeActionPerformedHandler getBeforeActionPerformedHandler() {
-        return beforeActionPerformedHandler;
-    }
-
-    @Override
-    public void setBeforeActionPerformedHandler(BeforeActionPerformedHandler handler) {
-        beforeActionPerformedHandler = handler;
     }
 
     protected Report reloadReport(Report report) {

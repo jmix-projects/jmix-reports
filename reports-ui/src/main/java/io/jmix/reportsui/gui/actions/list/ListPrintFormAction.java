@@ -99,11 +99,6 @@ public class ListPrintFormAction extends AbstractPrintFormAction implements Acti
         ScreenContext screenContext = ComponentsHelper.getScreenContext(target);
         Preconditions.checkState(screenContext != null, "Component is not attached to window");
 
-        if (beforeActionPerformedHandler != null
-                && !beforeActionPerformedHandler.beforeActionPerformed()) {
-            return;
-        }
-
         Dialogs dialogs = screenContext.getDialogs();
         Set selected = target.getSelected();
         if (CollectionUtils.isNotEmpty(selected)) {

@@ -282,8 +282,8 @@ public class JmixHtmlFormatter extends HtmlFormatter {
     }
 
     protected String resolveServerPrefix(String uri) {
-        String coreUrl = String.format("http://%s:%s/%s/",
-                coreProperties.getWebHostName(), coreProperties.getWebPort(), coreProperties.getWebContextName());
+        String coreUrl = String.format("http://%s:%s/",
+                coreProperties.getWebHostName(), coreProperties.getWebPort());
         return uri.replace(CORE_APP_PREFIX, coreUrl);
     }
 

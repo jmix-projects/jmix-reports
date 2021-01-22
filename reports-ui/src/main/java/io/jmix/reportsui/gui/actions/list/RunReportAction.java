@@ -54,7 +54,7 @@ import java.util.Set;
  */
 @StudioAction(category = "Reports list actions", description = "Runs the reports associated with current screen or list component")
 @ActionType(RunReportAction.ID)
-public class RunReportAction extends ListAction implements Action.HasBeforeActionPerformedHandler {
+public class RunReportAction extends ListAction {
 
     public static final String ID = "runReport";
     public static final String DEFAULT_SINGLE_ENTITY_ALIAS = "entity";
@@ -63,8 +63,6 @@ public class RunReportAction extends ListAction implements Action.HasBeforeActio
     protected DataManager dataManager;
     protected ScreenBuilders screenBuilders;
     protected ReportGuiManager reportGuiManager;
-
-    protected BeforeActionPerformedHandler beforeActionPerformedHandler;
 
     public RunReportAction() {
         this(ID);
@@ -100,21 +98,7 @@ public class RunReportAction extends ListAction implements Action.HasBeforeActio
     }
 
     @Override
-    public BeforeActionPerformedHandler getBeforeActionPerformedHandler() {
-        return beforeActionPerformedHandler;
-    }
-
-    @Override
-    public void setBeforeActionPerformedHandler(BeforeActionPerformedHandler handler) {
-        beforeActionPerformedHandler = handler;
-    }
-
-    @Override
     public void actionPerform(Component component) {
-        if (beforeActionPerformedHandler != null
-                && !beforeActionPerformedHandler.beforeActionPerformed()) {
-            return;
-        }
         if (target != null && target.getFrame() != null) {
             MetaClass metaClass = null;
             DataUnit items = target.getItems();

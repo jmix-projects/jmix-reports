@@ -63,10 +63,6 @@ public class EditorPrintFormAction extends AbstractPrintFormAction {
 
     @Override
     public void actionPerform(Component component) {
-        if (beforeActionPerformedHandler != null) {
-            if (!beforeActionPerformedHandler.beforeActionPerformed())
-                return;
-        }
         Object entity = editor.getEditedEntity();
         if (entity != null) {
             MetaClass metaClass = metadata.getClass(entity);
