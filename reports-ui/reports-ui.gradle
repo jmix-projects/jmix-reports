@@ -34,12 +34,13 @@ dependencies {
 //    api 'io.jmix.dynattr:jmix-dynattr-ui'
     api 'io.jmix.localfs:jmix-localfs'
 
-    api ('com.haulmont.yarg:yarg-api:2.2.5') {
+    api ('com.haulmont.yarg:yarg-api') {
         exclude group: 'org.codehaus.groovy', module: 'groovy-all'
     }
-    api ('com.haulmont.yarg:yarg:2.2.5') {
+    api ('com.haulmont.yarg:yarg') {
         exclude group: 'org.codehaus.groovy', module: 'groovy-all'
         exclude group: 'commons-dbcp', module: 'commons-dbcp'
+        exclude group: 'org.dom4j', module: 'dom4j'
     }
 
     implementation 'com.google.code.gson:gson'
@@ -52,7 +53,6 @@ dependencies {
     testImplementation 'org.apache.commons:commons-dbcp2'
     testImplementation 'org.springframework:spring-orm'
     testImplementation 'ch.qos.logback:logback-classic'
-    testImplementation 'commons-codec:commons-codec:1.13'
 
     testRuntimeOnly 'org.junit.vintage:junit-vintage-engine'
     testRuntimeOnly 'org.slf4j:slf4j-simple'

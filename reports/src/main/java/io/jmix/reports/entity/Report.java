@@ -23,10 +23,8 @@ import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.entity.annotation.Listeners;
 import io.jmix.core.entity.annotation.SystemLevel;
 import io.jmix.core.metamodel.annotation.*;
-import io.jmix.securitydata.entity.RoleEntity;
 import io.jmix.securityui.model.RoleModel;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.Predicate;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.CreatedDate;
@@ -179,16 +177,11 @@ public class Report implements com.haulmont.yarg.structure.Report, io.jmix.core.
         this.isTmp = isTmp;
     }
 
-    @JmixProperty
     public BandDefinition getRootBandDefinition() {
         if (rootBandDefinition == null && bands != null && bands.size() > 0) {
-            rootBandDefinition = (BandDefinition) CollectionUtils.find(bands, new Predicate() {
-                @Override
-                public boolean evaluate(Object object) {
-                    BandDefinition band = (BandDefinition) object;
-                    return band.getParentBandDefinition() == null;
-                }
-            });
+            rootBandDefinition = CollectionUtils.find(bands, band ->
+                    band.getParentBandDefinition() == null
+            );
         }
         return rootBandDefinition;
     }
@@ -292,7 +285,6 @@ public class Report implements com.haulmont.yarg.structure.Report, io.jmix.core.
         this.reportType = reportType != null ? reportType.getId() : null;
     }
 
-    @JmixProperty
     public Set<RoleModel> getRoles() {
         return roles;
     }

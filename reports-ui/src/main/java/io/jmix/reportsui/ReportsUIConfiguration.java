@@ -5,7 +5,7 @@ import io.jmix.core.annotation.JmixModule;
 import io.jmix.core.impl.scanning.AnnotationScanMetadataReaderFactory;
 import io.jmix.reports.ReportsConfiguration;
 import io.jmix.reports.util.DataSetFactory;
-import io.jmix.reportsui.gui.definition.edit.crosstab.CrossTabTableDecorator;
+import io.jmix.reportsui.screen.definition.edit.crosstab.CrossTabTableDecorator;
 import io.jmix.ui.UiConfiguration;
 import io.jmix.ui.sys.ActionsConfiguration;
 import io.jmix.ui.sys.UiControllersConfiguration;
@@ -30,7 +30,7 @@ public class ReportsUIConfiguration {
                                               AnnotationScanMetadataReaderFactory metadataReaderFactory) {
         UiControllersConfiguration uiControllers
                 = new UiControllersConfiguration(applicationContext, metadataReaderFactory);
-        uiControllers.setBasePackages(Collections.singletonList("io.jmix.reportsui.gui"));
+        uiControllers.setBasePackages(Collections.singletonList("io.jmix.reportsui.screen"));
         return uiControllers;
     }
 
@@ -38,7 +38,7 @@ public class ReportsUIConfiguration {
     public ActionsConfiguration actions(ApplicationContext applicationContext,
                                         AnnotationScanMetadataReaderFactory metadataReaderFactory) {
         ActionsConfiguration actionsConfiguration = new ActionsConfiguration(applicationContext, metadataReaderFactory);
-        actionsConfiguration.setBasePackages(Collections.singletonList("io.jmix.reportsui.gui.actions"));
+        actionsConfiguration.setBasePackages(Collections.singletonList("io.jmix.reportsui.action"));
         return actionsConfiguration;
     }
 
