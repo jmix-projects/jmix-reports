@@ -208,8 +208,9 @@ public class ReportRestControllerManager {
                 Object entityId = getIdFromString(paramValue.value, entityClass);
                 //noinspection unchecked
                 Entity entity = (Entity) dataManager.load(entityClass.getJavaClass())
+                        .id(entityId)
                         .fetchPlan(FetchPlan.INSTANCE_NAME)
-                        .id(entityId).optional().orElse(null);
+                        .optional().orElse(null);
                 checkEntityIsNotNull(entityClass.getName(), paramValue.value, entity);
                 return entity;
             }
@@ -222,8 +223,9 @@ public class ReportRestControllerManager {
                     Object entityId = getIdFromString(value, entityClass);
                     //noinspection unchecked
                     Entity entity = (Entity) dataManager.load(entityClass.getJavaClass())
+                            .id(entityId)
                             .fetchPlan(FetchPlan.INSTANCE_NAME)
-                            .id(entityId).optional().orElse(null);
+                            .optional().orElse(null);
                     checkEntityIsNotNull(entityClass.getName(), value, entity);
                     entities.add(entity);
                 }

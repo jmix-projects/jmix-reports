@@ -607,6 +607,7 @@ public class ReportingBean implements ReportingApi {
             return entity;
         }
         return (T) dataManager.load(entity.getClass())
+                .all()
                 .fetchPlan(view)
                 .one();
     }
@@ -715,6 +716,7 @@ public class ReportingBean implements ReportingApi {
         }
 
         return (T) dataManager.load(entity.getClass())
+                .all()
                 .fetchPlan(viewName)
                 .one();
     }
