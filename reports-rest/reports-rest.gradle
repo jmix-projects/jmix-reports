@@ -39,7 +39,6 @@ dependencies {
     api ('com.haulmont.yarg:yarg') {
         exclude group: 'org.codehaus.groovy', module: 'groovy-all'
         exclude group: 'commons-dbcp', module: 'commons-dbcp'
-        exclude group: 'org.dom4j', module: 'dom4j'
     }
 
     implementation 'com.google.code.gson:gson'

@@ -16,7 +16,7 @@
         <table id="executionsTable" dataContainer="executionsDc" width="100%"
                presentations="true" multiselect="true">
             <actions>
-                <action id="excel" type="excel"/>
+                <action id="excel" type="excelExport"/>
             </actions>
             <buttonsPanel>
                 <button id="excel" action="executionsTable.excel"/>

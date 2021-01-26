@@ -185,7 +185,7 @@ public class ReportsProperties {
 
     /**
      * Entities that will be available for report wizard. All others entities will be ignored.
-     * Note that even if {@code cuba.reporting.wizardEntitiesBlackList} is not empty, this list will be used anyway.
+     * Note that even if {@code jmix.reports.wizardEntitiesBlackList} is not empty, this list will be used anyway.
      *
      * @return list of entities that available for reportWizard
      */

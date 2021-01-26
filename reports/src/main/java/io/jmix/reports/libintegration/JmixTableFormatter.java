@@ -42,7 +42,7 @@ import java.util.*;
 import static io.jmix.reports.app.EntityMap.INSTANCE_NAME_KEY;
 import static io.jmix.reports.entity.wizard.ReportRegion.HEADER_BAND_PREFIX;
 
-@Component("report_CubaTableFormatter")
+@Component("report_JmixTableFormatter")
 @Scope(BeanDefinition.SCOPE_PROTOTYPE)
 public class JmixTableFormatter extends AbstractFormatter {
 

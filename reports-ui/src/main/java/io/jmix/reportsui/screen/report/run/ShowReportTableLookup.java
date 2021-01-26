@@ -29,12 +29,15 @@ import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportOutputType;
 import io.jmix.reports.entity.ReportTemplate;
 import io.jmix.reportsui.screen.ReportGuiManager;
+import io.jmix.ui.Actions;
 import io.jmix.ui.Fragments;
 import io.jmix.ui.UiComponents;
+import io.jmix.ui.action.Action;
 import io.jmix.ui.component.*;
 import io.jmix.ui.component.data.table.ContainerGroupTableItems;
 import io.jmix.ui.model.CollectionContainer;
 import io.jmix.ui.screen.*;
+import io.jmix.uiexport.action.ExcelExportAction;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -74,6 +77,8 @@ public class ShowReportTableLookup extends StandardLookup {
     protected Fragments fragments;
     @Autowired
     protected ScreenValidation screenValidation;
+    @Autowired
+    protected Actions actions;
 
     protected Report report;
 
@@ -85,6 +90,7 @@ public class ShowReportTableLookup extends StandardLookup {
 
     protected byte[] tableData;
 
+    //todo
 //    protected DsContextImpl dsContext;
 
     public void setReport(Report report) {
@@ -178,6 +184,7 @@ public class ShowReportTableLookup extends StandardLookup {
 
         data.forEach((dataSetName, keyValueEntities) -> {
             if (keyValueEntities != null && !keyValueEntities.isEmpty()) {
+                //todo
 //                CollectionContainer dataSource = createDataSource(dataSetName, keyValueEntities, headerMap);
                 Table table = createTable(dataSetName, null, headerMap);
 
@@ -228,16 +235,14 @@ public class ShowReportTableLookup extends StandardLookup {
         table.setColumnControlVisible(false);
         table.setColumnReorderingAllowed(false);
 
-        //TODO excel action
-//        ExcelAction excelAction = ExcelAction.create(table);
-//        excelAction.setFileName(dataSetName);
-//        Button excelButton = componentsFactory.createComponent(Button.class);
-//        excelButton.setAction(excelAction);
+        Action excelExportAction = actions.create(ExcelExportAction.ID);
+        Button excelButton = uiComponents.create(Button.class);
+        excelButton.setAction(excelExportAction);
 
         ButtonsPanel buttonsPanel = uiComponents.create(ButtonsPanel.class);
         table.setButtonsPanel(buttonsPanel);
-//        table.addAction(excelAction);
-//        buttonsPanel.add(excelButton);
+        table.addAction(excelExportAction);
+        buttonsPanel.add(excelButton);
         return table;
     }
 

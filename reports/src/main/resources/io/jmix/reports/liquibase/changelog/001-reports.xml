@@ -173,7 +173,7 @@
 
         <insert tableName="REPORT_GROUP">
             <column name="ID" value="4e083530-0b9c-11e1-9b41-6bdaa41bff94"/>
-            <!--            <column name="CREATE_TS" value="current_timestamp"/>-->
+            <column name="CREATE_TS" valueDate="current_timestamp"/>
             <column name="CREATED_BY" value="admin"/>
             <column name="VERSION" value="0"/>
             <column name="VERSION" value="0"/>

@@ -30,16 +30,6 @@
                     class="io.jmix.core.entity.KeyValueEntity"/>
     </data>
 
-<!--    <dsContext>-->
-<!--        <collectionDatasource id="reportsDs" class="com.haulmont.reports.entity.Report"-->
-<!--                              datasourceClass="com.haulmont.reports.gui.datasource.AvailableForUserReportsDatasource">-->
-<!--            <query><![CDATA[select r from report_Report r, in (r.templates) t where t.reportOutputType = 90]]></query>-->
-<!--        </collectionDatasource>-->
-<!--        <hierarchicalDatasource id="reportDataDs" class="com.haulmont.cuba.core.entity.KeyValueEntity"-->
-<!--                                allowCommit="false"-->
-<!--                                refreshMode="NEVER"/>-->
-<!--    </dsContext>-->
-
     <dialogMode height="800"
                 width="1024"
                 resizable="true"/>
