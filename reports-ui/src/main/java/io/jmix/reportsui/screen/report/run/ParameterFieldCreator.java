@@ -21,7 +21,7 @@ import com.google.common.collect.ImmutableMap;
 import io.jmix.core.*;
 import io.jmix.core.metamodel.datatype.DatatypeRegistry;
 import io.jmix.core.metamodel.model.MetaClass;
-import io.jmix.reports.app.service.ReportService;
+import io.jmix.reports.Reports;
 import io.jmix.reports.entity.ParameterType;
 import io.jmix.reports.entity.ReportInputParameter;
 import io.jmix.ui.Actions;
@@ -45,8 +45,6 @@ import java.util.*;
 @org.springframework.stereotype.Component("report_ParameterFieldCreator")
 public class ParameterFieldCreator {
 
-    public static final String COMMON_LOOKUP_SCREEN_ID = "commonLookup";
-
     @Autowired
     protected UiComponents uiComponents;
 
@@ -60,7 +58,7 @@ public class ParameterFieldCreator {
     protected ClassManager classManager;
 
     @Autowired
-    protected ReportService reportService;
+    protected Reports reports;
 
     @Autowired
     protected QueryTransformerFactory queryTransformerFactory;
@@ -110,9 +108,9 @@ public class ParameterFieldCreator {
     }
 
     protected void setCurrentDateAsNow(ReportInputParameter parameter, Field dateField) {
-        Date now = reportService.currentDateOrTime(parameter.getType());
+        Date now = reports.currentDateOrTime(parameter.getType());
         dateField.setValue(now);
-        parameter.setDefaultValue(reportService.convertToString(now.getClass(), now));
+        parameter.setDefaultValue(reports.convertToString(now.getClass(), now));
     }
 
     protected interface FieldCreator {

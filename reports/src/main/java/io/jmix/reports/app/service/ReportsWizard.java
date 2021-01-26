@@ -29,7 +29,7 @@ import io.jmix.reports.exception.TemplateGenerationException;
 import javax.annotation.Nullable;
 import java.util.List;
 
-public interface ReportWizardService {
+public interface ReportsWizard {
     String NAME = "report_ReportWizardService";
 
     Report toReport(ReportData reportData, boolean temporary);

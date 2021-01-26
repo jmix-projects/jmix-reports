@@ -29,8 +29,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Component(ReportExecutionHistoryRecorder.NAME)
-public class ReportExecutionHistoryRecorderBean implements ReportExecutionHistoryRecorder {
-    private static Logger log = LoggerFactory.getLogger(ReportExecutionHistoryRecorderBean.class);
+public class ReportExecutionHistoryRecorderImpl implements ReportExecutionHistoryRecorder {
+    private static Logger log = LoggerFactory.getLogger(ReportExecutionHistoryRecorderImpl.class);
 
     @Autowired
     protected Metadata metadata;

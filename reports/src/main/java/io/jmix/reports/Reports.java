@@ -29,9 +29,11 @@ import java.util.*;
 /**
  * API for reporting
  */
-public interface ReportingApi {
+public interface Reports {
 
     String NAME = "report_ReportingApi";
+
+    String DEFAULT_TEMPLATE_CODE = "DEFAULT";
 
     /**
      * Saves Report entity to the database.
@@ -224,4 +226,8 @@ public interface ReportingApi {
      * @return adjusted Date
      */
     Date currentDateOrTime(ParameterType parameterType);
+
+    String convertToString(Class parameterClass, Object paramValue);
+
+    Object convertFromString(Class parameterClass, String paramValueStr);
 }

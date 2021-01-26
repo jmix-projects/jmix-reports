@@ -18,7 +18,7 @@ package io.jmix.reportsui.screen.parameter.edit;
 import io.jmix.core.*;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.reports.ParameterClassResolver;
-import io.jmix.reports.app.service.ReportService;
+import io.jmix.reports.Reports;
 import io.jmix.reports.entity.ParameterType;
 import io.jmix.reports.entity.PredefinedTransformation;
 import io.jmix.reports.entity.ReportInputParameter;
@@ -126,7 +126,7 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
     protected ThemeConstants themeConstants;
 
     @Autowired
-    protected ReportService reportService;
+    protected Reports reports;
 
     @Autowired
     protected InstanceContainer<ReportInputParameter> parameterDc;
@@ -322,14 +322,14 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
 
             field.addValueChangeListener(e -> {
                 if (e.getValue() != null) {
-                    parameter.setDefaultValue(reportService.convertToString(e.getValue().getClass(), e.getValue()));
+                    parameter.setDefaultValue(reports.convertToString(e.getValue().getClass(), e.getValue()));
                 } else {
                     parameter.setDefaultValue(null);
                 }
             });
 
             if (parameter.getParameterClass() != null) {
-                field.setValue(reportService.convertFromString(parameter.getParameterClass(), parameter.getDefaultValue()));
+                field.setValue(reports.convertFromString(parameter.getParameterClass(), parameter.getDefaultValue()));
             }
             field.setRequired(false);
 

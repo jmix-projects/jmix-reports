@@ -17,7 +17,7 @@
 package io.jmix.reportsui.screen.report.importdialog;
 
 import io.jmix.core.Messages;
-import io.jmix.reports.app.service.ReportService;
+import io.jmix.reports.Reports;
 import io.jmix.reports.entity.ReportImportOption;
 import io.jmix.reports.entity.ReportImportResult;
 import io.jmix.ui.Notifications;
@@ -48,7 +48,7 @@ public class ReportImportDialog extends Screen {
     @Autowired
     protected TemporaryStorage temporaryStorage;
     @Autowired
-    protected ReportService reportService;
+    protected Reports reports;
     @Autowired
     protected HBoxLayout dropZone;
     @Autowired
@@ -77,7 +77,7 @@ public class ReportImportDialog extends Screen {
     public void onCommitBtnClick(Button.ClickEvent event) {
         ValidationErrors validationErrors = getValidationErrors();
 
-        if(validationErrors.isEmpty()) {
+        if (validationErrors.isEmpty()) {
             importReport();
             closeWithDefaultAction();
         }
@@ -91,7 +91,7 @@ public class ReportImportDialog extends Screen {
             File file = temporaryStorage.getFile(fileID);
             byte[] bytes = FileUtils.readFileToByteArray(file);
             temporaryStorage.deleteFile(fileID);
-            ReportImportResult result = reportService.importReportsWithResult(bytes, getImportOptions());
+            ReportImportResult result = reports.importReportsWithResult(bytes, getImportOptions());
 
             notifications.create(Notifications.NotificationType.HUMANIZED)
                     .withCaption(messages.formatMessage(getClass(), "importResult", result.getCreatedReports().size(), result.getUpdatedReports().size()))

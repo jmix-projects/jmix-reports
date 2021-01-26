@@ -19,7 +19,7 @@ import com.google.common.collect.ImmutableMap;
 import io.jmix.core.*;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.reports.app.EntityTree;
-import io.jmix.reports.app.service.ReportWizardService;
+import io.jmix.reports.app.service.ReportsWizard;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportGroup;
 import io.jmix.reports.entity.ReportOutputType;
@@ -144,7 +144,7 @@ public class ReportWizardCreator extends Screen implements MainWizardFrame<Scree
     @Autowired
     protected UiComponents uiComponents;
     @Autowired
-    protected ReportWizardService reportWizardService;
+    protected ReportsWizard reportWizardService;
     @Autowired
     protected ThemeConstants themeConstants;
     @Autowired

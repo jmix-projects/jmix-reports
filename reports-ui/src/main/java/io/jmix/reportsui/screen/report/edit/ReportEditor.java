@@ -23,20 +23,16 @@ import io.jmix.core.Metadata;
 import io.jmix.core.MetadataTools;
 import io.jmix.core.common.util.ParamsMap;
 import io.jmix.reports.ReportPrintHelper;
-import io.jmix.reports.app.service.ReportService;
+import io.jmix.reports.Reports;
 import io.jmix.reports.entity.*;
 import io.jmix.reportsui.screen.definition.edit.BandDefinitionEditor;
 import io.jmix.reportsui.screen.report.run.InputParametersDialog;
 import io.jmix.security.constraint.PolicyStore;
 import io.jmix.security.constraint.SecureOperations;
 import io.jmix.securitydata.entity.RoleEntity;
-import io.jmix.securityui.model.RoleModel;
 import io.jmix.ui.*;
 import io.jmix.ui.component.*;
-import io.jmix.ui.model.CollectionContainer;
-import io.jmix.ui.model.CollectionLoader;
-import io.jmix.ui.model.DataContext;
-import io.jmix.ui.model.InstanceContainer;
+import io.jmix.ui.model.*;
 import io.jmix.ui.screen.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -84,7 +80,7 @@ public class ReportEditor extends StandardEditor<Report> {
     protected CollectionContainer<ReportScreen> reportScreensDc;
 
     @Autowired
-    protected CollectionContainer<RoleModel> rolesDc;
+    protected CollectionPropertyContainer<RoleEntity> rolesDc;
 
     @Autowired
     protected CollectionContainer<RoleEntity> lookupRolesDc;
@@ -99,7 +95,7 @@ public class ReportEditor extends StandardEditor<Report> {
     protected UiComponents uiComponents;
 
     @Autowired
-    protected ReportService reportService;
+    protected Reports reports;
 
     @Autowired
     protected CollectionContainer<BandDefinition> bandsDc;
@@ -256,7 +252,7 @@ public class ReportEditor extends StandardEditor<Report> {
     }
 
     protected void addCommitListeners() {
-        String xml = reportService.convertToString(getEditedEntity());
+        String xml = reports.convertToString(getEditedEntity());
         getEditedEntity().setXml(xml);
 
         //TODO

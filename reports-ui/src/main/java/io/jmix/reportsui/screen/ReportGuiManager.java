@@ -23,8 +23,8 @@ import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.reports.ReportPrintHelper;
 import io.jmix.reports.ReportSecurityManager;
+import io.jmix.reports.Reports;
 import io.jmix.reports.app.ParameterPrototype;
-import io.jmix.reports.app.service.ReportService;
 import io.jmix.reports.entity.*;
 import io.jmix.reports.exception.FailedToConnectToOpenOfficeException;
 import io.jmix.reports.exception.NoOpenOfficeFreePortsException;
@@ -61,7 +61,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class ReportGuiManager {
 
     @Autowired
-    protected ReportService reportService;
+    protected Reports reports;
 
     @Autowired
     protected DataManager dataManager;
@@ -293,13 +293,13 @@ public class ReportGuiManager {
     public ReportOutputDocument getReportResult(Report report, Map<String, Object> params, @Nullable String templateCode, @Nullable ReportOutputType outputType) {
         ReportOutputDocument document;
         if (StringUtils.isBlank(templateCode) && outputType == null) {
-            document = reportService.createReport(report, params);
+            document = reports.createReport(report, params);
         } else if (!StringUtils.isBlank(templateCode) && outputType == null) {
-            document = reportService.createReport(report, templateCode, params);
+            document = reports.createReport(report, templateCode, params);
         } else if (!StringUtils.isBlank(templateCode) && outputType != null) {
-            document = reportService.createReport(report, templateCode, params, outputType);
+            document = reports.createReport(report, templateCode, params, outputType);
         } else {
-            document = reportService.createReport(report, params, outputType);
+            document = reports.createReport(report, params, outputType);
         }
         return document;
     }
@@ -581,7 +581,7 @@ public class ReportGuiManager {
             paramsList.add(map);
         }
 
-        ReportOutputDocument reportOutputDocument = reportService.bulkPrint(report, templateCode, outputType, paramsList);
+        ReportOutputDocument reportOutputDocument = reports.bulkPrint(report, templateCode, outputType, paramsList);
         String documentName = reportOutputDocument.getDocumentName();
 
         downloader.download(new ByteArrayDataProvider(reportOutputDocument.getContent(), uiProperties.getSaveExportedByteArrayDataThresholdBytes(), coreProperties.getTempDir()), documentName, DownloadFormat.ZIP);
@@ -654,7 +654,7 @@ public class ReportGuiManager {
                     @SuppressWarnings("UnnecessaryLocalVariable")
                     @Override
                     public ReportOutputDocument run(TaskLifeCycle<Integer> taskLifeCycle) {
-                        ReportOutputDocument result = reportService.bulkPrint(targetReport, templateCode, outputType, paramsList);
+                        ReportOutputDocument result = reports.bulkPrint(targetReport, templateCode, outputType, paramsList);
                         return result;
                     }
 
@@ -756,7 +756,7 @@ public class ReportGuiManager {
             paramValueWithCollection = (Collection) paramValue;
         } else if (paramValue instanceof ParameterPrototype) {
             ParameterPrototype prototype = (ParameterPrototype) paramValue;
-            paramValueWithCollection = reportService.loadDataForParameterPrototype(prototype);
+            paramValueWithCollection = reports.loadDataForParameterPrototype(prototype);
         }
 
         if (CollectionUtils.isEmpty(paramValueWithCollection)) {

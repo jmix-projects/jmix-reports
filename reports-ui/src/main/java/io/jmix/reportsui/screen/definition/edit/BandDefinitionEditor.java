@@ -18,12 +18,11 @@ package io.jmix.reportsui.screen.definition.edit;
 import io.jmix.core.*;
 import io.jmix.core.common.util.ParamsMap;
 import io.jmix.core.metamodel.model.MetaClass;
-import io.jmix.reports.app.service.ReportService;
-import io.jmix.reports.app.service.ReportWizardService;
+import io.jmix.reports.app.service.ReportsWizard;
 import io.jmix.reports.entity.*;
 import io.jmix.reports.util.DataSetFactory;
-import io.jmix.reportsui.screen.ReportsClientProperties;
 import io.jmix.reportsui.action.list.EditViewAction;
+import io.jmix.reportsui.screen.ReportsClientProperties;
 import io.jmix.reportsui.screen.definition.edit.crosstab.CrossTabTableDecorator;
 import io.jmix.reportsui.screen.definition.edit.scripteditordialog.ScriptEditorDialog;
 import io.jmix.security.constraint.PolicyStore;
@@ -118,9 +117,7 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
     @Autowired
     protected Metadata metadata;
     @Autowired
-    protected ReportService reportService;
-    @Autowired
-    protected ReportWizardService reportWizardService;
+    protected ReportsWizard reportWizardService;
     @Autowired
     protected BoxLayout editPane;
     @Autowired

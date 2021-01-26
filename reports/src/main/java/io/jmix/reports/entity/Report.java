@@ -483,8 +483,8 @@ public class Report implements com.haulmont.yarg.structure.Report, io.jmix.core.
     }
 
     @InstanceName
-    @DependsOnProperties({"locName", "name", "localeNames"})
+    @DependsOnProperties({"locName", "name"})
     public String getCaption() {
-        return String.format("%s [%s] %s", getLocName(), getName(), getLocaleNames());
+        return String.format("%s [%s]", getLocName(), getName());
     }
 }

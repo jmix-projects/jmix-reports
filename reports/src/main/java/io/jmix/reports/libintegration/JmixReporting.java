@@ -18,7 +18,6 @@ package io.jmix.reports.libintegration;
 
 import com.google.common.base.Strings;
 import com.haulmont.yarg.exception.ReportingException;
-import com.haulmont.yarg.reporting.Reporting;
 import com.haulmont.yarg.reporting.RunParams;
 import com.haulmont.yarg.structure.BandData;
 import com.haulmont.yarg.structure.Report;
@@ -28,7 +27,7 @@ import io.jmix.core.DataManager;
 import io.jmix.core.Metadata;
 import io.jmix.core.QueryUtils;
 import io.jmix.core.Resources;
-import io.jmix.reports.ReportingApi;
+import io.jmix.reports.Reports;
 import io.jmix.reports.entity.ParameterType;
 import io.jmix.reports.entity.PredefinedTransformation;
 import io.jmix.reports.entity.ReportInputParameter;
@@ -40,13 +39,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-public class JmixReporting extends Reporting {
+public class JmixReporting extends com.haulmont.yarg.reporting.Reporting {
 
     public static final String REPORT_FILE_NAME_KEY = "__REPORT_FILE_NAME";
 
     protected Scripting scripting;
 
-    protected ReportingApi reportingApi;
+    protected Reports reports;
 
     @Autowired
     protected Resources resources;
@@ -61,8 +60,8 @@ public class JmixReporting extends Reporting {
         this.scripting = scripting;
     }
 
-    public void setReportingApi(ReportingApi reportingApi) {
-        this.reportingApi = reportingApi;
+    public void setReports(Reports reports) {
+        this.reports = reports;
     }
 
     @Override
@@ -104,7 +103,7 @@ public class JmixReporting extends Reporting {
     protected void handleDateTimeRelatedParameterAsNow(String paramName, Object paramValue, ParameterType parameterType,
                                                        Map<String, Object> handledParams) {
         if (Objects.isNull(paramValue)) {
-            paramValue = reportingApi.currentDateOrTime(parameterType);
+            paramValue = reports.currentDateOrTime(parameterType);
             handledParams.put(paramName, paramValue);
         }
     }

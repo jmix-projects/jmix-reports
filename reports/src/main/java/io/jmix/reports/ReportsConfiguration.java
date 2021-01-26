@@ -43,7 +43,7 @@ public class ReportsConfiguration {
     protected CoreProperties coreProperties;
 
     @Autowired
-    protected ReportingApi reportingApi;
+    protected Reports reports;
 
     @Bean("reporting_lib_Scripting")
     public Scripting scripting() {
@@ -192,7 +192,7 @@ public class ReportsConfiguration {
         jmixReporting.setDataExtractor(dataExtractor());
         jmixReporting.setObjectToStringConverter(objectToStringConverter());
         jmixReporting.setScripting(scripting());
-        jmixReporting.setReportingApi(reportingApi);
+        jmixReporting.setReports(reports);
         return jmixReporting;
     }
 

@@ -20,7 +20,7 @@ import io.jmix.core.DataManager;
 import io.jmix.core.Id;
 import io.jmix.reports.ParameterClassResolver;
 import io.jmix.reports.ReportPrintHelper;
-import io.jmix.reports.app.service.ReportService;
+import io.jmix.reports.Reports;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportInputParameter;
 import io.jmix.reports.entity.ReportOutputType;
@@ -71,7 +71,7 @@ public class InputParametersFragment extends ScreenFragment {
     protected CollectionLoader<ReportTemplate> templateReportsDl;
 
     @Autowired
-    protected ReportService reportService;
+    protected Reports reports;
 
     @Autowired
     protected DataManager dataManager;
@@ -107,7 +107,7 @@ public class InputParametersFragment extends ScreenFragment {
     protected void onInit(InitEvent event) {
         ScreenOptions options = event.getOptions();
 
-        if(options instanceof MapScreenOptions) {
+        if (options instanceof MapScreenOptions) {
             MapScreenOptions mapScreenOptions = (MapScreenOptions) options;
 
             report = (Report) mapScreenOptions.getParams().get(REPORT_PARAMETER);
@@ -118,7 +118,7 @@ public class InputParametersFragment extends ScreenFragment {
 
         if (report != null && !report.getIsTmp()) {
             report = dataManager.load(Id.of(report))
-                    .fetchPlan(ReportService.MAIN_VIEW_NAME)
+                    .fetchPlan("report.edit")
                     .one();
         }
         if (parameters == null) {
@@ -164,7 +164,7 @@ public class InputParametersFragment extends ScreenFragment {
         if (value == null && parameter.getDefaultValue() != null) {
             Class parameterClass = parameterClassResolver.resolveClass(parameter);
             if (parameterClass != null) {
-                value = reportService.convertFromString(parameterClass, parameter.getDefaultValue());
+                value = reports.convertFromString(parameterClass, parameter.getDefaultValue());
             }
         }
 

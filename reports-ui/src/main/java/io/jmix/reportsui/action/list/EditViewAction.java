@@ -19,9 +19,9 @@ package io.jmix.reportsui.action.list;
 import io.jmix.core.*;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.core.metamodel.model.MetaProperty;
+import io.jmix.reports.Reports;
 import io.jmix.reports.app.EntityTree;
-import io.jmix.reports.app.service.ReportService;
-import io.jmix.reports.app.service.ReportWizardService;
+import io.jmix.reports.app.service.ReportsWizard;
 import io.jmix.reports.entity.BandDefinition;
 import io.jmix.reports.entity.DataSet;
 import io.jmix.reports.entity.DataSetType;
@@ -68,10 +68,10 @@ public class EditViewAction extends ListAction {
     protected Messages messages;
 
     @Autowired
-    protected ReportService reportService;
+    protected Reports reports;
 
     @Autowired
-    protected ReportWizardService reportWizardService;
+    protected ReportsWizard reportWizardService;
 
     @Autowired
     protected Metadata metadata;
@@ -155,7 +155,7 @@ public class EditViewAction extends ListAction {
                     .show();
             return null;
         }
-        MetaClass byAliasMetaClass = reportService.findMetaClassByDataSetEntityAlias(dataSetAlias, dataSet.getType(),
+        MetaClass byAliasMetaClass = reports.findMetaClassByDataSetEntityAlias(dataSetAlias, dataSet.getType(),
                 bandsDc.getItem().getReport().getInputParameters());
 
         //Lets return some value

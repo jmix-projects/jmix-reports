@@ -19,7 +19,7 @@ import io.jmix.core.*;
 import io.jmix.core.accesscontext.CrudEntityContext;
 import io.jmix.core.common.util.ParamsMap;
 import io.jmix.core.metamodel.model.MetaClass;
-import io.jmix.reports.app.service.ReportService;
+import io.jmix.reports.Reports;
 import io.jmix.reports.entity.Report;
 import io.jmix.reportsui.screen.ReportGuiManager;
 import io.jmix.reportsui.screen.report.edit.ReportEditor;
@@ -56,7 +56,7 @@ public class ReportBrowser extends StandardLookup<Report> {
     @Autowired
     protected ReportGuiManager reportGuiManager;
     @Autowired
-    protected ReportService reportService;
+    protected Reports reports;
     @Autowired
     protected UiProperties uiProperties;
     @Autowired
@@ -175,13 +175,13 @@ public class ReportBrowser extends StandardLookup<Report> {
 
     @Subscribe("reportsTable.export")
     protected void onTableExport(Action.ActionPerformedEvent event) {
-        Set<Report> reports = reportsTable.getSelected();
-        if (!reports.isEmpty()) {
-            ByteArrayDataProvider provider = new ByteArrayDataProvider(reportService.exportReports(reports), uiProperties.getSaveExportedByteArrayDataThresholdBytes(), coreProperties.getTempDir());
-            if (reports.size() > 1) {
+        Set<Report> reportsTableSelected = reportsTable.getSelected();
+        if (!reportsTableSelected.isEmpty()) {
+            ByteArrayDataProvider provider = new ByteArrayDataProvider(reports.exportReports(reportsTableSelected), uiProperties.getSaveExportedByteArrayDataThresholdBytes(), coreProperties.getTempDir());
+            if (reportsTableSelected.size() > 1) {
                 downloader.download(provider, "Reports", DownloadFormat.ZIP);
-            } else if (reports.size() == 1) {
-                downloader.download(provider, reports.iterator().next().getName(), DownloadFormat.ZIP);
+            } else if (reportsTableSelected.size() == 1) {
+                downloader.download(provider, reportsTableSelected.iterator().next().getName(), DownloadFormat.ZIP);
             }
         }
     }
@@ -190,7 +190,7 @@ public class ReportBrowser extends StandardLookup<Report> {
     protected void onTableCopy(Action.ActionPerformedEvent event) {
         Report report = reportsTable.getSingleSelected();
         if (report != null) {
-            reportService.copyReport(report);
+            reports.copyReport(report);
             reportDl.load();
         } else {
             notifications.create(Notifications.NotificationType.HUMANIZED)

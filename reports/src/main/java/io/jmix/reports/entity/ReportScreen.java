@@ -24,7 +24,6 @@ import javax.persistence.Id;
 import java.util.UUID;
 
 @JmixEntity(name = "report_ReportScreen")
-@SystemLevel
 public class ReportScreen {
 
     private static final long serialVersionUID = -7416940515333599470L;

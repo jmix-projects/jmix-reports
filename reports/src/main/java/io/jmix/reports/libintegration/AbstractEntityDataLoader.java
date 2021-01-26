@@ -21,7 +21,7 @@ import com.haulmont.yarg.structure.ReportQuery;
 import io.jmix.core.FetchPlan;
 import io.jmix.core.FetchPlanRepository;
 import io.jmix.core.Entity;
-import io.jmix.reports.ReportingApi;
+import io.jmix.reports.Reports;
 import io.jmix.reports.entity.DataSet;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +32,7 @@ public abstract class AbstractEntityDataLoader implements ReportDataLoader {
     protected BeanFactory beanFactory;
 
     @Autowired
-    protected ReportingApi reportingApi;
+    protected Reports reports;
 
     @Autowired
     protected FetchPlanRepository fetchPlanRepository;
@@ -44,7 +44,7 @@ public abstract class AbstractEntityDataLoader implements ReportDataLoader {
             DataSet dataSet = (DataSet) reportQuery;
             FetchPlan view = getView(entity, dataSet);
             if (view != null) {
-                entity = reportingApi.reloadEntity(entity, view);
+                entity = reports.reloadEntity(entity, view);
             }
         }
 

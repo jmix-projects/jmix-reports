@@ -21,9 +21,10 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import io.jmix.core.*;
 import io.jmix.core.metamodel.model.MetaClass;
+import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.reports.ParameterClassResolver;
 import io.jmix.reports.ReportSecurityManager;
-import io.jmix.reports.app.service.ReportService;
+import io.jmix.reports.Reports;
 import io.jmix.reports.entity.*;
 import io.jmix.reports.exception.FailedToConnectToOpenOfficeException;
 import io.jmix.reports.exception.NoOpenOfficeFreePortsException;
@@ -32,7 +33,6 @@ import io.jmix.security.constraint.PolicyStore;
 import io.jmix.security.constraint.SecureOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
@@ -44,7 +44,7 @@ public class ReportRestControllerManager {
     @Autowired
     protected DataManager dataManager;
     @Autowired
-    protected ReportService reportService;
+    protected Reports reports;
     @Autowired
     protected Metadata metadata;
     @Autowired
@@ -61,6 +61,8 @@ public class ReportRestControllerManager {
     protected FetchPlans fetchPlans;
     @Autowired
     protected FetchPlanRepository fetchPlanRepository;
+    @Autowired
+    protected CurrentAuthentication currentAuthentication;
 
     public String loadGroup(String entityId) {
         checkCanReadEntity(metadata.getClass(ReportGroup.class));
@@ -100,7 +102,7 @@ public class ReportRestControllerManager {
 
         loadContext.setFetchPlan(fetchPlan)
                 .setQueryString("select r from report_Report r where r.restAccess = true");
-        reportSecurityManager.applySecurityPolicies(loadContext, null, SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+        reportSecurityManager.applySecurityPolicies(loadContext, null, currentAuthentication.getUser());
         List<Report> reports = dataManager.loadList(loadContext);
 
         List<ReportInfo> objects = reports.stream()
@@ -139,7 +141,7 @@ public class ReportRestControllerManager {
         Map<String, Object> preparedValues = prepareValues(report, body.parameters);
         if (body.template != null) {
             try {
-                return new ReportRestResult(reportService.createReport(report, body.template, preparedValues), body.attachment);
+                return new ReportRestResult(reports.createReport(report, body.template, preparedValues), body.attachment);
             } catch (FailedToConnectToOpenOfficeException e) {
                 throw new RestAPIException("Run report error", "Couldn't find LibreOffice instance",
                         HttpStatus.INTERNAL_SERVER_ERROR);
@@ -152,7 +154,7 @@ public class ReportRestControllerManager {
             }
         } else {
             try {
-                return new ReportRestResult(reportService.createReport(report, preparedValues), body.attachment);
+                return new ReportRestResult(reports.createReport(report, preparedValues), body.attachment);
             } catch (FailedToConnectToOpenOfficeException e) {
                 throw new RestAPIException("Run report error", "Couldn't find LibreOffice instance",
                         HttpStatus.INTERNAL_SERVER_ERROR);
@@ -170,11 +172,12 @@ public class ReportRestControllerManager {
         checkCanReadEntity(metadata.getClass(Report.class));
 
         LoadContext<Report> loadContext = new LoadContext(metadata.getClass(Report.class));
-        FetchPlan fetchPlan = fetchPlanRepository.getFetchPlan(Report.class, ReportService.MAIN_VIEW_NAME);
+        FetchPlan fetchPlan = fetchPlanRepository.getFetchPlan(Report.class, "report.edit");
         loadContext.setFetchPlan(fetchPlan)
                 .setQueryString("select r from report_Report r where r.id = :id and r.restAccess = true")
                 .setParameter("id", getReportIdFromString(entityId));
-        reportSecurityManager.applySecurityPolicies(loadContext, null, SecurityContextHolder.getContext().getAuthentication().getPrincipal());
+
+        reportSecurityManager.applySecurityPolicies(loadContext, null, currentAuthentication.getUser());
 
         Report report = dataManager.load(loadContext);
 
@@ -233,7 +236,7 @@ public class ReportRestControllerManager {
             }
         } else if (paramValue.value != null) {
             Class paramClass = resolveDatatypeActualClass(inputParam);
-            return reportService.convertFromString(paramClass, paramValue.value);
+            return reports.convertFromString(paramClass, paramValue.value);
         }
         return null;
     }
@@ -312,8 +315,8 @@ public class ReportRestControllerManager {
                 break;
             case DATE:
             case TIME:
-                Object defParamValue = reportService.convertFromString(parameter.getParameterClass(), parameter.getDefaultValue());
-                return reportService.convertToString(resolveDatatypeActualClass(parameter), defParamValue);
+                Object defParamValue = reports.convertFromString(parameter.getParameterClass(), parameter.getDefaultValue());
+                return reports.convertToString(resolveDatatypeActualClass(parameter), defParamValue);
         }
         return parameter.getDefaultValue();
     }

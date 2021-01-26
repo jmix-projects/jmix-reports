@@ -21,6 +21,7 @@ import com.haulmont.yarg.reporting.ReportOutputDocument;
 import com.haulmont.yarg.reporting.ReportOutputDocumentImpl;
 import com.haulmont.yarg.reporting.ReportingAPI;
 import com.haulmont.yarg.reporting.RunParams;
+import com.haulmont.yarg.util.converter.ObjectToStringConverter;
 import io.jmix.core.*;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.core.security.AccessDeniedException;
@@ -36,6 +37,8 @@ import io.jmix.reports.exception.*;
 import io.jmix.reports.libintegration.CustomFormatter;
 import io.jmix.security.constraint.PolicyStore;
 import io.jmix.security.constraint.SecureOperations;
+import io.jmix.security.model.Role;
+import io.jmix.securityui.model.RoleModel;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Predicate;
 import org.apache.commons.compress.archivers.ArchiveEntry;
@@ -61,8 +64,8 @@ import java.util.zip.CRC32;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-@Component(ReportingApi.NAME)
-public class ReportingBean implements ReportingApi {
+@Component(Reports.NAME)
+public class ReportsImpl implements Reports {
     public static final String REPORT_EDIT_VIEW_NAME = "report.edit";
     protected static final int MAX_REPORT_NAME_LENGTH = 255;
     protected static final String IDX_SEPARATOR = ",";
@@ -78,7 +81,7 @@ public class ReportingBean implements ReportingApi {
     @Autowired
     protected ReportingAPI reportingApi;
     @Autowired
-    protected ReportImportExportAPI reportImportExport;
+    protected ReportImportExport reportImportExport;
     @Autowired
     protected ReportExecutionHistoryRecorder executionHistoryRecorder;
     @Autowired
@@ -119,6 +122,9 @@ public class ReportingBean implements ReportingApi {
 
     @Autowired
     protected GsonConverter gsonConverter;
+
+    @Autowired
+    protected ObjectToStringConverter objectToStringConverter;
 
     protected XStreamConverter xStreamConverter = new XStreamConverter();
 
@@ -282,7 +288,7 @@ public class ReportingBean implements ReportingApi {
 
             ZipArchiveOutputStream zipOutputStream = new ZipArchiveOutputStream(byteArrayOutputStream);
             zipOutputStream.setMethod(ZipArchiveOutputStream.STORED);
-            zipOutputStream.setEncoding(ReportImportExport.ENCODING);
+            zipOutputStream.setEncoding(ReportImportExportImpl.ENCODING);
 
             ReportTemplate reportTemplate = getDefaultTemplate(report);
             ReportTemplate template = report.getTemplateByCode(templateCode);
@@ -709,6 +715,16 @@ public class ReportingBean implements ReportingApi {
         return now;
     }
 
+    @Override
+    public String convertToString(Class parameterClass, Object paramValue) {
+        return objectToStringConverter.convertToString(parameterClass, paramValue);
+    }
+
+    @Override
+    public Object convertFromString(Class parameterClass, String paramValueStr) {
+        return objectToStringConverter.convertFromString(parameterClass, paramValueStr);
+    }
+
     @SuppressWarnings("unchecked")
     protected <T extends Entity> T reloadEntity(T entity, String viewName) {
         if (entity instanceof Report && ((Report) entity).getIsTmp()) {
@@ -751,19 +767,11 @@ public class ReportingBean implements ReportingApi {
             report.setScreensIdx(screens.length() > 1 ? screens.toString() : null);
 
             StringBuilder roles = new StringBuilder(IDX_SEPARATOR);
-//            if (report.getRoles() != null) {
-
-//                for (Role role : report.getRoles()) {
-            //TODO predefined
-//                    if (role.isPredefined()) {
-//                        roles.append(role.getName())
-//                                .append(IDX_SEPARATOR);
-//                    } else {
-//                        roles.append(role.getId().toString())
-//                                .append(IDX_SEPARATOR);
-//                    }
-//                }
-//            }
+            if (report.getRoles() != null) {
+                for (RoleModel role : report.getRoles()) {
+                    roles.append(role.getCode()).append(IDX_SEPARATOR);
+                }
+            }
             report.setRolesIdx(roles.length() > 1 ? roles.toString() : null);
         }
     }

@@ -31,7 +31,7 @@ import java.util.List;
 /**
  * API for report wizard
  */
-public interface ReportingWizardApi {
+public interface ReportingWizard {
 
     Report toReport(ReportData reportData, boolean temporary);
 

@@ -19,11 +19,10 @@ package io.jmix.reportsui.wizard;
 import io.jmix.core.*;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.core.metamodel.model.MetaProperty;
-import io.jmix.reports.ReportingApi;
-import io.jmix.reports.ReportingBean;
+import io.jmix.reports.Reports;
+import io.jmix.reports.ReportsImpl;
 import io.jmix.reports.ReportsProperties;
 import io.jmix.reports.app.EntityTree;
-import io.jmix.reports.app.service.ReportService;
 import io.jmix.reports.entity.*;
 import io.jmix.reports.entity.wizard.*;
 import io.jmix.reports.util.DataSetFactory;
@@ -41,18 +40,18 @@ import java.lang.reflect.AnnotatedElement;
 import java.util.*;
 
 @Component("report_ReportingWizardApi")
-public class ReportingWizardBean implements ReportingWizardApi {
+public class ReportingWizardImpl implements ReportingWizard {
 
     public static final String ROOT_BAND_DEFINITION_NAME = "Root";
     protected static final String DEFAULT_SINGLE_ENTITY_ALIAS = "entity";//cause Thesis used it for running reports from screens without selection input params
     protected static final String DEFAULT_LIST_OF_ENTITIES_ALIAS = "entities";//cause Thesis will use it for running reports from screens without selection input params
 
-    private static final Logger log = LoggerFactory.getLogger(ReportingBean.class);
+    private static final Logger log = LoggerFactory.getLogger(ReportsImpl.class);
 
     @Autowired
     protected Metadata metadata;
     @Autowired
-    protected ReportingApi reportingApi;
+    protected Reports reports;
     @Autowired
     protected ReportsProperties reportsProperties;
     @Autowired
@@ -78,12 +77,12 @@ public class ReportingWizardBean implements ReportingWizardApi {
         HashSet<BandDefinition> childrenBandsDefinitionForRoot = new HashSet<>(bands);
         childrenBandsDefinitionForRoot.remove(rootReportBandDefinition);
         rootReportBandDefinition.getChildrenBandDefinitions().addAll(childrenBandsDefinitionForRoot);
-        report.setName(reportingApi.generateReportName(reportData.getName()));
-        String xml = reportingApi.convertToString(report);
+        report.setName(reports.generateReportName(reportData.getName()));
+        String xml = reports.convertToString(report);
         report.setXml(xml);
 
         if (!temporary) {
-            report = reportingApi.storeReportEntity(report);
+            report = reports.storeReportEntity(report);
         }
 
         return report;
@@ -231,7 +230,7 @@ public class ReportingWizardBean implements ReportingWizardApi {
     protected ReportTemplate createDefaultTemplate(Report report, ReportData reportData) {
         ReportTemplate reportTemplate = metadata.create(ReportTemplate.class);
         reportTemplate.setReport(report);
-        reportTemplate.setCode(ReportService.DEFAULT_TEMPLATE_CODE);
+        reportTemplate.setCode(Reports.DEFAULT_TEMPLATE_CODE);
 
         reportTemplate.setName(reportData.getTemplateFileName());
         reportTemplate.setContent(reportData.getTemplateContent());

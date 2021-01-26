@@ -19,28 +19,29 @@ import io.jmix.core.FetchPlan;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.core.metamodel.model.MetaProperty;
 import io.jmix.reports.app.EntityTree;
-import io.jmix.reports.app.service.ReportWizardService;
+import io.jmix.reports.app.service.ReportsWizard;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.wizard.EntityTreeNode;
 import io.jmix.reports.entity.wizard.ReportData;
 import io.jmix.reports.entity.wizard.ReportRegion;
 import io.jmix.reports.entity.wizard.TemplateFileType;
 import io.jmix.reports.exception.TemplateGenerationException;
+import io.jmix.reportsui.wizard.template.TemplateGeneratorImpl;
 import io.jmix.reportsui.wizard.template.TemplateGenerator;
-import io.jmix.reportsui.wizard.template.TemplateGeneratorApi;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Nullable;
 import javax.inject.Provider;
 import java.util.List;
 
-@Service(ReportWizardService.NAME)
-public class ReportWizardServiceBean implements ReportWizardService {
+@Component(ReportsWizard.NAME)
+public class ReportsWizardImpl implements ReportsWizard {
     @Autowired
-    private ReportingWizardApi reportingWizardApi;
+    private ReportingWizard reportingWizard;
     @Autowired
-    private Provider<EntityTreeModelBuilderApi> entityTreeModelBuilderApiProvider;
+    private Provider<EntityTreeModelBuilder> entityTreeModelBuilderApiProvider;
 
 //    //todo prototype
 //    @Autowired
@@ -50,33 +51,33 @@ public class ReportWizardServiceBean implements ReportWizardService {
 
     @Override
     public Report toReport(ReportData reportData, boolean temporary) {
-        return reportingWizardApi.toReport(reportData, temporary);
+        return reportingWizard.toReport(reportData, temporary);
     }
 
     @Override
     public FetchPlan createViewByReportRegions(EntityTreeNode entityTreeRootNode, List<ReportRegion> reportRegions) {
-        return reportingWizardApi.createViewByReportRegions(entityTreeRootNode, reportRegions);
+        return reportingWizard.createViewByReportRegions(entityTreeRootNode, reportRegions);
     }
 
     @Override
     public ReportRegion createReportRegionByView(EntityTree entityTree, boolean isTabulated, @Nullable FetchPlan view, @Nullable String collectionPropertyName) {
-        return reportingWizardApi.createReportRegionByView(entityTree, isTabulated, view, collectionPropertyName);
+        return reportingWizard.createReportRegionByView(entityTree, isTabulated, view, collectionPropertyName);
     }
 
     @Override
     public boolean isEntityAllowedForReportWizard(MetaClass metaClass) {
-        return reportingWizardApi.isEntityAllowedForReportWizard(metaClass);
+        return reportingWizard.isEntityAllowedForReportWizard(metaClass);
     }
 
     @Override
     public boolean isPropertyAllowedForReportWizard(MetaClass metaClass, MetaProperty metaProperty) {
-        return reportingWizardApi.isPropertyAllowedForReportWizard(metaClass, metaProperty);
+        return reportingWizard.isPropertyAllowedForReportWizard(metaClass, metaProperty);
     }
 
     @Override
     public byte[] generateTemplate(ReportData reportData, TemplateFileType templateFileType) throws TemplateGenerationException {
-        TemplateGeneratorApi templateGeneratorApi = new TemplateGenerator(reportData, templateFileType);
-        return templateGeneratorApi.generateTemplate();
+        TemplateGenerator templateGenerator = new TemplateGeneratorImpl(reportData, templateFileType);
+        return templateGenerator.generateTemplate();
     }
 
     @Override

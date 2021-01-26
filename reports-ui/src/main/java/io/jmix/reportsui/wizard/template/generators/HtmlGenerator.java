@@ -23,7 +23,7 @@ import freemarker.template.TemplateException;
 import io.jmix.reports.entity.wizard.RegionProperty;
 import io.jmix.reports.entity.wizard.ReportData;
 import io.jmix.reports.entity.wizard.ReportRegion;
-import io.jmix.reportsui.wizard.ReportingWizardBean;
+import io.jmix.reportsui.wizard.ReportingWizardImpl;
 import io.jmix.reportsui.wizard.template.Generator;
 import io.jmix.reportsui.wizard.template.ReportTemplatePlaceholder;
 
@@ -125,7 +125,7 @@ public class HtmlGenerator implements Generator {
         stringBuilder.append("\n<#assign ").
                 append(bandName).
                 append(" = ").
-                append(ReportingWizardBean.ROOT_BAND_DEFINITION_NAME).
+                append(ReportingWizardImpl.ROOT_BAND_DEFINITION_NAME).
                 append(".bands.").
                 append(bandName).
                 append("><br/>");

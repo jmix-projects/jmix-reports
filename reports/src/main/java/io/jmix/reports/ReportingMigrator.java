@@ -37,7 +37,7 @@ public class ReportingMigrator implements io.jmix.reports.ReportingMigratorMBean
     protected DataManager dataManager;
 
     @Autowired
-    protected ReportingApi reportingApi;
+    protected Reports reports;
 
     @Autowired
     protected FetchPlanRepository fetchPlanRepository;
@@ -55,7 +55,7 @@ public class ReportingMigrator implements io.jmix.reports.ReportingMigratorMBean
         ctx.setQueryString("select r from report_Report r");
         List<Report> resultList = dataManager.loadList(ctx);
         for (Report report : resultList) {
-            reportingApi.storeReportEntity(report);
+            reports.storeReportEntity(report);
         }
         return "Index migrated successfully";
     }

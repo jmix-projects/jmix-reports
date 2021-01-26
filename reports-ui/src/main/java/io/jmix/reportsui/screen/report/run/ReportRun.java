@@ -21,7 +21,6 @@ import io.jmix.core.Id;
 import io.jmix.core.Messages;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.core.security.CurrentAuthentication;
-import io.jmix.reports.app.service.ReportService;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportGroup;
 import io.jmix.reportsui.screen.ReportGuiManager;
@@ -126,7 +125,7 @@ public class ReportRun extends StandardLookup<Report> {
         Report report = reportsTable.getSingleSelected();
         if (report != null) {
             report = dataManager.load(Id.of(report))
-                    .fetchPlan(ReportService.MAIN_VIEW_NAME)
+                    .fetchPlan("report.edit")
                     .one();
             reportGuiManager.runReport(report, ReportRun.this);
         }
