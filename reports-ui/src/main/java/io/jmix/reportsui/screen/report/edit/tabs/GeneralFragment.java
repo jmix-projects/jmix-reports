@@ -3,6 +3,7 @@ package io.jmix.reportsui.screen.report.edit.tabs;
 import io.jmix.core.*;
 import io.jmix.reports.entity.*;
 import io.jmix.reportsui.screen.definition.edit.BandDefinitionEditor;
+import io.jmix.reportsui.screen.template.edit.TemplateEditor;
 import io.jmix.security.constraint.PolicyStore;
 import io.jmix.security.constraint.SecureOperations;
 import io.jmix.ui.Notifications;
@@ -178,8 +179,8 @@ public class GeneralFragment extends ScreenFragment {
         ReportTemplate template = metadata.create(ReportTemplate.class);
         template.setReport(report);
 
-        StandardEditor editor = (StandardEditor) screenBuilders.editor(defaultTemplateField)
-                .withScreenId("report_ReportTemplate.edit")
+        TemplateEditor editor = screenBuilders.editor(defaultTemplateField)
+                .withScreenClass(TemplateEditor.class)
                 .withContainer(templatesDc)
                 .withOpenMode(OpenMode.DIALOG)
                 .editEntity(template)
@@ -188,7 +189,7 @@ public class GeneralFragment extends ScreenFragment {
         editor.addAfterCloseListener(e -> {
             StandardCloseAction standardCloseAction = (StandardCloseAction) e.getCloseAction();
             if (Window.COMMIT_ACTION_ID.equals(standardCloseAction.getActionId())) {
-                ReportTemplate item = (ReportTemplate) editor.getEditedEntity();
+                ReportTemplate item = editor.getEditedEntity();
                 templatesDc.getMutableItems().add(item);
                 report.setDefaultTemplate(item);
                 //Workaround to disable button after default template
@@ -216,8 +217,8 @@ public class GeneralFragment extends ScreenFragment {
         Report report = reportDc.getItem();
         ReportTemplate defaultTemplate = report.getDefaultTemplate();
         if (defaultTemplate != null) {
-            StandardEditor editor = (StandardEditor) screenBuilders.editor(defaultTemplateField)
-                    .withScreenId("report_ReportTemplate.edit")
+            TemplateEditor editor = screenBuilders.editor(defaultTemplateField)
+                    .withScreenClass(TemplateEditor.class)
                     .withOpenMode(OpenMode.DIALOG)
                     .withContainer(templatesDc)
                     .editEntity(defaultTemplate)
@@ -249,8 +250,8 @@ public class GeneralFragment extends ScreenFragment {
         final ReportTemplate defaultTemplate = reportDc.getItem().getDefaultTemplate();
         if (defaultTemplate != null) {
             if (!isTemplateWithoutFile(defaultTemplate)) {
-                FileUploadDialog fileUploadDialog = (FileUploadDialog) screenBuilders.screen(getFragment().getFrameOwner())
-                        .withScreenId("singleFileUploadDialog")
+                FileUploadDialog fileUploadDialog = screenBuilders.screen(getFragment().getFrameOwner())
+                        .withScreenClass(FileUploadDialog.class)
                         .withOpenMode(OpenMode.DIALOG)
                         .build();
 

@@ -78,8 +78,8 @@ public abstract class AbstractPrintFormAction extends AbstractAction {
                 Report reloadedReport = reloadReport(report);
                 ReportInputParameter parameter = getParameterAlias(reloadedReport, inputValueMetaClass);
 
-                ReportRun reportRunScreen = (ReportRun) screenBuilder.screen(screen)
-                        .withScreenId("report_Report.run")
+                ReportRun reportRunScreen = screenBuilder.screen(screen)
+                        .withScreenClass(ReportRun.class)
                         .withOpenMode(OpenMode.DIALOG)
                         .build();
                 reportRunScreen.setReportsParameter(reports);

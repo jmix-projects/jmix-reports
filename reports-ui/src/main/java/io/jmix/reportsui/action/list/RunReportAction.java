@@ -122,8 +122,8 @@ public class RunReportAction extends ListAction {
             hostScreen = UiControllerUtils.getHostScreen((ScreenFragment) screen);
         }
 
-        ReportRun reportRunScreen = (ReportRun) screenBuilders.lookup(Report.class, screen)
-                .withScreenId("report_Report.run")
+        ReportRun reportRunScreen = screenBuilders.lookup(Report.class, screen)
+                .withScreenClass(ReportRun.class)
                 .withOpenMode(OpenMode.DIALOG)
                 .withSelectHandler(reports -> runReports(reports, screen))
                 .build();

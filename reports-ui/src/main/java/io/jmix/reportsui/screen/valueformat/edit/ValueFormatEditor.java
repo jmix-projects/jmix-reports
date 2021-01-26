@@ -188,8 +188,8 @@ public class ValueFormatEditor extends StandardEditor<ReportValueFormat> {
 
     @Subscribe("groovyFullScreenLinkButton")
     protected void showGroovyEditorDialog(Button.ClickEvent event) {
-        ScriptEditorDialog editorDialog = (ScriptEditorDialog) screenBuilders.screen(this)
-                .withScreenId("report_Editor.dialog")
+        ScriptEditorDialog editorDialog = screenBuilders.screen(this)
+                .withScreenClass(ScriptEditorDialog.class)
                 .withOpenMode(OpenMode.DIALOG)
                 .withOptions(new MapScreenOptions(ParamsMap.of(
                         "mode", groovyScriptFieldMode,

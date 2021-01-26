@@ -151,8 +151,8 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
 
     @Subscribe("jsonSourceGroovyCodeLinkBtn")
     protected void showJsonScriptEditorDialog(Button.ClickEvent event) {
-        ScriptEditorDialog editorDialog = (ScriptEditorDialog) screenBuilders.screen(this)
-                .withScreenId("report_Editor.dialog")
+        ScriptEditorDialog editorDialog = screenBuilders.screen(this)
+                .withScreenClass(ScriptEditorDialog.class)
                 .withOpenMode(OpenMode.DIALOG)
                 .withOptions(new MapScreenOptions(ParamsMap.of(
                         "scriptValue", jsonGroovyCodeEditor.getValue(),
@@ -180,8 +180,8 @@ public class BandDefinitionEditor extends ScreenFragment implements Suggester {
 
     @Subscribe("dataSetTextLinkBtn")
     protected void showDataSetScriptEditorDialog(Button.ClickEvent event) {
-        ScriptEditorDialog editorDialog = (ScriptEditorDialog) screenBuilders.screen(this)
-                .withScreenId("report_Editor.dialog")
+        ScriptEditorDialog editorDialog = screenBuilders.screen(this)
+                .withScreenClass(ScriptEditorDialog.class)
                 .withOpenMode(OpenMode.DIALOG)
                 .withOptions(new MapScreenOptions(ParamsMap.of(
                         "mode", dataSetScriptFieldMode,

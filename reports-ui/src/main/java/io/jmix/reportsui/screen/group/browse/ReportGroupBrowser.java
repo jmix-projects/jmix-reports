@@ -21,8 +21,6 @@ import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportGroup;
 import io.jmix.ui.Notifications;
 import io.jmix.ui.action.Action;
-import io.jmix.ui.action.list.CreateAction;
-import io.jmix.ui.action.list.EditAction;
 import io.jmix.ui.action.list.RemoveAction;
 import io.jmix.ui.component.Table;
 import io.jmix.ui.navigation.Route;
@@ -39,12 +37,6 @@ public class ReportGroupBrowser extends StandardLookup<ReportGroup> {
 
     @Autowired
     protected Table<ReportGroup> reportGroupsTable;
-
-    @Named("reportGroupsTable.create")
-    protected CreateAction<ReportGroup> createAction;
-
-    @Named("reportGroupsTable.edit")
-    protected EditAction<ReportGroup> editAction;
 
     @Named("reportGroupsTable.remove")
     protected RemoveAction<ReportGroup> removeAction;
@@ -63,12 +55,6 @@ public class ReportGroupBrowser extends StandardLookup<ReportGroup> {
 
     @Autowired
     protected FetchPlanRepository fetchPlanRepository;
-
-    @Subscribe
-    protected void onInit(InitEvent event) {
-        createAction.setOpenMode(OpenMode.DIALOG);
-        editAction.setOpenMode(OpenMode.DIALOG);
-    }
 
     @Subscribe("reportGroupsTable.remove")
     protected void onReportGroupsTableRemove(Action.ActionPerformedEvent event) {

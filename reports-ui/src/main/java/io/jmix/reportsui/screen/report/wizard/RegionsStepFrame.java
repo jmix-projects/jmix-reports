@@ -91,8 +91,8 @@ public class RegionsStepFrame extends StepFrame {
             lookupParams.put("collectionsOnly", Boolean.TRUE);
             lookupParams.put("persistentOnly", ReportType.LIST_OF_ENTITIES_WITH_QUERY == wizard.reportTypeRadioButtonGroup.getValue());
 
-            EntityTreeLookup entityTreeLookup = (EntityTreeLookup) wizard.screenBuilders.lookup(EntityTreeNode.class, wizard)
-                    .withScreenId("report_ReportEntityTree.lookup")
+            EntityTreeLookup entityTreeLookup = wizard.screenBuilders.lookup(EntityTreeNode.class, wizard)
+                    .withScreenClass(EntityTreeLookup.class)
                     .withOpenMode(OpenMode.DIALOG)
                     .withOptions(new MapScreenOptions(lookupParams))
                     .withSelectHandler(items -> {
@@ -105,8 +105,8 @@ public class RegionsStepFrame extends StepFrame {
                             editorParams.put("rootEntity", regionPropertiesRootNode);
                             item.setRegionPropertiesRootNode(regionPropertiesRootNode);
 
-                            RegionEditor regionEditor = (RegionEditor) wizard.screenBuilders.editor(ReportRegion.class, wizard)
-                                    .withScreenId("report_Region.edit")
+                            RegionEditor regionEditor = wizard.screenBuilders.editor(ReportRegion.class, wizard)
+                                    .withScreenClass(RegionEditor.class)
                                     .editEntity(item)
                                     .withOpenMode(OpenMode.DIALOG)
                                     .withContainer(wizard.reportRegionsDc)
@@ -130,8 +130,8 @@ public class RegionsStepFrame extends StepFrame {
             editorParams.put("scalarOnly", Boolean.TRUE);
             editorParams.put("persistentOnly", ReportType.LIST_OF_ENTITIES_WITH_QUERY == wizard.reportTypeRadioButtonGroup.getValue());
 
-            RegionEditor regionEditor = (RegionEditor) wizard.screenBuilders.editor(ReportRegion.class, wizard)
-                    .withScreenId("report_Region.edit")
+            RegionEditor regionEditor = wizard.screenBuilders.editor(ReportRegion.class, wizard)
+                    .withScreenClass(RegionEditor.class)
                     .editEntity(item)
                     .withOpenMode(OpenMode.DIALOG)
                     .withContainer(wizard.reportRegionsDc)
@@ -323,8 +323,8 @@ public class RegionsStepFrame extends StepFrame {
                 editorParams.put("scalarOnly", Boolean.TRUE);
                 editorParams.put("persistentOnly", ReportType.LIST_OF_ENTITIES_WITH_QUERY == wizard.reportTypeRadioButtonGroup.getValue());
 
-                RegionEditor regionEditor = (RegionEditor) wizard.screenBuilders.editor(ReportRegion.class, wizard)
-                        .withScreenId("report_Region.edit")
+                RegionEditor regionEditor = wizard.screenBuilders.editor(ReportRegion.class, wizard)
+                        .withScreenClass(RegionEditor.class)
                         .editEntity(wizard.regionsTable.getSingleSelected())
                         .withContainer(wizard.reportRegionsDc)
                         .withOpenMode(OpenMode.DIALOG)

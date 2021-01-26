@@ -510,8 +510,8 @@ public class TemplateEditor extends StandardEditor<ReportTemplate> {
 
     @Subscribe("fullScreenLinkButton")
     protected void showGroovyScriptEditorDialog(Button.ClickEvent event) {
-        ScriptEditorDialog editorDialog = (ScriptEditorDialog) screenBuilders.screen(this)
-                .withScreenId("report_Editor.dialog")
+        ScriptEditorDialog editorDialog = screenBuilders.screen(this)
+                .withScreenClass(ScriptEditorDialog.class)
                 .withOpenMode(OpenMode.DIALOG)
                 .withOptions(new MapScreenOptions(ParamsMap.of(
                         "mode", SourceCodeEditor.Mode.Groovy,

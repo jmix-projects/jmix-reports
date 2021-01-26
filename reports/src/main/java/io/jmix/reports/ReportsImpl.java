@@ -732,7 +732,7 @@ public class ReportsImpl implements Reports {
         }
 
         return (T) dataManager.load(entity.getClass())
-                .all()
+                .id(Id.of(entity))
                 .fetchPlan(viewName)
                 .one();
     }
