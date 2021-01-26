@@ -30,8 +30,7 @@
 
     <dialogMode height="600"
                 width="800"
-                resizable="true"
-    modal="true"/>
+                resizable="true"/>
 
     <facets>
         <dataLoadCoordinator auto="true"/>

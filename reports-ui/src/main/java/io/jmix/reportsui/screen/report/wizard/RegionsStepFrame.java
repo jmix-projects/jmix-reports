@@ -91,8 +91,8 @@ public class RegionsStepFrame extends StepFrame {
             lookupParams.put("collectionsOnly", Boolean.TRUE);
             lookupParams.put("persistentOnly", ReportType.LIST_OF_ENTITIES_WITH_QUERY == wizard.reportTypeRadioButtonGroup.getValue());
 
-            EntityTreeLookup entityTreeLookup = wizard.screenBuilders.lookup(EntityTreeNode.class, wizard)
-                    .withScreenClass(EntityTreeLookup.class)
+            EntityTreeLookup entityTreeLookup = (EntityTreeLookup) wizard.screenBuilders.lookup(EntityTreeNode.class, wizard)
+                    .withScreenId("report_ReportEntityTree.lookup")
                     .withOpenMode(OpenMode.DIALOG)
                     .withOptions(new MapScreenOptions(lookupParams))
                     .withSelectHandler(items -> {

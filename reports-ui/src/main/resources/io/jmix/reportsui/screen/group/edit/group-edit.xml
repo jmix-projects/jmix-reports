@@ -30,7 +30,9 @@
         <dataLoadCoordinator auto="true"/>
     </facets>
 
-    <dialogMode width="400"/>
+    <dialogMode width="400"
+                modal="true"
+                forceDialog="true"/>
 
     <layout spacing="true">
         <form id="groupProps" dataContainer="groupDc" width="100%">
