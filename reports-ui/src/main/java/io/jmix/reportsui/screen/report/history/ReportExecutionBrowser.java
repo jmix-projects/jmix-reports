@@ -18,7 +18,8 @@ package io.jmix.reportsui.screen.report.history;
 
 
 import io.jmix.core.CoreProperties;
-import io.jmix.localfs.LocalFileStorage;
+import io.jmix.core.FileStorage;
+import io.jmix.core.FileStorageLocator;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportExecution;
 import io.jmix.ui.UiProperties;
@@ -59,12 +60,15 @@ public class ReportExecutionBrowser extends StandardLookup<ReportExecution> {
     @Autowired
     protected SecondsToTextFormatter durationFormatter;
     @Autowired
-    protected LocalFileStorage localFileStorage;
+    protected FileStorageLocator fileStorageLocator;
     @Autowired
     protected UiProperties uiProperties;
     @Autowired
     protected CoreProperties coreProperties;
 
+    protected FileStorage fileStorage;
+
+    //todo
     @WindowParam(name = REPORTS_PARAMETER)
     protected List<Report> filterByReports;
 
@@ -141,7 +145,7 @@ public class ReportExecutionBrowser extends StandardLookup<ReportExecution> {
             ReportExecution execution = executionsTable.getSingleSelected();
             if (execution != null && execution.getFileUri() != null) {
                 URI uri = execution.getFileUri();
-                String fileName = localFileStorage.getFileName(uri);
+                String fileName = getFileStorage().getFileName(uri);
                 try {
                     downloader.download(new ByteArrayDataProvider(
                             IOUtils.toByteArray(uri),
@@ -152,5 +156,12 @@ public class ReportExecutionBrowser extends StandardLookup<ReportExecution> {
                 }
             }
         }
+    }
+
+    protected FileStorage getFileStorage() {
+        if (fileStorage == null) {
+            fileStorage = fileStorageLocator.getDefault();
+        }
+        return fileStorage;
     }
 }

@@ -28,7 +28,6 @@ import io.jmix.core.security.AccessDeniedException;
 import io.jmix.core.security.EntityOp;
 import io.jmix.core.security.PermissionType;
 import io.jmix.data.PersistenceHints;
-import io.jmix.localfs.LocalFileStorage;
 import io.jmix.reports.app.ParameterPrototype;
 import io.jmix.reports.converter.GsonConverter;
 import io.jmix.reports.converter.XStreamConverter;
@@ -50,7 +49,6 @@ import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.persistence.EntityManager;
@@ -75,7 +73,7 @@ public class ReportsImpl implements Reports {
     @Autowired
     protected Metadata metadata;
     @Autowired
-    protected LocalFileStorage localFileStorage;
+    protected FileStorageLocator fileStorageLocator;
     @Autowired
     protected TimeSource timeSource;
     @Autowired
@@ -88,6 +86,8 @@ public class ReportsImpl implements Reports {
     protected SecureOperations secureOperations;
     @Autowired
     protected PolicyStore policyStore;
+
+    protected FileStorage fileStorage;
 
     //    @Autowired
 //    protected UserSessionSource userSessionSource;
@@ -568,8 +568,8 @@ public class ReportsImpl implements Reports {
     }
 
     protected URI saveReport(byte[] reportData, String fileName, String ext) {
-        URI reference = localFileStorage.createReference(fileName + "." + ext);
-        localFileStorage.saveStream(reference, new ByteArrayInputStream(reportData));
+        URI reference = (URI) getFileStorage().createReference(fileName + "." + ext);
+        getFileStorage().saveStream(reference, new ByteArrayInputStream(reportData));
 
 //        transaction.executeWithoutResult(status -> {
 //            em.persist(file);
@@ -793,5 +793,12 @@ public class ReportsImpl implements Reports {
         cal.set(Calendar.MONTH, 0);
         cal.set(Calendar.DAY_OF_MONTH, 1);
         return cal.getTime();
+    }
+
+    protected FileStorage getFileStorage() {
+        if (fileStorage == null) {
+            fileStorage = fileStorageLocator.getDefault();
+        }
+        return fileStorage;
     }
 }

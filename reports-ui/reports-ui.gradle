@@ -33,7 +33,6 @@ dependencies {
     api 'io.jmix.security:jmix-security'
 //    api 'io.jmix.dynattr:jmix-dynattr'
 //    api 'io.jmix.dynattr:jmix-dynattr-ui'
-    api 'io.jmix.localfs:jmix-localfs'
 
     api ('com.haulmont.yarg:yarg-api') {
         exclude group: 'org.codehaus.groovy', module: 'groovy-all'

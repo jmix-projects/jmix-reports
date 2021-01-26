@@ -10,7 +10,6 @@ import com.haulmont.yarg.reporting.ReportOutputDocument;
 import com.haulmont.yarg.structure.ReportOutputType;
 import io.jmix.core.*;
 import io.jmix.core.security.CurrentAuthentication;
-import io.jmix.localfs.LocalFileStorage;
 import io.jmix.reports.entity.JmixReportOutputType;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportExecution;
@@ -50,9 +49,11 @@ public class ReportExecutionHistoryRecorderImpl implements ReportExecutionHistor
     @PersistenceContext
     protected EntityManager entityManager;
     @Autowired
-    protected LocalFileStorage localFileStorage;
+    protected FileStorageLocator fileStorageLocator;
     @Autowired
     protected EntityStates entityStates;
+
+    protected FileStorage fileStorage;
 
     @Override
     public ReportExecution startExecution(Report report, Map<String, Object> params) {
@@ -149,8 +150,8 @@ public class ReportExecutionHistoryRecorderImpl implements ReportExecutionHistor
     }
 
     protected URI saveDocument(ReportOutputDocument document) throws FileStorageException {
-        URI reference = localFileStorage.createReference(document.getDocumentName());
-        localFileStorage.saveStream(reference, new ByteArrayInputStream(document.getContent()));
+        URI reference = (URI) getFileStorage().createReference(document.getDocumentName());
+        getFileStorage().saveStream(reference, new ByteArrayInputStream(document.getContent()));
         return reference;
     }
 
@@ -219,7 +220,7 @@ public class ReportExecutionHistoryRecorderImpl implements ReportExecutionHistor
 
         for (URI path : paths) {
             try {
-                localFileStorage.removeFile(path);
+                getFileStorage().removeFile(path);
             } catch (FileStorageException e) {
                 log.error("Failed to remove document from storage " + path, e);
             }
@@ -280,5 +281,12 @@ public class ReportExecutionHistoryRecorderImpl implements ReportExecutionHistor
         });
         deleteFileAndFiles(paths);
         return deleted;
+    }
+
+    protected FileStorage getFileStorage() {
+        if (fileStorage == null) {
+            fileStorage = fileStorageLocator.getDefault();
+        }
+        return fileStorage;
     }
 }

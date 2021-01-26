@@ -28,7 +28,6 @@ import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateScalarModel;
 import io.jmix.core.*;
-import io.jmix.localfs.LocalFileStorage;
 import io.jmix.reports.ReportsProperties;
 import io.jmix.ui.upload.TemporaryStorage;
 import org.apache.commons.io.FileUtils;
@@ -81,9 +80,11 @@ public class JmixHtmlFormatter extends HtmlFormatter {
     @Autowired
     protected Metadata metadata;
     @Autowired
-    protected LocalFileStorage localFileStorage;
+    protected FileStorageLocator fileStorageLocator;
     @Autowired
     protected TemporaryStorage temporaryStorage;
+
+    protected FileStorage fileStorage;
 
     public JmixHtmlFormatter(FormatterFactoryInput formatterFactoryInput) {
         super(formatterFactoryInput);
@@ -251,7 +252,7 @@ public class JmixHtmlFormatter extends HtmlFormatter {
 //                }
 
                 try {
-                    return localFileStorage.openStream(uriFile);
+                    return getFileStorage().openStream(uriFile);
                 } catch (FileStorageException e) {
                     throw wrapWithReportingException(
                             format("An error occurred while loading file with id [%s] from file storage", id), e);
@@ -372,5 +373,12 @@ public class JmixHtmlFormatter extends HtmlFormatter {
 
     protected void throwIncorrectArgType(String methodName, int argIdx, String type) throws TemplateModelException {
         throw new TemplateModelException(String.format("Incorrect argument[%s] type for method %s. Expected type %s", argIdx, methodName, type));
+    }
+
+    protected FileStorage getFileStorage() {
+        if (fileStorage == null) {
+            fileStorage = fileStorageLocator.getDefault();
+        }
+        return fileStorage;
     }
 }

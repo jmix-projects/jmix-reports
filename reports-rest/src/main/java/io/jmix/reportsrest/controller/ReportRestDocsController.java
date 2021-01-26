@@ -36,7 +36,7 @@ public class ReportRestDocsController {
 
     @RequestMapping(value = "/swagger.yaml", method = RequestMethod.GET, produces = "application/yaml")
     public String getSwaggerYaml() {
-        return resources.getResourceAsString("classpath:io/jmix/reports/rest-api-swagger.yaml");
+        return resources.getResourceAsString("classpath:io/jmix/reportsrest/rest-api-swagger.yaml");
     }
 
     @RequestMapping(value = "/swagger.json", method = RequestMethod.GET, produces = "application/json")

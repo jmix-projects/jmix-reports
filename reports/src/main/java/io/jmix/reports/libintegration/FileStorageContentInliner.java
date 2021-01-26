@@ -19,8 +19,9 @@ package io.jmix.reports.libintegration;
 import com.haulmont.yarg.exception.ReportFormattingException;
 import com.haulmont.yarg.formatters.impl.inline.AbstractInliner;
 import io.jmix.core.DataManager;
+import io.jmix.core.FileStorage;
+import io.jmix.core.FileStorageLocator;
 import io.jmix.core.Metadata;
-import io.jmix.localfs.LocalFileStorage;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -40,7 +41,9 @@ public class FileStorageContentInliner extends AbstractInliner {
     protected DataManager dataManager;
 
     @Autowired
-    protected LocalFileStorage localFileStorage;
+    protected FileStorageLocator fileStorageLocator;
+
+    protected FileStorage fileStorage;
 
     public FileStorageContentInliner() {
         tagPattern = Pattern.compile(REGULAR_EXPRESSION, Pattern.CASE_INSENSITIVE);
@@ -61,10 +64,17 @@ public class FileStorageContentInliner extends AbstractInliner {
 //            } else {
 //                file = dataManager.load(new LoadContext(metadata.getClass(FileDescriptor.class)).setId(UuidProvider.fromString(paramValue.toString())));
 //            }
-            byte[] bytes = IOUtils.toByteArray(localFileStorage.openStream(uri));
+            byte[] bytes = IOUtils.toByteArray(getFileStorage().openStream(uri));
             return bytes;
         } catch (IOException e) {
             throw new ReportFormattingException(String.format("Unable to get image from file storage. File id [%s]", paramValue), e);
         }
+    }
+
+    protected FileStorage getFileStorage() {
+        if (fileStorage == null) {
+            fileStorage = fileStorageLocator.getDefault();
+        }
+        return fileStorage;
     }
 }

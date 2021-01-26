@@ -31,7 +31,6 @@ dependencies {
     api 'io.jmix.security:jmix-security-data'
     api 'io.jmix.security:jmix-security-ui-starter'
 //    api 'io.jmix.dynattr:jmix-dynattr'
-    api 'io.jmix.localfs:jmix-localfs'
 
     api 'com.thoughtworks.xstream:xstream'
 
