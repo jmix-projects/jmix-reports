@@ -23,7 +23,6 @@ import io.jmix.security.model.EntityPolicyAction;
 import io.jmix.security.role.annotation.EntityAttributePolicy;
 import io.jmix.security.role.annotation.EntityPolicy;
 import io.jmix.security.role.annotation.Role;
-import io.jmix.securityui.role.annotation.ScreenPolicy;
 
 import static io.jmix.security.model.EntityAttributePolicyAction.MODIFY;
 
@@ -35,14 +34,6 @@ public interface ReportsMinimalRoleDefinition {
 
     String ROLE_NAME = "system-reports-minimal";
 
-    @ScreenPolicy(screenIds = {
-            "report_inputParameters",
-            "report_Report.run",
-            "report_showReportTable",
-            "report_showPivotTable",
-            "report_showChart",
-            "commonLookup"
-    })
     @EntityPolicy(entityClass = Report.class, actions = {EntityPolicyAction.READ})
     @EntityPolicy(entityClass = ReportGroup.class, actions = {EntityPolicyAction.READ})
     @EntityPolicy(entityClass = ReportTemplate.class, actions = {EntityPolicyAction.READ})
@@ -50,5 +41,4 @@ public interface ReportsMinimalRoleDefinition {
     @EntityAttributePolicy(entityClass = ReportGroup.class, attributes = {"title", "localeNames"}, action = MODIFY)
     @EntityAttributePolicy(entityClass = ReportTemplate.class, attributes = {"code", "name", "customDefinition", "custom", "alterable"}, action = MODIFY)
     void access();
-
 }

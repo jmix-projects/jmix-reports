@@ -21,7 +21,6 @@ import com.haulmont.yarg.structure.ReportOutputType;
 import io.jmix.core.FileTypesHelper;
 import io.jmix.core.common.util.URLEncodeUtils;
 import io.jmix.reports.ReportPrintHelper;
-import io.jmix.ui.download.DownloadFormat;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;
@@ -90,7 +89,7 @@ public class ReportRestController {
     }
 
     protected String getContentType(ReportOutputType outputType) {
-        DownloadFormat exportFormat = ReportPrintHelper.getExportFormat(outputType);
-        return exportFormat == null ? FileTypesHelper.DEFAULT_MIME_TYPE : exportFormat.getContentType();
+        String mimeType = ReportPrintHelper.getMimeType(outputType);
+        return mimeType == null ? FileTypesHelper.DEFAULT_MIME_TYPE : mimeType;
     }
 }

@@ -21,7 +21,6 @@ import io.jmix.core.*;
 import io.jmix.core.common.util.ParamsMap;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.core.security.CurrentAuthentication;
-import io.jmix.reports.ReportPrintHelper;
 import io.jmix.reports.ReportSecurityManager;
 import io.jmix.reports.Reports;
 import io.jmix.reports.app.ParameterPrototype;
@@ -339,7 +338,7 @@ public class ReportGuiManager {
             com.haulmont.yarg.structure.ReportOutputType finalOutputType =
                     (outputType != null) ? outputType.getOutputType() : document.getReportOutputType();
 
-            DownloadFormat exportFormat = ReportPrintHelper.getExportFormat(finalOutputType);
+            DownloadFormat exportFormat = DownloadFormat.getByExtension(finalOutputType.getId());
             String documentName = isNotBlank(outputFileName) ? outputFileName : document.getDocumentName();
 
             downloader.download(new ByteArrayDataProvider(byteArr, uiProperties.getSaveExportedByteArrayDataThresholdBytes(), coreProperties.getTempDir()), documentName, exportFormat);

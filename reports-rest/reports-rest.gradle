@@ -26,11 +26,6 @@ dependencies {
     api project(':reports')
 
     api 'io.jmix.core:jmix-core'
-    api 'io.jmix.data:jmix-data'
-    api 'io.jmix.ui:jmix-ui-data'
-    api 'io.jmix.rest:jmix-rest'
-    api 'io.jmix.security:jmix-security'
-//    api 'io.jmix.dynattr:jmix-dynattr'
 
     api ('com.haulmont.yarg:yarg-api') {
         exclude group: 'org.codehaus.groovy', module: 'groovy-all'

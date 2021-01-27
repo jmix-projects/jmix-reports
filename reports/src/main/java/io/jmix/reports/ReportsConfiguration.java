@@ -14,8 +14,8 @@ import com.haulmont.yarg.util.groovy.Scripting;
 import io.jmix.core.CoreConfiguration;
 import io.jmix.core.CoreProperties;
 import io.jmix.core.annotation.JmixModule;
+import io.jmix.data.DataConfiguration;
 import io.jmix.reports.libintegration.*;
-import io.jmix.ui.UiConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
@@ -29,7 +29,7 @@ import java.util.Map;
 @Configuration
 @ComponentScan
 @ConfigurationPropertiesScan
-@JmixModule(dependsOn = {CoreConfiguration.class, UiConfiguration.class})
+@JmixModule(dependsOn = {CoreConfiguration.class, DataConfiguration.class})
 @PropertySource(name = "io.jmix.reports", value = "classpath:/io/jmix/reports/module.properties")
 public class ReportsConfiguration {
 

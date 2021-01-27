@@ -41,6 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.inject.Named;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -48,6 +49,8 @@ import java.util.Map;
 @UiDescriptor("report-edit.xml")
 @EditedEntityContainer("reportDc")
 public class ReportEditor extends StandardEditor<Report> {
+
+    public static final String ROOT_BAND = "Root";
 
     @Named("generalFragment.bandEditor")
     protected BandDefinitionEditor bandEditor;
@@ -139,15 +142,17 @@ public class ReportEditor extends StandardEditor<Report> {
     @Subscribe
     protected void initNewItem(InitEntityEvent<Report> event) {
         Report report = event.getEntity();
-        report.setReportType(ReportType.SIMPLE);
 
-        BandDefinition rootDefinition = metadata.create(BandDefinition.class);
-        rootDefinition.setName("Root");
-        rootDefinition.setPosition(0);
-        report.setBands(new HashSet<>());
-        report.getBands().add(rootDefinition);
+        if (report.getReportType() == null) {
+            report.setReportType(ReportType.SIMPLE);
+        }
 
-        rootDefinition.setReport(report);
+        if (report.getBands().isEmpty()) {
+            BandDefinition rootDefinition = createRootBandDefinition(report);
+
+            report.setBands(new HashSet<>());
+            report.getBands().add(rootDefinition);
+        }
 
         groupsDl.load();
         Collection<ReportGroup> reportGroups = groupsDc.getItems();
@@ -155,6 +160,14 @@ public class ReportEditor extends StandardEditor<Report> {
             ReportGroup reportGroup = reportGroups.iterator().next();
             report.setGroup(groupsDc.getItem(reportGroup.getId()));
         }
+    }
+
+    protected BandDefinition createRootBandDefinition(Report report) {
+        BandDefinition rootDefinition = metadata.create(BandDefinition.class);
+        rootDefinition.setName(ROOT_BAND);
+        rootDefinition.setPosition(0);
+        rootDefinition.setReport(report);
+        return rootDefinition;
     }
 
     @Subscribe

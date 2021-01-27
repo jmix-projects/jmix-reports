@@ -25,11 +25,9 @@ dependencies {
 
     api 'io.jmix.core:jmix-core'
     api 'io.jmix.data:jmix-data'
-    api 'io.jmix.rest:jmix-rest'
-    api 'io.jmix.ui:jmix-ui'
     api 'io.jmix.security:jmix-security'
     api 'io.jmix.security:jmix-security-data'
-    api 'io.jmix.security:jmix-security-ui-starter'
+    api 'io.jmix.security:jmix-security-ui'
 //    api 'io.jmix.dynattr:jmix-dynattr'
 
     api 'com.thoughtworks.xstream:xstream'

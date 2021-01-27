@@ -29,7 +29,6 @@ import freemarker.template.TemplateModelException;
 import freemarker.template.TemplateScalarModel;
 import io.jmix.core.*;
 import io.jmix.reports.ReportsProperties;
-import io.jmix.ui.upload.TemporaryStorage;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -47,7 +46,6 @@ import org.xhtmlrenderer.resource.ImageResource;
 
 import java.io.*;
 import java.lang.reflect.Field;
-import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
@@ -76,13 +74,9 @@ public class JmixHtmlFormatter extends HtmlFormatter {
     @Autowired
     protected DataManager dataManager;
     @Autowired
-    protected FetchPlanRepository fetchPlanRepository;
-    @Autowired
     protected Metadata metadata;
     @Autowired
     protected FileStorageLocator fileStorageLocator;
-    @Autowired
-    protected TemporaryStorage temporaryStorage;
 
     protected FileStorage fileStorage;
 
@@ -237,7 +231,7 @@ public class JmixHtmlFormatter extends HtmlFormatter {
                 String uuidString = StringUtils.substring(uri, FS_PROTOCOL_PREFIX.length());
 
                 UUID id = UUID.fromString(uuidString);
-                URI uriFile = temporaryStorage.getFile(id).toURI();
+//                URI uriFile = temporaryStorage.getFile(id).toURI();
 
 //                LoadContext<FileDescriptor> loadContext = new LoadContext(metadata.getClass(FileDescriptor.class));
 //                loadContext.setFetchPlan(fetchPlanRepository.getFetchPlan(FileDescriptor.class, FetchPlan.LOCAL));
@@ -252,7 +246,7 @@ public class JmixHtmlFormatter extends HtmlFormatter {
 //                }
 
                 try {
-                    return getFileStorage().openStream(uriFile);
+                    return getFileStorage().openStream(null);
                 } catch (FileStorageException e) {
                     throw wrapWithReportingException(
                             format("An error occurred while loading file with id [%s] from file storage", id), e);
