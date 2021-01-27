@@ -57,7 +57,8 @@ import static java.lang.String.format;
 @Component("report_JmixHtmlFormatter")
 @Scope(BeanDefinition.SCOPE_PROTOTYPE)
 public class JmixHtmlFormatter extends HtmlFormatter {
-    protected static final String CUBA_FONTS_DIR = "/cuba/fonts";
+    //todo
+    protected static final String JMIX_FONTS_DIR = "/jmix/fonts";
 
     public static final String FS_PROTOCOL_PREFIX = "fs://";
     public static final String WEB_APP_PREFIX = "web://";
@@ -119,7 +120,7 @@ public class JmixHtmlFormatter extends HtmlFormatter {
     }
 
     protected void loadFonts(ITextRenderer renderer) {
-        String fontsPath = coreProperties.getConfDir() + CUBA_FONTS_DIR;
+        String fontsPath = coreProperties.getConfDir() + JMIX_FONTS_DIR;
 
         File fontsDir = new File(fontsPath);
 

@@ -435,28 +435,6 @@ public class ReportWizardCreator extends Screen implements MainWizardFrame<Scree
         return report;
     }
 
-    /**
-     * Dead code. Must to be tested after platform fixes in com.haulmont.cuba.web.WebWindowManager
-     * Web modal editor window always closed forced, therefore that preClose method is not called
-     * <p>
-     * Confirm closing without save if regions are created
-     */
-    //todo
-    //@Override
-    public boolean preClose(String actionId) {
-        if (!COMMIT_ACTION_ID.equals(actionId) && reportRegionsDc.getItems() != null) {
-            dialogs.createOptionDialog()
-                    .withCaption(messages.getMessage("dialogs.Confirmation"))
-                    .withMessage(messages.getMessage("interruptConfirm"))
-                    .withActions(
-                            new DialogAction(DialogAction.Type.YES).withHandler(e ->
-                                    ReportWizardCreator.this.close(WINDOW_CLOSE_ACTION)),
-                            new DialogAction(DialogAction.Type.NO, Action.Status.PRIMARY)
-                    );
-        }
-        return false;
-    }
-
     //todo
     public String getMessage(String key) {
         return ""/*super.getMessage(key)*/;

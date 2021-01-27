@@ -32,7 +32,6 @@ import io.jmix.ui.component.autocomplete.Suggestion;
 import io.jmix.ui.model.InstanceContainer;
 import io.jmix.ui.screen.*;
 import io.jmix.ui.sys.ScreensHelper;
-import io.jmix.ui.theme.ThemeConstants;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -121,9 +120,6 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
 
     @Autowired
     protected PolicyStore policyStore;
-
-    @Autowired
-    protected ThemeConstants themeConstants;
 
     @Autowired
     protected Reports reports;
@@ -254,10 +250,10 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
 
     protected void initCodeEditors() {
         lookupWhere.setSuggester((source, text, cursorPosition) -> requestHint(lookupWhere, cursorPosition));
-        lookupWhere.setHeight(themeConstants.get("cuba.gui.customConditionFrame.whereField.height"));
+        lookupWhere.setHeight("70px");
 
         lookupJoin.setSuggester((source, text, cursorPosition) -> requestHint(lookupJoin, cursorPosition));
-        lookupJoin.setHeight(themeConstants.get("cuba.gui.customConditionFrame.joinField.height"));
+        lookupJoin.setHeight("70px");
     }
 
     protected void initScreensLookup() {

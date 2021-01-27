@@ -2,12 +2,12 @@ swagger: '2.0'
 
 info:
   version: "6.10"
-  title: CUBA Platform Reports REST API
+  title: Jmix Reports REST API
   description: |
 
     ## General Overview
 
-    CUBA Platform Reports REST API provides the following functionality:
+    Jmix Reports REST API provides the following functionality:
 
     * Getting list of avaliable reports
     * Getting report metadata (parameters, templates)
