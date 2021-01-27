@@ -211,14 +211,12 @@ public class ParameterFieldCreator {
         @Override
         public Field createField(ReportInputParameter parameter) {
             boolean isLookup = Boolean.TRUE.equals(parameter.getLookup());
-            EntityPicker field;
             MetaClass entityMetaClass = metadata.getClass(parameter.getEntityMetaClass());
 
-            if (isLookup) {
-                field = createEntityComboBox(parameter, entityMetaClass);
-            } else {
-                field = createEntityPicker();
-            }
+            EntityPicker field = isLookup
+                    ? createEntityComboBox(parameter, entityMetaClass)
+                    : createEntityPicker();
+
             field.setMetaClass(entityMetaClass);
 
             LookupAction pickerLookupAction = (LookupAction) actions.create(LookupAction.ID);
@@ -242,7 +240,12 @@ public class ParameterFieldCreator {
 
         protected EntityPicker createEntityComboBox(ReportInputParameter parameter, MetaClass entityMetaClass) {
             EntityComboBox field = uiComponents.create(EntityComboBox.class);
+            CollectionContainer collectionContainer = getCollectionContainer(parameter, entityMetaClass);
+            field.setOptionsContainer(collectionContainer);
+            return field;
+        }
 
+        protected CollectionContainer getCollectionContainer(ReportInputParameter parameter, MetaClass entityMetaClass) {
             FetchPlan fetchPlan = fetchPlans.builder(entityMetaClass.getJavaClass())
                     .addFetchPlan(FetchPlan.INSTANCE_NAME)
                     .build();
@@ -250,23 +253,30 @@ public class ParameterFieldCreator {
             CollectionContainer collectionContainer = factory.createCollectionContainer(entityMetaClass.getJavaClass());
             collectionContainer.setFetchPlan(fetchPlan);
 
-            CollectionLoader collectionLoader = factory.createCollectionLoader();
-            collectionLoader.setContainer(collectionContainer);
+            CollectionLoader loader = factory.createCollectionLoader();
+            loader.setContainer(collectionContainer);
 
+            String query = createQueryString(entityMetaClass, parameter);
+            loader.setQuery(query);
+            loader.load();
+            return collectionContainer;
+        }
+
+        protected String createQueryString(MetaClass entityMetaClass, ReportInputParameter parameter) {
             String whereClause = parameter.getLookupWhere();
             String joinClause = parameter.getLookupJoin();
+
+            String query = String.format("select e from %s e", entityMetaClass.getName());
+
             if (!Strings.isNullOrEmpty(whereClause)) {
-                String query = String.format("select e from %s e", entityMetaClass.getName());
                 QueryTransformer queryTransformer = queryTransformerFactory.transformer(query);
                 queryTransformer.addWhere(whereClause);
                 if (!Strings.isNullOrEmpty(joinClause)) {
                     queryTransformer.addJoin(joinClause);
                 }
                 query = queryTransformer.getResult();
-                collectionLoader.setQuery(query);
             }
-            field.setOptionsContainer(collectionContainer);
-            return field;
+            return query;
         }
     }
 
@@ -277,20 +287,32 @@ public class ParameterFieldCreator {
             TagPicker tagPicker = uiComponents.create(TagPicker.class);
             MetaClass entityMetaClass = metadata.getClass(parameter.getEntityMetaClass());
 
-            CollectionContainer collectionContainer = factory.createCollectionContainer(entityMetaClass.getJavaClass());
-            FetchPlan fetchPlan = fetchPlans.builder(entityMetaClass.getJavaClass())
-                    .addFetchPlan(FetchPlan.LOCAL)
-                    .build();
-
-            collectionContainer.setFetchPlan(fetchPlan);
-            factory.createCollectionLoader().setContainer(collectionContainer);
+            CollectionContainer collectionContainer = createCollectionContainer(entityMetaClass);
 
             ContainerOptions options = new ContainerOptions(collectionContainer);
 
             tagPicker.setOptions(options);
             tagPicker.setEditable(true);
             tagPicker.setHeight("120px");
+            tagPicker.setMetaClass(entityMetaClass);
 
+            TagLookupAction tagLookupAction = createTagLookupAction(parameter, tagPicker);
+            tagPicker.addAction(tagLookupAction);
+
+            ValueClearAction valueClearAction = createValueClearAction();
+            tagPicker.addAction(valueClearAction);
+
+            tagPicker.setInlineTags(true);
+
+            return tagPicker;
+        }
+
+        protected ValueClearAction createValueClearAction() {
+            ValueClearAction valueClearAction = (ValueClearAction) actions.create(ValueClearAction.ID);
+            return valueClearAction;
+        }
+
+        protected TagLookupAction createTagLookupAction(ReportInputParameter parameter, TagPicker tagPicker) {
             TagLookupAction tagLookupAction = (TagLookupAction) actions.create(TagLookupAction.ID);
             tagLookupAction.setTagPicker(tagPicker);
             tagLookupAction.setMultiSelect(true);
@@ -299,14 +321,24 @@ public class ParameterFieldCreator {
             if (StringUtils.isNotEmpty(screen)) {
                 tagLookupAction.setScreenId(screen);
             }
-            tagPicker.addAction(tagLookupAction);
+            return tagLookupAction;
+        }
 
-            ValueClearAction valueClearAction = (ValueClearAction) actions.create(ValueClearAction.ID);
-            tagPicker.addAction(valueClearAction);
+        protected CollectionContainer createCollectionContainer(MetaClass entityMetaClass) {
+            CollectionContainer collectionContainer = factory.createCollectionContainer(entityMetaClass.getJavaClass());
+            FetchPlan fetchPlan = fetchPlans.builder(entityMetaClass.getJavaClass())
+                    .addFetchPlan(FetchPlan.LOCAL)
+                    .build();
 
-            tagPicker.setInlineTags(true);
+            collectionContainer.setFetchPlan(fetchPlan);
+            CollectionLoader loader = factory.createCollectionLoader();
+            loader.setContainer(collectionContainer);
 
-            return tagPicker;
+            String query = String.format("select e from %s e", entityMetaClass.getName());
+            loader.setQuery(query);
+            loader.load();
+
+            return collectionContainer;
         }
     }
 }
