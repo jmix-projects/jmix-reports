@@ -180,6 +180,11 @@ public class ReportEditor extends StandardEditor<Report> {
         setScreenCaption();
     }
 
+    @Subscribe
+    public void onInit(InitEvent event) {
+        setShowSaveNotification(false);
+    }
+
     @Subscribe(target = Target.DATA_CONTEXT)
     protected void onPostCommit(DataContext.PostCommitEvent event) {
         notifications.create(Notifications.NotificationType.TRAY)
