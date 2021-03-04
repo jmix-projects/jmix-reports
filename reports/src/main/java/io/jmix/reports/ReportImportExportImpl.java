@@ -34,10 +34,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.zip.CRC32;
@@ -103,21 +100,27 @@ public class ReportImportExportImpl implements ReportImportExport, ReportImportE
             try {
                 while (archiveReader.getNextZipEntry() != null) {
                     final byte[] buffer = readBytesFromEntry(archiveReader);
-                    importReport(buffer, importOptions, importResult);
+                    Report report = importReport(buffer, importOptions, importResult);
                 }
             } catch (IOException e) {
                 throw new ReportingException("Exception occurred while importing report", e);
             }
         } finally {
-            IOUtils.closeQuietly(byteArrayInputStream);
-        }
-
-        if (importResult.getImportedReports().isEmpty()) {
-            throw new ReportingException("Unable to import reports because correct data not found in the archive");
+            closeInputStreamWithLog(byteArrayInputStream);
         }
         log.info("Import successfully completed. Created reports {}, updated {}.",
                 importResult.getCreatedReports().size(), importResult.getUpdatedReports().size());
         return importResult;
+    }
+
+    private void closeInputStreamWithLog(final InputStream stream){
+        try {
+            if (stream != null) {
+                stream.close();
+            }
+        } catch (final IOException ioe) {
+            log.error("Error occur while closing input stream", ioe);
+        }
     }
 
     /**
@@ -293,15 +296,14 @@ public class ReportImportExportImpl implements ReportImportExport, ReportImportE
             }
         }
 
-        Report existingReport = dataManager.load(Report.class)
+        Optional<Report> existingReport = dataManager.load(Report.class)
                 .id(report.getId())
                 .fetchPlan(FetchPlan.INSTANCE_NAME)
-                .optional()
-                .orElse(null);
+                .optional();
 
         report = saveReport(report);
         importResult.addImportedReport(report);
-        if (existingReport != null) {
+        if (existingReport.isPresent()) {
             importResult.addUpdatedReport(report);
             log.info("Existing report {} updated", report);
         } else {

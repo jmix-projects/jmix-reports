@@ -29,9 +29,12 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.EnumSet;
 import java.util.UUID;
 
@@ -39,6 +42,7 @@ import java.util.UUID;
 @UiDescriptor("report-import-dialog.xml")
 public class ReportImportDialog extends Screen {
 
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(ReportImportDialog.class);
     @Autowired
     protected FileStorageUploadField fileUploadField;
     @Autowired
@@ -79,30 +83,45 @@ public class ReportImportDialog extends Screen {
         ValidationErrors validationErrors = getValidationErrors();
 
         if (validationErrors.isEmpty()) {
-            importReport();
-            close(StandardOutcome.COMMIT);
+            ReportImportResult result = importReport();
+
+            notifications.create(Notifications.NotificationType.HUMANIZED)
+                    .withCaption(getResultNotificationCaption(result))
+                    .show();
+            close(isAnyImported(result) ? StandardOutcome.COMMIT : StandardOutcome.CLOSE);
         }
 
         screenValidation.showValidationErrors(getWindow().getFrameOwner(), validationErrors);
     }
 
-    protected void importReport() {
-        try {
-            UUID fileID = fileUploadField.getFileId();
-            File file = temporaryStorage.getFile(fileID);
-            byte[] bytes = FileUtils.readFileToByteArray(file);
-            temporaryStorage.deleteFile(fileID);
-            ReportImportResult result = reports.importReportsWithResult(bytes, getImportOptions());
+    private boolean isAnyImported(ReportImportResult result){
+        return !CollectionUtils.isEmpty(result.getImportedReports());
+    }
 
-            notifications.create(Notifications.NotificationType.HUMANIZED)
-                    .withCaption(messages.formatMessage(getClass(), "importResult", result.getCreatedReports().size(), result.getUpdatedReports().size()))
-                    .show();
-        } catch (Exception e) {
-            notifications.create(Notifications.NotificationType.ERROR)
-                    .withCaption(messages.getMessage(getClass(), "reportException.unableToImportReport"))
-                    .withDescription(e.toString())
-                    .show();
+    protected ReportImportResult importReport() {
+        UUID fileId = fileUploadField.getFileId();
+        File file = temporaryStorage.getFile(fileId);
+
+        byte[] bytes;
+        try {
+            bytes = FileUtils.readFileToByteArray(file);
+        } catch (IOException e) {
+            log.error("An error occurred while reading the import file", e);
+
+            return new ReportImportResult();
         }
+
+        temporaryStorage.deleteFile(fileId);
+        return reports.importReportsWithResult(bytes, getImportOptions());
+    }
+
+    protected String getResultNotificationCaption(ReportImportResult result){
+        if(isAnyImported(result)){
+            return messages.formatMessage(getClass(), "importResult",
+                    result.getCreatedReports().size(),
+                    result.getUpdatedReports().size());
+        }
+        return messages.getMessage(getClass(), "reportException.unableToImportReport");
     }
 
     protected EnumSet<ReportImportOption> getImportOptions() {
