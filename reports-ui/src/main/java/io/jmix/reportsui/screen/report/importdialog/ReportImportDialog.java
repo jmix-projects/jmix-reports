@@ -80,7 +80,7 @@ public class ReportImportDialog extends Screen {
 
         if (validationErrors.isEmpty()) {
             importReport();
-            closeWithDefaultAction();
+            close(StandardOutcome.COMMIT);
         }
 
         screenValidation.showValidationErrors(getWindow().getFrameOwner(), validationErrors);
