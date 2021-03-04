@@ -296,7 +296,8 @@ public class ReportImportExportImpl implements ReportImportExport, ReportImportE
         Report existingReport = dataManager.load(Report.class)
                 .id(report.getId())
                 .fetchPlan(FetchPlan.INSTANCE_NAME)
-                .one();
+                .optional()
+                .orElse(null);
 
         report = saveReport(report);
         importResult.addImportedReport(report);

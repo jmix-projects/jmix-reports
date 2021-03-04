@@ -60,6 +60,7 @@ public class ReportImportDialog extends Screen {
 
     @Subscribe
     protected void onInit(InitEvent event) {
+        fileUploadField.setMode(FileStorageUploadField.FileStoragePutMode.MANUAL);
         importRoles.setValue(Boolean.TRUE);
     }
 
