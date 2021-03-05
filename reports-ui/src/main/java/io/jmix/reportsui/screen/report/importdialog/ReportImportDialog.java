@@ -85,20 +85,32 @@ public class ReportImportDialog extends Screen {
         if (validationErrors.isEmpty()) {
             ReportImportResult result = importReport();
 
-            notifications.create(Notifications.NotificationType.HUMANIZED)
-                    .withCaption(getResultNotificationCaption(result))
-                    .show();
-            close(isAnyImported(result) ? StandardOutcome.COMMIT : StandardOutcome.CLOSE);
-        }
+            if (result.endedWithoutException()) {
+                notifications.create(Notifications.NotificationType.HUMANIZED)
+                        .withCaption(messages.formatMessage(getClass(), "importResult",
+                                result.getCreatedReports().size(),
+                                result.getUpdatedReports().size()))
+                        .show();
+                close(StandardOutcome.COMMIT);
+            } else {
+                StringBuilder exceptionTraces = new StringBuilder();
+                result.getInnerExceptions().forEach(t -> exceptionTraces.append(t.toString()));
 
+                log.error(exceptionTraces.toString());
+
+                notifications.create(Notifications.NotificationType.ERROR)
+                        .withCaption(messages.getMessage(getClass(), "reportException.unableToImportReport"))
+                        .withDescription(exceptionTraces.toString())
+                .show();
+                close(StandardOutcome.CLOSE);
+            }
+        }
         screenValidation.showValidationErrors(getWindow().getFrameOwner(), validationErrors);
     }
 
-    private boolean isAnyImported(ReportImportResult result){
-        return !CollectionUtils.isEmpty(result.getImportedReports());
-    }
-
     protected ReportImportResult importReport() {
+        ReportImportResult reportImportResult = new ReportImportResult();
+
         UUID fileId = fileUploadField.getFileId();
         File file = temporaryStorage.getFile(fileId);
 
@@ -106,23 +118,14 @@ public class ReportImportDialog extends Screen {
         try {
             bytes = FileUtils.readFileToByteArray(file);
         } catch (IOException e) {
-            log.error("An error occurred while reading the import file", e);
-
-            return new ReportImportResult();
+            reportImportResult.addException(e);
+            return reportImportResult;
         }
 
         temporaryStorage.deleteFile(fileId);
         return reports.importReportsWithResult(bytes, getImportOptions());
     }
 
-    protected String getResultNotificationCaption(ReportImportResult result){
-        if(isAnyImported(result)){
-            return messages.formatMessage(getClass(), "importResult",
-                    result.getCreatedReports().size(),
-                    result.getUpdatedReports().size());
-        }
-        return messages.getMessage(getClass(), "reportException.unableToImportReport");
-    }
 
     protected EnumSet<ReportImportOption> getImportOptions() {
         if (BooleanUtils.isNotTrue(importRoles.getValue())) {
