@@ -49,9 +49,10 @@ public class ReportImportResult implements Serializable {
         return innerExceptions == null ? Collections.emptyList() : innerExceptions;
     }
 
-    public boolean endedWithoutException(){
+    public boolean hasErrors(){
         return getInnerExceptions().size() == 0;
     }
+
     public void addException(Exception exception){
         getInnerExceptions().add(exception);
     }
