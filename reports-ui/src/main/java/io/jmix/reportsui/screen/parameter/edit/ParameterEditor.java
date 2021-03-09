@@ -167,9 +167,11 @@ public class ParameterEditor extends StandardEditor<ReportInputParameter> {
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-        if(getEditedEntity().getParameterClass() == null){
-            getEditedEntity().setType(parameterTypeField.getValue());
-            getEditedEntity().setParameterClass(parameterClassResolver.resolveClass(getEditedEntity()));
+        ReportInputParameter editedParam = getEditedEntity();
+
+        if (editedParam.getParameterClass() == null) {
+            editedParam.setType(parameterTypeField.getValue());
+            editedParam.setParameterClass(parameterClassResolver.resolveClass(editedParam));
         }
     }
 
