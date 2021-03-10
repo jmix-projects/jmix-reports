@@ -12,7 +12,11 @@ import io.jmix.ui.sys.UiControllersConfiguration;
 import io.jmix.uiexport.UiExportConfiguration;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.Import;
 
 import java.util.Collections;
 
