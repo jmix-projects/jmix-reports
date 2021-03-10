@@ -50,7 +50,7 @@ public class ReportImportResult implements Serializable {
     }
 
     public boolean hasErrors(){
-        return getInnerExceptions().size() == 0;
+        return getInnerExceptions().size() != 0;
     }
 
     public void addException(Exception exception){
