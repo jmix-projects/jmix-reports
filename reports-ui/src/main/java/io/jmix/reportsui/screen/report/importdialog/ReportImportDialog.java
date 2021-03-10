@@ -85,7 +85,7 @@ public class ReportImportDialog extends Screen {
         if (validationErrors.isEmpty()) {
             ReportImportResult result = importReport();
 
-            if (result.endedWithoutException()) {
+            if (result.hasErrors()) {
                 notifications.create(Notifications.NotificationType.HUMANIZED)
                         .withCaption(messages.formatMessage(getClass(), "importResult",
                                 result.getCreatedReports().size(),
