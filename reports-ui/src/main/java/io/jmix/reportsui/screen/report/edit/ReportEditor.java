@@ -34,18 +34,17 @@ import io.jmix.ui.*;
 import io.jmix.ui.component.*;
 import io.jmix.ui.model.CollectionContainer;
 import io.jmix.ui.model.CollectionLoader;
-import io.jmix.ui.model.DataContext;
 import io.jmix.ui.model.InstanceContainer;
 import io.jmix.ui.screen.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import javax.inject.Named;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @UiController("report_Report.edit")
 @UiDescriptor("report-edit.xml")
@@ -158,6 +157,33 @@ public class ReportEditor extends StandardEditor<Report> {
         if (!reportGroups.isEmpty()) {
             ReportGroup reportGroup = reportGroups.iterator().next();
             report.setGroup(groupsDc.getItem(reportGroup.getId()));
+        }
+    }
+
+    @Subscribe
+    public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
+        Report report = getEditedEntity();
+
+        // todo maybe generify this code
+        if(CollectionUtils.isNotEmpty(report.getReportScreens())){
+            report.setScreensIdx(report.getReportScreens()
+                    .stream()
+                    .map(ReportScreen::getScreenId)
+                    .collect(Collectors.joining(",")));
+        }
+
+        if(CollectionUtils.isNotEmpty(report.getReportRoles())){
+            report.setRolesIdx(report.getReportRoles()
+                    .stream()
+                    .map(ReportRole::getRoleName)
+                    .collect(Collectors.joining(",")));
+        }
+
+        if(CollectionUtils.isNotEmpty(report.getInputParameters())){
+            report.setInputEntityTypesIdx(report.getInputParameters()
+                    .stream()
+                    .map(ReportInputParameter::getEntityMetaClass)
+                    .collect(Collectors.joining(",")));
         }
     }
 
