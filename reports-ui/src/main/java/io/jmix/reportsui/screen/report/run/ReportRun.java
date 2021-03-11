@@ -96,7 +96,7 @@ public class ReportRun extends StandardLookup<Report> {
     }
 
     @Subscribe
-    protected void onInit(InitEvent event) {
+    protected void onBeforeShow(BeforeShowEvent event) {
         List<Report> reports = reportsParameter;
         if (reports == null) {
             reports = reportGuiManager.getAvailableReports(screenParameter, currentAuthentication.getUser(),

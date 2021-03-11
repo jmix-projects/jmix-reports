@@ -65,8 +65,8 @@ public class ReportSecurityManager {
                 lc.getQuery().setParameter(paramName, wrapCodeParameterForSearch(role.getCode()));
                 transformer.addWhereAsIs(roleCondition.toString());
             }
-            lc.getQuery().setQueryString(transformer.getResult());
         }
+        lc.getQuery().setQueryString(transformer.getResult());
     }
 
     /**
@@ -90,6 +90,6 @@ public class ReportSecurityManager {
     }
 
     protected String wrapCodeParameterForSearch(String value) {
-        return "%," + QueryUtils.escapeForLike(value) + ",%";
+        return "%" + QueryUtils.escapeForLike(value) + "%";
     }
 }
