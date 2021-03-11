@@ -160,33 +160,6 @@ public class ReportEditor extends StandardEditor<Report> {
         }
     }
 
-    @Subscribe
-    public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
-        Report report = getEditedEntity();
-
-        // todo maybe generify this code
-        if(CollectionUtils.isNotEmpty(report.getReportScreens())){
-            report.setScreensIdx(report.getReportScreens()
-                    .stream()
-                    .map(ReportScreen::getScreenId)
-                    .collect(Collectors.joining(",")));
-        }
-
-        if(CollectionUtils.isNotEmpty(report.getReportRoles())){
-            report.setRolesIdx(report.getReportRoles()
-                    .stream()
-                    .map(ReportRole::getRoleName)
-                    .collect(Collectors.joining(",")));
-        }
-
-        if(CollectionUtils.isNotEmpty(report.getInputParameters())){
-            report.setInputEntityTypesIdx(report.getInputParameters()
-                    .stream()
-                    .map(ReportInputParameter::getEntityMetaClass)
-                    .collect(Collectors.joining(",")));
-        }
-    }
-
     protected BandDefinition createRootBandDefinition(Report report) {
         BandDefinition rootDefinition = metadata.create(BandDefinition.class);
         rootDefinition.setName(ROOT_BAND);

@@ -16,18 +16,21 @@
 package io.jmix.reports.listener;
 
 import io.jmix.core.EntityStates;
+import io.jmix.core.event.EntitySavingEvent;
 import io.jmix.data.listener.BeforeDetachEntityListener;
 import io.jmix.reports.Reports;
 import io.jmix.reports.entity.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component("report_ReportDetachListener")
 public class ReportDetachListener implements BeforeDetachEntityListener<Report> {
@@ -37,6 +40,48 @@ public class ReportDetachListener implements BeforeDetachEntityListener<Report> 
 
     @Autowired
     protected EntityStates entityStates;
+
+    @EventListener
+    public void onReportSaving(EntitySavingEvent<Report> event) {
+        Report report = event.getEntity();
+
+        updateInputParamIdx(report);
+        updateRoleIdx(report);
+        updateScreenIdx(report);
+    }
+
+    private void updateInputParamIdx(Report report) {
+        if (CollectionUtils.isNotEmpty(report.getInputParameters())) {
+            report.setInputEntityTypesIdx(report.getInputParameters()
+                    .stream()
+                    .map(ReportInputParameter::getEntityMetaClass)
+                    .collect(Collectors.joining(",")));
+        } else {
+            report.setInputEntityTypesIdx(null);
+        }
+    }
+
+    private void updateRoleIdx(Report report) {
+        if (CollectionUtils.isNotEmpty(report.getReportRoles())) {
+            report.setRolesIdx(report.getReportRoles()
+                    .stream()
+                    .map(ReportRole::getRoleName)
+                    .collect(Collectors.joining(",")));
+        } else {
+            report.setRolesIdx(null);
+        }
+    }
+
+    private void updateScreenIdx(Report report) {
+        if (CollectionUtils.isNotEmpty(report.getReportScreens())) {
+            report.setScreensIdx(report.getReportScreens()
+                    .stream()
+                    .map(ReportScreen::getScreenId)
+                    .collect(Collectors.joining(",")));
+        } else {
+            report.setScreensIdx(null);
+        }
+    }
 
     @Override
     public void onBeforeDetach(Report entity) {
