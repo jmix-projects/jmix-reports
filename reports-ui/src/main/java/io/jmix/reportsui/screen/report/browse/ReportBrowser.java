@@ -40,6 +40,7 @@ import io.jmix.ui.model.CollectionContainer;
 import io.jmix.ui.model.CollectionLoader;
 import io.jmix.ui.navigation.Route;
 import io.jmix.ui.screen.*;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -90,15 +91,22 @@ public class ReportBrowser extends StandardLookup<Report> {
 
     @Install(to = "reportsTable.create", subject = "afterCloseHandler")
     protected void reportsTableCreateAfterCloseHandler(AfterCloseEvent event) {
-        if (event.closedWith(StandardOutcome.COMMIT)) {
-            Report newReport = (Report) ((EditorScreen) event.getScreen()).getEditedEntity();
+        updateTable(event);
+    }
 
-            if (!entityStates.isNew(newReport)) {
-                Report reloadedReport = reloadReport(newReport, reportDl.getFetchPlan());
-                reportDc.getMutableItems().add(reloadedReport);
-            }
+    @Install(to = "reportsTable.edit", subject = "afterCloseHandler")
+    protected void tableEditAfterCloseHandler(AfterCloseEvent event) {
+        updateTable(event);
+    }
+
+    protected void updateTable(AfterCloseEvent event){
+        if (event.closedWith(StandardOutcome.COMMIT)) {
+            Report edited = (Report) ((EditorScreen) event.getScreen()).getEditedEntity();
+
+            reportDc.replaceItem(edited);
         }
     }
+
 
     @Subscribe("popupCreateBtn.wizard")
     protected void onPopupCreateBtnWizard(Action.ActionPerformedEvent event) {
@@ -115,9 +123,7 @@ public class ReportBrowser extends StandardLookup<Report> {
                         .addAfterCloseListener(closeEvent -> {
                             if (closeEvent.closedWith(StandardOutcome.COMMIT)) {
                                 Report item1 = reportEditor.getEditedEntity();
-                                if (item1 != null) {
-                                    reportDc.replaceItem(item1);
-                                }
+                                reportDc.replaceItem(item1);
                             }
                             UUID newReportId = reportEditor.getEditedEntity().getId();
                             reportsTable.expandPath(reportDc.getItem(newReportId));
@@ -142,21 +148,24 @@ public class ReportBrowser extends StandardLookup<Report> {
     @Subscribe("reportsTable.runReport")
     protected void onTableRunReport(Action.ActionPerformedEvent event) {
         Report report = reportsTable.getSingleSelected();
-        if (report != null) {
-            report = reloadReport(report, fetchPlanRepository.findFetchPlan(
-                    metadata.getClass(Report.class), "report.edit"));
-            if (report.getInputParameters() != null && report.getInputParameters().size() > 0 ||
-                    reportGuiManager.inputParametersRequiredByTemplates(report)) {
-                screens.create(InputParametersDialog.class, OpenMode.DIALOG,
-                        new MapScreenOptions(ParamsMap.of("report", report)))
-                        .show()
-                        .addAfterCloseListener(e -> {
-                            reportsTable.focus();
-                        });
-            } else {
-                reportGuiManager.printReport(report, Collections.emptyMap(), ReportBrowser.this);
-            }
+        report = reloadReport(report, fetchPlanRepository.findFetchPlan(
+                metadata.getClass(Report.class), "report.edit"));
+        if (CollectionUtils.isNotEmpty(report.getInputParameters()) ||
+                reportGuiManager.inputParametersRequiredByTemplates(report)) {
+            screens.create(InputParametersDialog.class, OpenMode.DIALOG,
+                    new MapScreenOptions(ParamsMap.of("report", report)))
+                    .show()
+                    .addAfterCloseListener(e -> {
+                        reportsTable.focus();
+                    });
+        } else {
+            reportGuiManager.printReport(report, Collections.emptyMap(), ReportBrowser.this);
         }
+    }
+
+    @Install(to = "reportsTable.runReport", subject = "enabledRule")
+    private boolean reportsTableRunReportEnabledRule() {
+        return reportsTable.getSingleSelected() != null;
     }
 
     @Subscribe("reportsTable.import")
@@ -224,19 +233,6 @@ public class ReportBrowser extends StandardLookup<Report> {
         lc.setFetchPlan(fetchPlan);
         report = dataManager.load(lc);
         return report;
-    }
-
-    @Install(to = "reportsTable.edit", subject = "afterCloseHandler")
-    protected void tableEditAfterCloseHandler(AfterCloseEvent event) {
-        if (event.closedWith(StandardOutcome.COMMIT)) {
-            Report editedReport = (Report) ((EditorScreen) event.getScreen()).getEditedEntity();
-            Report currentItem = reportDc.getItem(editedReport.getId());
-
-            if (!editedReport.getVersion().equals(currentItem.getVersion())) {
-                Report reloadedReport = reloadReport(currentItem, reportDl.getFetchPlan());
-                reportDc.replaceItem(reloadedReport);
-            }
-        }
     }
 
     @Install(to = "reportsTable.create", subject = "enabledRule")
