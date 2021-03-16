@@ -26,6 +26,7 @@ import io.jmix.reports.entity.BandDefinition;
 import io.jmix.reports.entity.DataSet;
 import io.jmix.reports.entity.DataSetType;
 import io.jmix.reports.entity.Report;
+import io.jmix.reports.entity.wizard.ReportData;
 import io.jmix.reports.entity.wizard.ReportRegion;
 import io.jmix.reportsui.screen.report.wizard.region.RegionEditor;
 import io.jmix.security.constraint.PolicyStore;
@@ -34,6 +35,7 @@ import io.jmix.ui.Notifications;
 import io.jmix.ui.ScreenBuilders;
 import io.jmix.ui.action.ActionType;
 import io.jmix.ui.action.ListAction;
+import io.jmix.ui.builder.ScreenBuilder;
 import io.jmix.ui.component.Component;
 import io.jmix.ui.component.Table;
 import io.jmix.ui.component.Window;
@@ -48,12 +50,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @StudioAction(target = "io.jmix.ui.component.ListComponent", description = "Edit action for an entity band")
 @ActionType(EditViewAction.ID)
 public class EditViewAction extends ListAction {
 
     public static final String ID = "editViewEntity";
+
 
     @Autowired
     protected ScreenBuilders screenBuilders;
@@ -84,6 +88,8 @@ public class EditViewAction extends ListAction {
 
     protected Table<DataSet> dataSetsTable;
     protected CollectionContainer<BandDefinition> bandsDc;
+    @Autowired
+    protected DataManager dataManager;
 
     public EditViewAction() {
         this(ID);
@@ -128,11 +134,20 @@ public class EditViewAction extends ListAction {
                             editorParams.put("scalarOnly", Boolean.TRUE);
                             editorParams.put("updateDisabled", !secureOperations.isEntityUpdatePermitted(metadata.getClass(Report.class), policyStore));
 
-                            Screen screen = screenBuilders.editor(ReportRegion.class, dataSetsTable.getFrame().getFrameOwner())
+                            reportRegion.getRegionPropertiesRootNode().getChildren().forEach(t -> {
+                                t.setId(UUID.randomUUID());
+                            });
+                            reportRegion.getRegionPropertiesRootNode().setId(UUID.randomUUID());
+                            reportRegion.setReportData(dataManager.create(ReportData.class));
+                            reportRegion.getReportData().setId(UUID.randomUUID());
+                            reportRegion.setBandNameFromReport("band");
+
+                            RegionEditor screen = screenBuilders.editor(ReportRegion.class, dataSetsTable.getFrame().getFrameOwner())
                                     .editEntity(reportRegion)
                                     .withScreenClass(RegionEditor.class)
                                     .withOpenMode(OpenMode.DIALOG)
                                     .build();
+                            screen.setRootNode(reportRegion.getRegionPropertiesRootNode());
                             screen.addAfterCloseListener(afterCloseEvent -> {
                                 if (Window.COMMIT_ACTION_ID.equals(((StandardCloseAction) afterCloseEvent.getCloseAction()).getActionId())) {
                                     dataSet.setFetchPlan(reportRegionToView(entityTree, reportRegion));

@@ -40,6 +40,7 @@ import java.util.Set;
 
 @UiController("report_Region.edit")
 @UiDescriptor("region-edit.xml")
+@EditedEntityContainer("reportRegionDc")
 public class RegionEditor extends StandardEditor<ReportRegion> {
     //    @Named("entityTreeFrame.reportEntityTreeNodeDs")
 //    protected AbstractTreeDatasource reportEntityTreeNodeDs;
@@ -94,7 +95,7 @@ public class RegionEditor extends StandardEditor<ReportRegion> {
     }
 
     @Subscribe
-    protected void onInit(InitEvent event) {
+    public void onBeforeShow(BeforeShowEvent event) {
         //params.put("component$reportPropertyName", reportPropertyName);
         //todo
         //reportEntityTreeNodeDs.refresh(params);
@@ -112,6 +113,7 @@ public class RegionEditor extends StandardEditor<ReportRegion> {
         tipLabel.setValue(messages.formatMessage(group, rootNode.getLocalizedName()));
         tipLabel.setHtmlEnabled(true);
         initComponents();
+        getScreenData().loadAll();
     }
 
     @Install(to = "addItemAction", subject = "enabledRule")

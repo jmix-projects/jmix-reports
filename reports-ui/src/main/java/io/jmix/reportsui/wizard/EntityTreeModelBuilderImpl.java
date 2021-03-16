@@ -56,15 +56,10 @@ public class EntityTreeModelBuilderImpl implements EntityTreeModelBuilder {
     @Autowired
     protected MetadataTools metadataTools;
 
-    protected int entityTreeModelMaxDeep = reportsProperties.getEntityTreeModelMaxDeep();
-
     public int getEntityTreeModelMaxDeep() {
-        return entityTreeModelMaxDeep;
+        return reportsProperties.getEntityTreeModelMaxDeep();
     }
 
-    public void setEntityTreeModelMaxDeep(int entityTreeModelMaxDeep) {
-        this.entityTreeModelMaxDeep = entityTreeModelMaxDeep;
-    }
 
     @Override
     public EntityTree buildEntityTree(MetaClass metaClass) {
