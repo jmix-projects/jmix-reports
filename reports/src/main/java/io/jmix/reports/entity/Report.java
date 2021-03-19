@@ -45,6 +45,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings("unused")
 public class Report implements com.haulmont.yarg.structure.Report, io.jmix.core.Entity {
     private static final long serialVersionUID = -2817764915661205093L;
+    protected static final String IDX_SEPARATOR = ",";
 
     @JmixGeneratedValue
     @Id
@@ -184,8 +185,8 @@ public class Report implements com.haulmont.yarg.structure.Report, io.jmix.core.
             setInputEntityTypesIdx(inputParameters
                     .stream()
                     .map(ReportInputParameter::getEntityMetaClass)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.joining(",")));
+                    .filter(StringUtils::isNotBlank)
+                    .collect(Collectors.joining(IDX_SEPARATOR)));
         } else {
             setInputEntityTypesIdx(null);
         }
@@ -196,7 +197,7 @@ public class Report implements com.haulmont.yarg.structure.Report, io.jmix.core.
             setRolesIdx(reportRoles
                     .stream()
                     .map(ReportRole::getRoleName)
-                    .collect(Collectors.joining(",")));
+                    .collect(Collectors.joining(IDX_SEPARATOR)));
         } else {
            setRolesIdx(null);
         }
@@ -207,7 +208,7 @@ public class Report implements com.haulmont.yarg.structure.Report, io.jmix.core.
             setScreensIdx(reportScreens
                     .stream()
                     .map(ReportScreen::getScreenId)
-                    .collect(Collectors.joining(",")));
+                    .collect(Collectors.joining(IDX_SEPARATOR)));
         } else {
             setScreensIdx(null);
         }
