@@ -184,6 +184,7 @@ public class Report implements com.haulmont.yarg.structure.Report, io.jmix.core.
             setInputEntityTypesIdx(inputParameters
                     .stream()
                     .map(ReportInputParameter::getEntityMetaClass)
+                    .filter(Objects::nonNull)
                     .collect(Collectors.joining(",")));
         } else {
             setInputEntityTypesIdx(null);

@@ -180,7 +180,7 @@ public class ReportEditor extends StandardEditor<Report> {
     }
 
     @Override
-    protected String getSaveNotificationCaption(){
+    protected String getSaveNotificationCaption() {
         return messages.formatMessage(getClass(), "notification.completeSuccessfully", getEditedEntity().getName());
     }
 
@@ -215,6 +215,21 @@ public class ReportEditor extends StandardEditor<Report> {
             screen.addAfterCloseListener(e -> bandTree.focus());
             screen.show();
         }
+    }
+
+    @Subscribe
+    public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
+        getEditedEntity().getReportRoles().forEach(role -> {
+            if(role.getReport() == null){
+                role.setReport(getEditedEntity());
+            }
+        });
+
+        getEditedEntity().getReportScreens().forEach(screen -> {
+            if(screen.getReport() == null){
+                screen.setReport(getEditedEntity());
+            }
+        });
     }
 
     @Subscribe
