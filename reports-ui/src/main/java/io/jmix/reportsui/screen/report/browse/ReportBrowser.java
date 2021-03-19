@@ -89,25 +89,6 @@ public class ReportBrowser extends StandardLookup<Report> {
     @Autowired
     protected ScreenBuilders screenBuilders;
 
-    @Install(to = "reportsTable.create", subject = "afterCloseHandler")
-    protected void reportsTableCreateAfterCloseHandler(AfterCloseEvent event) {
-        updateTable(event);
-    }
-
-    @Install(to = "reportsTable.edit", subject = "afterCloseHandler")
-    protected void tableEditAfterCloseHandler(AfterCloseEvent event) {
-        updateTable(event);
-    }
-
-    protected void updateTable(AfterCloseEvent event){
-        if (event.closedWith(StandardOutcome.COMMIT)) {
-            Report edited = (Report) ((EditorScreen) event.getScreen()).getEditedEntity();
-
-            reportDc.replaceItem(edited);
-        }
-    }
-
-
     @Subscribe("popupCreateBtn.wizard")
     protected void onPopupCreateBtnWizard(Action.ActionPerformedEvent event) {
         ReportWizardCreator wizard = screens.create(ReportWizardCreator.class, OpenMode.DIALOG);
@@ -161,11 +142,6 @@ public class ReportBrowser extends StandardLookup<Report> {
         } else {
             reportGuiManager.printReport(report, Collections.emptyMap(), ReportBrowser.this);
         }
-    }
-
-    @Install(to = "reportsTable.runReport", subject = "enabledRule")
-    private boolean reportsTableRunReportEnabledRule() {
-        return reportsTable.getSingleSelected() != null;
     }
 
     @Subscribe("reportsTable.import")
