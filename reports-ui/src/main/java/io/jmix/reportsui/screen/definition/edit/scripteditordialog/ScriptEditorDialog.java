@@ -25,7 +25,7 @@ import io.jmix.ui.component.SourceCodeEditor;
 import io.jmix.ui.component.autocomplete.Suggester;
 import io.jmix.ui.icon.Icons;
 import io.jmix.ui.icon.JmixIcon;
-import io.jmix.ui.property.UiScreensProperties;
+import io.jmix.ui.UiScreensProperties;
 import io.jmix.ui.screen.*;
 import io.jmix.ui.settings.UserSettingService;
 import org.apache.commons.lang3.StringUtils;
