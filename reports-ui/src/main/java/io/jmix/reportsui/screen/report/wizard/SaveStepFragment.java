@@ -22,7 +22,7 @@ import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportOutputType;
 import io.jmix.reports.entity.charts.*;
 import io.jmix.reports.exception.TemplateGenerationException;
-import io.jmix.reportsui.screen.report.wizard.step.StepFrame;
+import io.jmix.reportsui.screen.report.wizard.step.StepFragment;
 import io.jmix.reportsui.screen.template.edit.generator.RandomChartDataGenerator;
 import io.jmix.ui.Dialogs;
 import io.jmix.ui.Fragments;
@@ -35,19 +35,19 @@ import io.jmix.ui.component.ValidationException;
 import io.jmix.ui.download.ByteArrayDataProvider;
 import io.jmix.ui.download.DownloadFormat;
 import io.jmix.ui.download.Downloader;
+import io.jmix.ui.screen.UiController;
+import io.jmix.ui.screen.UiDescriptor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.context.annotation.Scope;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-@org.springframework.stereotype.Component("report_SaveStep.fragment")
-@Scope(BeanDefinition.SCOPE_PROTOTYPE)
-public class SaveStepFrame extends StepFrame {
+@UiController("report_Save.fragment")
+@UiDescriptor("save-fragment.xml")
+public class SaveStepFragment extends StepFragment {
 
     @Autowired
     protected UiProperties uiProperties;
@@ -70,8 +70,8 @@ public class SaveStepFrame extends StepFrame {
     @Autowired
     protected Downloader downloader;
 
-    public SaveStepFrame(ReportWizardCreator wizard) {
-        super(wizard, wizard.getMessage("saveReport"), "saveStep");
+    public SaveStepFragment(ReportWizardCreator wizard) {
+        super(wizard, "", "saveStep");
         isLast = true;
         beforeShowFrameHandler = new BeforeShowSaveStepFrameHandler();
 
@@ -100,6 +100,7 @@ public class SaveStepFrame extends StepFrame {
                 wizard.diagramType.setVisible(true);
 
                 showChart();
+
 //TODO dialog options
 //                wizard.getDialogOptions()
 //                        .setHeight(wizard.wizardHeight + 400).setHeightUnit(SizeUnit.PIXELS)

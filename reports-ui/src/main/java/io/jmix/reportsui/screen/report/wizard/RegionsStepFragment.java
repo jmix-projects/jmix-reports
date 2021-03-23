@@ -25,7 +25,7 @@ import io.jmix.reportsui.action.list.OrderableItemMoveAction;
 import io.jmix.reportsui.action.list.OrderableItemMoveAction.Direction;
 import io.jmix.reportsui.screen.report.wizard.region.EntityTreeLookup;
 import io.jmix.reportsui.screen.report.wizard.region.RegionEditor;
-import io.jmix.reportsui.screen.report.wizard.step.StepFrame;
+import io.jmix.reportsui.screen.report.wizard.step.StepFragment;
 import io.jmix.ui.Notifications;
 import io.jmix.ui.action.AbstractAction;
 import io.jmix.ui.action.DialogAction;
@@ -44,7 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-public class RegionsStepFrame extends StepFrame {
+public class RegionsStepFragment extends StepFragment {
     protected static final String ADD_TABULATED_REGION_ACTION_ID = "tabulatedRegion";
     protected static final String ADD_SIMPLE_REGION_ACTION_ID = "simpleRegion";
 
@@ -53,7 +53,7 @@ public class RegionsStepFrame extends StepFrame {
     protected EditRegionAction editRegionAction;
     protected RemoveRegionAction removeRegionAction;
 
-    public RegionsStepFrame(ReportWizardCreator wizard) {
+    public RegionsStepFragment(ReportWizardCreator wizard) {
         super(wizard, wizard.getMessage("reportRegions"), "regionsStep");
         initFrameHandler = new InitRegionsStepFrameHandler();
 
@@ -395,15 +395,15 @@ public class RegionsStepFrame extends StepFrame {
             if (wizard.reportRegionsDc.getItems().isEmpty()) {
                 if (((ReportType) wizard.reportTypeRadioButtonGroup.getValue()).isList()) {
                     if (wizard.entityTreeHasSimpleAttrs) {
-                        addTabulatedRegionAction.actionPerform(wizard.regionsStepFrame.getFrame());
+                        addTabulatedRegionAction.actionPerform(wizard.regionsStepFragment.getFrame());
                     }
                 } else {
                     if (wizard.entityTreeHasSimpleAttrs && wizard.entityTreeHasCollections) {
-                        addSimpleRegionAction.actionPerform(wizard.regionsStepFrame.getFrame());
+                        addSimpleRegionAction.actionPerform(wizard.regionsStepFragment.getFrame());
                     } else if (wizard.entityTreeHasSimpleAttrs) {
-                        addSimpleRegionAction.actionPerform(wizard.regionsStepFrame.getFrame());
+                        addSimpleRegionAction.actionPerform(wizard.regionsStepFragment.getFrame());
                     } else if (wizard.entityTreeHasCollections) {
-                        addTabulatedRegionAction.actionPerform(wizard.regionsStepFrame.getFrame());
+                        addTabulatedRegionAction.actionPerform(wizard.regionsStepFragment.getFrame());
                     }
                 }
             }

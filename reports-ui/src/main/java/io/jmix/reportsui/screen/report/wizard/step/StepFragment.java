@@ -18,12 +18,13 @@ package io.jmix.reportsui.screen.report.wizard.step;
 
 import io.jmix.reportsui.screen.report.wizard.ReportWizardCreator;
 import io.jmix.ui.component.*;
+import io.jmix.ui.screen.ScreenFragment;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class StepFrame {
+public class StepFragment extends ScreenFragment {
     protected final String name;
     protected final Frame frame;
     protected final ReportWizardCreator wizard;
@@ -41,7 +42,7 @@ public class StepFrame {
     protected FrameValidator frameValidator = new FrameValidator();
     protected boolean isInitialized;
 
-    public StepFrame(ReportWizardCreator reportWizardCreatorEditor, String name, String frameComponentName) {
+    public StepFragment(ReportWizardCreator reportWizardCreatorEditor, String name, String frameComponentName) {
         this.wizard = reportWizardCreatorEditor;
         this.name = name;
         this.frame = (Frame) reportWizardCreatorEditor.getWindow().getComponent(frameComponentName);
