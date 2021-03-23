@@ -21,10 +21,6 @@ import io.jmix.ui.screen.Screen;
 
 public interface MainWizardFrame<T extends Screen> {
 
-//    String getMessage(String key);
-//
-//    String formatMessage(String key, Object... params);
-
     T getMainWizardFrame();
 
     Button getBackwardBtn();

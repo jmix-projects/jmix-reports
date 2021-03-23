@@ -22,18 +22,18 @@ import java.util.List;
 
 public class StepFrameManager {
 
-    protected List<StepFrame> stepFrames;
+    protected List<StepFragment> stepFragments;
     protected MainWizardFrame mainWizardFrame;
     protected int currentFrameIdx = 0;
 
-    public StepFrameManager(MainWizardFrame reportWizardCreatorFrame, List<StepFrame> stepFrames) {
+    public StepFrameManager(MainWizardFrame reportWizardCreatorFrame, List<StepFragment> stepFragments) {
         this.mainWizardFrame = reportWizardCreatorFrame;
-        this.stepFrames = stepFrames;
+        this.stepFragments = stepFragments;
         //frames initialization is in showCurrentFrame() method
     }
 
-    public List<StepFrame> getStepFrames() {
-        return stepFrames;
+    public List<StepFragment> getStepFrames() {
+        return stepFragments;
     }
 
     public void showCurrentFrame() {
@@ -43,12 +43,12 @@ public class StepFrameManager {
         getCurrentStepFrame().getFrame().setVisible(true);
     }
 
-    protected StepFrame getCurrentStepFrame() {
-        return stepFrames.get(currentFrameIdx);
+    protected StepFragment getCurrentStepFrame() {
+        return stepFragments.get(currentFrameIdx);
     }
 
     public Frame getCurrentFrame() {
-        return stepFrames.get(currentFrameIdx).getFrame();
+        return stepFragments.get(currentFrameIdx).getFrame();
     }
 
     public void setMainWindowProps() {
@@ -64,7 +64,7 @@ public class StepFrameManager {
     protected void setNavigationButtonProps() {
         if (getCurrentStepFrame().isLast()) {
             mainWizardFrame.getForwardBtn().setVisible(false);
-        } else if (currentFrameIdx + 1 >= stepFrames.size()) {
+        } else if (currentFrameIdx + 1 >= stepFragments.size()) {
             mainWizardFrame.getForwardBtn().setEnabled(false);
         } else {
             mainWizardFrame.getForwardBtn().setVisible(true);
@@ -102,7 +102,7 @@ public class StepFrameManager {
     }
 
     public boolean nextFrame() {
-        if (currentFrameIdx > stepFrames.size()) {
+        if (currentFrameIdx > stepFragments.size()) {
             throw new ArrayIndexOutOfBoundsException("Next frame is not exists");
         }
         if (!getCurrentStepFrame().isValidateBeforeNext() || validateCurrentFrame()) {

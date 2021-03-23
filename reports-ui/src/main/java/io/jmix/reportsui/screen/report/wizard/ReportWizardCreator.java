@@ -30,7 +30,7 @@ import io.jmix.reports.entity.wizard.TemplateFileType;
 import io.jmix.reports.exception.TemplateGenerationException;
 import io.jmix.reportsui.screen.ReportGuiManager;
 import io.jmix.reportsui.screen.report.wizard.step.MainWizardFrame;
-import io.jmix.reportsui.screen.report.wizard.step.StepFrame;
+import io.jmix.reportsui.screen.report.wizard.step.StepFragment;
 import io.jmix.reportsui.screen.report.wizard.step.StepFrameManager;
 import io.jmix.ui.Dialogs;
 import io.jmix.ui.Notifications;
@@ -41,10 +41,7 @@ import io.jmix.ui.component.*;
 import io.jmix.ui.model.CollectionChangeType;
 import io.jmix.ui.model.CollectionContainer;
 import io.jmix.ui.model.InstanceContainer;
-import io.jmix.ui.screen.Screen;
-import io.jmix.ui.screen.Subscribe;
-import io.jmix.ui.screen.UiController;
-import io.jmix.ui.screen.UiDescriptor;
+import io.jmix.ui.screen.*;
 import io.jmix.ui.theme.ThemeConstants;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,8 +84,6 @@ public class ReportWizardCreator extends Screen implements MainWizardFrame<Scree
 
     @Named("detailsStep.mainFields")
     protected Form mainFields;
-    @Named("detailsStep.setQuery")
-    protected Button setQueryButton;
 
     protected RadioButtonGroup reportTypeRadioButtonGroup;//this and following are set during creation
     protected ComboBox<TemplateFileType> templateFileFormat;
@@ -142,17 +137,15 @@ public class ReportWizardCreator extends Screen implements MainWizardFrame<Scree
     @Autowired
     protected ReportsWizard reportWizardService;
     @Autowired
-    protected ThemeConstants themeConstants;
-    @Autowired
     protected ReportGuiManager reportGuiManager;
     @Autowired
     protected Messages messages;
     @Autowired
     protected Notifications notifications;
 
-    protected StepFrame detailsStepFrame;
-    protected StepFrame regionsStepFrame;
-    protected StepFrame saveStepFrame;
+    protected StepFragment detailsStepFragment;
+    protected StepFragment regionsStepFragment;
+    protected StepFragment saveStepFragment;
     protected StepFrameManager stepFrameManager;
 
     protected byte[] lastGeneratedTemplate;
@@ -177,21 +170,7 @@ public class ReportWizardCreator extends Screen implements MainWizardFrame<Scree
         initMainFields();
 
         stepFrameManager.showCurrentFrame();
-        tipLabel.setValue(getMessage("enterMainParameters"));
-
-        reportRegionsDc.addCollectionChangeListener(e -> {
-            if (e.getChangeType().equals(CollectionChangeType.ADD_ITEMS)) {
-                regionsTable.setSelected((Collection) e.getChanges());
-            }
-        });
-
-        reportRegionsDc.addItemChangeListener(e -> {
-            if (regionsTable.getSingleSelected() != null) {
-                moveDownBtn.setEnabled(true);
-                moveUpBtn.setEnabled(true);
-                removeBtn.setEnabled(true);
-            }
-        });
+        tipLabel.setValue(messages.getMessage("enterMainParameters"));
 
         outputFileName.setContextHelpIconClickHandler(e ->
                 dialogs.createMessageDialog()
@@ -200,6 +179,22 @@ public class ReportWizardCreator extends Screen implements MainWizardFrame<Scree
                         .withModal(false)
                         .withWidth("560px")
                         .show());
+    }
+
+    @Subscribe(id = "reportRegionsDc", target = Target.DATA_CONTAINER)
+    public void onReportRegionsDcCollectionChange(CollectionContainer.CollectionChangeEvent<ReportRegion> event) {
+        if (event.getChangeType().equals(CollectionChangeType.ADD_ITEMS)) {
+            regionsTable.setSelected((Collection) event.getChanges());
+        }
+    }
+
+    @Subscribe(id = "reportRegionsDc", target = Target.DATA_CONTAINER)
+    public void onReportRegionsDcItemChange(InstanceContainer.ItemChangeEvent<ReportRegion> event) {
+        if (regionsTable.getSingleSelected() != null) {
+            moveDownBtn.setEnabled(true);
+            moveUpBtn.setEnabled(true);
+            removeBtn.setEnabled(true);
+        }
     }
 
     protected void initMainButtons() {
@@ -263,43 +258,43 @@ public class ReportWizardCreator extends Screen implements MainWizardFrame<Scree
     }
 
     protected void refreshFrameVisible() {
-        if (detailsStepFrame.getFrame().isVisible()) {
-            tipLabel.setValue(getMessage("enterMainParameters"));
+        if (detailsStepFragment.getFrame().isVisible()) {
+            tipLabel.setValue(messages.getMessage("enterMainParameters"));
             editAreaVbox.add(editAreaGroupBox);
-            editAreaVbox.remove(regionsStepFrame.getFrame());
-            editAreaGroupBox.remove(saveStepFrame.getFrame());
-            editAreaGroupBox.add(detailsStepFrame.getFrame());
-        } else if (regionsStepFrame.getFrame().isVisible()) {
-            tipLabel.setValue(getMessage("addPropertiesAndTableAreas"));
+            editAreaVbox.remove(regionsStepFragment.getFrame());
+            editAreaGroupBox.remove(saveStepFragment.getFrame());
+            editAreaGroupBox.add(detailsStepFragment.getFrame());
+        } else if (regionsStepFragment.getFrame().isVisible()) {
+            tipLabel.setValue(messages.getMessage("addPropertiesAndTableAreas"));
             editAreaVbox.remove(editAreaGroupBox);
-            editAreaVbox.add(regionsStepFrame.getFrame());
-        } else if (saveStepFrame.getFrame().isVisible()) {
-            tipLabel.setValue(getMessage("finishPrepareReport"));
+            editAreaVbox.add(regionsStepFragment.getFrame());
+        } else if (saveStepFragment.getFrame().isVisible()) {
+            tipLabel.setValue(messages.getMessage("finishPrepareReport"));
             editAreaVbox.add(editAreaGroupBox);
-            editAreaVbox.remove(regionsStepFrame.getFrame());
-            editAreaGroupBox.add(saveStepFrame.getFrame());
-            editAreaGroupBox.remove(detailsStepFrame.getFrame());
+            editAreaVbox.remove(regionsStepFragment.getFrame());
+            editAreaGroupBox.add(saveStepFragment.getFrame());
+            editAreaGroupBox.remove(detailsStepFragment.getFrame());
         }
     }
 
-    protected List<StepFrame> getStepFrames() {
-        detailsStepFrame = new DetailsStepFrame(this);
-        regionsStepFrame = new RegionsStepFrame(this);
-        saveStepFrame = new SaveStepFrame(this);
-        return Arrays.asList(detailsStepFrame, regionsStepFrame, saveStepFrame);
+    protected List<StepFragment> getStepFrames() {
+        detailsStepFragment = new DetailsStepFragment(this);
+        regionsStepFragment = new RegionsStepFragment(this);
+        saveStepFragment = new SaveStepFragment(this);
+        return Arrays.asList(detailsStepFragment, regionsStepFragment, saveStepFragment);
     }
 
     protected String generateTemplateFileName(String fileExtension) {
         if (entity.getValue() == null) {
             return "";
         }
-        return formatMessage("downloadTemplateFileNamePattern", reportName.getValue(), fileExtension);
+        return messages.formatMessage("downloadTemplateFileNamePattern", reportName.getValue(), fileExtension);
     }
 
     protected String generateOutputFileName(String fileExtension) {
         if (StringUtils.isBlank(reportName.getValue())) {
             if (entity.getValue() != null) {
-                return formatMessage("downloadOutputFileNamePattern", messageTools.getEntityCaption(entity.getValue()), fileExtension);
+                return messages.formatMessage("downloadOutputFileNamePattern", messageTools.getEntityCaption(entity.getValue()), fileExtension);
             } else {
                 return "";
             }
@@ -353,7 +348,7 @@ public class ReportWizardCreator extends Screen implements MainWizardFrame<Scree
         buttonsBox.remove(addTabulatedRegionBtn);
         buttonsBox.remove(addRegionPopupBtn);
         if (((ReportData.ReportType) reportTypeRadioButtonGroup.getValue()).isList()) {
-            tipLabel.setValue(formatMessage("regionTabulatedMessage",
+            tipLabel.setValue(messages.formatMessage("regionTabulatedMessage",
                     messages.getMessage(entity.getValue().getJavaClass(),
                             entity.getValue().getJavaClass().getSimpleName())
             ));
@@ -363,7 +358,7 @@ public class ReportWizardCreator extends Screen implements MainWizardFrame<Scree
                 buttonsBox.add(addTabulatedRegionDisabledBtn);
             }
         } else {
-            tipLabel.setValue(getMessage("addPropertiesAndTableAreas"));
+            tipLabel.setValue(messages.getMessage("addPropertiesAndTableAreas"));
             if (entityTreeHasSimpleAttrs && entityTreeHasCollections) {
                 buttonsBox.add(addRegionPopupBtn);
             } else if (entityTreeHasSimpleAttrs) {
@@ -429,15 +424,6 @@ public class ReportWizardCreator extends Screen implements MainWizardFrame<Scree
         Report report = reportWizardService.toReport(reportData, temporary);
         reportData.setGeneratedReport(report);
         return report;
-    }
-
-    //todo
-    public String getMessage(String key) {
-        return ""/*super.getMessage(key)*/;
-    }
-
-    public String formatMessage(String key, Object... params) {
-        return ""/*super.formatMessage(key, params)*/;
     }
 
     protected void setCorrectReportOutputType() {
