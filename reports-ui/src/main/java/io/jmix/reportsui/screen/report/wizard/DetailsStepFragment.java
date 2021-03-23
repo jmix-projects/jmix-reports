@@ -21,27 +21,25 @@ import io.jmix.core.Messages;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.reports.entity.wizard.ReportData.ReportType;
 import io.jmix.reports.entity.wizard.TemplateFileType;
-import io.jmix.reportsui.screen.report.wizard.step.StepFrame;
+import io.jmix.reportsui.screen.report.wizard.step.StepFragment;
 import io.jmix.ui.Notifications;
-import io.jmix.ui.action.AbstractAction;
 import io.jmix.ui.action.Action;
 import io.jmix.ui.action.DialogAction;
 import io.jmix.ui.component.Component;
 import io.jmix.ui.component.HasValue;
+import io.jmix.ui.screen.UiController;
+import io.jmix.ui.screen.UiDescriptor;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 import java.util.function.Consumer;
 
+@UiController("DetailsStep.fragment")
+@UiDescriptor("first-details-fragment.xml")
+public class DetailsStepFragment extends StepFragment {
 
-public class DetailsStepFrame extends StepFrame {
-    //todo
-//    protected ConditionsTree conditionsTree;
-//    protected Filter filter;
-//    protected FilterEntity filterEntity;
-
-    public DetailsStepFrame(ReportWizardCreator wizard) {
-        super(wizard, wizard.getMessage("reportDetails"), "detailsStep");
+    public DetailsStepFragment(ReportWizardCreator wizard) {
+        super(wizard, "reportDetails", "detailsStep");
 
         isFirst = true;
         initFrameHandler = new InitDetailsStepFrameHandler();
@@ -56,8 +54,6 @@ public class DetailsStepFrame extends StepFrame {
             initEntityLookupField();
 
             wizard.entity.addValueChangeListener(new ChangeReportNameListener());
-
-            wizard.setQueryButton.setAction(new SetQueryAction());
         }
 
         protected void initEntityLookupField() {
@@ -184,48 +180,6 @@ public class DetailsStepFrame extends StepFrame {
                     }
                 }
             }
-        }
-    }
-
-    protected class SetQueryAction extends AbstractAction {
-        public SetQueryAction() {
-            super("setQuery");
-        }
-
-        @Override
-        public boolean isVisible() {
-            return ReportType.LIST_OF_ENTITIES_WITH_QUERY == wizard.reportTypeRadioButtonGroup.getValue();
-        }
-
-        @Override
-        public void actionPerform(Component component) {
-            MetaClass entityMetaClass = wizard.entity.getValue();
-            if (entityMetaClass == null) {
-                wizard.notifications.create(Notifications.NotificationType.TRAY)
-                        .withCaption(wizard.getMessage("fillEntityMsg"))
-                        .show();
-                return;
-            }
-//TODO Fake filter
-//            FakeFilterSupport fakeFilterSupport = new FakeFilterSupport(wizard, entityMetaClass);
-//            if (filter == null) {
-//                filter = fakeFilterSupport.createFakeFilter();
-//                filterEntity = fakeFilterSupport.createFakeFilterEntity(null);
-//                conditionsTree = fakeFilterSupport.createFakeConditionsTree(filter, filterEntity);
-//            }
-
-//            List<Op> hideOperations = Collections.singletonList(Op.DATE_INTERVAL);
-
-            Map<String, Object> params = new HashMap<>();
-//            params.put("filterEntity", filterEntity);
-//            params.put("filter", filter);
-//            params.put("conditionsTree", conditionsTree);
-            params.put("useShortConditionForm", true);
-            params.put("showConditionHiddenOption", true);
-//            params.put("hideOperations", hideOperations);
-
-            //FilterEditor filterEditor = (FilterEditor) wizard.openWindow("filterEditor", OpenType.DIALOG, params);
-
         }
     }
 

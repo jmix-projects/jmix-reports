@@ -29,8 +29,9 @@
             <field id="reportType" caption="msg://reportBuildType"
                    width="-1px" custom="true"
                    description="msg://singleMultiEntityHintMsg" descriptionAsHtml="true"/>
+            <textField id="reportQuery" caption="msg://io.jmix.reportsui.screen.report.wizard/reportQuery" width="100%"
+                       requiredMessage="msg://io.jmix.reportsui.screen.report.wizard/fillReportQueryMsg"/>
         </hbox>
-        <linkButton id="setQuery" caption="msg://setQuery"/>
         <label id="spacer"/>
     </layout>
 </window>
