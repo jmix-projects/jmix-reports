@@ -25,7 +25,7 @@ import io.jmix.ui.component.SourceCodeEditor;
 import io.jmix.ui.component.autocomplete.Suggester;
 import io.jmix.ui.icon.Icons;
 import io.jmix.ui.icon.JmixIcon;
-import io.jmix.ui.UiScreensProperties;
+import io.jmix.ui.UiScreenProperties;
 import io.jmix.ui.screen.*;
 import io.jmix.ui.settings.UserSettingService;
 import org.apache.commons.lang3.StringUtils;
@@ -79,13 +79,13 @@ public class ScriptEditorDialog extends Screen {
 
     protected void initAction() {
         Icons icons = getApplicationContext().getBean(Icons.class);
-        UiScreensProperties screensProperties = getApplicationContext().getBean(UiScreensProperties.class);
+        UiScreenProperties screenProperties = getApplicationContext().getBean(UiScreenProperties.class);
 
         Action commitAction = new BaseAction("commit")
                 .withCaption(messages.getMessage("actions.Ok"))
                 .withIcon(icons.get(JmixIcon.OK))
                 .withPrimary(true)
-                .withShortcut(screensProperties.getCommitShortcut())
+                .withShortcut(screenProperties.getCommitShortcut())
                 .withHandler(this::commit);
 
         getWindow().addAction(commitAction);
@@ -93,7 +93,7 @@ public class ScriptEditorDialog extends Screen {
         Action cancelAction = new BaseAction("cancel")
                 .withCaption(messages.getMessage("actions.Cancel"))
                 .withIcon(icons.get(JmixIcon.CANCEL))
-                .withShortcut(screensProperties.getCloseShortcut())
+                .withShortcut(screenProperties.getCloseShortcut())
                 .withHandler(this::cancel);
 
         getWindow().addAction(cancelAction);
