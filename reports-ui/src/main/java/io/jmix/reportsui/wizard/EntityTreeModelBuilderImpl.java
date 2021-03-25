@@ -31,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -56,10 +57,20 @@ public class EntityTreeModelBuilderImpl implements EntityTreeModelBuilder {
     @Autowired
     protected MetadataTools metadataTools;
 
+    protected int entityTreeModelMaxDeep;
+
     public int getEntityTreeModelMaxDeep() {
-        return reportsProperties.getEntityTreeModelMaxDeep();
+        return entityTreeModelMaxDeep;
     }
 
+    public void setEntityTreeModelMaxDeep(int entityTreeModelMaxDeep) {
+        this.entityTreeModelMaxDeep = entityTreeModelMaxDeep;
+    }
+
+    @PostConstruct
+    void init() {
+        entityTreeModelMaxDeep = reportsProperties.getEntityTreeModelMaxDeep();
+    }
 
     @Override
     public EntityTree buildEntityTree(MetaClass metaClass) {
