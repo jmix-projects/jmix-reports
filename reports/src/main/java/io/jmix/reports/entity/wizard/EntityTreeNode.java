@@ -34,28 +34,33 @@ import java.util.UUID;
 @JmixEntity(name = "report_WizardReportEntityTreeNode", annotatedPropertiesOnly = true)
 @SystemLevel
 public class EntityTreeNode implements Entity {
-
     private static final long serialVersionUID = 465985155557062476L;
 
     @Id
+    @JmixProperty
     @JmixGeneratedValue
     protected UUID id;
 
     @JmixProperty
     @Transient
     protected String name;
+
     @JmixProperty
     @Transient
     protected String localizedName;
+
     @JmixProperty
     @Transient
     protected EntityTreeNode parent;
+
     @JmixProperty
     @Composition
     @Transient
     protected List<EntityTreeNode> children = new ArrayList<>();
+
     @Transient
     protected MetaClass wrappedMetaClass;//'wrappedMetaClass' name cause 'metaClass' field already exists in superclass
+
     @Transient
     protected MetaProperty wrappedMetaProperty;
 

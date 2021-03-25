@@ -84,6 +84,7 @@ public class ReportData implements Serializable {
     }
 
     @Id
+    @JmixProperty
     @JmixGeneratedValue
     protected UUID id;
 
