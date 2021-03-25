@@ -35,6 +35,6 @@
             <button id="reportPropertyNameSearchButton" icon="SEARCH"/>
         </hbox>
         <tree id="entityTree" width="100%" multiselect="false" dataContainer="reportEntityTreeNodeDc"
-              hierarchyProperty="parent"/>
+              hierarchyProperty="parent" captionProperty="localizedName"/>
     </layout>
 </fragment>

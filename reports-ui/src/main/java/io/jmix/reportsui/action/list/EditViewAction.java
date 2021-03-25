@@ -134,13 +134,8 @@ public class EditViewAction extends ListAction {
                             editorParams.put("scalarOnly", Boolean.TRUE);
                             editorParams.put("updateDisabled", !secureOperations.isEntityUpdatePermitted(metadata.getClass(Report.class), policyStore));
 
-                            reportRegion.getRegionPropertiesRootNode().getChildren().forEach(t -> {
-                                t.setId(UUID.randomUUID());
-                            });
-                            reportRegion.getRegionPropertiesRootNode().setId(UUID.randomUUID());
                             reportRegion.setReportData(dataManager.create(ReportData.class));
-                            reportRegion.getReportData().setId(UUID.randomUUID());
-                            reportRegion.setBandNameFromReport("band");
+                            reportRegion.setBandNameFromReport(dataSet.getName());
 
                             RegionEditor screen = screenBuilders.editor(ReportRegion.class, dataSetsTable.getFrame().getFrameOwner())
                                     .editEntity(reportRegion)
