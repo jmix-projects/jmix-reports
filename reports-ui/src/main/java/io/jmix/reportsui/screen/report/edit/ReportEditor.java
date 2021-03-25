@@ -44,7 +44,6 @@ import javax.inject.Named;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @UiController("report_Report.edit")
 @UiDescriptor("report-edit.xml")
@@ -217,20 +216,6 @@ public class ReportEditor extends StandardEditor<Report> {
         }
     }
 
-    @Subscribe
-    public void onBeforeCommitChanges(BeforeCommitChangesEvent event) {
-        getEditedEntity().getReportRoles().forEach(role -> {
-            if(role.getReport() == null){
-                role.setReport(getEditedEntity());
-            }
-        });
-
-        getEditedEntity().getReportScreens().forEach(screen -> {
-            if(screen.getReport() == null){
-                screen.setReport(getEditedEntity());
-            }
-        });
-    }
 
     @Subscribe
     protected void onValidation(ValidationEvent event) {
