@@ -90,6 +90,10 @@ public class RegionEditor extends StandardEditor<ReportRegion> {
         this.updatePermission = updatePermission;
     }
 
+    public EntityTreeNode getRootNode() {
+        return rootNode;
+    }
+
     public void setRootNode(EntityTreeNode rootNode) {
         this.rootNode = rootNode;
     }
