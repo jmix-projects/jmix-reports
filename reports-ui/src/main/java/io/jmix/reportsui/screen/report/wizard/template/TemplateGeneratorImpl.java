@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package io.jmix.reportsui.wizard.template;
+package io.jmix.reportsui.screen.report.wizard.template;
 
 import io.jmix.reports.entity.wizard.ReportData;
 import io.jmix.reports.entity.wizard.TemplateFileType;
 import io.jmix.reports.exception.TemplateGenerationException;
-import io.jmix.reportsui.wizard.template.generators.*;
+import io.jmix.reportsui.screen.report.wizard.template.generators.*;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 

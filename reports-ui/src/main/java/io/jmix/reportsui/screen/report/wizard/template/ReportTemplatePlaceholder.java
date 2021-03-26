@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.jmix.reportsui.wizard.template;
+package io.jmix.reportsui.screen.report.wizard.template;
 
 import io.jmix.core.Messages;
 import io.jmix.core.metamodel.model.MetaProperty;

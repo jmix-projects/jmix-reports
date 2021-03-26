@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package io.jmix.reportsui.wizard.template.generators;
+package io.jmix.reportsui.screen.report.wizard.template.generators;
 
 import com.google.common.base.Joiner;
 import io.jmix.reports.entity.wizard.RegionProperty;
 import io.jmix.reports.entity.wizard.ReportData;
 import io.jmix.reports.entity.wizard.ReportRegion;
-import io.jmix.reportsui.wizard.template.Generator;
-import io.jmix.reportsui.wizard.template.ReportTemplatePlaceholder;
+import io.jmix.reportsui.screen.report.wizard.template.Generator;
+import io.jmix.reportsui.screen.report.wizard.template.ReportTemplatePlaceholder;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;

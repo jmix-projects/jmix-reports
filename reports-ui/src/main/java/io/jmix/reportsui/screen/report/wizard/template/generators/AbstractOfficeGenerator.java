@@ -14,12 +14,12 @@
  * limitations under the License.
  */
 
-package io.jmix.reportsui.wizard.template.generators;
+package io.jmix.reportsui.screen.report.wizard.template.generators;
 
 import io.jmix.reports.entity.wizard.ReportData;
 import io.jmix.reports.exception.TemplateGenerationException;
-import io.jmix.reportsui.wizard.template.Generator;
-import io.jmix.reportsui.wizard.template.ReportTemplatePlaceholder;
+import io.jmix.reportsui.screen.report.wizard.template.Generator;
+import io.jmix.reportsui.screen.report.wizard.template.ReportTemplatePlaceholder;
 import org.apache.poi.ss.util.CellReference;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.io3.Save;

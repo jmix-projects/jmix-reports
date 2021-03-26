@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.jmix.reportsui.wizard.template;
+package io.jmix.reportsui.screen.report.wizard.template;
 
 import io.jmix.reports.exception.TemplateGenerationException;
 

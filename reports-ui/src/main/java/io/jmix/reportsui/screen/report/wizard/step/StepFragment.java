@@ -25,9 +25,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class StepFragment extends ScreenFragment {
-    protected final String name;
-    protected final Frame frame;
-    protected final ReportWizardCreator wizard;
+    protected String name;
+    protected Frame frame;
+    protected ReportWizardCreator wizard;
 
     protected InitStepFrameHandler initFrameHandler;
     protected BeforeHideStepFrameHandler beforeHideFrameHandler;
@@ -42,14 +42,14 @@ public class StepFragment extends ScreenFragment {
     protected FrameValidator frameValidator = new FrameValidator();
     protected boolean isInitialized;
 
-    public StepFragment(ReportWizardCreator reportWizardCreatorEditor, String name, String frameComponentName) {
-        this.wizard = reportWizardCreatorEditor;
-        this.name = name;
-        this.frame = (Frame) reportWizardCreatorEditor.getWindow().getComponent(frameComponentName);
-        if (frame == null) {
-            throw new UnsupportedOperationException("Frame component is not found");
-        }
-    }
+//    public StepFragment(ReportWizardCreator reportWizardCreatorEditor, String name, String frameComponentName) {
+//        this.wizard = reportWizardCreatorEditor;
+//        this.name = name;
+//        this.frame = (Frame) reportWizardCreatorEditor.getWindow().getComponent(frameComponentName);
+//        if (frame == null) {
+//            throw new UnsupportedOperationException("Frame component is not found");
+//        }
+//    }
 
     public void setInitFrameHandler(InitStepFrameHandler initFrameHandler) {
         this.initFrameHandler = initFrameHandler;
@@ -100,8 +100,8 @@ public class StepFragment extends ScreenFragment {
         return name;
     }
 
-    public Frame getFrame() {
-        return frame;
+    public ScreenFragment getScreenFragment() {
+        return this;
     }
 
     public boolean isLast() {

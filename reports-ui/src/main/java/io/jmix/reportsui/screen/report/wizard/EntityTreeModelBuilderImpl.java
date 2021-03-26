@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Haulmont.
+ * Copyright 2021 Haulmont.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.jmix.reportsui.wizard;
+package io.jmix.reportsui.screen.report.wizard;
 
 import io.jmix.core.ExtendedEntities;
 import io.jmix.core.MessageTools;

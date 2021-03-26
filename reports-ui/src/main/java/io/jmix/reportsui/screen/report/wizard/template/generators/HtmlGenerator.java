@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.jmix.reportsui.wizard.template.generators;
+package io.jmix.reportsui.screen.report.wizard.template.generators;
 
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
@@ -23,9 +23,9 @@ import freemarker.template.TemplateException;
 import io.jmix.reports.entity.wizard.RegionProperty;
 import io.jmix.reports.entity.wizard.ReportData;
 import io.jmix.reports.entity.wizard.ReportRegion;
-import io.jmix.reportsui.wizard.ReportingWizardImpl;
-import io.jmix.reportsui.wizard.template.Generator;
-import io.jmix.reportsui.wizard.template.ReportTemplatePlaceholder;
+import io.jmix.reportsui.screen.report.wizard.ReportingWizardImpl;
+import io.jmix.reportsui.screen.report.wizard.template.Generator;
+import io.jmix.reportsui.screen.report.wizard.template.ReportTemplatePlaceholder;
 
 import java.io.IOException;
 import java.io.StringWriter;
