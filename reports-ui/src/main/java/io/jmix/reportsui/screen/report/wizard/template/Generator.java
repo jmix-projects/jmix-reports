@@ -14,16 +14,14 @@
  * limitations under the License.
  */
 
-package io.jmix.reportsui.wizard;
+package io.jmix.reportsui.screen.report.wizard.template;
 
-import io.jmix.core.metamodel.model.MetaClass;
-import io.jmix.reports.app.EntityTree;
-import org.springframework.stereotype.Service;
+import freemarker.template.TemplateException;
+import io.jmix.reports.entity.wizard.ReportData;
+import io.jmix.reports.exception.TemplateGenerationException;
 
+import java.io.IOException;
 
-public interface EntityTreeModelBuilder {
-    String NAME = "report_EntityTreeModelBuilder";
-
-    EntityTree buildEntityTree(MetaClass metaClass);
+public interface Generator {
+    byte[] generate(ReportData reportData) throws TemplateGenerationException, TemplateException, IOException;
 }
-

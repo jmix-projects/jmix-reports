@@ -40,7 +40,7 @@ public class StepFrameManager {
         setMainWindowProps();
         getCurrentStepFrame().initFrame();
         getCurrentStepFrame().beforeShow();
-        getCurrentStepFrame().getFrame().setVisible(true);
+        getCurrentStepFrame().getFragment().setVisible(true);
     }
 
     protected StepFragment getCurrentStepFrame() {
@@ -48,7 +48,7 @@ public class StepFrameManager {
     }
 
     public Frame getCurrentFrame() {
-        return stepFragments.get(currentFrameIdx).getFrame();
+        return stepFragments.get(currentFrameIdx).getFragment();
     }
 
     public void setMainWindowProps() {
@@ -129,6 +129,6 @@ public class StepFrameManager {
 
     protected void hideCurrentFrame() {
         getCurrentStepFrame().beforeHide();
-        getCurrentStepFrame().getFrame().setVisible(false);
+        getCurrentStepFrame().getFragment().setVisible(false);
     }
 }

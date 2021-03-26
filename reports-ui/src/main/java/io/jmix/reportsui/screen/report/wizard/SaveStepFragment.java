@@ -71,138 +71,138 @@ public class SaveStepFragment extends StepFragment {
     protected Downloader downloader;
 
     public SaveStepFragment(ReportWizardCreator wizard) {
-        super(wizard, "", "saveStep");
+        //super(wizard, "", "saveStep");
         isLast = true;
-        beforeShowFrameHandler = new BeforeShowSaveStepFrameHandler();
+        //beforeShowFrameHandler = new BeforeShowSaveStepFrameHandler();
 
         beforeHideFrameHandler = new BeforeHideSaveStepFrameHandler();
     }
 
-    protected class BeforeShowSaveStepFrameHandler implements BeforeShowStepFrameHandler {
-        @Override
-        public void beforeShowFrame() {
-            initSaveAction();
-            initDownloadAction();
+//    protected class BeforeShowSaveStepFrameHandler implements BeforeShowStepFrameHandler {
+//        @Override
+//        public void beforeShowFrame() {
+//            initSaveAction();
+//            initDownloadAction();
+//
+//            if (StringUtils.isEmpty(wizard.outputFileName.getValue())) {
+//                Object value = wizard.templateFileFormat.getValue();
+//                wizard.outputFileName.setValue(wizard.generateOutputFileName(value.toString().toLowerCase()));
+//            }
+//            wizard.setCorrectReportOutputType();
+//
+//            initChartPreview();
+//        }
 
-            if (StringUtils.isEmpty(wizard.outputFileName.getValue())) {
-                Object value = wizard.templateFileFormat.getValue();
-                wizard.outputFileName.setValue(wizard.generateOutputFileName(value.toString().toLowerCase()));
-            }
-            wizard.setCorrectReportOutputType();
+//        protected void initChartPreview() {
+//            if (wizard.outputFileFormat.getValue() == ReportOutputType.CHART) {
+//                wizard.chartPreviewBox.setVisible(true);
+//                wizard.diagramTypeLabel.setVisible(true);
+//                wizard.diagramType.setVisible(true);
+//
+//                showChart();
+//
+////TODO dialog options
+////                wizard.getDialogOptions()
+////                        .setHeight(wizard.wizardHeight + 400).setHeightUnit(SizeUnit.PIXELS)
+////                        .center();
+//
+//                wizard.diagramType.setRequired(true);
+//                wizard.diagramType.setOptionsList(Arrays.asList(ChartType.values()));
+//                wizard.diagramType.setValue(ChartType.SERIAL);
+//
+//                wizard.diagramType.addValueChangeListener(e -> {
+//                    wizard.getItem().setChartType((ChartType) e.getValue());
+//                    wizard.chartPreviewBox.removeAll();
+//                    showChart();
+//                });
+//            } else {
+//                wizard.chartPreviewBox.setVisible(false);
+//                wizard.diagramTypeLabel.setVisible(false);
+//                wizard.diagramType.setVisible(false);
+//            }
+//        }
 
-            initChartPreview();
-        }
-
-        protected void initChartPreview() {
-            if (wizard.outputFileFormat.getValue() == ReportOutputType.CHART) {
-                wizard.chartPreviewBox.setVisible(true);
-                wizard.diagramTypeLabel.setVisible(true);
-                wizard.diagramType.setVisible(true);
-
-                showChart();
-
-//TODO dialog options
-//                wizard.getDialogOptions()
-//                        .setHeight(wizard.wizardHeight + 400).setHeightUnit(SizeUnit.PIXELS)
-//                        .center();
-
-                wizard.diagramType.setRequired(true);
-                wizard.diagramType.setOptionsList(Arrays.asList(ChartType.values()));
-                wizard.diagramType.setValue(ChartType.SERIAL);
-
-                wizard.diagramType.addValueChangeListener(e -> {
-                    wizard.getItem().setChartType((ChartType) e.getValue());
-                    wizard.chartPreviewBox.removeAll();
-                    showChart();
-                });
-            } else {
-                wizard.chartPreviewBox.setVisible(false);
-                wizard.diagramTypeLabel.setVisible(false);
-                wizard.diagramType.setVisible(false);
-            }
-        }
-
-        protected void initDownloadAction() {
-            wizard.downloadTemplateFile.setCaption(wizard.generateTemplateFileName(wizard.templateFileFormat.getValue().toString().toLowerCase()));
-            wizard.downloadTemplateFile.setAction(new AbstractAction("generateNewTemplateAndGet") {
-                @Override
-                public void actionPerform(Component component) {
-                    byte[] newTemplate = null;
-                    try {
-                        wizard.getItem().setName(wizard.reportName.getValue().toString());
-                        newTemplate = wizard.reportWizardService.generateTemplate(wizard.getItem(), wizard.templateFileFormat.getValue());
-                        downloader.download(new ByteArrayDataProvider(newTemplate, uiProperties.getSaveExportedByteArrayDataThresholdBytes(), coreProperties.getTempDir()),
-                                wizard.downloadTemplateFile.getCaption(), DownloadFormat.getByExtension(wizard.templateFileFormat.getValue().toString().toLowerCase()));
-                    } catch (TemplateGenerationException e) {
-                        notifications.create(Notifications.NotificationType.WARNING)
-                                .withCaption(messages.getMessage("templateGenerationException"))
-                                .show();
-                    }
-                    if (newTemplate != null) {
-                        wizard.lastGeneratedTemplate = newTemplate;
-                    }
-                }
-            });
-        }
-
-        protected void initSaveAction() {
-            wizard.saveBtn.setVisible(true);
-            wizard.saveBtn.setAction(new AbstractAction("saveReport") {
-                @Override
-                public void actionPerform(Component component) {
-                    try {
-                        wizard.outputFileName.validate();
-                    } catch (ValidationException e) {
-                        notifications.create(Notifications.NotificationType.TRAY)
-                                .withCaption(messages.getMessage("validationFail.caption"))
-                                .withDescription(e.getMessage())
-                                .show();
-                        return;
-                    }
-                    if (wizard.getItem().getReportRegions().isEmpty()) {
-                        dialogs.createOptionDialog()
-                                .withCaption(messages.getMessage("dialogs.Confirmation"))
-                                .withMessage(messages.getMessage("confirmSaveWithoutRegions"))
-                                .withActions(
-                                        new DialogAction(DialogAction.Type.OK).withHandler(handle ->
-                                                convertToReportAndForceCloseWizard()
-                                        ),
-                                        new DialogAction(DialogAction.Type.NO)
-                                ).show();
-                    } else {
-                        convertToReportAndForceCloseWizard();
-                    }
-                }
-
-                private void convertToReportAndForceCloseWizard() {
-                    Report r = wizard.buildReport(false);
-                    //todo
-//                    if (r != null) {
-//                        wizard.close(Window.COMMIT_ACTION_ID); //true is ok cause it is a save btn
+//        protected void initDownloadAction() {
+//            wizard.downloadTemplateFile.setCaption(wizard.generateTemplateFileName(wizard.templateFileFormat.getValue().toString().toLowerCase()));
+//            wizard.downloadTemplateFile.setAction(new AbstractAction("generateNewTemplateAndGet") {
+//                @Override
+//                public void actionPerform(Component component) {
+//                    byte[] newTemplate = null;
+//                    try {
+//                        wizard.getItem().setName(wizard.reportName.getValue().toString());
+//                        newTemplate = wizard.reportWizardService.generateTemplate(wizard.getItem(), wizard.templateFileFormat.getValue());
+//                        downloader.download(new ByteArrayDataProvider(newTemplate, uiProperties.getSaveExportedByteArrayDataThresholdBytes(), coreProperties.getTempDir()),
+//                                wizard.downloadTemplateFile.getCaption(), DownloadFormat.getByExtension(wizard.templateFileFormat.getValue().toString().toLowerCase()));
+//                    } catch (TemplateGenerationException e) {
+//                        notifications.create(Notifications.NotificationType.WARNING)
+//                                .withCaption(messages.getMessage("templateGenerationException"))
+//                                .show();
 //                    }
-                }
-            });
-        }
+//                    if (newTemplate != null) {
+//                        wizard.lastGeneratedTemplate = newTemplate;
+//                    }
+//                }
+//            });
+//        }
 
-        protected void showChart() {
-            byte[] content = wizard.buildReport(true).getDefaultTemplate().getContent();
-            String chartDescriptionJson = new String(content, StandardCharsets.UTF_8);
-            AbstractChartDescription chartDescription = AbstractChartDescription.fromJsonString(chartDescriptionJson);
-            RandomChartDataGenerator randomChartDataGenerator = new RandomChartDataGenerator();
-            List<Map<String, Object>> randomChartData = randomChartDataGenerator.generateRandomChartData(chartDescription);
-            ChartToJsonConverter chartToJsonConverter = new ChartToJsonConverter();
-            String chartJson = null;
-            if (chartDescription instanceof PieChartDescription) {
-                chartJson = chartToJsonConverter.convertPieChart((PieChartDescription) chartDescription, randomChartData);
-            } else if (chartDescription instanceof SerialChartDescription) {
-                chartJson = chartToJsonConverter.convertSerialChart((SerialChartDescription) chartDescription, randomChartData);
-            }
-
-            //todo
-//            wizard.openFrame(wizard.chartPreviewBox, ShowChartController.JSON_CHART_SCREEN_ID,
-//                    ParamsMap.of(ShowChartController.CHART_JSON_PARAMETER, chartJson));
-        }
-    }
+//        protected void initSaveAction() {
+//            wizard.saveBtn.setVisible(true);
+//            wizard.saveBtn.setAction(new AbstractAction("saveReport") {
+//                @Override
+//                public void actionPerform(Component component) {
+//                    try {
+//                        //wizard.outputFileName.validate();
+//                    } catch (ValidationException e) {
+//                        notifications.create(Notifications.NotificationType.TRAY)
+//                                .withCaption(messages.getMessage("validationFail.caption"))
+//                                .withDescription(e.getMessage())
+//                                .show();
+//                        return;
+//                    }
+//                    if (wizard.getItem().getReportRegions().isEmpty()) {
+//                        dialogs.createOptionDialog()
+//                                .withCaption(messages.getMessage("dialogs.Confirmation"))
+//                                .withMessage(messages.getMessage("confirmSaveWithoutRegions"))
+//                                .withActions(
+//                                        new DialogAction(DialogAction.Type.OK).withHandler(handle ->
+//                                                convertToReportAndForceCloseWizard()
+//                                        ),
+//                                        new DialogAction(DialogAction.Type.NO)
+//                                ).show();
+//                    } else {
+//                        convertToReportAndForceCloseWizard();
+//                    }
+//                }
+//
+//                private void convertToReportAndForceCloseWizard() {
+//                    Report r = wizard.buildReport(false);
+//                    //todo
+////                    if (r != null) {
+////                        wizard.close(Window.COMMIT_ACTION_ID); //true is ok cause it is a save btn
+////                    }
+//                }
+//            });
+//        }
+//
+//        protected void showChart() {
+//            byte[] content = wizard.buildReport(true).getDefaultTemplate().getContent();
+//            String chartDescriptionJson = new String(content, StandardCharsets.UTF_8);
+//            AbstractChartDescription chartDescription = AbstractChartDescription.fromJsonString(chartDescriptionJson);
+//            RandomChartDataGenerator randomChartDataGenerator = new RandomChartDataGenerator();
+//            List<Map<String, Object>> randomChartData = randomChartDataGenerator.generateRandomChartData(chartDescription);
+//            ChartToJsonConverter chartToJsonConverter = new ChartToJsonConverter();
+//            String chartJson = null;
+//            if (chartDescription instanceof PieChartDescription) {
+//                chartJson = chartToJsonConverter.convertPieChart((PieChartDescription) chartDescription, randomChartData);
+//            } else if (chartDescription instanceof SerialChartDescription) {
+//                chartJson = chartToJsonConverter.convertSerialChart((SerialChartDescription) chartDescription, randomChartData);
+//            }
+//
+//            //todo
+////            wizard.openFrame(wizard.chartPreviewBox, ShowChartController.JSON_CHART_SCREEN_ID,
+////                    ParamsMap.of(ShowChartController.CHART_JSON_PARAMETER, chartJson));
+//        }
+//    }
 
     protected class BeforeHideSaveStepFrameHandler implements BeforeHideStepFrameHandler {
         @Override

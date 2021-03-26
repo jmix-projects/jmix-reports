@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Haulmont.
+ * Copyright 2021 Haulmont.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.jmix.reportsui.wizard;
+package io.jmix.reportsui.screen.report.wizard;
 
 import io.jmix.core.FetchPlan;
 import io.jmix.core.metamodel.model.MetaClass;
@@ -26,11 +26,10 @@ import io.jmix.reports.entity.wizard.ReportData;
 import io.jmix.reports.entity.wizard.ReportRegion;
 import io.jmix.reports.entity.wizard.TemplateFileType;
 import io.jmix.reports.exception.TemplateGenerationException;
-import io.jmix.reportsui.wizard.template.TemplateGeneratorImpl;
-import io.jmix.reportsui.wizard.template.TemplateGenerator;
+import io.jmix.reportsui.screen.report.wizard.template.TemplateGeneratorImpl;
+import io.jmix.reportsui.screen.report.wizard.template.TemplateGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import javax.annotation.Nullable;
 import javax.inject.Provider;

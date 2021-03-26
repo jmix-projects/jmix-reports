@@ -92,25 +92,25 @@ public class ReportBrowser extends StandardLookup<Report> {
     @Subscribe("popupCreateBtn.wizard")
     protected void onPopupCreateBtnWizard(Action.ActionPerformedEvent event) {
         ReportWizardCreator wizard = screens.create(ReportWizardCreator.class, OpenMode.DIALOG);
-        wizard.addAfterCloseListener(e -> {
-            if (e.closedWith(StandardOutcome.COMMIT)) {
-                Report item = wizard.getItem().getGeneratedReport();
-                reportDc.getMutableItems().add(item);
-                reportsTable.setSelected(item);
-                ReportEditor reportEditor = (ReportEditor) screenBuilders.editor(reportsTable)
-                        .withOpenMode(OpenMode.THIS_TAB)
-                        .build();
-                reportEditor.show()
-                        .addAfterCloseListener(closeEvent -> {
-                            if (closeEvent.closedWith(StandardOutcome.COMMIT)) {
-                                Report item1 = reportEditor.getEditedEntity();
-                                reportDc.replaceItem(item1);
-                            }
-                            UUID newReportId = reportEditor.getEditedEntity().getId();
-                            reportsTable.expandPath(reportDc.getItem(newReportId));
-                        });
-            }
-        });
+//        wizard.addAfterCloseListener(e -> {
+//            if (e.closedWith(StandardOutcome.COMMIT)) {
+//                Report item = wizard.getItem().getGeneratedReport();
+//                reportDc.getMutableItems().add(item);
+//                reportsTable.setSelected(item);
+//                ReportEditor reportEditor = (ReportEditor) screenBuilders.editor(reportsTable)
+//                        .withOpenMode(OpenMode.THIS_TAB)
+//                        .build();
+//                reportEditor.show()
+//                        .addAfterCloseListener(closeEvent -> {
+//                            if (closeEvent.closedWith(StandardOutcome.COMMIT)) {
+//                                Report item1 = reportEditor.getEditedEntity();
+//                                reportDc.replaceItem(item1);
+//                            }
+//                            UUID newReportId = reportEditor.getEditedEntity().getId();
+//                            reportsTable.expandPath(reportDc.getItem(newReportId));
+//                        });
+//            }
+//        });
         wizard.show();
     }
 
