@@ -100,6 +100,7 @@ public class RegionEditor extends StandardEditor<ReportRegion> {
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
+        getEditedEntity().getRegionPropertiesRootNode().setWrappedMetaClass(rootNode.getWrappedMetaClass());
         //params.put("component$reportPropertyName", reportPropertyName);
         //todo
         //reportEntityTreeNodeDs.refresh(params);
@@ -190,7 +191,7 @@ public class RegionEditor extends StandardEditor<ReportRegion> {
             initAsViewEditor();
         }
         entityTree.setSelectionMode(Tree.SelectionMode.MULTI);
-        entityTree.expand(rootNode);
+
     }
 
     protected void initAsViewEditor() {
@@ -254,12 +255,20 @@ public class RegionEditor extends StandardEditor<ReportRegion> {
     }
 
     @Subscribe
+    public void onBeforeClose(BeforeCloseEvent event) {
+        getEditedEntity().setRegionProperties(new ArrayList<>(propertiesTable.getItems().getItems()));
+        event.closedWith(StandardOutcome.COMMIT);
+    }
+
+    @Subscribe
     protected void onBeforeCommit(BeforeCommitChangesEvent event) {
         if (reportRegionPropertiesTableDc.getItems().isEmpty()) {
             notifications.create(Notifications.NotificationType.TRAY)
                     .withCaption(messages.getMessage("selectAtLeastOneProp"))
                     .show();
             event.preventCommit();
+        } else {
+            event.resume();
         }
     }
 }

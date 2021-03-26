@@ -35,29 +35,22 @@ import io.jmix.ui.Notifications;
 import io.jmix.ui.ScreenBuilders;
 import io.jmix.ui.action.ActionType;
 import io.jmix.ui.action.ListAction;
-import io.jmix.ui.builder.ScreenBuilder;
 import io.jmix.ui.component.Component;
 import io.jmix.ui.component.Table;
-import io.jmix.ui.component.Window;
 import io.jmix.ui.meta.StudioAction;
 import io.jmix.ui.model.CollectionContainer;
 import io.jmix.ui.screen.OpenMode;
-import io.jmix.ui.screen.Screen;
-import io.jmix.ui.screen.StandardCloseAction;
+import io.jmix.ui.screen.StandardOutcome;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @StudioAction(target = "io.jmix.ui.component.ListComponent", description = "Edit action for an entity band")
 @ActionType(EditViewAction.ID)
 public class EditViewAction extends ListAction {
 
     public static final String ID = "editViewEntity";
-
 
     @Autowired
     protected ScreenBuilders screenBuilders;
@@ -144,7 +137,9 @@ public class EditViewAction extends ListAction {
                                     .build();
                             screen.setRootNode(reportRegion.getRegionPropertiesRootNode());
                             screen.addAfterCloseListener(afterCloseEvent -> {
-                                if (Window.COMMIT_ACTION_ID.equals(((StandardCloseAction) afterCloseEvent.getCloseAction()).getActionId())) {
+                                if (afterCloseEvent.closedWith(StandardOutcome.COMMIT)) {
+                                    RegionEditor editor = (RegionEditor) afterCloseEvent.getScreen();
+                                    reportRegion.setRegionProperties(editor.getEditedEntity().getRegionProperties());
                                     dataSet.setFetchPlan(reportRegionToView(entityTree, reportRegion));
                                 }
                             });
@@ -221,7 +216,7 @@ public class EditViewAction extends ListAction {
                         //We must to create minimal view that contains collection property for ability of creating ReportRegion.regionPropertiesRootNode later
                         MetaClass metaClass = entityTree.getEntityTreeRootNode().getWrappedMetaClass();
                         MetaProperty metaProperty = metaClass.getProperty(collectionPropertyName);
-                        if (metaProperty != null && metaProperty.getDomain() != null && metaProperty.getRange().getCardinality().isMany()) {
+                        if (metaProperty.getDomain() != null && metaProperty.getRange().getCardinality().isMany()) {
                             view = fetchPlans.builder(metaProperty.getDomain().getJavaClass()).build();
                         } else {
                             notifications.create(Notifications.NotificationType.TRAY)
