@@ -134,6 +134,7 @@ public class Report implements com.haulmont.yarg.structure.Report, io.jmix.core.
 
     @Transient
     @JmixProperty
+    @Composition
     protected Set<BandDefinition> bands = new HashSet<>();
 
     @Transient
