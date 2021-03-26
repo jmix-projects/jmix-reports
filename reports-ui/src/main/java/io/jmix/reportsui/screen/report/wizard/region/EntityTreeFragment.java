@@ -2,8 +2,8 @@ package io.jmix.reportsui.screen.report.wizard.region;
 
 import io.jmix.core.DataManager;
 import io.jmix.reports.entity.wizard.EntityTreeNode;
+import io.jmix.ui.component.Tree;
 import io.jmix.ui.model.CollectionContainer;
-import io.jmix.ui.model.CollectionLoader;
 import io.jmix.ui.screen.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -15,6 +15,8 @@ public class EntityTreeFragment extends ScreenFragment {
     protected DataManager dataManager;
     @Autowired
     private CollectionContainer<EntityTreeNode> reportEntityTreeNodeDc;
+    @Autowired
+    private Tree<EntityTreeNode> entityTree;
 
     @Subscribe(target = Target.PARENT_CONTROLLER)
     public void onBeforeShow(Screen.BeforeShowEvent event) {
@@ -22,6 +24,7 @@ public class EntityTreeFragment extends ScreenFragment {
 
         reportEntityTreeNodeDc.getMutableItems().add(regionEditor.getRootNode());
         reportEntityTreeNodeDc.getMutableItems().addAll(regionEditor.getRootNode().getChildren());
+        entityTree.expand(regionEditor.getRootNode());
     }
 
 }
