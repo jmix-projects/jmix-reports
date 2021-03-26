@@ -182,7 +182,8 @@ public class Report implements com.haulmont.yarg.structure.Report, io.jmix.core.
 
     private void updateInputParamIdx() {
         if (CollectionUtils.isNotEmpty(inputParameters)) {
-            setInputEntityTypesIdx(inputParameters
+            setInputEntityTypesIdx(IDX_SEPARATOR +
+                    inputParameters
                     .stream()
                     .map(ReportInputParameter::getEntityMetaClass)
                     .filter(StringUtils::isNotBlank)
@@ -194,9 +195,10 @@ public class Report implements com.haulmont.yarg.structure.Report, io.jmix.core.
 
     private void updateRoleIdx() {
         if (CollectionUtils.isNotEmpty(reportRoles)) {
-            setRolesIdx(reportRoles
+            setRolesIdx(IDX_SEPARATOR +
+                    reportRoles
                     .stream()
-                    .map(ReportRole::getRoleName)
+                    .map(ReportRole::getRoleCode)
                     .collect(Collectors.joining(IDX_SEPARATOR)));
         } else {
            setRolesIdx(null);
@@ -205,7 +207,8 @@ public class Report implements com.haulmont.yarg.structure.Report, io.jmix.core.
 
     private void updateScreenIdx() {
         if (CollectionUtils.isNotEmpty(reportScreens)) {
-            setScreensIdx(reportScreens
+            setScreensIdx(IDX_SEPARATOR +
+                    reportScreens
                     .stream()
                     .map(ReportScreen::getScreenId)
                     .collect(Collectors.joining(IDX_SEPARATOR)));
