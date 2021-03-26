@@ -155,7 +155,7 @@ public class StepFragment extends ScreenFragment {
                 if (c instanceof Field) {
                     Field field = (Field) c;
                     if (field.isRequired() && StringUtils.isBlank(field.getRequiredMessage()) && StringUtils.isBlank(field.getCaption())) {
-                        field.setRequiredMessage(getDefaultRequiredMessage(wizard.getMessage(field.getId())));
+                        field.setRequiredMessage(getDefaultRequiredMessage("" /*wizard.getMessage(field.getId())*/));
                     }
                 }
             }

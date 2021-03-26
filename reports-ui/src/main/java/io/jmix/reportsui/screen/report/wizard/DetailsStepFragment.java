@@ -30,13 +30,17 @@ import io.jmix.ui.component.HasValue;
 import io.jmix.ui.screen.UiController;
 import io.jmix.ui.screen.UiDescriptor;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
 import java.util.function.Consumer;
 
-@UiController("DetailsStep.fragment")
+@UiController("report_DetailsStep.fragment")
 @UiDescriptor("first-details-fragment.xml")
 public class DetailsStepFragment extends StepFragment {
+
+    @Autowired
+    protected Messages messages;
 
     public DetailsStepFragment(ReportWizardCreator wizard) {
         super(wizard, "reportDetails", "detailsStep");
@@ -94,9 +98,9 @@ public class DetailsStepFragment extends StepFragment {
 
         protected Map<String, Object> getListedReportOptionsMap() {
             Map<String, Object> result = new LinkedHashMap<>(3);
-            result.put(wizard.getMessage("singleEntityReport"), ReportType.SINGLE_ENTITY);
-            result.put(wizard.getMessage("listOfEntitiesReport"), ReportType.LIST_OF_ENTITIES);
-            result.put(wizard.getMessage("listOfEntitiesReportWithQuery"), ReportType.LIST_OF_ENTITIES_WITH_QUERY);
+            result.put(messages.getMessage("singleEntityReport"), ReportType.SINGLE_ENTITY);
+            result.put(messages.getMessage("listOfEntitiesReport"), ReportType.LIST_OF_ENTITIES);
+            result.put(messages.getMessage("listOfEntitiesReportWithQuery"), ReportType.LIST_OF_ENTITIES_WITH_QUERY);
             return result;
         }
 
@@ -133,7 +137,7 @@ public class DetailsStepFragment extends StepFragment {
     public List<String> validateFrame() {
         ArrayList<String> errors = new ArrayList<>(super.validateFrame());
         if (wizard.reportTypeRadioButtonGroup.getValue() == ReportType.LIST_OF_ENTITIES_WITH_QUERY && wizard.query == null) {
-            errors.add(wizard.getMessage("fillReportQuery"));
+            errors.add(messages.getMessage("fillReportQuery"));
         }
 
         return errors;
@@ -154,7 +158,7 @@ public class DetailsStepFragment extends StepFragment {
             String oldReportName = wizard.reportName.getValue();
             MessageTools messageTools = wizard.messageTools;
             if (StringUtils.isBlank(oldReportName)) {
-                String newText = wizard.formatMessage("reportNamePattern", messageTools.getEntityCaption(value));
+                String newText = messages.formatMessage("reportNamePattern", messageTools.getEntityCaption(value));
                 wizard.reportName.setValue(newText);
             } else {
                 if (prevValue != null) {
@@ -171,10 +175,10 @@ public class DetailsStepFragment extends StepFragment {
                         }
 
                         wizard.reportName.setValue(newText);
-                        if (!oldReportName.equals(wizard.formatMessage("reportNamePattern", prevEntityCaption))) {
+                        if (!oldReportName.equals(messages.formatMessage("reportNamePattern", prevEntityCaption))) {
                             //if user changed auto generated report name and we have changed it, we show message to him
                             wizard.notifications.create(Notifications.NotificationType.TRAY)
-                                    .withCaption(wizard.getMessage("reportNameChanged"))
+                                    .withCaption(messages.getMessage("reportNameChanged"))
                                     .show();
                         }
                     }
@@ -207,8 +211,8 @@ public class DetailsStepFragment extends StepFragment {
         public void accept(HasValue.ValueChangeEvent e) {
             if (!wizard.getItem().getReportRegions().isEmpty()) {
                 wizard.dialogs.createOptionDialog()
-                        .withCaption(wizard.getMessage("dialogs.Confirmation"))
-                        .withMessage(wizard.getMessage("regionsClearConfirm"))
+                        .withCaption(messages.getMessage("dialogs.Confirmation"))
+                        .withMessage(messages.getMessage("regionsClearConfirm"))
                         .withActions(
                                 okAction.setValue(e.getValue()),
                                 new DialogAction(DialogAction.Type.NO, Action.Status.PRIMARY)
@@ -217,11 +221,6 @@ public class DetailsStepFragment extends StepFragment {
             } else {
                 wizard.needUpdateEntityModel = true;
                 clearQueryAndFilter();
-            }
-
-            if (wizard.setQueryButton != null) {
-                wizard.setQueryButton.setVisible(
-                        wizard.reportTypeRadioButtonGroup.getValue() == ReportType.LIST_OF_ENTITIES_WITH_QUERY);
             }
         }
     }
@@ -232,7 +231,6 @@ public class DetailsStepFragment extends StepFragment {
         //filter = null;
 //        filterEntity = null;
         //conditionsTree = null;
-        wizard.setQueryButton.setCaption(wizard.getMessage("setQuery"));
     }
 
     protected class BeforeShowDetailsStepFrameHandler implements BeforeShowStepFrameHandler {
