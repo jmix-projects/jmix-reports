@@ -16,6 +16,7 @@
 
 package io.jmix.reportsui.screen.report.wizard;
 
+import io.jmix.core.Messages;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.reports.entity.wizard.EntityTreeNode;
 import io.jmix.reports.entity.wizard.RegionProperty;
@@ -30,13 +31,11 @@ import io.jmix.ui.Notifications;
 import io.jmix.ui.action.AbstractAction;
 import io.jmix.ui.action.DialogAction;
 import io.jmix.ui.component.*;
-import io.jmix.ui.screen.MapScreenOptions;
-import io.jmix.ui.screen.OpenMode;
-import io.jmix.ui.screen.Screen;
-import io.jmix.ui.screen.StandardCloseAction;
+import io.jmix.ui.screen.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,9 +43,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+@UiController("report_Region.fragment")
+@UiDescriptor("intermediate-regions-frame.xml")
 public class RegionsStepFragment extends StepFragment {
     protected static final String ADD_TABULATED_REGION_ACTION_ID = "tabulatedRegion";
     protected static final String ADD_SIMPLE_REGION_ACTION_ID = "simpleRegion";
+
+    @Autowired
+    protected Messages messages;
 
     protected AddSimpleRegionAction addSimpleRegionAction;
     protected AddTabulatedRegionAction addTabulatedRegionAction;
@@ -54,7 +58,7 @@ public class RegionsStepFragment extends StepFragment {
     protected RemoveRegionAction removeRegionAction;
 
     public RegionsStepFragment(ReportWizardCreator wizard) {
-        super(wizard, wizard.getMessage("reportRegions"), "regionsStep");
+        super(wizard, "" /*wizard.getMessage("reportRegions")*/, "regionsStep");
         initFrameHandler = new InitRegionsStepFrameHandler();
 
         beforeShowFrameHandler = new BeforeShowRegionsStepFrameHandler();
@@ -216,7 +220,7 @@ public class RegionsStepFragment extends StepFragment {
             firstRowAttrsLayout.setSpacing(true);
             Label regionLbl = wizard.uiComponents.create(Label.class);
             regionLbl.setStyleName(BOLD_LABEL_STYLE);
-            regionLbl.setValue(wizard.getMessage("region"));
+            regionLbl.setValue(messages.getMessage("region"));
             Label regionValueLbl = wizard.uiComponents.create(Label.class);
             regionValueLbl.setValue(currentReportRegionGeneratedColumn.getName());
             regionValueLbl.setWidth(WIDTH_PERCENT_100);
@@ -230,7 +234,7 @@ public class RegionsStepFragment extends StepFragment {
             secondRowAttrsLayout.setSpacing(true);
             Label entityLbl = wizard.uiComponents.create(Label.class);
             entityLbl.setStyleName(BOLD_LABEL_STYLE);
-            entityLbl.setValue(wizard.getMessage("entity"));
+            entityLbl.setValue(messages.getMessage("entity"));
             Label entityValueLbl = wizard.uiComponents.create(Label.class);
             MetaClass wrapperMetaClass = currentReportRegionGeneratedColumn.getRegionPropertiesRootNode().getWrappedMetaClass();
 
@@ -253,7 +257,7 @@ public class RegionsStepFragment extends StepFragment {
             thirdRowAttrsLayout.setSpacing(true);
             Label entityLbl = wizard.uiComponents.create(Label.class);
             entityLbl.setStyleName(BOLD_LABEL_STYLE);
-            entityLbl.setValue(wizard.getMessage("attributes"));
+            entityLbl.setValue(messages.getMessage("attributes"));
             Button editBtn = wizard.uiComponents.create(Button.class);
             editBtn.setCaption(generateAttrsBtnCaption());
             editBtn.setStyleName("link");
@@ -283,8 +287,8 @@ public class RegionsStepFragment extends StepFragment {
         public void actionPerform(Component component) {
             if (wizard.regionsTable.getSingleSelected() != null) {
                 wizard.dialogs.createOptionDialog()
-                        .withCaption(wizard.getMessage("dialogs.Confirmation"))
-                        .withMessage(wizard.formatMessage("deleteRegion", wizard.regionsTable.getSingleSelected().getName()))
+                        .withCaption(messages.getMessage("dialogs.Confirmation"))
+                        .withMessage(messages.formatMessage("deleteRegion", wizard.regionsTable.getSingleSelected().getName()))
                         .withActions(
                                 new DialogAction(DialogAction.Type.YES).withHandler(e -> {
                                     wizard.reportRegionsDc.getMutableItems().remove(wizard.regionsTable.getSingleSelected());
@@ -369,7 +373,7 @@ public class RegionsStepFragment extends StepFragment {
                 public void actionPerform(Component component) {
                     if (wizard.getItem().getReportRegions().isEmpty()) {
                         wizard.notifications.create(Notifications.NotificationType.TRAY)
-                                .withCaption(wizard.getMessage("addRegionsWarn"))
+                                .withCaption(messages.getMessage("addRegionsWarn"))
                                 .show();
                         return;
                     }
