@@ -46,6 +46,7 @@ import javax.inject.Named;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @UiController("report_Report.edit")
 @UiDescriptor("report-edit.xml")
@@ -171,11 +172,7 @@ public class ReportEditor extends StandardEditor<Report> {
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
-        Report reportFromXml = reports.convertToReport(getEditedEntity().getXml());
-
-        getEditedEntity().setBands(reportFromXml.getBands());
-        bandsDc.replaceItem(reportFromXml.getRootBandDefinition());
-
+        updateBands();
         bandTree.expandTree();
         bandTree.setSelected(getEditedEntity().getRootBandDefinition());
 
@@ -185,8 +182,18 @@ public class ReportEditor extends StandardEditor<Report> {
         setScreenCaption();
     }
 
+    private void updateBands() {
+        if (StringUtils.isNotBlank(getEditedEntity().getXml())) {
+            Report reportFromXml = reports.convertToReport(getEditedEntity().getXml());
+            if (reportFromXml.getBands() != null) {
+                getEditedEntity().setBands(reportFromXml.getBands());
+                bandsDc.replaceItem(reportFromXml.getRootBandDefinition());
+            }
+        }
+    }
+
     @Override
-    protected String getSaveNotificationCaption(){
+    protected String getSaveNotificationCaption() {
         return messages.formatMessage(getClass(), "notification.completeSuccessfully", getEditedEntity().getName());
     }
 
