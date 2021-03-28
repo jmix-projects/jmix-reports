@@ -171,6 +171,11 @@ public class ReportEditor extends StandardEditor<Report> {
 
     @Subscribe
     public void onAfterShow(AfterShowEvent event) {
+        Report reportFromXml = reports.convertToReport(getEditedEntity().getXml());
+
+        getEditedEntity().setBands(reportFromXml.getBands());
+        bandsDc.replaceItem(reportFromXml.getRootBandDefinition());
+
         bandTree.expandTree();
         bandTree.setSelected(getEditedEntity().getRootBandDefinition());
 
