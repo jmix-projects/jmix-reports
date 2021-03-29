@@ -16,25 +16,43 @@
 
 package io.jmix.reportsui.screen.report.wizard.step;
 
-import io.jmix.ui.component.Frame;
+import io.jmix.core.Messages;
+import io.jmix.ui.Notifications;
 import io.jmix.ui.component.Window;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
+@Component("report_StepFrameManager")
+@Scope(BeanDefinition.SCOPE_PROTOTYPE)
 public class StepFrameManager {
 
+    @Autowired
+    protected Messages messages;
+
+    @Autowired
+    protected Notifications notifications;
+
     protected List<StepFragment> stepFragments;
-    protected MainWizardFrame mainWizardFrame;
+    protected MainWizardScreen mainWizardScreen;
     protected int currentFrameIdx = 0;
 
-    public StepFrameManager(MainWizardFrame reportWizardCreatorFrame, List<StepFragment> stepFragments) {
-        this.mainWizardFrame = reportWizardCreatorFrame;
+    public void setStepFragments(List<StepFragment> stepFragments) {
         this.stepFragments = stepFragments;
-        //frames initialization is in showCurrentFrame() method
+    }
+
+    public void setMainWizardFrame(MainWizardScreen mainWizardScreen) {
+        this.mainWizardScreen = mainWizardScreen;
     }
 
     public void showCurrentFrame() {
-        setMainWindowProps();
+        setWizardCaption();
+
+        setNavigationButtonProps();
         getCurrentStepFrame().initFrame();
         getCurrentStepFrame().beforeShow();
         getCurrentStepFrame().getFragment().setVisible(true);
@@ -44,47 +62,41 @@ public class StepFrameManager {
         return stepFragments.get(currentFrameIdx);
     }
 
-    public Frame getCurrentFrame() {
-        return stepFragments.get(currentFrameIdx).getFragment();
-    }
+    public void setWizardCaption() {
+        String newWindowCaption = getCurrentStepFrame().getCaption() + " " +
+                messages.formatMessage(getClass(), "stepNo", currentFrameIdx + 1, stepFragments.size());
 
-    public void setMainWindowProps() {
-//        String newWindowCaption = getCurrentStepFrame().getName() + " " +
-//                mainWizardFrame.formatMessage("stepNo", currentFrameIdx + 1, stepFragments.size());
-//
-//        Window window = mainWizardFrame.getMainWizardFrame().getWindow();
-//        window.setCaption(newWindowCaption);
-
-        setNavigationButtonProps();
+        Window window = mainWizardScreen.getMainWizardFrame().getWindow();
+        window.setCaption(newWindowCaption);
     }
 
     protected void setNavigationButtonProps() {
         if (getCurrentStepFrame().isLast()) {
-            mainWizardFrame.getForwardBtn().setVisible(false);
+            mainWizardScreen.getForwardBtn().setVisible(false);
         } else if (currentFrameIdx + 1 >= stepFragments.size()) {
-            mainWizardFrame.getForwardBtn().setEnabled(false);
+            mainWizardScreen.getForwardBtn().setEnabled(false);
         } else {
-            mainWizardFrame.getForwardBtn().setVisible(true);
-            mainWizardFrame.getForwardBtn().setEnabled(true);
+            mainWizardScreen.getForwardBtn().setVisible(true);
+            mainWizardScreen.getForwardBtn().setEnabled(true);
         }
 
         if (getCurrentStepFrame().isFirst()) {
-            mainWizardFrame.getBackwardBtn().setVisible(false);
+            mainWizardScreen.getBackwardBtn().setVisible(false);
         } else if (currentFrameIdx - 1 < 0) {
-            mainWizardFrame.getBackwardBtn().setEnabled(false);
+            mainWizardScreen.getBackwardBtn().setEnabled(false);
         } else {
-            mainWizardFrame.getBackwardBtn().setVisible(true);
-            mainWizardFrame.getBackwardBtn().setEnabled(true);
+            mainWizardScreen.getBackwardBtn().setVisible(true);
+            mainWizardScreen.getBackwardBtn().setEnabled(true);
         }
-        mainWizardFrame.removeBtns();
-        if (mainWizardFrame.getBackwardBtn().isVisible())
-            mainWizardFrame.addBackwardBtn();
-        if (mainWizardFrame.getForwardBtn().isVisible())
-            mainWizardFrame.addForwardBtn();
-        mainWizardFrame.addSaveBtn();
+//        mainWizardScreen.removeBtns();
+//        if (mainWizardScreen.getBackwardBtn().isVisible())
+//            mainWizardScreen.addBackwardBtn();
+//        if (mainWizardScreen.getForwardBtn().isVisible())
+//            mainWizardScreen.addForwardBtn();
+//        mainWizardScreen.addSaveBtn();
     }
 
-    public boolean prevFrame() {
+    public boolean prevFragment() {
         if (currentFrameIdx == 0) {
             throw new ArrayIndexOutOfBoundsException("Previous frame is not exists");
         }
@@ -98,7 +110,7 @@ public class StepFrameManager {
         }
     }
 
-    public boolean nextFrame() {
+    public boolean nextFragment() {
         if (currentFrameIdx > stepFragments.size()) {
             throw new ArrayIndexOutOfBoundsException("Next frame is not exists");
         }
@@ -115,10 +127,10 @@ public class StepFrameManager {
     protected boolean validateCurrentFrame() {
         List<String> validationErrors = getCurrentStepFrame().validateFrame();
         if (!validationErrors.isEmpty()) {
-            //todo
-//            mainWizardFrame.getMainWizardFrame().showNotification(
-//                    org.springframework.util.StringUtils.arrayToDelimitedString(validationErrors.toArray(), "<br/>"),
-//                    Frame.NotificationType.TRAY_HTML);
+            notifications.create(Notifications.NotificationType.TRAY)
+                    .withHtmlSanitizer(true)
+                    .withCaption(StringUtils.arrayToDelimitedString(validationErrors.toArray(), "<br/>"))
+                    .show();
             return false;
         }
         return true;

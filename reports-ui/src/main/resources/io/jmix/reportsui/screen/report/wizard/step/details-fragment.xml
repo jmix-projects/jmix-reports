@@ -42,14 +42,14 @@
                        requiredMessage="msg://fillReportNameMsg"
                        width="100%"/>
             <radioButtonGroup id="reportTypeGenerate"
-                              property="reportTypeGenerate"
                               caption="msg://reportBuildType"
                               description="msg://singleMultiEntityHintMsg"
                               descriptionAsHtml="true"/>
-            <textArea id="reportQuery"
-                      caption="msg://io.jmix.reportsui.screen.report.wizard/reportQuery"
-                      requiredMessage="msg://io.jmix.reportsui.screen.report.wizard/fillReportQueryMsg"
-                      width="100%"/>
+            <sourceCodeEditor id="reportQueryCodeEditor"
+                              caption="msg://io.jmix.reportsui.screen.report.wizard/reportQuery"
+                              required="true"
+                              requiredMessage="msg://fillReportQueryMsg"
+                              width="100%"/>
         </form>
         <label id="spacer"/>
     </layout>

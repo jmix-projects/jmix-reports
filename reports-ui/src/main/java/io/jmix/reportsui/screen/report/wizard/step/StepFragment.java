@@ -16,17 +16,30 @@
 
 package io.jmix.reportsui.screen.report.wizard.step;
 
-import io.jmix.reportsui.screen.report.wizard.ReportWizardCreator;
-import io.jmix.ui.component.*;
+import io.jmix.core.MessageTools;
+import io.jmix.core.Messages;
+import io.jmix.core.Metadata;
+import io.jmix.ui.component.Component;
+import io.jmix.ui.component.Field;
+import io.jmix.ui.component.Validatable;
+import io.jmix.ui.component.ValidationException;
 import io.jmix.ui.screen.ScreenFragment;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class StepFragment extends ScreenFragment {
-    protected String name;
-    protected ReportWizardCreator wizard;
+
+    @Autowired
+    protected Messages messages;
+
+    @Autowired
+    protected MessageTools messageTools;
+
+    @Autowired
+    protected Metadata metadata;
 
     protected InitStepFrameHandler initFrameHandler;
     protected BeforeHideStepFrameHandler beforeHideFrameHandler;
@@ -37,15 +50,6 @@ public abstract class StepFragment extends ScreenFragment {
 
     protected FrameValidator frameValidator = new FrameValidator();
     protected boolean isInitialized;
-
-//    public StepFragment(ReportWizardCreator reportWizardCreatorEditor, String name, String frameComponentName) {
-//        this.wizard = reportWizardCreatorEditor;
-//        this.name = name;
-//        this.frame = (Frame) reportWizardCreatorEditor.getWindow().getComponent(frameComponentName);
-//        if (frame == null) {
-//            throw new UnsupportedOperationException("Frame component is not found");
-//        }
-//    }
 
     public void setInitFrameHandler(InitStepFrameHandler initFrameHandler) {
         this.initFrameHandler = initFrameHandler;
@@ -92,9 +96,7 @@ public abstract class StepFragment extends ScreenFragment {
         beforeShowFrameHandler.beforeShowFrame();
     }
 
-    public String getName() {
-        return name;
-    }
+    public abstract String getCaption();
 
     public abstract boolean isLast();
 
@@ -127,7 +129,7 @@ public abstract class StepFragment extends ScreenFragment {
                 if (c instanceof Field) {
                     Field field = (Field) c;
                     if (field.isRequired() && StringUtils.isBlank(field.getRequiredMessage()) && StringUtils.isBlank(field.getCaption())) {
-                        field.setRequiredMessage(getDefaultRequiredMessage("" /*wizard.getMessage(field.getId())*/));
+                        field.setRequiredMessage(getDefaultRequiredMessage(messages.getMessage(field.getId())));
                     }
                 }
             }
@@ -152,10 +154,6 @@ public abstract class StepFragment extends ScreenFragment {
     }
 
     protected String getDefaultRequiredMessage(String name) {
-        return name;
-        //todo
-//        Messages messages = AppBeans.get(Messages.NAME);
-//                return messages.formatMainMessage(
-//                "validation.required.defaultMsg", name);
+        return messages.formatMessage("validation.required.defaultMsg", name);
     }
 }

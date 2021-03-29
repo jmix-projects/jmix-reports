@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Haulmont.
+ * Copyright 2021 Haulmont.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,26 +14,36 @@
  * limitations under the License.
  */
 
-package io.jmix.reportsui.screen.report.wizard;
+package io.jmix.reportsui.screen.report.wizard.step;
 
 import io.jmix.core.CoreProperties;
 import io.jmix.core.Messages;
-import io.jmix.reportsui.screen.report.wizard.step.StepFragment;
+import io.jmix.reports.app.service.ReportsWizard;
+import io.jmix.reports.entity.ReportOutputType;
+import io.jmix.reports.entity.wizard.ReportData;
+import io.jmix.reports.entity.wizard.TemplateFileType;
+import io.jmix.reports.exception.TemplateGenerationException;
+import io.jmix.reportsui.screen.report.wizard.OutputFormatTools;
 import io.jmix.ui.Dialogs;
 import io.jmix.ui.Fragments;
 import io.jmix.ui.Notifications;
 import io.jmix.ui.UiProperties;
-import io.jmix.ui.component.HasContextHelp;
+import io.jmix.ui.component.*;
+import io.jmix.ui.download.ByteArrayDataProvider;
+import io.jmix.ui.download.DownloadFormat;
 import io.jmix.ui.download.Downloader;
-import io.jmix.ui.screen.Install;
-import io.jmix.ui.screen.Subscribe;
-import io.jmix.ui.screen.UiController;
-import io.jmix.ui.screen.UiDescriptor;
+import io.jmix.ui.model.InstanceContainer;
+import io.jmix.ui.screen.*;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Map;
 
 @UiController("report_Save.fragment")
 @UiDescriptor("save-fragment.xml")
 public class SaveStepFragment extends StepFragment {
+
+    @Autowired
+    private InstanceContainer<ReportData> reportDataDc;
 
     @Autowired
     protected UiProperties uiProperties;
@@ -56,10 +66,34 @@ public class SaveStepFragment extends StepFragment {
     @Autowired
     protected Downloader downloader;
 
+    @Autowired
+    protected ReportsWizard reportWizardService;
+
+    @Autowired
+    private ComboBox<ReportOutputType> outputFileFormat;
+
+    @Autowired
+    private TextField outputFileName;
+
+    @Autowired
+    protected OutputFormatTools outputFormatTools;
+
+    @Autowired
+    private Button downloadTemplateFile;
+
+
     @Subscribe
     public void onInit(InitEvent event) {
+        //beforeShowFrameHandler = new BeforeShowSaveStepFrameHandler();
 
+        //beforeHideFrameHandler = new BeforeHideSaveStepFrameHandler();
     }
+
+    @Subscribe("outputFileFormat")
+    public void onOutputFileFormatValueChange(HasValue.ValueChangeEvent event) {
+        event.getValue();
+    }
+
 
     @Install(to = "outputFileFormat", subject = "contextHelpIconClickHandler")
     private void outputFileFormatContextHelpIconClickHandler(HasContextHelp.ContextHelpIconClickEvent contextHelpIconClickEvent) {
@@ -71,12 +105,36 @@ public class SaveStepFragment extends StepFragment {
                 .show();
     }
 
+    protected void setCorrectReportOutputType() {
+        ReportOutputType outputFileFormatPrevValue = outputFileFormat.getValue();
+        outputFileFormat.setValue(null);
+        Map<String, ReportOutputType> optionsMap = outputFormatTools.getOutputAvailableFormats(reportDataDc.getItem().getTemplateFileType());
+        outputFileFormat.setOptionsMap(optionsMap);
 
-    public SaveStepFragment(ReportWizardCreator wizard) {
-        //super(wizard, "", "saveStep");
-        //beforeShowFrameHandler = new BeforeShowSaveStepFrameHandler();
+        if (outputFileFormatPrevValue != null) {
+            if (optionsMap.containsKey(outputFileFormatPrevValue.toString())) {
+                outputFileFormat.setValue(outputFileFormatPrevValue);
+            }
+        }
+        if (outputFileFormat.getValue() == null) {
+            if (optionsMap.size() > 1) {
+                outputFileFormat.setValue(optionsMap.get(reportDataDc.getItem().getTemplateFileType().toString()));
+            } else if (optionsMap.size() == 1) {
+                outputFileFormat.setValue(optionsMap.values().iterator().next());
+            }
+        }
+    }
 
-        //beforeHideFrameHandler = new BeforeHideSaveStepFrameHandler();
+    @Subscribe(id = "reportDataDc", target = Target.DATA_CONTAINER)
+    public void onReportDataDcItemPropertyChange(InstanceContainer.ItemPropertyChangeEvent<ReportData> event) {
+        if(event.getProperty().equals("entity")) {
+            setCorrectReportOutputType();
+        }
+    }
+
+    @Override
+    public String getCaption() {
+        return messages.getMessage(getClass(), "saveReport");
     }
 
     @Override
@@ -133,67 +191,26 @@ public class SaveStepFragment extends StepFragment {
 //            }
 //        }
 
-//        protected void initDownloadAction() {
-//            wizard.downloadTemplateFile.setCaption(wizard.generateTemplateFileName(wizard.templateFileFormat.getValue().toString().toLowerCase()));
-//            wizard.downloadTemplateFile.setAction(new AbstractAction("generateNewTemplateAndGet") {
-//                @Override
-//                public void actionPerform(Component component) {
-//                    byte[] newTemplate = null;
-//                    try {
-//                        wizard.getItem().setName(wizard.reportName.getValue().toString());
-//                        newTemplate = wizard.reportWizardService.generateTemplate(wizard.getItem(), wizard.templateFileFormat.getValue());
-//                        downloader.download(new ByteArrayDataProvider(newTemplate, uiProperties.getSaveExportedByteArrayDataThresholdBytes(), coreProperties.getTempDir()),
-//                                wizard.downloadTemplateFile.getCaption(), DownloadFormat.getByExtension(wizard.templateFileFormat.getValue().toString().toLowerCase()));
-//                    } catch (TemplateGenerationException e) {
-//                        notifications.create(Notifications.NotificationType.WARNING)
-//                                .withCaption(messages.getMessage("templateGenerationException"))
-//                                .show();
-//                    }
-//                    if (newTemplate != null) {
-//                        wizard.lastGeneratedTemplate = newTemplate;
-//                    }
-//                }
-//            });
-//        }
+    @Subscribe("downloadTemplateFile")
+    public void onDownloadTemplateFileClick(Button.ClickEvent event) {
+        ReportData reportData = reportDataDc.getItem();
+        try {
+            //reportData.setName(wizard.reportName.getValue().toString());
+            TemplateFileType templateFileType = reportData.getTemplateFileType();
+            byte[] newTemplate = reportWizardService.generateTemplate(reportData, templateFileType);
+            downloader.download(new ByteArrayDataProvider(
+                            newTemplate,
+                            uiProperties.getSaveExportedByteArrayDataThresholdBytes(),
+                            coreProperties.getTempDir()),
+                    downloadTemplateFile.getCaption(),
+                    DownloadFormat.getByExtension(templateFileType.toString().toLowerCase()));
+        } catch (TemplateGenerationException e) {
+            notifications.create(Notifications.NotificationType.WARNING)
+                    .withCaption(messages.getMessage(getClass(), "templateGenerationException"))
+                    .show();
+        }
+    }
 
-//        protected void initSaveAction() {
-//            wizard.saveBtn.setVisible(true);
-//            wizard.saveBtn.setAction(new AbstractAction("saveReport") {
-//                @Override
-//                public void actionPerform(Component component) {
-//                    try {
-//                        //wizard.outputFileName.validate();
-//                    } catch (ValidationException e) {
-//                        notifications.create(Notifications.NotificationType.TRAY)
-//                                .withCaption(messages.getMessage("validationFail.caption"))
-//                                .withDescription(e.getMessage())
-//                                .show();
-//                        return;
-//                    }
-//                    if (wizard.getItem().getReportRegions().isEmpty()) {
-//                        dialogs.createOptionDialog()
-//                                .withCaption(messages.getMessage("dialogs.Confirmation"))
-//                                .withMessage(messages.getMessage("confirmSaveWithoutRegions"))
-//                                .withActions(
-//                                        new DialogAction(DialogAction.Type.OK).withHandler(handle ->
-//                                                convertToReportAndForceCloseWizard()
-//                                        ),
-//                                        new DialogAction(DialogAction.Type.NO)
-//                                ).show();
-//                    } else {
-//                        convertToReportAndForceCloseWizard();
-//                    }
-//                }
-//
-//                private void convertToReportAndForceCloseWizard() {
-//                    Report r = wizard.buildReport(false);
-//                    //todo
-////                    if (r != null) {
-////                        wizard.close(Window.COMMIT_ACTION_ID); //true is ok cause it is a save btn
-////                    }
-//                }
-//            });
-//        }
 //
 //        protected void showChart() {
 //            byte[] content = wizard.buildReport(true).getDefaultTemplate().getContent();
@@ -214,11 +231,4 @@ public class SaveStepFragment extends StepFragment {
 ////                    ParamsMap.of(ShowChartController.CHART_JSON_PARAMETER, chartJson));
 //        }
 //    }
-
-    protected class BeforeHideSaveStepFrameHandler implements BeforeHideStepFrameHandler {
-        @Override
-        public void beforeHideFrame() {
-            wizard.saveBtn.setVisible(false);
-        }
-    }
 }

@@ -100,7 +100,7 @@ public class RegionEditor extends StandardEditor<ReportRegion> {
 
     @Subscribe
     public void onBeforeShow(BeforeShowEvent event) {
-        getEditedEntity().getRegionPropertiesRootNode().setWrappedMetaClass(rootNode.getWrappedMetaClass());
+        getEditedEntity().getRegionPropertiesRootNode().setWrappedMetaClass(rootEntity.getWrappedMetaClass());
         //params.put("component$reportPropertyName", reportPropertyName);
         //todo
         //reportEntityTreeNodeDs.refresh(params);

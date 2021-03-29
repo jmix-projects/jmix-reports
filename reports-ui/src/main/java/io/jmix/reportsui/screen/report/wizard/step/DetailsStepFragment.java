@@ -17,39 +17,37 @@
 package io.jmix.reportsui.screen.report.wizard.step;
 
 import com.google.common.collect.ImmutableMap;
-import io.jmix.core.*;
+import io.jmix.core.ExtendedEntities;
+import io.jmix.core.MessageTools;
+import io.jmix.core.Metadata;
+import io.jmix.core.MetadataTools;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.reports.app.service.ReportsWizard;
 import io.jmix.reports.entity.ReportOutputType;
+import io.jmix.reports.entity.ReportType;
 import io.jmix.reports.entity.wizard.ReportData;
 import io.jmix.reports.entity.wizard.ReportTypeGenerate;
 import io.jmix.reports.entity.wizard.TemplateFileType;
+import io.jmix.reportsui.screen.report.run.ShowChartLookup;
 import io.jmix.ui.Dialogs;
-import io.jmix.ui.action.DialogAction;
-import io.jmix.ui.component.ComboBox;
-import io.jmix.ui.component.HasValue;
-import io.jmix.ui.component.RadioButtonGroup;
+import io.jmix.ui.Notifications;
+import io.jmix.ui.WindowConfig;
+import io.jmix.ui.component.*;
 import io.jmix.ui.model.InstanceContainer;
 import io.jmix.ui.screen.Subscribe;
 import io.jmix.ui.screen.UiController;
 import io.jmix.ui.screen.UiDescriptor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.function.Consumer;
+import java.util.*;
 
 @UiController("report_DetailsStep.fragment")
-@UiDescriptor("first-details-fragment.xml")
+@UiDescriptor("details-fragment.xml")
 public class DetailsStepFragment extends StepFragment {
 
     @Autowired
     private InstanceContainer<ReportData> reportDataDc;
-
-    @Autowired
-    protected Messages messages;
 
     @Autowired
     protected Dialogs dialogs;
@@ -59,6 +57,9 @@ public class DetailsStepFragment extends StepFragment {
 
     @Autowired
     protected ComboBox<MetaClass> entity;
+
+    @Autowired
+    private TextField<String> reportName;
 
     @Autowired
     protected ComboBox templateFileFormat;
@@ -78,6 +79,15 @@ public class DetailsStepFragment extends StepFragment {
     @Autowired
     protected ReportsWizard reportsWizard;
 
+    @Autowired
+    protected Notifications notifications;
+
+    @Autowired
+    private SourceCodeEditor reportQueryCodeEditor;
+
+    @Autowired
+    protected WindowConfig windowConfig;
+
     protected boolean needUpdateEntityModel = false;
 
     public boolean isNeedUpdateEntityModel() {
@@ -90,25 +100,22 @@ public class DetailsStepFragment extends StepFragment {
 
     @Subscribe
     public void onInit(InitEvent event) {
-        initAvailableFormats();
-
         initReportTypeOptionGroup();
         initTemplateFormatLookupField();
         initEntityLookupField();
+        initQueryReportSourceCode();
 
         //entity.addValueChangeListener(new ChangeReportNameListener());
     }
 
+    protected void initQueryReportSourceCode() {
+        reportQueryCodeEditor.setHighlightActiveLine(false);
+        reportQueryCodeEditor.setShowGutter(false);
+        reportQueryCodeEditor.setMode(SourceCodeEditor.Mode.SQL);
+    }
+
     protected void initEntityLookupField() {
         entity.setOptionsMap(getAvailableEntities());
-        entity.addValueChangeListener(e -> {
-            reportDataDc.getItem().getReportRegions().clear();
-            //regionsTable.refresh(); //for web6
-            needUpdateEntityModel = true;
-            entity.setValue(e.getValue());
-
-            //clearQueryAndFilter();
-        });
 //        entity.addValueChangeListener(new ClearRegionListener(
 //                new DialogActionWithChangedValue(DialogAction.Type.YES) {
 //                    @Override
@@ -123,11 +130,58 @@ public class DetailsStepFragment extends StepFragment {
 //                }));
     }
 
+    @Subscribe("reportTypeGenerate")
+    public void onReportTypeGenerateValueChange(HasValue.ValueChangeEvent event) {
+        ReportTypeGenerate currentType = (ReportTypeGenerate) event.getValue();
+
+        reportQueryCodeEditor.setVisible(currentType.isList() && !currentType.isEntity());
+    }
+
     @Subscribe("entity")
     public void onEntityValueChange(HasValue.ValueChangeEvent event) {
-        MetaClass metaClass = (MetaClass) event.getValue();
-        reportDataDc.getItem().setEntityName(metaClass.getName());
+        ReportData reportData = reportDataDc.getItem();
+        reportData.getReportRegions().clear();
+        needUpdateEntityModel = true;
 
+        MetaClass metaClass = (MetaClass) event.getValue();
+        reportData.setEntityName(metaClass.getName());
+
+        String query = String.format("select e from %s e", metaClass.getName());
+        reportQueryCodeEditor.setValue(query);
+
+        setGeneratedReportName((MetaClass) event.getPrevValue(), (MetaClass) event.getValue());
+//            wizard.outputFileName.setValue("");
+    }
+
+    protected void setGeneratedReportName(MetaClass prevValue, MetaClass value) {
+        String oldReportName = reportName.getValue();
+        if (StringUtils.isBlank(oldReportName)) {
+            String newText = messages.formatMessage(getClass(), "reportNamePattern", messageTools.getEntityCaption(value));
+            reportName.setValue(newText);
+        } else {
+            if (prevValue != null) {
+                //if old text contains MetaClass name substring, just replace it
+                String prevEntityCaption = messageTools.getEntityCaption(prevValue);
+                if (StringUtils.contains(oldReportName, prevEntityCaption)) {
+
+                    String newText = oldReportName;
+                    int index = oldReportName.lastIndexOf(prevEntityCaption);
+                    if (index > -1) {
+                        newText = StringUtils.substring(oldReportName, 0, index)
+                                + messageTools.getEntityCaption(value)
+                                + StringUtils.substring(oldReportName, index + prevEntityCaption.length(), oldReportName.length());
+                    }
+
+                    reportName.setValue(newText);
+                    if (!oldReportName.equals(messages.formatMessage(getClass(), "reportNamePattern", prevEntityCaption))) {
+                        //if user changed auto generated report name and we have changed it, we show message to him
+                        notifications.create(Notifications.NotificationType.TRAY)
+                                .withCaption(messages.getMessage(getClass(),"reportNameChanged"))
+                                .show();
+                    }
+                }
+            }
+        }
     }
 
     protected void initTemplateFormatLookupField() {
@@ -152,9 +206,9 @@ public class DetailsStepFragment extends StepFragment {
 
     protected Map<String, ReportTypeGenerate> getListedReportOptionsMap() {
         Map<String, ReportTypeGenerate> result = new LinkedHashMap<>(3);
-        result.put(messages.getMessage("singleEntityReport"), ReportTypeGenerate.SINGLE_ENTITY);
-        result.put(messages.getMessage("listOfEntitiesReport"), ReportTypeGenerate.LIST_OF_ENTITIES);
-        result.put(messages.getMessage("listOfEntitiesReportWithQuery"), ReportTypeGenerate.LIST_OF_ENTITIES_WITH_QUERY);
+        result.put(messages.getMessage(getClass(), "singleEntityReport"), ReportTypeGenerate.SINGLE_ENTITY);
+        result.put(messages.getMessage(getClass(), "listOfEntitiesReport"), ReportTypeGenerate.LIST_OF_ENTITIES);
+        result.put(messages.getMessage(getClass(), "listOfEntitiesReportWithQuery"), ReportTypeGenerate.LIST_OF_ENTITIES_WITH_QUERY);
         return result;
     }
 
@@ -166,11 +220,9 @@ public class DetailsStepFragment extends StepFragment {
         result.put(messages.getMessage(TemplateFileType.CSV), TemplateFileType.CSV);
         result.put(messages.getMessage(TemplateFileType.TABLE), TemplateFileType.TABLE);
 
-        //todo char addon
-//        WindowConfig windowConfig = AppBeans.get(WindowConfig.NAME);
-//        if (windowConfig.hasWindow(ShowChartController.JSON_CHART_SCREEN_ID)) {
-//            result.put(messages.getMessage(TemplateFileType.CHART), TemplateFileType.CHART);
-//        }
+        if (windowConfig.hasWindow(ShowChartLookup.JSON_CHART_SCREEN_ID)) {
+            result.put(messages.getMessage(TemplateFileType.CHART), TemplateFileType.CHART);
+        }
         return result;
     }
 
@@ -188,39 +240,9 @@ public class DetailsStepFragment extends StepFragment {
         return result;
     }
 
-    protected Map<String, ReportOutputType> refreshOutputAvailableFormats(TemplateFileType templateFileType) {
-        return availableOutputFormats.get(templateFileType);
-    }
-
-    protected Map<TemplateFileType, Map<String, ReportOutputType>> availableOutputFormats;
-
-    private void initAvailableFormats() {
-        availableOutputFormats = new ImmutableMap.Builder<TemplateFileType, Map<String, ReportOutputType>>()
-                .put(TemplateFileType.DOCX, new ImmutableMap.Builder<String, ReportOutputType>()
-                        .put(messages.getMessage(ReportOutputType.DOCX), ReportOutputType.DOCX)
-                        .put(messages.getMessage(ReportOutputType.HTML), ReportOutputType.HTML)
-                        .put(messages.getMessage(ReportOutputType.PDF), ReportOutputType.PDF)
-                        .build())
-                .put(TemplateFileType.XLSX, new ImmutableMap.Builder<String, ReportOutputType>()
-                        .put(messages.getMessage(ReportOutputType.XLSX), ReportOutputType.XLSX)
-                        .put(messages.getMessage(ReportOutputType.HTML), ReportOutputType.HTML)
-                        .put(messages.getMessage(ReportOutputType.PDF), ReportOutputType.PDF)
-                        .put(messages.getMessage(ReportOutputType.CSV), ReportOutputType.CSV)
-                        .build())
-                .put(TemplateFileType.HTML, new ImmutableMap.Builder<String, ReportOutputType>()
-                        .put(messages.getMessage(ReportOutputType.HTML), ReportOutputType.HTML)
-                        .put(messages.getMessage(ReportOutputType.PDF), ReportOutputType.PDF)
-                        .build())
-                .put(TemplateFileType.CHART, new ImmutableMap.Builder<String, ReportOutputType>()
-                        .put(messages.getMessage(ReportOutputType.CHART), ReportOutputType.CHART)
-                        .build())
-                .put(TemplateFileType.CSV, new ImmutableMap.Builder<String, ReportOutputType>()
-                        .put(messages.getMessage(ReportOutputType.CSV), ReportOutputType.CSV)
-                        .build())
-                .put(TemplateFileType.TABLE, new ImmutableMap.Builder<String, ReportOutputType>()
-                        .put(messages.getMessage(ReportOutputType.TABLE), ReportOutputType.TABLE)
-                        .build())
-                .build();
+    @Override
+    public String getCaption() {
+        return messages.getMessage(getClass(), "reportDetails");
     }
 
     @Override
@@ -236,7 +258,6 @@ public class DetailsStepFragment extends StepFragment {
 //    public DetailsStepFragment(ReportWizardCreator wizard) {
 //        super(wizard, "reportDetails", "detailsStep");
 //
-//        isFirst = true;
 ////        initFrameHandler = new InitDetailsStepFrameHandler();
 ////        beforeShowFrameHandler = new BeforeShowDetailsStepFrameHandler();
 //    }
@@ -267,116 +288,17 @@ public class DetailsStepFragment extends StepFragment {
 //                    }));
 //        }
 //
-//        protected void initTemplateFormatLookupField() {
-//            wizard.templateFileFormat.setOptionsMap(getAvailableTemplateFormats());
-//            wizard.templateFileFormat.setTextInputAllowed(false);
-//            wizard.templateFileFormat.setValue(TemplateFileType.DOCX);
-//        }
-//
-//        protected void initReportTypeOptionGroup() {
-//            wizard.reportTypeRadioButtonGroup.setOptionsMap(getListedReportOptionsMap());
-//            wizard.reportTypeRadioButtonGroup.setValue(ReportType.SINGLE_ENTITY);
-//            wizard.reportTypeRadioButtonGroup.addValueChangeListener(new ClearRegionListener(
-//                    new DialogActionWithChangedValue(DialogAction.Type.YES) {
-//                        @Override
-//                        public void actionPerform(Component component) {
-//                            wizard.getItem().getReportRegions().clear();
-////                            wizard.regionsTable.refresh(); //for web6
-//                            wizard.reportTypeRadioButtonGroup.setValue(newValue);
-//                        }
-//                    }));
-//        }
-//
-//        protected Map<String, Object> getListedReportOptionsMap() {
-//            Map<String, Object> result = new LinkedHashMap<>(3);
-//            result.put(messages.getMessage("singleEntityReport"), ReportType.SINGLE_ENTITY);
-//            result.put(messages.getMessage("listOfEntitiesReport"), ReportType.LIST_OF_ENTITIES);
-//            result.put(messages.getMessage("listOfEntitiesReportWithQuery"), ReportType.LIST_OF_ENTITIES_WITH_QUERY);
-//            return result;
-//        }
-//
-//        protected Map<String, TemplateFileType> getAvailableTemplateFormats() {
-//            Messages messages = wizard.messages;
-//            Map<String, TemplateFileType> result = new LinkedHashMap<>(4);
-//            result.put(messages.getMessage(TemplateFileType.XLSX), TemplateFileType.XLSX);
-//            result.put(messages.getMessage(TemplateFileType.DOCX), TemplateFileType.DOCX);
-//            result.put(messages.getMessage(TemplateFileType.HTML), TemplateFileType.HTML);
-//            result.put(messages.getMessage(TemplateFileType.CSV), TemplateFileType.CSV);
-//            result.put(messages.getMessage(TemplateFileType.TABLE), TemplateFileType.TABLE);
-////            WindowConfig windowConfig = AppBeans.get(WindowConfig.NAME);
-////            if (windowConfig.hasWindow(ShowChartController.JSON_CHART_SCREEN_ID)) {
-////                result.put(messages.getMessage(TemplateFileType.CHART), TemplateFileType.CHART);
-////            }
-//            return result;
-//        }
-//
-//        protected Map<String, MetaClass> getAvailableEntities() {
-//            Map<String, MetaClass> result = new TreeMap<>(String::compareTo);
-//            Collection<MetaClass> classes = wizard.metadataTools.getAllJpaEntityMetaClasses();
-//            for (MetaClass metaClass : classes) {
-//                MetaClass effectiveMetaClass = wizard.extendedEntities.getEffectiveMetaClass(metaClass);
-//                if (!wizard.reportWizardService.isEntityAllowedForReportWizard(effectiveMetaClass)) {
-//                    continue;
-//                }
-//                result.put(wizard.messageTools.getEntityCaption(effectiveMetaClass) + " (" + effectiveMetaClass.getName() + ")", effectiveMetaClass);
-//            }
-//            return result;
-//        }
 //    }
 
-//    @Override
-//    public List<String> validateFrame() {
-//        ArrayList<String> errors = new ArrayList<>(super.validateFrame());
-//        if (wizard.reportTypeRadioButtonGroup.getValue() == ReportType.LIST_OF_ENTITIES_WITH_QUERY && wizard.query == null) {
-//            errors.add(messages.getMessage("fillReportQuery"));
-//        }
-//
-//        return errors;
-//    }
+    @Override
+    public List<String> validateFrame() {
+        ArrayList<String> errors = new ArrayList<>(super.validateFrame());
+        if (reportTypeGenerate.getValue() == ReportTypeGenerate.LIST_OF_ENTITIES_WITH_QUERY && reportQueryCodeEditor.getValue() == null) {
+            errors.add(messages.getMessage("fillReportQuery"));
+        }
 
-//    protected class ChangeReportNameListener implements Consumer<HasValue.ValueChangeEvent<MetaClass>> {
-//
-//        public ChangeReportNameListener() {
-//        }
-//
-//        @Override
-//        public void accept(HasValue.ValueChangeEvent e) {
-//            setGeneratedReportName((MetaClass) e.getPrevValue(), (MetaClass) e.getValue());
-//            wizard.outputFileName.setValue("");
-//        }
-//
-//        protected void setGeneratedReportName(MetaClass prevValue, MetaClass value) {
-//            String oldReportName = wizard.reportName.getValue();
-//            MessageTools messageTools = wizard.messageTools;
-//            if (StringUtils.isBlank(oldReportName)) {
-//                String newText = messages.formatMessage("reportNamePattern", messageTools.getEntityCaption(value));
-//                wizard.reportName.setValue(newText);
-//            } else {
-//                if (prevValue != null) {
-//                    //if old text contains MetaClass name substring, just replace it
-//                    String prevEntityCaption = messageTools.getEntityCaption(prevValue);
-//                    if (StringUtils.contains(oldReportName, prevEntityCaption)) {
-//
-//                        String newText = oldReportName;
-//                        int index = oldReportName.lastIndexOf(prevEntityCaption);
-//                        if (index > -1) {
-//                            newText = StringUtils.substring(oldReportName, 0, index)
-//                                    + messageTools.getEntityCaption(value)
-//                                    + StringUtils.substring(oldReportName, index + prevEntityCaption.length(), oldReportName.length());
-//                        }
-//
-//                        wizard.reportName.setValue(newText);
-//                        if (!oldReportName.equals(messages.formatMessage("reportNamePattern", prevEntityCaption))) {
-//                            //if user changed auto generated report name and we have changed it, we show message to him
-//                            wizard.notifications.create(Notifications.NotificationType.TRAY)
-//                                    .withCaption(messages.getMessage("reportNameChanged"))
-//                                    .show();
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
+        return errors;
+    }
 
     //    protected class DialogActionWithChangedValue extends DialogAction {
 //        protected Object newValue;
