@@ -182,12 +182,12 @@ public class Report implements com.haulmont.yarg.structure.Report, io.jmix.core.
 
     private void updateInputParamIdx() {
         if (CollectionUtils.isNotEmpty(inputParameters)) {
-            setInputEntityTypesIdx(IDX_SEPARATOR +
-                    inputParameters
+            String paramsIdx = inputParameters
                     .stream()
                     .map(ReportInputParameter::getEntityMetaClass)
                     .filter(StringUtils::isNotBlank)
-                    .collect(Collectors.joining(IDX_SEPARATOR)));
+                    .collect(Collectors.joining(IDX_SEPARATOR));
+            setInputEntityTypesIdx(String.format(",%s,", paramsIdx));
         } else {
             setInputEntityTypesIdx(null);
         }
@@ -195,11 +195,11 @@ public class Report implements com.haulmont.yarg.structure.Report, io.jmix.core.
 
     private void updateRoleIdx() {
         if (CollectionUtils.isNotEmpty(reportRoles)) {
-            setRolesIdx(IDX_SEPARATOR +
-                    reportRoles
+            String rolesIdx = reportRoles
                     .stream()
                     .map(ReportRole::getRoleCode)
-                    .collect(Collectors.joining(IDX_SEPARATOR)));
+                    .collect(Collectors.joining(IDX_SEPARATOR));
+            setRolesIdx(String.format(",%s,", rolesIdx));
         } else {
            setRolesIdx(null);
         }
@@ -207,11 +207,11 @@ public class Report implements com.haulmont.yarg.structure.Report, io.jmix.core.
 
     private void updateScreenIdx() {
         if (CollectionUtils.isNotEmpty(reportScreens)) {
-            setScreensIdx(IDX_SEPARATOR +
-                    reportScreens
+            String screensIdx = reportScreens
                     .stream()
                     .map(ReportScreen::getScreenId)
-                    .collect(Collectors.joining(IDX_SEPARATOR)));
+                    .collect(Collectors.joining(IDX_SEPARATOR));
+            setScreensIdx(String.format(",%s,", screensIdx));
         } else {
             setScreensIdx(null);
         }
