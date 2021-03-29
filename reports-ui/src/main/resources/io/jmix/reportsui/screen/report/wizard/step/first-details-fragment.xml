@@ -17,23 +17,40 @@
 <fragment xmlns="http://jmix.io/schema/ui/fragment"
           messagesPack="io.jmix.reportsui.screen.report.wizard">
 
+    <data>
+        <instance id="reportDataDc" class="io.jmix.reports.entity.wizard.ReportData" provided="true">
+            <collection id="reportRegionsDc" property="reportRegions" provided="true">
+                <collection id="regionPropertiesDc" property="regionProperties" provided="true"/>
+            </collection>
+        </instance>
+    </data>
+
     <layout width="100%" expand="spacer">
-        <hbox id="mainFields" width="100%">
-            <entityComboBox id="entity" caption="msg://entity" required="true" requiredMessage="msg://fillEntityMsg"
-                            description="msg://entityHintMsg" width="100%"/>
-            <entityComboBox id="templateFileFormat" caption="msg://templateFileFormat" required="true"
-                            requiredMessage="msg://fillTemplateTypeMsg"
-                            description="msg://templateTypeHintMsg" width="100%"/>
-            <textField id="reportName" caption="msg://reportName" required="true"
+        <form id="mainFields" dataContainer="reportDataDc" width="100%">
+            <comboBox id="entity"
+                      caption="msg://entity"
+                      required="true" requiredMessage="msg://fillEntityMsg"
+                      description="msg://entityHintMsg" width="100%"/>
+            <comboBox id="templateFileFormat"
+                      caption="msg://templateFileFormat" required="true"
+                      requiredMessage="msg://fillTemplateTypeMsg"
+                      description="msg://templateTypeHintMsg" width="100%"/>
+            <textField id="reportName"
+                       property="name"
+                       caption="msg://reportName"
+                       required="true"
                        requiredMessage="msg://fillReportNameMsg"
                        width="100%"/>
-            <radioButtonGroup id="reportType" caption="msg://reportBuildType"
-                              optionsEnum="io.jmix.reports.entity.ReportType"
+            <radioButtonGroup id="reportTypeGenerate"
+                              property="reportTypeGenerate"
+                              caption="msg://reportBuildType"
                               description="msg://singleMultiEntityHintMsg"
                               descriptionAsHtml="true"/>
-            <textArea id="reportQuery" caption="msg://io.jmix.reportsui.screen.report.wizard/reportQuery" width="100%"
-                      requiredMessage="msg://io.jmix.reportsui.screen.report.wizard/fillReportQueryMsg"/>
-        </hbox>
+            <textArea id="reportQuery"
+                      caption="msg://io.jmix.reportsui.screen.report.wizard/reportQuery"
+                      requiredMessage="msg://io.jmix.reportsui.screen.report.wizard/fillReportQueryMsg"
+                      width="100%"/>
+        </form>
         <label id="spacer"/>
     </layout>
 

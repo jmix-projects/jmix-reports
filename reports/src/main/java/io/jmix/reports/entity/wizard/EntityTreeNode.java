@@ -38,6 +38,7 @@ public class EntityTreeNode implements Entity {
     private static final long serialVersionUID = 465985155557062476L;
 
     @Id
+    @JmixProperty
     @JmixGeneratedValue
     protected UUID id;
 

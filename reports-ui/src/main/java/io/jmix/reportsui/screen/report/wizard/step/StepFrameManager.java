@@ -17,6 +17,7 @@
 package io.jmix.reportsui.screen.report.wizard.step;
 
 import io.jmix.ui.component.Frame;
+import io.jmix.ui.component.Window;
 
 import java.util.List;
 
@@ -30,10 +31,6 @@ public class StepFrameManager {
         this.mainWizardFrame = reportWizardCreatorFrame;
         this.stepFragments = stepFragments;
         //frames initialization is in showCurrentFrame() method
-    }
-
-    public List<StepFragment> getStepFrames() {
-        return stepFragments;
     }
 
     public void showCurrentFrame() {
@@ -53,9 +50,9 @@ public class StepFrameManager {
 
     public void setMainWindowProps() {
 //        String newWindowCaption = getCurrentStepFrame().getName() + " " +
-//                mainWizardFrame..formatMessage("stepNo", currentFrameIdx + 1, stepFrames.size());
+//                mainWizardFrame.formatMessage("stepNo", currentFrameIdx + 1, stepFragments.size());
 //
-//        Window window = mainWizardFrame.getMainWizardFrame();
+//        Window window = mainWizardFrame.getMainWizardFrame().getWindow();
 //        window.setCaption(newWindowCaption);
 
         setNavigationButtonProps();

@@ -24,6 +24,7 @@ import io.jmix.reports.entity.wizard.RegionProperty;
 import io.jmix.reports.entity.wizard.ReportRegion;
 import io.jmix.reportsui.action.list.OrderableItemMoveAction;
 import io.jmix.ui.Notifications;
+import io.jmix.ui.WindowParam;
 import io.jmix.ui.action.Action;
 import io.jmix.ui.component.*;
 import io.jmix.ui.model.CollectionContainer;
@@ -40,6 +41,7 @@ import java.util.Set;
 
 @UiController("report_Region.edit")
 @UiDescriptor("region-edit.xml")
+@EditedEntityContainer("reportRegionDc")
 public class RegionEditor extends StandardEditor<ReportRegion> {
     //    @Named("entityTreeFrame.reportEntityTreeNodeDs")
 //    protected AbstractTreeDatasource reportEntityTreeNodeDs;
@@ -64,7 +66,7 @@ public class RegionEditor extends StandardEditor<ReportRegion> {
     @Autowired
     protected Table<RegionProperty> propertiesTable;
     @Autowired
-    protected Label<String> tipLabel;
+    protected Label<String>     tipLabel;
     @Autowired
     protected Metadata metadata;
     @Autowired
@@ -74,7 +76,10 @@ public class RegionEditor extends StandardEditor<ReportRegion> {
 
     protected boolean isTabulated;//if true then user perform add tabulated region action
     protected boolean asViewEditor;
-    protected EntityTreeNode rootNode;
+
+    @WindowParam
+    protected EntityTreeNode rootEntity;
+
     protected boolean updatePermission;
 
     public void setTabulated(boolean tabulated) {
@@ -89,19 +94,19 @@ public class RegionEditor extends StandardEditor<ReportRegion> {
         this.updatePermission = updatePermission;
     }
 
-    public void setRootNode(EntityTreeNode rootNode) {
-        this.rootNode = rootNode;
+    public void setRootEntity(EntityTreeNode rootEntity) {
+        this.rootEntity = rootEntity;
     }
 
     @Subscribe
-    protected void onInit(InitEvent event) {
+    public void onBeforeShow(BeforeShowEvent event) {
         //params.put("component$reportPropertyName", reportPropertyName);
         //todo
         //reportEntityTreeNodeDs.refresh(params);
         //TODO add disallowing of classes selection in tree
         if (!asViewEditor) {
             if (isTabulated) {
-                setTabulatedRegionEditorCaption(rootNode.getName());
+                setTabulatedRegionEditorCaption(rootEntity.getName());
             } else {
                 setSimpleRegionEditorCaption();
             }
@@ -109,7 +114,7 @@ public class RegionEditor extends StandardEditor<ReportRegion> {
         String group = isTabulated
                 ? "selectEntityPropertiesForTableArea"
                 : "selectEntityProperties";
-        tipLabel.setValue(messages.formatMessage(group, rootNode.getLocalizedName()));
+        tipLabel.setValue(messages.formatMessage(group, rootEntity.getLocalizedName()));
         tipLabel.setHtmlEnabled(true);
         initComponents();
     }
@@ -184,7 +189,7 @@ public class RegionEditor extends StandardEditor<ReportRegion> {
             initAsViewEditor();
         }
         entityTree.setSelectionMode(Tree.SelectionMode.MULTI);
-        entityTree.expand(rootNode);
+        entityTree.expand(rootEntity);
     }
 
     protected void initAsViewEditor() {

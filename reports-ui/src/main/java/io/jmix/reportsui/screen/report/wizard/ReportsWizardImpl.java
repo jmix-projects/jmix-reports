@@ -37,8 +37,10 @@ import java.util.List;
 
 @Component(ReportsWizard.NAME)
 public class ReportsWizardImpl implements ReportsWizard {
+
     @Autowired
     private ReportingWizard reportingWizard;
+
     @Autowired
     private Provider<EntityTreeModelBuilder> entityTreeModelBuilderApiProvider;
 

@@ -16,17 +16,222 @@
 
 package io.jmix.reportsui.screen.report.wizard.step;
 
-import io.jmix.core.Messages;
+import com.google.common.collect.ImmutableMap;
+import io.jmix.core.*;
+import io.jmix.core.metamodel.model.MetaClass;
+import io.jmix.reports.app.service.ReportsWizard;
+import io.jmix.reports.entity.ReportOutputType;
+import io.jmix.reports.entity.wizard.ReportData;
+import io.jmix.reports.entity.wizard.ReportTypeGenerate;
+import io.jmix.reports.entity.wizard.TemplateFileType;
+import io.jmix.ui.Dialogs;
+import io.jmix.ui.action.DialogAction;
+import io.jmix.ui.component.ComboBox;
+import io.jmix.ui.component.HasValue;
+import io.jmix.ui.component.RadioButtonGroup;
+import io.jmix.ui.model.InstanceContainer;
+import io.jmix.ui.screen.Subscribe;
 import io.jmix.ui.screen.UiController;
 import io.jmix.ui.screen.UiDescriptor;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.function.Consumer;
 
 @UiController("report_DetailsStep.fragment")
 @UiDescriptor("first-details-fragment.xml")
 public class DetailsStepFragment extends StepFragment {
 
     @Autowired
+    private InstanceContainer<ReportData> reportDataDc;
+
+    @Autowired
     protected Messages messages;
+
+    @Autowired
+    protected Dialogs dialogs;
+
+    @Autowired
+    protected MessageTools messageTools;
+
+    @Autowired
+    protected ComboBox<MetaClass> entity;
+
+    @Autowired
+    protected ComboBox templateFileFormat;
+
+    @Autowired
+    protected Metadata metadata;
+
+    @Autowired
+    protected ExtendedEntities extendedEntities;
+
+    @Autowired
+    protected RadioButtonGroup<ReportTypeGenerate> reportTypeGenerate;
+
+    @Autowired
+    protected MetadataTools metadataTools;
+
+    @Autowired
+    protected ReportsWizard reportsWizard;
+
+    protected boolean needUpdateEntityModel = false;
+
+    public boolean isNeedUpdateEntityModel() {
+        return needUpdateEntityModel;
+    }
+
+    public void setNeedUpdateEntityModel(boolean needUpdateEntityModel) {
+        this.needUpdateEntityModel = needUpdateEntityModel;
+    }
+
+    @Subscribe
+    public void onInit(InitEvent event) {
+        initAvailableFormats();
+
+        initReportTypeOptionGroup();
+        initTemplateFormatLookupField();
+        initEntityLookupField();
+
+        //entity.addValueChangeListener(new ChangeReportNameListener());
+    }
+
+    protected void initEntityLookupField() {
+        entity.setOptionsMap(getAvailableEntities());
+        entity.addValueChangeListener(e -> {
+            reportDataDc.getItem().getReportRegions().clear();
+            //regionsTable.refresh(); //for web6
+            needUpdateEntityModel = true;
+            entity.setValue(e.getValue());
+
+            //clearQueryAndFilter();
+        });
+//        entity.addValueChangeListener(new ClearRegionListener(
+//                new DialogActionWithChangedValue(DialogAction.Type.YES) {
+//                    @Override
+//                    public void actionPerform(Component component) {
+//                        reportDataDc.getItem().getReportRegions().clear();
+//                        //regionsTable.refresh(); //for web6
+//                        needUpdateEntityModel = true;
+//                        entity.setValue((MetaClass) newValue);
+//
+//                        clearQueryAndFilter();
+//                    }
+//                }));
+    }
+
+    @Subscribe("entity")
+    public void onEntityValueChange(HasValue.ValueChangeEvent event) {
+        MetaClass metaClass = (MetaClass) event.getValue();
+        reportDataDc.getItem().setEntityName(metaClass.getName());
+
+    }
+
+    protected void initTemplateFormatLookupField() {
+        templateFileFormat.setOptionsMap(getAvailableTemplateFormats());
+        templateFileFormat.setTextInputAllowed(false);
+        templateFileFormat.setValue(TemplateFileType.DOCX);
+    }
+
+    protected void initReportTypeOptionGroup() {
+        reportTypeGenerate.setOptionsMap(getListedReportOptionsMap());
+        reportTypeGenerate.setValue(ReportTypeGenerate.SINGLE_ENTITY);
+//        reportTypeGenerate.addValueChangeListener(new ClearRegionListener(
+//                new DialogActionWithChangedValue(Type.YES) {
+//                    @Override
+//                    public void actionPerform(Component component) {
+//                        wizard.getItem().getReportRegions().clear();
+//                        wizard.regionsTable.refresh(); //for web6
+//                        wizard.reportTypeOptionGroup.setValue(newValue);
+//                    }
+//                }));
+    }
+
+    protected Map<String, ReportTypeGenerate> getListedReportOptionsMap() {
+        Map<String, ReportTypeGenerate> result = new LinkedHashMap<>(3);
+        result.put(messages.getMessage("singleEntityReport"), ReportTypeGenerate.SINGLE_ENTITY);
+        result.put(messages.getMessage("listOfEntitiesReport"), ReportTypeGenerate.LIST_OF_ENTITIES);
+        result.put(messages.getMessage("listOfEntitiesReportWithQuery"), ReportTypeGenerate.LIST_OF_ENTITIES_WITH_QUERY);
+        return result;
+    }
+
+    protected Map<String, TemplateFileType> getAvailableTemplateFormats() {
+        Map<String, TemplateFileType> result = new LinkedHashMap<>(4);
+        result.put(messages.getMessage(TemplateFileType.XLSX), TemplateFileType.XLSX);
+        result.put(messages.getMessage(TemplateFileType.DOCX), TemplateFileType.DOCX);
+        result.put(messages.getMessage(TemplateFileType.HTML), TemplateFileType.HTML);
+        result.put(messages.getMessage(TemplateFileType.CSV), TemplateFileType.CSV);
+        result.put(messages.getMessage(TemplateFileType.TABLE), TemplateFileType.TABLE);
+
+        //todo char addon
+//        WindowConfig windowConfig = AppBeans.get(WindowConfig.NAME);
+//        if (windowConfig.hasWindow(ShowChartController.JSON_CHART_SCREEN_ID)) {
+//            result.put(messages.getMessage(TemplateFileType.CHART), TemplateFileType.CHART);
+//        }
+        return result;
+    }
+
+    protected Map<String, MetaClass> getAvailableEntities() {
+        Map<String, MetaClass> result = new TreeMap<>(String::compareTo);
+        // todo need to be fixed later - ReferenceToEntity is not persistent but returned in 'metadataTools.getAllPersistentMetaClasses'
+        Collection<MetaClass> classes = metadataTools.getAllJpaEntityMetaClasses();
+        for (MetaClass metaClass : classes) {
+            MetaClass effectiveMetaClass = extendedEntities.getEffectiveMetaClass(metaClass);
+            if (!reportsWizard.isEntityAllowedForReportWizard(effectiveMetaClass)) {
+                continue;
+            }
+            result.put(messageTools.getEntityCaption(effectiveMetaClass) + " (" + effectiveMetaClass.getName() + ")", effectiveMetaClass);
+        }
+        return result;
+    }
+
+    protected Map<String, ReportOutputType> refreshOutputAvailableFormats(TemplateFileType templateFileType) {
+        return availableOutputFormats.get(templateFileType);
+    }
+
+    protected Map<TemplateFileType, Map<String, ReportOutputType>> availableOutputFormats;
+
+    private void initAvailableFormats() {
+        availableOutputFormats = new ImmutableMap.Builder<TemplateFileType, Map<String, ReportOutputType>>()
+                .put(TemplateFileType.DOCX, new ImmutableMap.Builder<String, ReportOutputType>()
+                        .put(messages.getMessage(ReportOutputType.DOCX), ReportOutputType.DOCX)
+                        .put(messages.getMessage(ReportOutputType.HTML), ReportOutputType.HTML)
+                        .put(messages.getMessage(ReportOutputType.PDF), ReportOutputType.PDF)
+                        .build())
+                .put(TemplateFileType.XLSX, new ImmutableMap.Builder<String, ReportOutputType>()
+                        .put(messages.getMessage(ReportOutputType.XLSX), ReportOutputType.XLSX)
+                        .put(messages.getMessage(ReportOutputType.HTML), ReportOutputType.HTML)
+                        .put(messages.getMessage(ReportOutputType.PDF), ReportOutputType.PDF)
+                        .put(messages.getMessage(ReportOutputType.CSV), ReportOutputType.CSV)
+                        .build())
+                .put(TemplateFileType.HTML, new ImmutableMap.Builder<String, ReportOutputType>()
+                        .put(messages.getMessage(ReportOutputType.HTML), ReportOutputType.HTML)
+                        .put(messages.getMessage(ReportOutputType.PDF), ReportOutputType.PDF)
+                        .build())
+                .put(TemplateFileType.CHART, new ImmutableMap.Builder<String, ReportOutputType>()
+                        .put(messages.getMessage(ReportOutputType.CHART), ReportOutputType.CHART)
+                        .build())
+                .put(TemplateFileType.CSV, new ImmutableMap.Builder<String, ReportOutputType>()
+                        .put(messages.getMessage(ReportOutputType.CSV), ReportOutputType.CSV)
+                        .build())
+                .put(TemplateFileType.TABLE, new ImmutableMap.Builder<String, ReportOutputType>()
+                        .put(messages.getMessage(ReportOutputType.TABLE), ReportOutputType.TABLE)
+                        .build())
+                .build();
+    }
+
+    @Override
+    public boolean isLast() {
+        return false;
+    }
+
+    @Override
+    public boolean isFirst() {
+        return true;
+    }
 
 //    public DetailsStepFragment(ReportWizardCreator wizard) {
 //        super(wizard, "reportDetails", "detailsStep");
@@ -173,7 +378,7 @@ public class DetailsStepFragment extends StepFragment {
 //        }
 //    }
 
-//    protected class DialogActionWithChangedValue extends DialogAction {
+    //    protected class DialogActionWithChangedValue extends DialogAction {
 //        protected Object newValue;
 //
 //        public DialogActionWithChangedValue(Type type) {
@@ -195,8 +400,8 @@ public class DetailsStepFragment extends StepFragment {
 //
 //        @Override
 //        public void accept(HasValue.ValueChangeEvent e) {
-//            if (!wizard.getItem().getReportRegions().isEmpty()) {
-//                wizard.dialogs.createOptionDialog()
+//            if (!reportDataDc.getItem().getReportRegions().isEmpty()) {
+//                dialogs.createOptionDialog()
 //                        .withCaption(messages.getMessage("dialogs.Confirmation"))
 //                        .withMessage(messages.getMessage("regionsClearConfirm"))
 //                        .withActions(
@@ -205,15 +410,15 @@ public class DetailsStepFragment extends StepFragment {
 //                        )
 //                        .show();
 //            } else {
-//                wizard.needUpdateEntityModel = true;
+//                needUpdateEntityModel = true;
 //                clearQueryAndFilter();
 //            }
 //        }
 //    }
-//
+
 //    protected void clearQueryAndFilter() {
-//        wizard.query = null;
-//        wizard.queryParameters = null;
+//        query = null;
+//        queryParameters = null;
 //        //filter = null;
 ////        filterEntity = null;
 //        //conditionsTree = null;

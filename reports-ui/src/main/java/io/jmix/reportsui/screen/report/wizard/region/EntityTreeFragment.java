@@ -6,10 +6,7 @@ import io.jmix.ui.Notifications;
 import io.jmix.ui.action.Action;
 import io.jmix.ui.component.Tree;
 import io.jmix.ui.model.CollectionContainer;
-import io.jmix.ui.screen.ScreenFragment;
-import io.jmix.ui.screen.Subscribe;
-import io.jmix.ui.screen.UiController;
-import io.jmix.ui.screen.UiDescriptor;
+import io.jmix.ui.screen.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @UiController("report_EntityTree.fragment")
@@ -28,17 +25,23 @@ public class EntityTreeFragment extends ScreenFragment {
     @Autowired
     private CollectionContainer<EntityTreeNode> reportEntityTreeNodeDc;
 
-    @Subscribe("search")
-    public void onSearch(Action.ActionPerformedEvent event) {
-                if (!reportEntityTreeNodeDc.getItems().isEmpty()) {
-                    entityTree.collapseTree();
-                    //todo
-                    //entityTree.expand(rootNode.getId());
-                } else {
-                    notifications.create(Notifications.NotificationType.HUMANIZED)
-                            .withCaption(messages.getMessage("valueNotFound"))
-                            .show();
-                }
+    @Subscribe(target = Target.PARENT_CONTROLLER)
+    public void onBeforeShow(Screen.BeforeShowEvent event) {
+        RegionEditor regionEditor = (RegionEditor) getHostScreen();
+//        if (!reportEntityTreeNodeDc.getItems().isEmpty()) {
+//            entityTree.collapseTree();
+//            //todo
+//            //entityTree.expand(rootNode.getId());
+//        } else {
+//            notifications.create(Notifications.NotificationType.HUMANIZED)
+//                    .withCaption(messages.getMessage("valueNotFound"))
+//                    .show();
+//        }
+        EntityTreeNode entityTreeNode = regionEditor.getEditedEntity().getRegionPropertiesRootNode();
+
+        reportEntityTreeNodeDc.getMutableItems().add(entityTreeNode);
+        reportEntityTreeNodeDc.getMutableItems().addAll(entityTreeNode.getChildren());
+        entityTree.expand(entityTreeNode);
     }
 
 }

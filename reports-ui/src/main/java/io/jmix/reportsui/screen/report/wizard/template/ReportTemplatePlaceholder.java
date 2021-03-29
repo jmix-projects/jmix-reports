@@ -21,6 +21,7 @@ import io.jmix.core.metamodel.model.MetaProperty;
 import io.jmix.reports.entity.wizard.RegionProperty;
 import io.jmix.reports.entity.wizard.ReportData;
 import io.jmix.reports.entity.wizard.ReportRegion;
+import io.jmix.reports.entity.wizard.ReportTypeGenerate;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -98,7 +99,7 @@ public class ReportTemplatePlaceholder {
         } else {
             ReportData reportData = reportRegion.getReportData();
             String[] partsFieldName;
-            if (reportData != null && reportData.getReportType() == ReportData.ReportType.LIST_OF_ENTITIES_WITH_QUERY) {
+            if (reportData != null && reportData.getReportTypeGenerate() == ReportTypeGenerate.LIST_OF_ENTITIES_WITH_QUERY) {
                 partsFieldName = new String[]{fieldName};
             } else {
                 partsFieldName = fieldName.split("\\.");
