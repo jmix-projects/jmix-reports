@@ -43,12 +43,12 @@ public class ReportsUIConfiguration {
     }
 
     @Bean("report_DataSetFactory")
-    public DataSetFactory dataSetFactory(){
+    public DataSetFactory dataSetFactory() {
         return new DataSetFactory();
     }
 
     @Bean("reports_CrossTabOrientationTableDecorator")
-    public CrossTabTableDecorator crossTabTableDecorator(){
+    public CrossTabTableDecorator crossTabTableDecorator() {
         return new CrossTabTableDecorator();
     }
 

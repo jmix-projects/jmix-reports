@@ -26,7 +26,6 @@ import io.jmix.core.*;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.core.security.AccessDeniedException;
 import io.jmix.core.security.EntityOp;
-import io.jmix.core.security.PermissionType;
 import io.jmix.data.PersistenceHints;
 import io.jmix.reports.app.ParameterPrototype;
 import io.jmix.reports.converter.GsonConverter;
@@ -61,7 +60,7 @@ import java.util.zip.CRC32;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-@Component(Reports.NAME)
+@Component("report_Reports")
 public class ReportsImpl implements Reports {
 
     public static final String REPORT_EDIT_VIEW_NAME = "report.edit";
@@ -346,10 +345,10 @@ public class ReportsImpl implements Reports {
     protected void checkPermission(Report report) {
         if (entityStates.isNew(report)) {
             if (!secureOperations.isEntityCreatePermitted(metadata.getClass(Report.class), policyStore))
-                throw new AccessDeniedException(PermissionType.ENTITY_OP.name(), metadata.getClass(Report.class).getName(), EntityOp.UPDATE.getId());
+                throw new AccessDeniedException("entity", metadata.getClass(Report.class).getName(), EntityOp.UPDATE.getId());
         } else {
             if (!secureOperations.isEntityUpdatePermitted(metadata.getClass(Report.class), policyStore))
-                throw new AccessDeniedException(PermissionType.ENTITY_OP.name(), metadata.getClass(Report.class).getName(), EntityOp.UPDATE.getId());
+                throw new AccessDeniedException("entity", metadata.getClass(Report.class).getName(), EntityOp.UPDATE.getId());
         }
     }
 
