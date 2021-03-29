@@ -24,17 +24,13 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-public class StepFragment extends ScreenFragment {
+public abstract class StepFragment extends ScreenFragment {
     protected String name;
-    protected Frame frame;
     protected ReportWizardCreator wizard;
 
     protected InitStepFrameHandler initFrameHandler;
     protected BeforeHideStepFrameHandler beforeHideFrameHandler;
     protected BeforeShowStepFrameHandler beforeShowFrameHandler;
-
-    protected boolean isLast;
-    protected boolean isFirst;
 
     protected boolean validateBeforeNext = true;
     protected boolean validateBeforePrev = false;
@@ -100,40 +96,16 @@ public class StepFragment extends ScreenFragment {
         return name;
     }
 
-    public ScreenFragment getScreenFragment() {
-        return this;
-    }
+    public abstract boolean isLast();
 
-    public boolean isLast() {
-        return isLast;
-    }
-
-    public void setLast(boolean isLast) {
-        this.isLast = isLast;
-    }
-
-    public boolean isFirst() {
-        return isFirst;
-    }
-
-    public void setFirst(boolean isFirst) {
-        this.isFirst = isFirst;
-    }
+    public abstract boolean isFirst();
 
     public boolean isValidateBeforeNext() {
         return validateBeforeNext;
     }
 
-    public void setValidateBeforeNext(boolean validateBeforeNext) {
-        this.validateBeforeNext = validateBeforeNext;
-    }
-
     public boolean isValidateBeforePrev() {
         return validateBeforePrev;
-    }
-
-    public void setValidateBeforePrev(boolean validateBeforePrev) {
-        this.validateBeforePrev = validateBeforePrev;
     }
 
     public interface BeforeHideStepFrameHandler {
@@ -151,7 +123,7 @@ public class StepFragment extends ScreenFragment {
     protected class DefaultFrameInitializer implements InitStepFrameHandler {
         @Override
         public void initFrame() {
-            for (Component c : frame.getComponents()) {
+            for (Component c : getFragment().getComponents()) {
                 if (c instanceof Field) {
                     Field field = (Field) c;
                     if (field.isRequired() && StringUtils.isBlank(field.getRequiredMessage()) && StringUtils.isBlank(field.getCaption())) {
@@ -165,7 +137,7 @@ public class StepFragment extends ScreenFragment {
     protected class FrameValidator {
         public List<String> validateAllComponents() {
             List<String> errors = new ArrayList<>();
-            for (Component c : frame.getComponents()) {
+            for (Component c : getFragment().getComponents()) {
                 if (c instanceof Validatable) {
                     Validatable validatable = (Validatable) c;
                     try {

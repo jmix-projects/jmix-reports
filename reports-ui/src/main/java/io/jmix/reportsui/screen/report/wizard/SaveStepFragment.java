@@ -18,32 +18,18 @@ package io.jmix.reportsui.screen.report.wizard;
 
 import io.jmix.core.CoreProperties;
 import io.jmix.core.Messages;
-import io.jmix.reports.entity.Report;
-import io.jmix.reports.entity.ReportOutputType;
-import io.jmix.reports.entity.charts.*;
-import io.jmix.reports.exception.TemplateGenerationException;
 import io.jmix.reportsui.screen.report.wizard.step.StepFragment;
-import io.jmix.reportsui.screen.template.edit.generator.RandomChartDataGenerator;
 import io.jmix.ui.Dialogs;
 import io.jmix.ui.Fragments;
 import io.jmix.ui.Notifications;
 import io.jmix.ui.UiProperties;
-import io.jmix.ui.action.AbstractAction;
-import io.jmix.ui.action.DialogAction;
-import io.jmix.ui.component.Component;
-import io.jmix.ui.component.ValidationException;
-import io.jmix.ui.download.ByteArrayDataProvider;
-import io.jmix.ui.download.DownloadFormat;
+import io.jmix.ui.component.HasContextHelp;
 import io.jmix.ui.download.Downloader;
+import io.jmix.ui.screen.Install;
+import io.jmix.ui.screen.Subscribe;
 import io.jmix.ui.screen.UiController;
 import io.jmix.ui.screen.UiDescriptor;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 
 @UiController("report_Save.fragment")
 @UiDescriptor("save-fragment.xml")
@@ -70,12 +56,37 @@ public class SaveStepFragment extends StepFragment {
     @Autowired
     protected Downloader downloader;
 
+    @Subscribe
+    public void onInit(InitEvent event) {
+
+    }
+
+    @Install(to = "outputFileFormat", subject = "contextHelpIconClickHandler")
+    private void outputFileFormatContextHelpIconClickHandler(HasContextHelp.ContextHelpIconClickEvent contextHelpIconClickEvent) {
+        dialogs.createMessageDialog()
+                .withCaption(messages.getMessage("template.namePatternText"))
+                .withMessage(messages.getMessage("template.namePatternTextHelp"))
+                .withModal(false)
+                .withWidth("560px")
+                .show();
+    }
+
+
     public SaveStepFragment(ReportWizardCreator wizard) {
         //super(wizard, "", "saveStep");
-        isLast = true;
         //beforeShowFrameHandler = new BeforeShowSaveStepFrameHandler();
 
-        beforeHideFrameHandler = new BeforeHideSaveStepFrameHandler();
+        //beforeHideFrameHandler = new BeforeHideSaveStepFrameHandler();
+    }
+
+    @Override
+    public boolean isLast() {
+        return true;
+    }
+
+    @Override
+    public boolean isFirst() {
+        return false;
     }
 
 //    protected class BeforeShowSaveStepFrameHandler implements BeforeShowStepFrameHandler {

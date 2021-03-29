@@ -21,6 +21,7 @@ import io.jmix.core.entity.annotation.SystemLevel;
 import io.jmix.core.metamodel.annotation.Composition;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.annotation.JmixProperty;
+import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.reports.entity.*;
 import io.jmix.reports.entity.charts.ChartType;
 
@@ -61,28 +62,6 @@ public class ReportData {
         }
     }
 
-    public enum ReportType {
-        SINGLE_ENTITY(false, true),
-        LIST_OF_ENTITIES(true, true),
-        LIST_OF_ENTITIES_WITH_QUERY(true, false);
-
-        private boolean list;
-        private boolean entity;
-
-        ReportType(boolean list, boolean entity) {
-            this.list = list;
-            this.entity = entity;
-        }
-
-        public boolean isList() {
-            return list;
-        }
-
-        public boolean isEntity() {
-            return entity;
-        }
-    }
-
     @Id
     @JmixProperty
     @JmixGeneratedValue
@@ -91,6 +70,10 @@ public class ReportData {
     @JmixProperty
     @Transient
     protected String name;
+
+    @JmixProperty
+    @Transient
+    protected String entityName;
 
     @JmixProperty
     @Transient
@@ -106,7 +89,7 @@ public class ReportData {
 
     @JmixProperty
     @Transient
-    protected ReportType reportType;
+    protected ReportTypeGenerate reportTypeGenerate;
 
     @JmixProperty
     @Transient
@@ -152,6 +135,14 @@ public class ReportData {
         this.id = id;
     }
 
+    public String getEntityName() {
+        return entityName;
+    }
+
+    public void setEntityName(String entityName) {
+        this.entityName = entityName;
+    }
+
     public Report getGeneratedReport() {
         return generatedReport;
     }
@@ -168,12 +159,12 @@ public class ReportData {
         this.group = group;
     }
 
-    public ReportType getReportType() {
-        return reportType;
+    public ReportTypeGenerate getReportTypeGenerate() {
+        return reportTypeGenerate;
     }
 
-    public void setReportType(ReportType reportType) {
-        this.reportType = reportType;
+    public void getReportTypeGenerate(ReportTypeGenerate reportTypeGenerate) {
+        this.reportTypeGenerate = reportTypeGenerate;
     }
 
     public String getTemplateFileName() {

@@ -41,20 +41,20 @@
             <groupBox id="editAreaGroupBox" width="100%" height="100%">
                 <fragment id="detailsFragment" screen="report_DetailsStep.fragment"
                           width="100%" height="100%"
-                          visible="false"/>
+                          visible="true"/>
 <!--                <fragment id="saveFragment" screen="report_Save.fragment"-->
 <!--                          width="100%" height="100%"-->
 <!--                          visible="false"/>-->
             </groupBox>
-<!--            <fragment id="regionsStep"-->
-<!--                      screen="report_Region.fragment"-->
-<!--                      width="100%" height="100%"-->
-<!--                      visible="false"/>-->
+            <fragment id="regionsStepFragment"
+                      screen="report_Region.fragment"
+                      width="100%" height="100%"
+                      visible="false"/>
         </vbox>
         <buttonsPanel id="navBtnsPanel">
-            <button id="bwd" caption="msg://backward" icon="icons/report-wizard-previous.png"/>
-            <button id="fwd" caption="msg://forward" icon="icons/report-wizard-next.png"/>
-            <button id="save" caption="msg://save" visible="false" icon="EDITOR_OK"/>
+            <button id="backBtn" caption="msg://backward" icon="ARROW_LEFT"/>
+            <button id="nextBtn" caption="msg://forward" icon="ARROW_RIGHT"/>
+            <button id="saveBtn" caption="msg://save" visible="false" icon="EDITOR_OK"/>
         </buttonsPanel>
     </layout>
 </window>

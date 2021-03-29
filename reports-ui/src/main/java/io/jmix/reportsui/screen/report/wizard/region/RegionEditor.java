@@ -24,6 +24,7 @@ import io.jmix.reports.entity.wizard.RegionProperty;
 import io.jmix.reports.entity.wizard.ReportRegion;
 import io.jmix.reportsui.action.list.OrderableItemMoveAction;
 import io.jmix.ui.Notifications;
+import io.jmix.ui.WindowParam;
 import io.jmix.ui.action.Action;
 import io.jmix.ui.component.*;
 import io.jmix.ui.model.CollectionContainer;
@@ -75,7 +76,10 @@ public class RegionEditor extends StandardEditor<ReportRegion> {
 
     protected boolean isTabulated;//if true then user perform add tabulated region action
     protected boolean asViewEditor;
-    protected EntityTreeNode rootNode;
+
+    @WindowParam
+    protected EntityTreeNode rootEntity;
+
     protected boolean updatePermission;
 
     public void setTabulated(boolean tabulated) {
@@ -90,12 +94,8 @@ public class RegionEditor extends StandardEditor<ReportRegion> {
         this.updatePermission = updatePermission;
     }
 
-    public EntityTreeNode getRootNode() {
-        return rootNode;
-    }
-
-    public void setRootNode(EntityTreeNode rootNode) {
-        this.rootNode = rootNode;
+    public void setRootEntity(EntityTreeNode rootEntity) {
+        this.rootEntity = rootEntity;
     }
 
     @Subscribe
@@ -107,7 +107,7 @@ public class RegionEditor extends StandardEditor<ReportRegion> {
         //TODO add disallowing of classes selection in tree
         if (!asViewEditor) {
             if (isTabulated) {
-                setTabulatedRegionEditorCaption(rootNode.getName());
+                setTabulatedRegionEditorCaption(rootEntity.getName());
             } else {
                 setSimpleRegionEditorCaption();
             }
@@ -115,7 +115,7 @@ public class RegionEditor extends StandardEditor<ReportRegion> {
         String group = isTabulated
                 ? "selectEntityPropertiesForTableArea"
                 : "selectEntityProperties";
-        tipLabel.setValue(messages.formatMessage(group, rootNode.getLocalizedName()));
+        tipLabel.setValue(messages.formatMessage(group, rootEntity.getLocalizedName()));
         tipLabel.setHtmlEnabled(true);
         initComponents();
         getScreenData().loadAll();

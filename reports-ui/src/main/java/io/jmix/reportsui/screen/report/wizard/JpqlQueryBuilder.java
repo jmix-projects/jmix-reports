@@ -17,10 +17,7 @@
 package io.jmix.reportsui.screen.report.wizard;
 
 import io.jmix.core.common.util.Preconditions;
-import io.jmix.reports.entity.wizard.RegionProperty;
-import io.jmix.reports.entity.wizard.ReportData;
-import io.jmix.reports.entity.wizard.ReportRegion;
-import io.jmix.reports.entity.wizard.TemplateFileType;
+import io.jmix.reports.entity.wizard.*;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.annotation.Nullable;
@@ -67,7 +64,7 @@ public class JpqlQueryBuilder {
     }
 
     protected void addDefaultOrderBy() {
-        if (reportData.getReportType() == ReportData.ReportType.LIST_OF_ENTITIES_WITH_QUERY) {
+        if (reportData.getReportTypeGenerate() == ReportTypeGenerate.LIST_OF_ENTITIES_WITH_QUERY) {
             if (reportData.getTemplateFileType() == TemplateFileType.CHART) {
                 reportRegion.getRegionProperties().stream()
                         .findFirst()

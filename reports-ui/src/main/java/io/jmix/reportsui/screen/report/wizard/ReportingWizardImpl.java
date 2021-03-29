@@ -102,7 +102,7 @@ public class ReportingWizardImpl implements ReportingWizard {
 
             BandDefinition dataBand = createDataBand(report, rootReportBandDefinition, reportRegion.getNameForBand(), bandDefinitionPosition++);
 
-            if (reportData.getReportType().isEntity()) {
+            if (reportData.getReportTypeGenerate().isEntity()) {
                 FetchPlan parameterView = createViewByReportRegions(reportData.getEntityTreeRootNode(), reportData.getReportRegions());
                 createEntityDataSet(reportData, reportRegion, dataBand, mainParameter, parameterView);
             } else {
@@ -118,7 +118,7 @@ public class ReportingWizardImpl implements ReportingWizard {
     @Nullable
     protected ReportInputParameter createParameters(ReportData reportData, Report report) {
         ReportInputParameter mainParameter = null;
-        if (reportData.getReportType().isEntity()) {
+        if (reportData.getReportTypeGenerate().isEntity()) {
             mainParameter = createMainInputParameter(report, reportData);
             report.getInputParameters().add(mainParameter);
         } else if (reportData.getQueryParameters() != null) {
@@ -175,11 +175,11 @@ public class ReportingWizardImpl implements ReportingWizard {
                                        ReportInputParameter mainParameter, FetchPlan parameterView) {
         DataSet dataSet = dataSetFactory.createEmptyDataSet(dataBand);
         dataSet.setName(messages.getMessage(getClass(), "dataSet"));
-        if (ReportData.ReportType.LIST_OF_ENTITIES == reportData.getReportType()) {
+        if (ReportTypeGenerate.LIST_OF_ENTITIES == reportData.getReportTypeGenerate()) {
             dataSet.setType(DataSetType.MULTI);
             dataSet.setListEntitiesParamName(mainParameter.getAlias());
             dataSet.setFetchPlan(parameterView);
-        } else if (ReportData.ReportType.SINGLE_ENTITY == reportData.getReportType()) {
+        } else if (ReportTypeGenerate.SINGLE_ENTITY == reportData.getReportTypeGenerate()) {
             if (reportRegion.isTabulatedRegion()) {
                 dataSet.setType(DataSetType.MULTI);
                 dataSet.setListEntitiesParamName(mainParameter.getAlias() + "#" + reportRegion.getRegionPropertiesRootNode().getName());
@@ -208,7 +208,7 @@ public class ReportingWizardImpl implements ReportingWizard {
         MetaClass wrapperMetaClass = reportData.getEntityTreeRootNode().getWrappedMetaClass();
 
         reportInputParameter.setEntityMetaClass(wrapperMetaClass.getName());
-        if (ReportData.ReportType.LIST_OF_ENTITIES == reportData.getReportType()) {
+        if (ReportTypeGenerate.LIST_OF_ENTITIES == reportData.getReportTypeGenerate()) {
             reportInputParameter.setType(ParameterType.ENTITY_LIST);
             reportInputParameter.setAlias(DEFAULT_LIST_OF_ENTITIES_ALIAS);
         } else {
