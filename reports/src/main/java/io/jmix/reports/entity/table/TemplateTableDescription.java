@@ -16,9 +16,7 @@
 
 package io.jmix.reports.entity.table;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.*;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.annotation.JmixProperty;
@@ -33,9 +31,23 @@ import java.util.UUID;
 public class TemplateTableDescription {
 
     protected final static Gson gson;
+    protected final static String METADATA_STARTS_CHAR = "_";
 
     static {
+        ExclusionStrategy strategy = new ExclusionStrategy() {
+            @Override
+            public boolean shouldSkipClass(Class<?> clazz) {
+                return false;
+            }
+
+            @Override
+            public boolean shouldSkipField(FieldAttributes field) {
+                return field.getName().startsWith(METADATA_STARTS_CHAR);
+            }
+        };
+
         gson = new GsonBuilder()
+                .addSerializationExclusionStrategy(strategy)
                 .create();
     }
 
