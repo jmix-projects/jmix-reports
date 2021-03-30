@@ -326,9 +326,7 @@ public class ReportingWizardImpl implements ReportingWizard {
             }
         }
 
-        FetchPlan plan = fetchPlanBuilder.build();
-
-        return plan;
+        return fetchPlanBuilder.build();
     }
 
     /**

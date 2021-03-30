@@ -178,7 +178,7 @@ public class Report implements com.haulmont.yarg.structure.Report, io.jmix.core.
     }
 
     public BandDefinition getRootBandDefinition() {
-        if (rootBandDefinition == null && (bands != null && bands.size() > 0)) {
+        if (rootBandDefinition == null && bands != null && bands.size() > 0) {
             rootBandDefinition = CollectionUtils.find(bands, band ->
                     band.getParentBandDefinition() == null
             );

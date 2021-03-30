@@ -44,10 +44,10 @@
                 <fragment id="entityTreeFrame" screen="report_EntityTree.fragment" width="100%" height="100%"/>
             </groupBox>
             <vbox id="btnsControlPanel" margin="true" spacing="true" width="AUTO">
-                <button id="addItem" action="addItemAction" icon="font-icon:ARROW_RIGHT" width="40px"/>
+                <button id="addItem" action="addItemAction" icon="ARROW_RIGHT" width="40px"/>
                 <button id="removeItem" action="removeItemAction" icon="REMOVE" width="40px"/>
-                <button id="upItem" enable="false" icon="font-icon:TOGGLE_UP" width="40px"/>
-                <button id="downItem" icon="font-icon:TOGGLE_DOWN" width="40px"/>
+                <button id="upItem" enable="false" icon="CARET_UP" width="40px"/>
+                <button id="downItem" icon="CARET_DOWN" width="40px"/>
             </vbox>
             <groupBox id="selectedTreeItemsPanel" width="500px" height="500px">
                 <table id="propertiesTable"
