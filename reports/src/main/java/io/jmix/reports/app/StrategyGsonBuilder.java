@@ -24,7 +24,7 @@ import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.Arrays;
 
-public class GsonEntityBuilder {
+public class StrategyGsonBuilder {
 
     protected final static String METADATA_STARTS_CHAR = "_";
 
