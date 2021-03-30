@@ -16,41 +16,17 @@
 
 package io.jmix.reports.entity.table;
 
-import com.google.gson.*;
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.annotation.JmixProperty;
 
 import javax.persistence.Id;
-import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
 @JmixEntity(name = "report_TemplateTableDescription")
 public class TemplateTableDescription {
-
-    protected final static Gson gson;
-    protected final static String METADATA_STARTS_CHAR = "_";
-
-    static {
-        ExclusionStrategy strategy = new ExclusionStrategy() {
-            @Override
-            public boolean shouldSkipClass(Class<?> clazz) {
-                return false;
-            }
-
-            @Override
-            public boolean shouldSkipField(FieldAttributes field) {
-                return field.getName().startsWith(METADATA_STARTS_CHAR);
-            }
-        };
-
-        gson = new GsonBuilder()
-                .addSerializationExclusionStrategy(strategy)
-                .create();
-    }
-
     @Id
     @JmixGeneratedValue
     protected UUID id;
@@ -72,17 +48,5 @@ public class TemplateTableDescription {
 
     public void setTemplateTableBands(List<TemplateTableBand> templateTableBands) {
         this.templateTableBands = templateTableBands;
-    }
-
-    public static String toJsonString(TemplateTableDescription description) {
-        return gson.toJson(description);
-    }
-
-    public static TemplateTableDescription fromJsonString(String json) {
-        try {
-            return gson.fromJson(json, TemplateTableDescription.class);
-        } catch (JsonSyntaxException e) {
-            return null;
-        }
     }
 }
