@@ -26,6 +26,7 @@ import io.jmix.reports.entity.wizard.ReportData;
 import io.jmix.reports.entity.wizard.ReportRegion;
 import io.jmix.reportsui.wizard.template.Generator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
@@ -33,7 +34,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 @Component("reports_TableGenerator")
-@Scope("prototype")
+@Scope(BeanDefinition.SCOPE_PROTOTYPE)
 public class TableGenerator implements Generator {
 
     @Autowired
