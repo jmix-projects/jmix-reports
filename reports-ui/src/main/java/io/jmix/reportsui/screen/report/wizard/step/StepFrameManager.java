@@ -33,6 +33,13 @@ public class StepFrameManager {
         //frames initialization is in showCurrentFrame() method
     }
 
+<<<<<<< HEAD
+=======
+    public List<StepFragment> getStepFrames() {
+        return stepFragments;
+    }
+
+>>>>>>> origin/features/wizard
     public void showCurrentFrame() {
         setMainWindowProps();
         getCurrentStepFrame().initFrame();
@@ -45,7 +52,11 @@ public class StepFrameManager {
     }
 
     public Frame getCurrentFrame() {
+<<<<<<< HEAD
         return stepFragments.get(currentFrameIdx).getFragment();
+=======
+        return stepFragments.get(currentFrameIdx).getFrame();
+>>>>>>> origin/features/wizard
     }
 
     public void setMainWindowProps() {

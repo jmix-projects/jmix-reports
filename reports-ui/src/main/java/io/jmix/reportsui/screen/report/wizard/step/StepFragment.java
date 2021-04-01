@@ -24,9 +24,16 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+<<<<<<< HEAD:reports-ui/src/main/java/io/jmix/reportsui/screen/report/wizard/step/StepFragment.java
 public abstract class StepFragment extends ScreenFragment {
     protected String name;
     protected ReportWizardCreator wizard;
+=======
+public class StepFragment extends ScreenFragment {
+    protected final String name;
+    protected final Frame frame;
+    protected final ReportWizardCreator wizard;
+>>>>>>> origin/features/wizard:reports-ui/src/main/java/io/jmix/reportsui/screen/report/wizard/step/StepFrame.java
 
     protected InitStepFrameHandler initFrameHandler;
     protected BeforeHideStepFrameHandler beforeHideFrameHandler;
@@ -38,6 +45,7 @@ public abstract class StepFragment extends ScreenFragment {
     protected FrameValidator frameValidator = new FrameValidator();
     protected boolean isInitialized;
 
+<<<<<<< HEAD:reports-ui/src/main/java/io/jmix/reportsui/screen/report/wizard/step/StepFragment.java
 //    public StepFragment(ReportWizardCreator reportWizardCreatorEditor, String name, String frameComponentName) {
 //        this.wizard = reportWizardCreatorEditor;
 //        this.name = name;
@@ -46,6 +54,16 @@ public abstract class StepFragment extends ScreenFragment {
 //            throw new UnsupportedOperationException("Frame component is not found");
 //        }
 //    }
+=======
+    public StepFragment(ReportWizardCreator reportWizardCreatorEditor, String name, String frameComponentName) {
+        this.wizard = reportWizardCreatorEditor;
+        this.name = name;
+        this.frame = (Frame) reportWizardCreatorEditor.getWindow().getComponent(frameComponentName);
+        if (frame == null) {
+            throw new UnsupportedOperationException("Frame component is not found");
+        }
+    }
+>>>>>>> origin/features/wizard:reports-ui/src/main/java/io/jmix/reportsui/screen/report/wizard/step/StepFrame.java
 
     public void setInitFrameHandler(InitStepFrameHandler initFrameHandler) {
         this.initFrameHandler = initFrameHandler;
