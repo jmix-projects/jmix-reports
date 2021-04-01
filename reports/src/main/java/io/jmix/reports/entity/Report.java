@@ -32,6 +32,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 
 import javax.persistence.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Attention! This entity should be detached for correct work. If you do not detach it please use logic as in
@@ -42,8 +43,9 @@ import java.util.*;
 @Listeners("report_ReportDetachListener")
 @JmixEntity
 @SuppressWarnings("unused")
-public class Report implements com.haulmont.yarg.structure.Report, io.jmix.core.Entity {
+public class Report implements com.haulmont.yarg.structure.Report {
     private static final long serialVersionUID = -2817764915661205093L;
+    protected static final String IDX_SEPARATOR = ",";
 
     @JmixGeneratedValue
     @Id
@@ -149,10 +151,12 @@ public class Report implements com.haulmont.yarg.structure.Report, io.jmix.core.
 
     @Transient
     @JmixProperty
+    @Composition
     protected List<ReportScreen> reportScreens = new ArrayList<>();
 
     @Transient
     @JmixProperty
+    @Composition
     protected Set<ReportRole> reportRoles = new HashSet<>();
 
     @Transient
@@ -168,6 +172,54 @@ public class Report implements com.haulmont.yarg.structure.Report, io.jmix.core.
     @Transient
     @JmixProperty
     protected Boolean validationOn = false;
+
+    @PreUpdate
+    @PrePersist
+    protected void updateIdxFields(){
+        updateInputParamIdx();
+        updateRoleIdx();
+        updateScreenIdx();
+    }
+
+    private void updateInputParamIdx() {
+        if (CollectionUtils.isNotEmpty(inputParameters)) {
+            String paramsIdx = inputParameters
+                    .stream()
+                    .map(ReportInputParameter::getEntityMetaClass)
+                    .filter(StringUtils::isNotBlank)
+                    .collect(Collectors.joining(IDX_SEPARATOR));
+            setInputEntityTypesIdx(String.format(",%s,", paramsIdx));
+        } else {
+            setInputEntityTypesIdx(null);
+        }
+    }
+
+    private void updateRoleIdx() {
+        if (CollectionUtils.isNotEmpty(reportRoles)) {
+            String rolesIdx = reportRoles
+                    .stream()
+                    .map(ReportRole::getRoleCode)
+                    .collect(Collectors.joining(IDX_SEPARATOR));
+            setRolesIdx(String.format(",%s,", rolesIdx));
+        } else {
+           setRolesIdx(null);
+        }
+    }
+
+    private void updateScreenIdx() {
+        if (CollectionUtils.isNotEmpty(reportScreens)) {
+            String screensIdx = reportScreens
+                    .stream()
+                    .map(ReportScreen::getScreenId)
+                    .collect(Collectors.joining(IDX_SEPARATOR));
+            setScreensIdx(String.format(",%s,", screensIdx));
+        } else {
+            setScreensIdx(null);
+        }
+    }
+
+
+
 
     public Boolean getIsTmp() {
         return isTmp;

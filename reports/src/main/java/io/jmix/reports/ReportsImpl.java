@@ -60,7 +60,7 @@ import java.util.zip.CRC32;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-@Component(Reports.NAME)
+@Component("report_Reports")
 public class ReportsImpl implements Reports {
 
     public static final String REPORT_EDIT_VIEW_NAME = "report.edit";
@@ -598,7 +598,7 @@ public class ReportsImpl implements Reports {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <T extends Entity> T reloadEntity(T entity, FetchPlan view) {
+    public <T> T reloadEntity(T entity, FetchPlan view) {
         if (entity instanceof Report && ((Report) entity).getIsTmp()) {
             return entity;
         }
@@ -716,7 +716,7 @@ public class ReportsImpl implements Reports {
     }
 
     @SuppressWarnings("unchecked")
-    protected <T extends Entity> T reloadEntity(T entity, String viewName) {
+    protected <T> T reloadEntity(T entity, String viewName) {
         if (entity instanceof Report && ((Report) entity).getIsTmp()) {
             return entity;
         }
