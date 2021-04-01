@@ -19,7 +19,7 @@ package io.jmix.reportsui.screen.report.wizard.step;
 import io.jmix.ui.component.Button;
 import io.jmix.ui.screen.Screen;
 
-public interface MainWizardFrame<T extends Screen> {
+public interface MainWizardScreen<T extends Screen> {
 
     T getMainWizardFrame();
 

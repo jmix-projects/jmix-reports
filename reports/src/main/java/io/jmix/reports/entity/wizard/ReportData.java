@@ -75,6 +75,8 @@ public class ReportData implements Serializable {
     @Transient
     protected String entityName;
 
+    protected MetaClass entity;
+
     @JmixProperty
     @Transient
     protected EntityTreeNode entityTreeRootNode;
@@ -133,6 +135,14 @@ public class ReportData implements Serializable {
 
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    public MetaClass getEntity() {
+        return entity;
+    }
+
+    public void setEntity(MetaClass entity) {
+        this.entity = entity;
     }
 
     public String getEntityName() {

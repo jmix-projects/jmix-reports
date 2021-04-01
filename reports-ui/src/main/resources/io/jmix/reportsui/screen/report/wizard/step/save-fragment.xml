@@ -14,8 +14,15 @@
   ~ limitations under the License.
   -->
 
-<window xmlns="http://jmix.io/schema/ui/window"
-        messagesPack="io.jmix.reportsui.screen.report.wizard">
+<fragment xmlns="http://jmix.io/schema/ui/fragment"
+          messagesPack="io.jmix.reportsui.screen.report.wizard">
+
+    <data>
+        <instance id="reportDataDc" class="io.jmix.reports.entity.wizard.ReportData" provided="true">
+            <collection id="reportRegionsDc" property="reportRegions" provided="true"/>
+        </instance>
+    </data>
+
     <layout expand="props" width="100%">
         <vbox id="props" expand="chartPreviewBox">
             <gridLayout spacing="true" width="100%">
@@ -41,7 +48,7 @@
                     <row>
                         <label value="msg://outputFileFormat" align="MIDDLE_LEFT"/>
                         <comboBox id="outputFileFormat" required="true" width="100%"
-                                     description="msg://outputFileTypeHintMsg"/>
+                                  description="msg://outputFileTypeHintMsg"/>
                     </row>
                     <row>
                         <label id="diagramTypeLabel" value="msg://diagramType" visible="false" align="MIDDLE_LEFT"/>
@@ -53,4 +60,4 @@
             </vbox>
         </vbox>
     </layout>
-</window>
+</fragment>

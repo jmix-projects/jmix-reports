@@ -14,7 +14,7 @@
   ~ limitations under the License.
   -->
 
-<window xmlns="http://jmix.io/schema/ui/window"
+<fragment xmlns="http://jmix.io/schema/ui/fragment"
         messagesPack="io.jmix.reportsui.screen.report.wizard">
 
     <data>
@@ -30,13 +30,14 @@
               expand="spacer">
 
             <hbox id="buttonsBox">
-                <button id="addRegionDisabledBtn" caption="msg://addRegion" enable="false"/>
-                <button id="addTabulatedRegionDisabledBtn" caption="msg://tabulatedRegion" enable="false"/>
-                <button id="addSimpleRegionBtn" caption="msg://simpleRegion"/>
-                <button id="addTabulatedRegionBtn" caption="msg://tabulatedRegion"/>
-                <popupButton id="addRegionPopupBtn" caption="msg://add"/>
+                <popupButton id="addRegionPopupBtn" caption="msg://add">
+                    <actions>
+                        <action id="addSimpleRegion" caption="msg://simpleRegion"/>
+                        <action id="addTabulatedRegion" caption="msg://tabulatedRegion"/>
+                    </actions>
+                </popupButton>
             </hbox>
-            <button id="runBtn" caption="msg://runReport" icon="icons/run.png"/>
+            <button id="runBtn" caption="msg://runReport" icon="ANGLE_DOUBLE_RIGHT"/>
 
             <label id="spacer"/>
 
@@ -57,4 +58,4 @@
             </table>
         </vbox>
     </layout>
-</window>
+</fragment>

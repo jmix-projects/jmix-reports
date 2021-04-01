@@ -30,6 +30,12 @@
         </collection>
     </data>
 
+    <actions>
+        <action id="back"/>
+        <action id="next"/>
+        <action id="save"/>
+    </actions>
+
     <dialogMode width="800"/>
 
     <layout expand="editAreaVbox" spacing="true">
@@ -39,21 +45,12 @@
 
         <vbox id="editAreaVbox">
             <groupBox id="editAreaGroupBox" width="100%" height="100%">
-<<<<<<< HEAD
                 <fragment id="detailsFragment" screen="report_DetailsStep.fragment"
                           width="100%" height="100%"
                           visible="true"/>
-<!--                <fragment id="saveFragment" screen="report_Save.fragment"-->
-<!--                          width="100%" height="100%"-->
-<!--                          visible="false"/>-->
-=======
-                <fragment id="detailsFragment" screen="report_FirstDetails.fragment"
+                <fragment id="saveStepFragment" screen="report_Save.fragment"
                           width="100%" height="100%"
                           visible="false"/>
-                <fragment id="saveFragment" screen="report_Save.fragment"
-                          width="100%" height="100%"
-                          visible="false"/>
->>>>>>> origin/features/wizard
             </groupBox>
             <fragment id="regionsStepFragment"
                       screen="report_Region.fragment"
@@ -61,9 +58,9 @@
                       visible="false"/>
         </vbox>
         <buttonsPanel id="navBtnsPanel">
-            <button id="backBtn" caption="msg://backward" icon="ARROW_LEFT"/>
-            <button id="nextBtn" caption="msg://forward" icon="ARROW_RIGHT"/>
-            <button id="saveBtn" caption="msg://save" visible="false" icon="EDITOR_OK"/>
+            <button id="backBtn" action="back" caption="msg://backward" icon="ARROW_LEFT"/>
+            <button id="nextBtn" action="next" caption="msg://forward" icon="ARROW_RIGHT"/>
+            <button id="saveBtn" action="save" caption="msg://save" visible="false" icon="EDITOR_OK"/>
         </buttonsPanel>
     </layout>
 </window>
