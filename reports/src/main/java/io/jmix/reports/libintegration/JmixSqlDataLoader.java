@@ -23,7 +23,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.List;
 
 public class JmixSqlDataLoader extends SqlDataLoader {
@@ -38,7 +37,7 @@ public class JmixSqlDataLoader extends SqlDataLoader {
 
     @Override
     protected List runQuery(ReportQuery reportQuery, String queryString, Object[] params, ResultSetHandler<List> handler) throws SQLException {
-//        QueryRunner runner = new QueryRunner(persistence.getDataSource(StoreUtils.getStoreName(reportQuery)));
-        return Collections.emptyList();
+        //QueryRunner runner = new QueryRunner(persistence.getDataSource(StoreUtils.getStoreName(reportQuery)));
+        return super.runQuery(reportQuery, queryString, params, handler);
     }
 }
