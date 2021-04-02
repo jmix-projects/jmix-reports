@@ -53,7 +53,7 @@ public class JmixFormatterFactory extends DefaultFormatterFactory {
         formattersMap.put("pivot", PivotTableFormatter::new);
 
         FormatterCreator xlsxCreator = factoryInput -> {
-            XlsxFormatter xlsxFormatter = new JmixXlsxFormatter(factoryInput);
+            XlsxFormatter xlsxFormatter = new XlsxFormatter(factoryInput);
             xlsxFormatter.setDefaultFormatProvider(defaultFormatProvider);
             xlsxFormatter.setDocumentConverter(documentConverter);
             xlsxFormatter.setScripting(scripting);

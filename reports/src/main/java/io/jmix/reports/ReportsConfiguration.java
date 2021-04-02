@@ -4,6 +4,7 @@ import com.haulmont.yarg.loaders.QueryLoaderPreprocessor;
 import com.haulmont.yarg.loaders.ReportDataLoader;
 import com.haulmont.yarg.loaders.factory.DefaultLoaderFactory;
 import com.haulmont.yarg.loaders.factory.ReportLoaderFactory;
+import com.haulmont.yarg.loaders.impl.SqlDataLoader;
 import com.haulmont.yarg.reporting.extraction.DefaultExtractionControllerFactory;
 import com.haulmont.yarg.reporting.extraction.DefaultPreprocessorFactory;
 import com.haulmont.yarg.reporting.extraction.ExtractionController;
@@ -72,7 +73,7 @@ public class ReportsConfiguration {
 
     @Bean("reporting_lib_SqlDataLoader")
     public ReportDataLoader sqlDataLoader() {
-        JmixSqlDataLoader sqlDataLoader = new JmixSqlDataLoader(dataSource);
+        SqlDataLoader sqlDataLoader = new SqlDataLoader(dataSource);
         sqlDataLoader.setParametersConverter(sqlParametersConverter());
         return sqlDataLoader;
     }
