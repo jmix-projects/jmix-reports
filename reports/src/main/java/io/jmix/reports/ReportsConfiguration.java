@@ -126,7 +126,11 @@ public class ReportsConfiguration {
 
     @Bean("reporting_lib_FormatterFactory")
     public JmixFormatterFactory formatterFactory() {
-        JmixFormatterFactory formatterFactory = appContext.getBean(JmixFormatterFactory.class);
+        JmixFormatterFactory formatterFactory = new JmixFormatterFactory();
+        AutowireCapableBeanFactory factory = appContext.getAutowireCapableBeanFactory();
+        factory.autowireBean(formatterFactory);
+        factory.initializeBean(formatterFactory, formatterFactory.getClass().getSimpleName());
+
         formatterFactory.setUseOfficeForDocumentConversion(reportsProperties.isUseOfficeForDocumentConversion());
         formatterFactory.setInlinersProvider(inlinersProvider());
         formatterFactory.setDefaultFormatProvider(fieldFormatProvider());
