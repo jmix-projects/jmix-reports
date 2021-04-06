@@ -17,7 +17,7 @@
 package io.jmix.reportsui.wizard.template.generators;
 
 import io.jmix.core.DataManager;
-import io.jmix.reports.app.StrategyGsonBuilder;
+import io.jmix.reports.app.MetadataFieldsIgnoringGsonBuilder;
 import io.jmix.reports.entity.table.TemplateTableBand;
 import io.jmix.reports.entity.table.TemplateTableColumn;
 import io.jmix.reports.entity.table.TemplateTableDescription;
@@ -70,8 +70,8 @@ public class TableGenerator implements Generator {
 
         templateTableDescription.setTemplateTableBands(bands);
 
-        return new StrategyGsonBuilder()
-                .build(StrategyGsonBuilder.SerializationPolicy.ignoreMetadata)
+        return new MetadataFieldsIgnoringGsonBuilder()
+                .build()
                 .toJson(templateTableDescription)
                 .getBytes();
     }
