@@ -18,23 +18,18 @@ package io.jmix.reports.libintegration;
 
 import com.haulmont.yarg.formatters.factory.FormatterFactoryInput;
 import com.haulmont.yarg.formatters.impl.XlsxFormatter;
+import io.jmix.reports.entity.SerializableCell;
 import org.xlsx4j.sml.Cell;
 
 public class JmixXlsxFormatter extends XlsxFormatter {
+
     public JmixXlsxFormatter(FormatterFactoryInput formatterFactoryInput) {
         super(formatterFactoryInput);
     }
 
     @Override
     protected Cell copyCell(Cell cell) {
-        Object parent = cell.getParent();
-        try {
-            cell.setParent(null);
-            //TODO copy cell
-//            return (Cell) SerializationSupport.getKryoSerialization().copy(cell);
-            return cell;
-        } finally {
-            cell.setParent(parent);
-        }
+        //if the copy constructor causes problems use deepCopy from SerializationUtils
+        return new SerializableCell(cell);
     }
 }

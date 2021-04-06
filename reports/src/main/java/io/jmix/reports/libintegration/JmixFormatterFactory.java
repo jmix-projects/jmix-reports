@@ -20,10 +20,13 @@ import com.haulmont.yarg.formatters.factory.DefaultFormatterFactory;
 import com.haulmont.yarg.formatters.impl.DocxFormatter;
 import com.haulmont.yarg.formatters.impl.HtmlFormatter;
 import com.haulmont.yarg.formatters.impl.XlsxFormatter;
-import freemarker.template.Template;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
+@Component("JmixFormatterFactory")
+@Scope(BeanDefinition.SCOPE_PROTOTYPE)
 public class JmixFormatterFactory extends DefaultFormatterFactory {
-
     protected boolean useOfficeForDocumentConversion = true;
 
     public JmixFormatterFactory() {

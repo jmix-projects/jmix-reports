@@ -50,6 +50,9 @@ public class JpqlDataDataLoader extends AbstractDbDataLoader implements ReportDa
     @Autowired
     protected DataManager dataManager;
 
+    @Autowired
+    protected StoreUtils storeUtils;
+
     @PersistenceContext
     protected EntityManager entityManager;
 
@@ -72,7 +75,7 @@ public class JpqlDataDataLoader extends AbstractDbDataLoader implements ReportDa
 
     @Override
     public List<Map<String, Object>> loadData(ReportQuery reportQuery, BandData parentBand, Map<String, Object> params) {
-        String storeName = StoreUtils.getStoreName(reportQuery);
+        String storeName = storeUtils.getStoreByQuery(reportQuery);
         String query = reportQuery.getScript();
         if (StringUtils.isBlank(query)) {
             return Collections.emptyList();

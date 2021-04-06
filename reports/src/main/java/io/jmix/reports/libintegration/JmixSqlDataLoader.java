@@ -18,27 +18,48 @@ package io.jmix.reports.libintegration;
 
 import com.haulmont.yarg.loaders.impl.SqlDataLoader;
 import com.haulmont.yarg.structure.ReportQuery;
+import com.haulmont.yarg.util.db.QueryRunner;
 import com.haulmont.yarg.util.db.ResultSetHandler;
-import org.springframework.jdbc.core.JdbcTemplate;
+import io.jmix.data.StoreAwareLocator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.BeanDefinition;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.List;
 
+@Component("JmixSqlDataLoader")
+@Scope(BeanDefinition.SCOPE_PROTOTYPE)
 public class JmixSqlDataLoader extends SqlDataLoader {
 
-    protected JdbcTemplate jdbcTemplate;
+    @Autowired
+    protected List<DataSource> datasources;
+
+    @Autowired
+    protected StoreUtils storeUtils;
+
+    @Autowired
+    protected StoreAwareLocator storeAwareLocator;
 
     public JmixSqlDataLoader(DataSource dataSource) {
         super(dataSource);
-
-        jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
     @Override
     protected List runQuery(ReportQuery reportQuery, String queryString, Object[] params, ResultSetHandler<List> handler) throws SQLException {
-//        QueryRunner runner = new QueryRunner(persistence.getDataSource(StoreUtils.getStoreName(reportQuery)));
-        return Collections.emptyList();
+        if(datasources.size() > 1){
+            String storeName = storeUtils.getStoreByQuery(reportQuery);
+
+            QueryRunner runner = new QueryRunner(storeAwareLocator.getDataSource(storeName));
+            return runner.query(queryString, params, handler);
+        }
+        return super.runQuery(reportQuery, queryString, params, handler);
     }
+
+
 }
+

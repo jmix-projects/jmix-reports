@@ -14,11 +14,14 @@ import com.haulmont.yarg.util.groovy.Scripting;
 import io.jmix.core.CoreConfiguration;
 import io.jmix.core.CoreProperties;
 import io.jmix.core.annotation.JmixModule;
+import io.jmix.core.impl.StandardSerialization;
 import io.jmix.data.DataConfiguration;
 import io.jmix.reports.libintegration.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.*;
 
 import javax.sql.DataSource;
@@ -44,6 +47,9 @@ public class ReportsConfiguration {
 
     @Autowired
     protected Reports reports;
+
+    @Autowired
+    private ApplicationContext appContext;
 
     @Bean("reporting_lib_Scripting")
     public Scripting scripting() {
@@ -73,6 +79,10 @@ public class ReportsConfiguration {
     @Bean("reporting_lib_SqlDataLoader")
     public ReportDataLoader sqlDataLoader() {
         JmixSqlDataLoader sqlDataLoader = new JmixSqlDataLoader(dataSource);
+        AutowireCapableBeanFactory factory = appContext.getAutowireCapableBeanFactory();
+        factory.autowireBean(sqlDataLoader);
+        factory.initializeBean(sqlDataLoader, sqlDataLoader.getClass().getSimpleName());
+
         sqlDataLoader.setParametersConverter(sqlParametersConverter());
         return sqlDataLoader;
     }
@@ -116,7 +126,7 @@ public class ReportsConfiguration {
 
     @Bean("reporting_lib_FormatterFactory")
     public JmixFormatterFactory formatterFactory() {
-        JmixFormatterFactory formatterFactory = new JmixFormatterFactory();
+        JmixFormatterFactory formatterFactory = appContext.getBean(JmixFormatterFactory.class);
         formatterFactory.setUseOfficeForDocumentConversion(reportsProperties.isUseOfficeForDocumentConversion());
         formatterFactory.setInlinersProvider(inlinersProvider());
         formatterFactory.setDefaultFormatProvider(fieldFormatProvider());
