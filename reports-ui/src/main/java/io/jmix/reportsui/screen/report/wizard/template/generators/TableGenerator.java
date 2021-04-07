@@ -23,10 +23,12 @@ import io.jmix.reports.entity.wizard.RegionProperty;
 import io.jmix.reports.entity.wizard.ReportData;
 import io.jmix.reports.entity.wizard.ReportRegion;
 import io.jmix.reportsui.screen.report.wizard.template.Generator;
+import org.springframework.stereotype.Component;
 
 import java.util.LinkedList;
 import java.util.List;
 
+@Component("report_TableGenerator")
 public class TableGenerator implements Generator {
 
     @Override

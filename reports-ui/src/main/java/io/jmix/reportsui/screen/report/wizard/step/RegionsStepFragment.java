@@ -17,10 +17,9 @@
 package io.jmix.reportsui.screen.report.wizard.step;
 
 import io.jmix.core.MessageTools;
-import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.wizard.*;
-import io.jmix.reportsui.action.list.OrderableItemMoveAction;
+import io.jmix.reportsui.action.list.ItemOrderableAction;
 import io.jmix.reportsui.screen.ReportGuiManager;
 import io.jmix.reportsui.screen.report.wizard.ReportWizardCreator;
 import io.jmix.reportsui.screen.report.wizard.region.EntityTreeLookup;
@@ -45,20 +44,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
 @UiController("report_Region.fragment")
-@UiDescriptor("intermediate-regions-fragment.xml")
+@UiDescriptor("regions-step-fragment.xml")
 public class RegionsStepFragment extends StepFragment {
 
     @Autowired
     protected PopupButton addRegionPopupBtn;
-
-    @Autowired
-    protected Button moveUpBtn;
-
-    @Autowired
-    protected Button moveDownBtn;
 
     @Autowired
     protected Button removeBtn;
@@ -94,6 +86,11 @@ public class RegionsStepFragment extends StepFragment {
     private CollectionPropertyContainer<ReportRegion> reportRegionsDc;
 
     @Autowired
+    private Button moveDownBtn;
+    @Autowired
+    private Button moveUpBtn;
+
+    @Autowired
     protected Button runBtn;
 
     protected Report lastGeneratedTmpReport;
@@ -116,20 +113,15 @@ public class RegionsStepFragment extends StepFragment {
     @Subscribe
     public void onInit(InitEvent event) {
         initFrameHandler = new InitRegionsStepFrameHandler();
+        //beforeHideFrameHandler = new BeforeHideRegionsStepFrameHandler();
+
+        initMoveAction();
     }
 
-//    protected EditRegionAction editRegionAction;
-//    protected RemoveRegionAction removeRegionAction;
-
-
-//    public RegionsStepFragment(ReportWizardCreator wizard) {
-    //super(wizard, "" /*wizard.getMessage("reportRegions")*/, "regionsStep");
-//        initFrameHandler = new InitRegionsStepFrameHandler();
-//
-//        beforeShowFrameHandler = new BeforeShowRegionsStepFrameHandler();
-
-//        beforeHideFrameHandler = new BeforeHideRegionsStepFrameHandler();
-//    }
+    public void initMoveAction() {
+//        moveDownBtn.getAction().setDirection(ItemOrderableAction.Direction.UP);
+//        down.setDirection(ItemOrderableAction.Direction.DOWN);
+    }
 
     @Override
     public String getCaption() {
@@ -137,13 +129,8 @@ public class RegionsStepFragment extends StepFragment {
     }
 
     @Override
-    public boolean isLast() {
-        return false;
-    }
-
-    @Override
-    public boolean isFirst() {
-        return false;
+    public String getDescription() {
+        return messages.getMessage(getClass(), "addPropertiesAndTableAreas");
     }
 
     @Subscribe("addRegionPopupBtn.addTabulatedRegion")
@@ -200,7 +187,6 @@ public class RegionsStepFragment extends StepFragment {
                                 .withOptions(new MapScreenOptions(editorParams))
                                 .build();
 
-                        regionEditor.addAfterCloseListener(new RegionEditorCloseListener());
                         regionEditor.show();
                     }
                 })
@@ -225,11 +211,8 @@ public class RegionsStepFragment extends StepFragment {
                 .withOptions(new MapScreenOptions(editorParams))
                 .build();
 
-//            regionEditor.setRootNode(reportDataDc.getItem().getEntityTreeRootNode());
 //            regionEditor.setTabulated(item.getIsTabulatedRegion());
 
-
-        regionEditor.addAfterCloseListener(new RegionEditorCloseListener());
         regionEditor.show();
     }
 
@@ -246,16 +229,6 @@ public class RegionsStepFragment extends StepFragment {
 
         if (lastGeneratedTmpReport != null) {
             reportGuiManager.runReport(lastGeneratedTmpReport, getFragment().getFrameOwner());
-        }
-    }
-
-    protected class RegionEditorCloseListener implements Consumer<Screen.AfterCloseEvent> {
-        @Override
-        public void accept(Screen.AfterCloseEvent afterCloseEvent) {
-            StandardCloseAction standardCloseAction = (StandardCloseAction) afterCloseEvent.getCloseAction();
-            if (Window.COMMIT_ACTION_ID.equals(standardCloseAction.getActionId())) {
-//                    wizard.regionsTable.refresh();
-            }
         }
     }
 
@@ -315,9 +288,9 @@ public class RegionsStepFragment extends StepFragment {
             entityLbl.setStyleName(BOLD_LABEL_STYLE);
             entityLbl.setValue(messages.getMessage("entity"));
             Label entityValueLbl = uiComponents.create(Label.class);
-            MetaClass wrapperMetaClass = currentReportRegionGeneratedColumn.getRegionPropertiesRootNode().getWrappedMetaClass();
+            //MetaClass wrapperMetaClass = currentReportRegionGeneratedColumn.getRegionPropertiesRootNode().getWrappedMetaClass();
 
-            entityValueLbl.setValue(messageTools.getEntityCaption(wrapperMetaClass));
+            entityValueLbl.setValue(currentReportRegionGeneratedColumn.getNameForBand());
             entityValueLbl.setWidth(WIDTH_PERCENT_100);
             secondRowAttrsLayout.add(entityLbl);
             secondRowAttrsLayout.add(entityValueLbl);
@@ -425,33 +398,18 @@ public class RegionsStepFragment extends StepFragment {
 //    }
 
 
-    protected class InitRegionsStepFrameHandler implements InitStepFrameHandler {
-        @Override
-        public void initFrame() {
-            regionsTable.addGeneratedColumn("regionsGeneratedColumn", new ReportRegionTableColumnGenerator());
-//            editRegionAction = new EditRegionAction();
-
-            moveDownBtn.setAction(new OrderableItemMoveAction<>("downItem", OrderableItemMoveAction.Direction.DOWN, regionsTable));
-            moveUpBtn.setAction(new OrderableItemMoveAction<>("upItem", OrderableItemMoveAction.Direction.UP, regionsTable));
-        }
-    }
-
-
-    protected class BeforeShowRegionsStepFrameHandler implements BeforeShowStepFrameHandler {
-        @Override
-        public void beforeShowFrame() {
-
-            showAddRegion();
-            //wizard.setCorrectReportOutputType();
-            //TODO dialog options
+    @Override
+    public void beforeShow() {
+        showAddRegion();
+        //setCorrectReportOutputType();
+        //TODO dialog options
 //            wizard.getDialogOptions()
 //                    .setHeight(wizard.wizardHeight).setHeightUnit(SizeUnit.PIXELS)
 //                    .center();
-        }
+    }
 
-
-        private void showAddRegion() {
-            if (reportRegionsDc.getItems().isEmpty()) {
+    private void showAddRegion() {
+        if (reportRegionsDc.getItems().isEmpty()) {
 //                if (reportDataDc.getItem().getReportTypeGenerate().isList()) {
 //                    if (entityTreeHasSimpleAttrs) {
 //                        addTabulatedRegionAction.actionPerform(getFragment());
@@ -465,8 +423,14 @@ public class RegionsStepFragment extends StepFragment {
 //                        addTabulatedRegionAction.actionPerform(getFragment());
 //                    }
 //                }
-            }
         }
     }
 
+    protected class InitRegionsStepFrameHandler implements InitStepFrameHandler {
+        @Override
+        public void initFrame() {
+            regionsTable.addGeneratedColumn("regionsGeneratedColumn", new ReportRegionTableColumnGenerator());
+//            editRegionAction = new EditRegionAction();
+        }
+    }
 }

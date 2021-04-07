@@ -18,7 +18,6 @@ package io.jmix.reportsui.screen.report.wizard.step;
 
 import io.jmix.core.Messages;
 import io.jmix.ui.Notifications;
-import io.jmix.ui.component.Window;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.Scope;
@@ -29,7 +28,7 @@ import java.util.List;
 
 @Component("report_StepFrameManager")
 @Scope(BeanDefinition.SCOPE_PROTOTYPE)
-public class StepFrameManager {
+public class StepFragmentManager {
 
     @Autowired
     protected Messages messages;
@@ -43,67 +42,64 @@ public class StepFrameManager {
 
     public void setStepFragments(List<StepFragment> stepFragments) {
         this.stepFragments = stepFragments;
+
+        setWizardCaption();
     }
 
     public void setMainWizardFrame(MainWizardScreen mainWizardScreen) {
         this.mainWizardScreen = mainWizardScreen;
     }
 
-    public void showCurrentFrame() {
+    public void showCurrentFragment() {
         setWizardCaption();
+        setWizardDescription();
 
         setNavigationButtonProps();
-        getCurrentStepFrame().initFrame();
-        getCurrentStepFrame().beforeShow();
-        getCurrentStepFrame().getFragment().setVisible(true);
+        getCurrentStepFragment().initFrame();
+        getCurrentStepFragment().beforeShow();
+        getCurrentStepFragment().getFragment().setVisible(true);
     }
 
-    protected StepFragment getCurrentStepFrame() {
+    protected StepFragment getCurrentStepFragment() {
         return stepFragments.get(currentFrameIdx);
     }
 
-    public void setWizardCaption() {
-        String newWindowCaption = getCurrentStepFrame().getCaption() + " " +
-                messages.formatMessage(getClass(), "stepNo", currentFrameIdx + 1, stepFragments.size());
+    public void setWizardDescription() {
+        mainWizardScreen.setDescription(getCurrentStepFragment().getDescription());
+    }
 
-        Window window = mainWizardScreen.getMainWizardFrame().getWindow();
-        window.setCaption(newWindowCaption);
+    public void setWizardCaption() {
+        mainWizardScreen.setCaption(messages.formatMessage(getClass(), "stepNo",
+                getCurrentStepFragment().getCaption(),
+                currentFrameIdx + 1,
+                stepFragments.size())
+        );
     }
 
     protected void setNavigationButtonProps() {
-        if (getCurrentStepFrame().isLast()) {
-            mainWizardScreen.getForwardBtn().setVisible(false);
-        } else if (currentFrameIdx + 1 >= stepFragments.size()) {
-            mainWizardScreen.getForwardBtn().setEnabled(false);
-        } else {
+        if (currentFrameIdx <= 0) {
             mainWizardScreen.getForwardBtn().setVisible(true);
-            mainWizardScreen.getForwardBtn().setEnabled(true);
-        }
-
-        if (getCurrentStepFrame().isFirst()) {
             mainWizardScreen.getBackwardBtn().setVisible(false);
-        } else if (currentFrameIdx - 1 < 0) {
-            mainWizardScreen.getBackwardBtn().setEnabled(false);
+            mainWizardScreen.getSaveBtn().setVisible(false);
+        } else if (currentFrameIdx >= stepFragments.size() - 1) {
+            mainWizardScreen.getForwardBtn().setVisible(false);
+            mainWizardScreen.getBackwardBtn().setVisible(true);
+            mainWizardScreen.getSaveBtn().setVisible(true);
         } else {
             mainWizardScreen.getBackwardBtn().setVisible(true);
-            mainWizardScreen.getBackwardBtn().setEnabled(true);
+            mainWizardScreen.getForwardBtn().setVisible(true);
+            mainWizardScreen.getSaveBtn().setVisible(false);
         }
-//        mainWizardScreen.removeBtns();
-//        if (mainWizardScreen.getBackwardBtn().isVisible())
-//            mainWizardScreen.addBackwardBtn();
-//        if (mainWizardScreen.getForwardBtn().isVisible())
-//            mainWizardScreen.addForwardBtn();
-//        mainWizardScreen.addSaveBtn();
     }
 
     public boolean prevFragment() {
         if (currentFrameIdx == 0) {
-            throw new ArrayIndexOutOfBoundsException("Previous frame is not exists");
+            throw new ArrayIndexOutOfBoundsException("Previous step is not exists");
         }
-        if (!getCurrentStepFrame().isValidateBeforePrev() || validateCurrentFrame()) {
+        if (!getCurrentStepFragment().isValidateBeforePrev() || validateCurrentFragment()) {
             hideCurrentFrame();
             currentFrameIdx--;
-            showCurrentFrame();
+            showCurrentFragment();
             return true;
         } else {
             return false;
@@ -112,20 +108,20 @@ public class StepFrameManager {
 
     public boolean nextFragment() {
         if (currentFrameIdx > stepFragments.size()) {
-            throw new ArrayIndexOutOfBoundsException("Next frame is not exists");
+            throw new ArrayIndexOutOfBoundsException("Next step is not exists");
         }
-        if (!getCurrentStepFrame().isValidateBeforeNext() || validateCurrentFrame()) {
+        if (!getCurrentStepFragment().isValidateBeforeNext() || validateCurrentFragment()) {
             hideCurrentFrame();
             currentFrameIdx++;
-            showCurrentFrame();
+            showCurrentFragment();
             return true;
         } else {
             return false;
         }
     }
 
-    protected boolean validateCurrentFrame() {
-        List<String> validationErrors = getCurrentStepFrame().validateFrame();
+    public boolean validateCurrentFragment() {
+        List<String> validationErrors = getCurrentStepFragment().validateFragment();
         if (!validationErrors.isEmpty()) {
             notifications.create(Notifications.NotificationType.TRAY)
                     .withHtmlSanitizer(true)
@@ -137,7 +133,7 @@ public class StepFrameManager {
     }
 
     protected void hideCurrentFrame() {
-        getCurrentStepFrame().beforeHide();
-        getCurrentStepFrame().getFragment().setVisible(false);
+        getCurrentStepFragment().beforeHide();
+        getCurrentStepFragment().getFragment().setVisible(false);
     }
 }

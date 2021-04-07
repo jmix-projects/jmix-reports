@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2019 Haulmont.
+ * Copyright 2021 Haulmont.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,9 +16,11 @@
 
 package io.jmix.reportsui.screen.report.wizard.template;
 
+import io.jmix.reports.entity.wizard.ReportData;
+import io.jmix.reports.entity.wizard.TemplateFileType;
 import io.jmix.reports.exception.TemplateGenerationException;
 
 public interface TemplateGenerator {
 
-    byte[] generateTemplate() throws TemplateGenerationException;
+    byte[] generateTemplate(ReportData reportData, TemplateFileType templateFileType) throws TemplateGenerationException;
 }

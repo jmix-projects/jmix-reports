@@ -26,7 +26,6 @@ import io.jmix.reports.entity.wizard.ReportData;
 import io.jmix.reports.entity.wizard.ReportRegion;
 import io.jmix.reports.entity.wizard.TemplateFileType;
 import io.jmix.reports.exception.TemplateGenerationException;
-import io.jmix.reportsui.screen.report.wizard.template.TemplateGeneratorImpl;
 import io.jmix.reportsui.screen.report.wizard.template.TemplateGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -39,16 +38,14 @@ import java.util.List;
 public class ReportsWizardImpl implements ReportsWizard {
 
     @Autowired
-    private ReportingWizard reportingWizard;
+    protected ReportingWizard reportingWizard;
 
     @Autowired
-    private Provider<EntityTreeModelBuilder> entityTreeModelBuilderApiProvider;
+    protected Provider<EntityTreeModelBuilder> entityTreeModelBuilderApiProvider;
 
-//    //todo prototype
-//    @Autowired
-//    protected TemplateGeneratorApi templateGeneratorApi(ReportData reportData, TemplateFileType templateFileType) {
-//        return new TemplateGenerator(reportData, templateFileType);
-//    }
+    @Autowired
+    protected TemplateGenerator templateGenerator;
+
 
     @Override
     public Report toReport(ReportData reportData, boolean temporary) {
@@ -77,8 +74,7 @@ public class ReportsWizardImpl implements ReportsWizard {
 
     @Override
     public byte[] generateTemplate(ReportData reportData, TemplateFileType templateFileType) throws TemplateGenerationException {
-        TemplateGenerator templateGenerator = new TemplateGeneratorImpl(reportData, templateFileType);
-        return templateGenerator.generateTemplate();
+        return templateGenerator.generateTemplate(reportData, templateFileType);
     }
 
     @Override

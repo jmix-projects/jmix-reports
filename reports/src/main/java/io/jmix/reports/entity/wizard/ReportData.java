@@ -21,7 +21,6 @@ import io.jmix.core.entity.annotation.SystemLevel;
 import io.jmix.core.metamodel.annotation.Composition;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.annotation.JmixProperty;
-import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.reports.entity.*;
 import io.jmix.reports.entity.charts.ChartType;
 
@@ -39,29 +38,6 @@ public class ReportData {
 
     private static final long serialVersionUID = -1649648403032678085L;
 
-    public static class Parameter implements Serializable {
-        public final String name;
-        public final Class javaClass;
-        public final ParameterType parameterType;
-        public final String defaultValue;
-        public final PredefinedTransformation predefinedTransformation;
-        public final Boolean hidden;
-
-        public Parameter(String name, Class javaClass, ParameterType parameterType, String defaultValue, Boolean hidden) {
-            this(name, javaClass, parameterType, defaultValue, null, hidden);
-        }
-
-        public Parameter(String name, Class javaClass, ParameterType parameterType, String defaultValue, PredefinedTransformation transformation,
-                         Boolean hidden) {
-            this.name = name;
-            this.javaClass = javaClass;
-            this.parameterType = parameterType;
-            this.defaultValue = defaultValue;
-            this.predefinedTransformation = transformation;
-            this.hidden = hidden;
-        }
-    }
-
     @Id
     @JmixProperty
     @JmixGeneratedValue
@@ -74,8 +50,6 @@ public class ReportData {
     @JmixProperty
     @Transient
     protected String entityName;
-
-    protected MetaClass entity;
 
     @JmixProperty
     @Transient
@@ -111,11 +85,15 @@ public class ReportData {
     @OneToMany(targetEntity = RegionProperty.class)
     protected List<ReportRegion> reportRegions = new ArrayList<>();
 
+    @JmixProperty
     @Transient
     protected String query;
 
+    @JmixProperty
+    @Composition
     @Transient
-    protected List<Parameter> queryParameters;
+    @OneToMany(targetEntity = QueryParameter.class)
+    protected List<QueryParameter> queryParameters;
 
     @Transient
     protected String dataStore;
@@ -135,14 +113,6 @@ public class ReportData {
 
     public void setId(UUID id) {
         this.id = id;
-    }
-
-    public MetaClass getEntity() {
-        return entity;
-    }
-
-    public void setEntity(MetaClass entity) {
-        this.entity = entity;
     }
 
     public String getEntityName() {
@@ -173,7 +143,7 @@ public class ReportData {
         return reportTypeGenerate;
     }
 
-    public void getReportTypeGenerate(ReportTypeGenerate reportTypeGenerate) {
+    public void setReportTypeGenerate(ReportTypeGenerate reportTypeGenerate) {
         this.reportTypeGenerate = reportTypeGenerate;
     }
 
@@ -263,11 +233,11 @@ public class ReportData {
         this.dataStore = dataStore;
     }
 
-    public List<Parameter> getQueryParameters() {
+    public List<QueryParameter> getQueryParameters() {
         return queryParameters;
     }
 
-    public void setQueryParameters(List<Parameter> queryParameters) {
+    public void setQueryParameters(List<QueryParameter> queryParameters) {
         this.queryParameters = queryParameters;
     }
 

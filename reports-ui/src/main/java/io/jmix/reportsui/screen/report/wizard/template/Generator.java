@@ -23,5 +23,7 @@ import io.jmix.reports.exception.TemplateGenerationException;
 import java.io.IOException;
 
 public interface Generator {
+
     byte[] generate(ReportData reportData) throws TemplateGenerationException, TemplateException, IOException;
+
 }

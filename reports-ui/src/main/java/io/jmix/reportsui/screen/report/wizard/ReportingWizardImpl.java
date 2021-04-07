@@ -123,24 +123,24 @@ public class ReportingWizardImpl implements ReportingWizard {
             report.getInputParameters().add(mainParameter);
         } else if (reportData.getQueryParameters() != null) {
             int i = 1;
-            for (ReportData.Parameter queryParameter : reportData.getQueryParameters()) {
+            for (QueryParameter queryParameter : reportData.getQueryParameters()) {
                 ReportInputParameter parameter = createParameter(report, i++);
-                parameter.setAlias(queryParameter.name);
-                parameter.setName(StringUtils.capitalize(queryParameter.name));
-                parameter.setType(queryParameter.parameterType);
-                parameter.setParameterClass(queryParameter.javaClass);
-                parameter.setDefaultValue(queryParameter.defaultValue);
-                parameter.setPredefinedTransformation(queryParameter.predefinedTransformation);
-                parameter.setHidden(queryParameter.hidden);
+                parameter.setAlias(queryParameter.getName());
+                parameter.setName(StringUtils.capitalize(queryParameter.getName()));
+                parameter.setType(queryParameter.getParameterType());
+                parameter.setParameterClass(metadata.getClass(queryParameter.getJavaClassName()).getJavaClass());
+                parameter.setDefaultValue(queryParameter.getDefaultValue());
+                parameter.setPredefinedTransformation(queryParameter.getPredefinedTransformation());
+                parameter.setHidden(queryParameter.getHidden());
 
-                if (queryParameter.parameterType == ParameterType.ENTITY
-                        || queryParameter.parameterType == ParameterType.ENTITY_LIST) {
-                    MetaClass metaClass = metadata.getClass(queryParameter.javaClass);
+                if (queryParameter.getParameterType() == ParameterType.ENTITY
+                        || queryParameter.getParameterType() == ParameterType.ENTITY_LIST) {
+                    MetaClass metaClass = metadata.getClass(queryParameter.getJavaClassName());
                     if (metaClass != null) {
                         parameter.setEntityMetaClass(metaClass.getName());
                     }
-                } else if (queryParameter.parameterType == ParameterType.ENUMERATION && queryParameter.javaClass != null) {
-                    parameter.setEnumerationClass(queryParameter.javaClass.getName());
+                } else if (queryParameter.getParameterType() == ParameterType.ENUMERATION && queryParameter.getJavaClassName() != null) {
+                    parameter.setEnumerationClass(queryParameter.getJavaClassName());
                 }
 
                 report.getInputParameters().add(parameter);
@@ -205,9 +205,9 @@ public class ReportingWizardImpl implements ReportingWizard {
         ReportInputParameter reportInputParameter = createParameter(report, 1);
 
         reportInputParameter.setName(reportData.getEntityTreeRootNode().getLocalizedName());
-        MetaClass wrapperMetaClass = reportData.getEntityTreeRootNode().getWrappedMetaClass();
+        String wrapperMetaClass = reportData.getEntityTreeRootNode().getWrappedMetaClass();
 
-        reportInputParameter.setEntityMetaClass(wrapperMetaClass.getName());
+        reportInputParameter.setEntityMetaClass(wrapperMetaClass);
         if (ReportTypeGenerate.LIST_OF_ENTITIES == reportData.getReportTypeGenerate()) {
             reportInputParameter.setType(ParameterType.ENTITY_LIST);
             reportInputParameter.setAlias(DEFAULT_LIST_OF_ENTITIES_ALIAS);
@@ -260,12 +260,16 @@ public class ReportingWizardImpl implements ReportingWizard {
         ArrayList<ReportValueFormat> formats = new ArrayList<>();
         if (!reportData.getTemplateFileName().endsWith(".html")) {
             for (RegionProperty regionProperty : reportRegion.getRegionProperties()) {
-                if (regionProperty.getEntityTreeNode().getWrappedMetaProperty().getJavaType().isAssignableFrom(Date.class)) {
+                EntityTreeNode entityTreeNode = regionProperty.getEntityTreeNode();
+                MetaClass metaClass = metadata.getClass(entityTreeNode.getWrappedMetaClass());
+                MetaProperty metaProperty = metaClass.getProperty(entityTreeNode.getWrappedMetaProperty());
+
+                if (metaProperty.getJavaType().isAssignableFrom(Date.class)) {
                     ReportValueFormat rvf = new ReportValueFormat();
                     rvf.setReport(report);
                     rvf.setValueName(reportRegion.getNameForBand() + "." + regionProperty.getHierarchicalNameExceptRoot());
                     rvf.setFormatString(messages.getMessage("dateTimeFormat"));
-                    AnnotatedElement annotatedElement = regionProperty.getEntityTreeNode().getWrappedMetaProperty().getAnnotatedElement();
+                    AnnotatedElement annotatedElement = metaProperty.getAnnotatedElement();
                     if (annotatedElement != null && annotatedElement.isAnnotationPresent(Temporal.class)) {
                         switch (annotatedElement.getAnnotation(Temporal.class).value()) {
                             case TIME:
@@ -299,7 +303,7 @@ public class ReportingWizardImpl implements ReportingWizard {
 
     @Override
     public FetchPlan createViewByReportRegions(EntityTreeNode entityTreeRootNode, List<ReportRegion> reportRegions) {
-        MetaClass rootWrapperMetaClass = entityTreeRootNode.getWrappedMetaClass();
+        MetaClass rootWrapperMetaClass = metadata.getClass(entityTreeRootNode.getWrappedMetaClass());
         FetchPlanBuilder fetchPlanBuilder = fetchPlans.builder(rootWrapperMetaClass.getJavaClass());
 
         Map<EntityTreeNode, FetchPlanBuilder> viewsForNodes = new HashMap<>();
@@ -377,7 +381,7 @@ public class ReportingWizardImpl implements ReportingWizard {
      */
     protected FetchPlanBuilder ensureParentViewsExist(EntityTreeNode entityTreeNode, Map<EntityTreeNode, FetchPlanBuilder> viewsForNodes) {
         EntityTreeNode parentNode = entityTreeNode.getParent();
-        MetaClass wrapperMetaClass = parentNode.getWrappedMetaClass();
+        MetaClass wrapperMetaClass = metadata.getClass(parentNode.getWrappedMetaClass());
 
         FetchPlanBuilder parentFetchPlanBuilder = fetchPlans.builder(wrapperMetaClass.getJavaClass());
 

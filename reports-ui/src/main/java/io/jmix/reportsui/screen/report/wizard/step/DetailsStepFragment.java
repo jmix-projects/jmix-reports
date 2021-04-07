@@ -16,15 +16,12 @@
 
 package io.jmix.reportsui.screen.report.wizard.step;
 
-import com.google.common.collect.ImmutableMap;
 import io.jmix.core.ExtendedEntities;
 import io.jmix.core.MessageTools;
 import io.jmix.core.Metadata;
 import io.jmix.core.MetadataTools;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.reports.app.service.ReportsWizard;
-import io.jmix.reports.entity.ReportOutputType;
-import io.jmix.reports.entity.ReportType;
 import io.jmix.reports.entity.wizard.ReportData;
 import io.jmix.reports.entity.wizard.ReportTypeGenerate;
 import io.jmix.reports.entity.wizard.TemplateFileType;
@@ -32,6 +29,7 @@ import io.jmix.reportsui.screen.report.run.ShowChartLookup;
 import io.jmix.ui.Dialogs;
 import io.jmix.ui.Notifications;
 import io.jmix.ui.WindowConfig;
+import io.jmix.ui.action.DialogAction;
 import io.jmix.ui.component.*;
 import io.jmix.ui.model.InstanceContainer;
 import io.jmix.ui.screen.Subscribe;
@@ -40,10 +38,13 @@ import io.jmix.ui.screen.UiDescriptor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.TreeMap;
 
 @UiController("report_DetailsStep.fragment")
-@UiDescriptor("details-fragment.xml")
+@UiDescriptor("details-step-fragment.xml")
 public class DetailsStepFragment extends StepFragment {
 
     @Autowired
@@ -62,7 +63,7 @@ public class DetailsStepFragment extends StepFragment {
     private TextField<String> reportName;
 
     @Autowired
-    protected ComboBox templateFileFormat;
+    protected ComboBox<TemplateFileType> templateFileFormat;
 
     @Autowired
     protected Metadata metadata;
@@ -83,9 +84,6 @@ public class DetailsStepFragment extends StepFragment {
     protected Notifications notifications;
 
     @Autowired
-    private SourceCodeEditor reportQueryCodeEditor;
-
-    @Autowired
     protected WindowConfig windowConfig;
 
     protected boolean needUpdateEntityModel = false;
@@ -103,54 +101,53 @@ public class DetailsStepFragment extends StepFragment {
         initReportTypeOptionGroup();
         initTemplateFormatLookupField();
         initEntityLookupField();
-        initQueryReportSourceCode();
-
-        //entity.addValueChangeListener(new ChangeReportNameListener());
-    }
-
-    protected void initQueryReportSourceCode() {
-        reportQueryCodeEditor.setHighlightActiveLine(false);
-        reportQueryCodeEditor.setShowGutter(false);
-        reportQueryCodeEditor.setMode(SourceCodeEditor.Mode.SQL);
     }
 
     protected void initEntityLookupField() {
         entity.setOptionsMap(getAvailableEntities());
-//        entity.addValueChangeListener(new ClearRegionListener(
-//                new DialogActionWithChangedValue(DialogAction.Type.YES) {
-//                    @Override
-//                    public void actionPerform(Component component) {
-//                        reportDataDc.getItem().getReportRegions().clear();
-//                        //regionsTable.refresh(); //for web6
-//                        needUpdateEntityModel = true;
-//                        entity.setValue((MetaClass) newValue);
-//
-//                        clearQueryAndFilter();
-//                    }
-//                }));
+    }
+
+    @Subscribe("reportName")
+    public void onReportNameTextChange(TextInputField.TextChangeEvent event) {
+        reportDataDc.getItem().setName(event.getText());
     }
 
     @Subscribe("reportTypeGenerate")
-    public void onReportTypeGenerateValueChange(HasValue.ValueChangeEvent event) {
-        ReportTypeGenerate currentType = (ReportTypeGenerate) event.getValue();
+    public void onReportTypeGenerateValueChange(HasValue.ValueChangeEvent<ReportTypeGenerate> event) {
+        dialogs.createOptionDialog()
+                .withCaption(messages.getMessage("dialogs.Confirmation"))
+                .withMessage(messages.getMessage(getClass(), "regionsClearConfirm"))
+                .withActions(
+                        new DialogAction(DialogAction.Type.OK).withHandler(e -> {
+                            ReportTypeGenerate reportTypeGenerate = event.getValue();
 
-        reportQueryCodeEditor.setVisible(currentType.isList() && !currentType.isEntity());
+                            ReportData reportData = reportDataDc.getItem();
+                            reportData.setReportTypeGenerate(reportTypeGenerate);
+                            reportData.getReportRegions().clear();
+
+                            clearQuery();
+                        }),
+                        new DialogAction(DialogAction.Type.CANCEL))
+                .show();
     }
 
     @Subscribe("entity")
-    public void onEntityValueChange(HasValue.ValueChangeEvent event) {
+    public void onEntityValueChange(HasValue.ValueChangeEvent<MetaClass> event) {
         ReportData reportData = reportDataDc.getItem();
         reportData.getReportRegions().clear();
         needUpdateEntityModel = true;
 
-        MetaClass metaClass = (MetaClass) event.getValue();
+        MetaClass metaClass = event.getValue();
         reportData.setEntityName(metaClass.getName());
 
-        String query = String.format("select e from %s e", metaClass.getName());
-        reportQueryCodeEditor.setValue(query);
+        setGeneratedReportName(event.getPrevValue(), metaClass);
 
-        setGeneratedReportName((MetaClass) event.getPrevValue(), (MetaClass) event.getValue());
-//            wizard.outputFileName.setValue("");
+        clearQuery();
+    }
+
+    @Subscribe("templateFileFormat")
+    public void onTemplateFileFormatValueChange(HasValue.ValueChangeEvent<TemplateFileType> event) {
+        reportDataDc.getItem().setTemplateFileType(event.getValue());
     }
 
     protected void setGeneratedReportName(MetaClass prevValue, MetaClass value) {
@@ -176,7 +173,7 @@ public class DetailsStepFragment extends StepFragment {
                     if (!oldReportName.equals(messages.formatMessage(getClass(), "reportNamePattern", prevEntityCaption))) {
                         //if user changed auto generated report name and we have changed it, we show message to him
                         notifications.create(Notifications.NotificationType.TRAY)
-                                .withCaption(messages.getMessage(getClass(),"reportNameChanged"))
+                                .withCaption(messages.getMessage(getClass(), "reportNameChanged"))
                                 .show();
                     }
                 }
@@ -193,15 +190,6 @@ public class DetailsStepFragment extends StepFragment {
     protected void initReportTypeOptionGroup() {
         reportTypeGenerate.setOptionsMap(getListedReportOptionsMap());
         reportTypeGenerate.setValue(ReportTypeGenerate.SINGLE_ENTITY);
-//        reportTypeGenerate.addValueChangeListener(new ClearRegionListener(
-//                new DialogActionWithChangedValue(Type.YES) {
-//                    @Override
-//                    public void actionPerform(Component component) {
-//                        wizard.getItem().getReportRegions().clear();
-//                        wizard.regionsTable.refresh(); //for web6
-//                        wizard.reportTypeOptionGroup.setValue(newValue);
-//                    }
-//                }));
     }
 
     protected Map<String, ReportTypeGenerate> getListedReportOptionsMap() {
@@ -246,113 +234,13 @@ public class DetailsStepFragment extends StepFragment {
     }
 
     @Override
-    public boolean isLast() {
-        return false;
+    public String getDescription() {
+        return messages.getMessage(getClass(), "enterMainParameters");
     }
 
-    @Override
-    public boolean isFirst() {
-        return true;
+    protected void clearQuery() {
+        ReportData reportData = reportDataDc.getItem();
+        reportData.setQuery(null);
+        reportData.setQueryParameters(null);
     }
-
-//    public DetailsStepFragment(ReportWizardCreator wizard) {
-//        super(wizard, "reportDetails", "detailsStep");
-//
-////        initFrameHandler = new InitDetailsStepFrameHandler();
-////        beforeShowFrameHandler = new BeforeShowDetailsStepFrameHandler();
-//    }
-
-//    protected class InitDetailsStepFrameHandler implements InitStepFrameHandler {
-//        @Override
-//        public void initFrame() {
-//            initReportTypeOptionGroup();
-//            initTemplateFormatLookupField();
-//            initEntityLookupField();
-//
-//            wizard.entity.addValueChangeListener(new ChangeReportNameListener());
-//        }
-//
-//        protected void initEntityLookupField() {
-//            wizard.entity.setOptionsMap(getAvailableEntities());
-//            wizard.entity.addValueChangeListener(new ClearRegionListener(
-//                    new DialogActionWithChangedValue(DialogAction.Type.YES) {
-//                        @Override
-//                        public void actionPerform(Component component) {
-//                            wizard.getItem().getReportRegions().clear();
-////                            wizard.regionsTable.refresh(); //for web6
-//                            wizard.needUpdateEntityModel = true;
-//                            wizard.entity.setValue((MetaClass) newValue);
-//
-//                            clearQueryAndFilter();
-//                        }
-//                    }));
-//        }
-//
-//    }
-
-    @Override
-    public List<String> validateFrame() {
-        ArrayList<String> errors = new ArrayList<>(super.validateFrame());
-        if (reportTypeGenerate.getValue() == ReportTypeGenerate.LIST_OF_ENTITIES_WITH_QUERY && reportQueryCodeEditor.getValue() == null) {
-            errors.add(messages.getMessage("fillReportQuery"));
-        }
-
-        return errors;
-    }
-
-    //    protected class DialogActionWithChangedValue extends DialogAction {
-//        protected Object newValue;
-//
-//        public DialogActionWithChangedValue(Type type) {
-//            super(type);
-//        }
-//
-//        public DialogActionWithChangedValue setValue(Object value) {
-//            this.newValue = value;
-//            return this;
-//        }
-//    }
-//
-//    protected class ClearRegionListener implements Consumer<HasValue.ValueChangeEvent<MetaClass>> {
-//        protected DialogActionWithChangedValue okAction;
-//
-//        public ClearRegionListener(DialogActionWithChangedValue okAction) {
-//            this.okAction = okAction;
-//        }
-//
-//        @Override
-//        public void accept(HasValue.ValueChangeEvent e) {
-//            if (!reportDataDc.getItem().getReportRegions().isEmpty()) {
-//                dialogs.createOptionDialog()
-//                        .withCaption(messages.getMessage("dialogs.Confirmation"))
-//                        .withMessage(messages.getMessage("regionsClearConfirm"))
-//                        .withActions(
-//                                okAction.setValue(e.getValue()),
-//                                new DialogAction(DialogAction.Type.NO, Action.Status.PRIMARY)
-//                        )
-//                        .show();
-//            } else {
-//                needUpdateEntityModel = true;
-//                clearQueryAndFilter();
-//            }
-//        }
-//    }
-
-//    protected void clearQueryAndFilter() {
-//        query = null;
-//        queryParameters = null;
-//        //filter = null;
-////        filterEntity = null;
-//        //conditionsTree = null;
-//    }
-
-//    protected class BeforeShowDetailsStepFrameHandler implements BeforeShowStepFrameHandler {
-//        @Override
-//        public void beforeShowFrame() {
-//            //TODO dialog options
-////            wizard.getDialogOptions()
-////                    .setHeight(wizard.wizardHeight).setHeightUnit(SizeUnit.PIXELS)
-////                    .center();
-//        }
-//    }
 }

@@ -18,6 +18,7 @@ package io.jmix.reportsui.screen.report.wizard.step;
 
 import io.jmix.core.CoreProperties;
 import io.jmix.core.Messages;
+import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.reports.app.service.ReportsWizard;
 import io.jmix.reports.entity.ReportOutputType;
 import io.jmix.reports.entity.wizard.ReportData;
@@ -34,12 +35,13 @@ import io.jmix.ui.download.DownloadFormat;
 import io.jmix.ui.download.Downloader;
 import io.jmix.ui.model.InstanceContainer;
 import io.jmix.ui.screen.*;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Map;
 
 @UiController("report_Save.fragment")
-@UiDescriptor("save-fragment.xml")
+@UiDescriptor("save-step-fragment.xml")
 public class SaveStepFragment extends StepFragment {
 
     @Autowired
@@ -73,27 +75,28 @@ public class SaveStepFragment extends StepFragment {
     private ComboBox<ReportOutputType> outputFileFormat;
 
     @Autowired
-    private TextField outputFileName;
-
-    @Autowired
-    protected OutputFormatTools outputFormatTools;
+    private TextField<String> outputFileName;
 
     @Autowired
     private Button downloadTemplateFile;
 
+    @Autowired
+    protected OutputFormatTools outputFormatTools;
 
     @Subscribe
     public void onInit(InitEvent event) {
-        //beforeShowFrameHandler = new BeforeShowSaveStepFrameHandler();
-
         //beforeHideFrameHandler = new BeforeHideSaveStepFrameHandler();
     }
 
     @Subscribe("outputFileFormat")
-    public void onOutputFileFormatValueChange(HasValue.ValueChangeEvent event) {
-        event.getValue();
+    public void onOutputFileFormatValueChange(HasValue.ValueChangeEvent<ReportOutputType> event) {
+        reportDataDc.getItem().setOutputFileType(event.getValue());
     }
 
+    @Subscribe("outputFileName")
+    public void onOutputFileNameValueChange(HasValue.ValueChangeEvent<String> event) {
+        reportDataDc.getItem().setTemplateFileName(event.getValue());
+    }
 
     @Install(to = "outputFileFormat", subject = "contextHelpIconClickHandler")
     private void outputFileFormatContextHelpIconClickHandler(HasContextHelp.ContextHelpIconClickEvent contextHelpIconClickEvent) {
@@ -127,7 +130,7 @@ public class SaveStepFragment extends StepFragment {
 
     @Subscribe(id = "reportDataDc", target = Target.DATA_CONTAINER)
     public void onReportDataDcItemPropertyChange(InstanceContainer.ItemPropertyChangeEvent<ReportData> event) {
-        if(event.getProperty().equals("entity")) {
+        if (event.getProperty().equals("entity")) {
             setCorrectReportOutputType();
         }
     }
@@ -138,30 +141,36 @@ public class SaveStepFragment extends StepFragment {
     }
 
     @Override
-    public boolean isLast() {
-        return true;
+    public String getDescription() {
+        return messages.getMessage(getClass(), "finishPrepareReport");
+    }
+
+    protected String generateOutputFileName(String fileExtension) {
+        ReportData reportData = reportDataDc.getItem();
+        if (StringUtils.isBlank(reportData.getName())) {
+            MetaClass entityMetaClass = metadata.findClass(reportData.getEntityName());
+            return entityMetaClass != null ?
+                    messages.formatMessage("downloadOutputFileNamePattern", messageTools.getEntityCaption(entityMetaClass), fileExtension) :
+                    "";
+        } else {
+            return reportData.getName() + "." + fileExtension;
+        }
     }
 
     @Override
-    public boolean isFirst() {
-        return false;
+    public void beforeShow() {
+        if (StringUtils.isEmpty(outputFileName.getValue())) {
+            ReportData reportData = reportDataDc.getItem();
+            String templateFileName = generateOutputFileName(reportData.getTemplateFileType().toString().toLowerCase());
+            outputFileName.setValue(templateFileName);
+        }
+        setCorrectReportOutputType();
+        initDownloadTemplateFile();
+
+        //initChartPreview();
     }
 
-//    protected class BeforeShowSaveStepFrameHandler implements BeforeShowStepFrameHandler {
-//        @Override
-//        public void beforeShowFrame() {
-//            initSaveAction();
-//            initDownloadAction();
-//
-//            if (StringUtils.isEmpty(wizard.outputFileName.getValue())) {
-//                Object value = wizard.templateFileFormat.getValue();
-//                wizard.outputFileName.setValue(wizard.generateOutputFileName(value.toString().toLowerCase()));
-//            }
-//            wizard.setCorrectReportOutputType();
-//
-//            initChartPreview();
-//        }
-
+            //todo chart
 //        protected void initChartPreview() {
 //            if (wizard.outputFileFormat.getValue() == ReportOutputType.CHART) {
 //                wizard.chartPreviewBox.setVisible(true);
@@ -170,10 +179,10 @@ public class SaveStepFragment extends StepFragment {
 //
 //                showChart();
 //
-////TODO dialog options
-////                wizard.getDialogOptions()
-////                        .setHeight(wizard.wizardHeight + 400).setHeightUnit(SizeUnit.PIXELS)
-////                        .center();
+//
+//                wizard.getDialogOptions()
+//                        .setHeight(wizard.wizardHeight + 400).setHeightUnit(SizeUnit.PIXELS)
+//                        .center();
 //
 //                wizard.diagramType.setRequired(true);
 //                wizard.diagramType.setOptionsList(Arrays.asList(ChartType.values()));
@@ -190,6 +199,21 @@ public class SaveStepFragment extends StepFragment {
 //                wizard.diagramType.setVisible(false);
 //            }
 //        }
+
+    public void initDownloadTemplateFile() {
+        String templateFileName = generateTemplateFileName(reportDataDc.getItem().getTemplateFileType().toString().toLowerCase());
+
+        downloadTemplateFile.setCaption(templateFileName);
+        reportDataDc.getItem().setTemplateFileName(templateFileName);
+    }
+
+    public String generateTemplateFileName(String fileExtension) {
+        ReportData reportData = reportDataDc.getItem();
+        MetaClass entityMetaClass = metadata.findClass(reportData.getEntityName());
+        return entityMetaClass != null ?
+                messages.formatMessage(getClass(),"downloadTemplateFileNamePattern", reportData.getName(), fileExtension) :
+                "";
+    }
 
     @Subscribe("downloadTemplateFile")
     public void onDownloadTemplateFileClick(Button.ClickEvent event) {
@@ -211,7 +235,7 @@ public class SaveStepFragment extends StepFragment {
         }
     }
 
-//
+            //todo chart
 //        protected void showChart() {
 //            byte[] content = wizard.buildReport(true).getDefaultTemplate().getContent();
 //            String chartDescriptionJson = new String(content, StandardCharsets.UTF_8);
@@ -226,9 +250,8 @@ public class SaveStepFragment extends StepFragment {
 //                chartJson = chartToJsonConverter.convertSerialChart((SerialChartDescription) chartDescription, randomChartData);
 //            }
 //
-//            //todo
-////            wizard.openFrame(wizard.chartPreviewBox, ShowChartController.JSON_CHART_SCREEN_ID,
-////                    ParamsMap.of(ShowChartController.CHART_JSON_PARAMETER, chartJson));
+//            wizard.openFrame(wizard.chartPreviewBox, ShowChartController.JSON_CHART_SCREEN_ID,
+//                    ParamsMap.of(ShowChartController.CHART_JSON_PARAMETER, chartJson));
 //        }
 //    }
 }

@@ -42,26 +42,11 @@ public abstract class StepFragment extends ScreenFragment {
     protected Metadata metadata;
 
     protected InitStepFrameHandler initFrameHandler;
-    protected BeforeHideStepFrameHandler beforeHideFrameHandler;
-    protected BeforeShowStepFrameHandler beforeShowFrameHandler;
 
     protected boolean validateBeforeNext = true;
     protected boolean validateBeforePrev = false;
 
-    protected FrameValidator frameValidator = new FrameValidator();
     protected boolean isInitialized;
-
-    public void setInitFrameHandler(InitStepFrameHandler initFrameHandler) {
-        this.initFrameHandler = initFrameHandler;
-    }
-
-    public void setBeforeHideFrameHandler(BeforeHideStepFrameHandler beforeHideFrameHandler) {
-        this.beforeHideFrameHandler = beforeHideFrameHandler;
-    }
-
-    public void setBeforeShowFrameHandler(BeforeShowStepFrameHandler beforeShowFrameHandler) {
-        this.beforeShowFrameHandler = beforeShowFrameHandler;
-    }
 
     public void initFrame() {
         if (!isInitialized) {
@@ -71,36 +56,34 @@ public abstract class StepFragment extends ScreenFragment {
             }
             isInitialized = true;
         }
-
     }
 
     private void doDefaultInit() {
         new DefaultFrameInitializer().initFrame();
     }
 
-    public List<String> validateFrame() {
-        return frameValidator.validateAllComponents();
+    public List<String> validateFragment() {
+        List<String> errors = new ArrayList<>();
+        for (Component c : getFragment().getComponents()) {
+            if (c instanceof Validatable) {
+                Validatable validatable = (Validatable) c;
+                try {
+                    validatable.validate();
+                } catch (ValidationException e) {
+                    errors.add(e.getMessage());
+                }
+            }
+        }
+        return errors;
     }
 
-    public void beforeHide() {
-        if (beforeHideFrameHandler == null) {
-            return;
-        }
-        beforeHideFrameHandler.beforeHideFrame();
-    }
+    public void beforeHide() {}
 
-    public void beforeShow() {
-        if (beforeShowFrameHandler == null) {
-            return;
-        }
-        beforeShowFrameHandler.beforeShowFrame();
-    }
+    public void beforeShow() {}
 
     public abstract String getCaption();
 
-    public abstract boolean isLast();
-
-    public abstract boolean isFirst();
+    public abstract String getDescription();
 
     public boolean isValidateBeforeNext() {
         return validateBeforeNext;
@@ -108,14 +91,6 @@ public abstract class StepFragment extends ScreenFragment {
 
     public boolean isValidateBeforePrev() {
         return validateBeforePrev;
-    }
-
-    public interface BeforeHideStepFrameHandler {
-        void beforeHideFrame();
-    }
-
-    public interface BeforeShowStepFrameHandler {
-        void beforeShowFrame();
     }
 
     public interface InitStepFrameHandler {
@@ -133,23 +108,6 @@ public abstract class StepFragment extends ScreenFragment {
                     }
                 }
             }
-        }
-    }
-
-    protected class FrameValidator {
-        public List<String> validateAllComponents() {
-            List<String> errors = new ArrayList<>();
-            for (Component c : getFragment().getComponents()) {
-                if (c instanceof Validatable) {
-                    Validatable validatable = (Validatable) c;
-                    try {
-                        validatable.validate();
-                    } catch (ValidationException e) {
-                        errors.add(e.getMessage());
-                    }
-                }
-            }
-            return errors;
         }
     }
 

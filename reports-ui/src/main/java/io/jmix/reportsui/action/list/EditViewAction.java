@@ -135,7 +135,7 @@ public class EditViewAction extends ListAction {
                                     .withScreenClass(RegionEditor.class)
                                     .withOpenMode(OpenMode.DIALOG)
                                     .build();
-                            screen.setRootNode(reportRegion.getRegionPropertiesRootNode());
+
                             screen.addAfterCloseListener(afterCloseEvent -> {
                                 if (afterCloseEvent.closedWith(StandardOutcome.COMMIT)) {
                                     RegionEditor editor = (RegionEditor) afterCloseEvent.getScreen();
@@ -214,7 +214,7 @@ public class EditViewAction extends ListAction {
                     if (view == null) {
                         //View was never created for current dataset.
                         //We must to create minimal view that contains collection property for ability of creating ReportRegion.regionPropertiesRootNode later
-                        MetaClass metaClass = entityTree.getEntityTreeRootNode().getWrappedMetaClass();
+                        MetaClass metaClass = metadata.getClass(entityTree.getEntityTreeRootNode().getWrappedMetaClass());
                         MetaProperty metaProperty = metaClass.getProperty(collectionPropertyName);
                         if (metaProperty.getDomain() != null && metaProperty.getRange().getCardinality().isMany()) {
                             view = fetchPlans.builder(metaProperty.getDomain().getJavaClass()).build();

@@ -15,14 +15,13 @@
   -->
 
 <fragment xmlns="http://jmix.io/schema/ui/fragment"
-        messagesPack="io.jmix.reportsui.screen.report.wizard">
+          messagesPack="io.jmix.reportsui.screen.report.wizard">
 
     <data>
         <instance id="reportDataDc" class="io.jmix.reports.entity.wizard.ReportData" provided="true">
             <collection id="reportRegionsDc" property="reportRegions" provided="true"/>
         </instance>
     </data>
-
 
     <layout spacing="true" expand="regionsBox">
         <hbox spacing="true"
@@ -41,16 +40,18 @@
 
             <label id="spacer"/>
 
-            <button id="moveUpBtn" icon="CARET_UP"/>
-            <button id="moveDownBtn" icon="CARET_DOWN"/>
-            <button id="removeBtn" action="regionsTable.removeRegion" icon="REMOVE"/>
+            <button id="moveUpBtn" action="regionsTable.up" icon="CARET_UP"/>
+            <button id="moveDownBtn" action="regionsTable.down" icon="CARET_DOWN"/>
+            <button id="removeBtn" action="regionsTable.remove" icon="REMOVE"/>
         </hbox>
         <vbox id="regionsBox">
             <table id="regionsTable" dataContainer="reportRegionsDc"
                    sortable="false" reorderingAllowed="false" columnControlVisible="false"
-                   height="100%" width="100%">
+                   height="200px" width="100%">
                 <actions>
-                    <action id="removeRegion"/>
+                    <action id="up" type="itemOrderable"/>
+                    <action id="down" type="itemOrderable"/>
+                    <action id="remove" type="remove"/>
                 </actions>
                 <columns>
                     <column id="regionsGeneratedColumn" caption="msg://reportRegionsColumn"/>
