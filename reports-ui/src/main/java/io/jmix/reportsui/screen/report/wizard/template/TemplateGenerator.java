@@ -1,5 +1,5 @@
 /*
- * Copyright 2021 Haulmont.
+ * Copyright (c) 2008-2019 Haulmont.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,8 +19,52 @@ package io.jmix.reportsui.screen.report.wizard.template;
 import io.jmix.reports.entity.wizard.ReportData;
 import io.jmix.reports.entity.wizard.TemplateFileType;
 import io.jmix.reports.exception.TemplateGenerationException;
+import io.jmix.reportsui.screen.report.wizard.template.generators.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.stereotype.Component;
 
-public interface TemplateGenerator {
+@Component("report_TemplateGenerator")
+public class TemplateGenerator {
 
-    byte[] generateTemplate(ReportData reportData, TemplateFileType templateFileType) throws TemplateGenerationException;
+    @Autowired
+    protected ApplicationContext applicationContext;
+
+    public byte[] generateTemplate(ReportData reportData, TemplateFileType templateFileType) throws TemplateGenerationException {
+        byte[] template;
+        try {
+            template = createGenerator(templateFileType).generate(reportData);
+        } catch (Exception e) {
+            throw new TemplateGenerationException(e);
+        }
+        return template;
+
+    }
+
+    protected Generator createGenerator(TemplateFileType templateFileType) throws TemplateGenerationException {
+        Generator generator;
+        switch (templateFileType) {
+            case DOCX:
+                generator = applicationContext.getBean(DocxGenerator.class);
+                break;
+            case XLSX:
+                generator = applicationContext.getBean(XlsxGenerator.class);
+                break;
+            case HTML:
+                generator = applicationContext.getBean(HtmlGenerator.class);
+                break;
+            case CHART:
+                generator = applicationContext.getBean(ChartGenerator.class);
+                break;
+            case CSV:
+                generator = applicationContext.getBean(CsvGenerator.class);
+                break;
+            case TABLE:
+                generator = applicationContext.getBean(TableGenerator.class);
+                break;
+            default:
+                throw new TemplateGenerationException(templateFileType + " format is unsupported yet");
+        }
+        return generator;
+    }
 }

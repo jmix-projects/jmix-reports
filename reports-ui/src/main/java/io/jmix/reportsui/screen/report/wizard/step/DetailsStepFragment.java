@@ -21,16 +21,20 @@ import io.jmix.core.MessageTools;
 import io.jmix.core.Metadata;
 import io.jmix.core.MetadataTools;
 import io.jmix.core.metamodel.model.MetaClass;
-import io.jmix.reports.app.service.ReportsWizard;
 import io.jmix.reports.entity.wizard.ReportData;
+import io.jmix.reports.entity.wizard.ReportRegion;
 import io.jmix.reports.entity.wizard.ReportTypeGenerate;
 import io.jmix.reports.entity.wizard.TemplateFileType;
 import io.jmix.reportsui.screen.report.run.ShowChartLookup;
+import io.jmix.reportsui.screen.report.wizard.ReportsWizard;
 import io.jmix.ui.Dialogs;
 import io.jmix.ui.Notifications;
 import io.jmix.ui.WindowConfig;
 import io.jmix.ui.action.DialogAction;
-import io.jmix.ui.component.*;
+import io.jmix.ui.component.ComboBox;
+import io.jmix.ui.component.HasValue;
+import io.jmix.ui.component.RadioButtonGroup;
+import io.jmix.ui.model.CollectionPropertyContainer;
 import io.jmix.ui.model.InstanceContainer;
 import io.jmix.ui.screen.Subscribe;
 import io.jmix.ui.screen.UiController;
@@ -51,19 +55,19 @@ public class DetailsStepFragment extends StepFragment {
     private InstanceContainer<ReportData> reportDataDc;
 
     @Autowired
+    private CollectionPropertyContainer<ReportRegion> reportRegionsDc;
+
+    @Autowired
     protected Dialogs dialogs;
 
     @Autowired
     protected MessageTools messageTools;
 
     @Autowired
-    protected ComboBox<MetaClass> entity;
+    protected ComboBox<MetaClass> entityField;
 
     @Autowired
-    private TextField<String> reportName;
-
-    @Autowired
-    protected ComboBox<TemplateFileType> templateFileFormat;
+    protected ComboBox<TemplateFileType> templateFileTypeField;
 
     @Autowired
     protected Metadata metadata;
@@ -72,7 +76,7 @@ public class DetailsStepFragment extends StepFragment {
     protected ExtendedEntities extendedEntities;
 
     @Autowired
-    protected RadioButtonGroup<ReportTypeGenerate> reportTypeGenerate;
+    protected RadioButtonGroup<ReportTypeGenerate> reportTypeGenerateField;
 
     @Autowired
     protected MetadataTools metadataTools;
@@ -104,73 +108,88 @@ public class DetailsStepFragment extends StepFragment {
     }
 
     protected void initEntityLookupField() {
-        entity.setOptionsMap(getAvailableEntities());
+        entityField.setOptionsMap(getAvailableEntities());
     }
 
-    @Subscribe("reportName")
-    public void onReportNameTextChange(TextInputField.TextChangeEvent event) {
-        reportDataDc.getItem().setName(event.getText());
-    }
-
-    @Subscribe("reportTypeGenerate")
+    @Subscribe("reportTypeGenerateField")
     public void onReportTypeGenerateValueChange(HasValue.ValueChangeEvent<ReportTypeGenerate> event) {
-        dialogs.createOptionDialog()
-                .withCaption(messages.getMessage("dialogs.Confirmation"))
-                .withMessage(messages.getMessage(getClass(), "regionsClearConfirm"))
-                .withActions(
-                        new DialogAction(DialogAction.Type.OK).withHandler(e -> {
-                            ReportTypeGenerate reportTypeGenerate = event.getValue();
+        ReportData reportData = reportDataDc.getItem();
+        ReportTypeGenerate currentType = event.getValue();
+        ReportTypeGenerate prevType = event.getPrevValue();
 
-                            ReportData reportData = reportDataDc.getItem();
-                            reportData.setReportTypeGenerate(reportTypeGenerate);
-                            reportData.getReportRegions().clear();
-
-                            clearQuery();
-                        }),
-                        new DialogAction(DialogAction.Type.CANCEL))
-                .show();
+        if (!isListOfEntityWithQuery(currentType) && isListOfEntityWithQuery(prevType)) {
+            dialogs.createOptionDialog()
+                    .withCaption(messages.getMessage("dialogs.Confirmation"))
+                    .withMessage(messages.getMessage(getClass(), "regionsClearConfirm"))
+                    .withActions(
+                            new DialogAction(DialogAction.Type.OK).withHandler(e -> updateReportTypeGenerate(reportData, currentType)),
+                            new DialogAction(DialogAction.Type.CANCEL))
+                    .show();
+        } else {
+            updateReportTypeGenerate(reportData, currentType);
+        }
     }
 
-    @Subscribe("entity")
-    public void onEntityValueChange(HasValue.ValueChangeEvent<MetaClass> event) {
-        ReportData reportData = reportDataDc.getItem();
-        reportData.getReportRegions().clear();
-        needUpdateEntityModel = true;
+    protected boolean isListOfEntityWithQuery(ReportTypeGenerate currentType) {
+        return ReportTypeGenerate.LIST_OF_ENTITIES_WITH_QUERY.equals(currentType);
+    }
 
-        MetaClass metaClass = event.getValue();
-        reportData.setEntityName(metaClass.getName());
-
-        setGeneratedReportName(event.getPrevValue(), metaClass);
+    protected void updateReportTypeGenerate(ReportData reportData, ReportTypeGenerate reportTypeGenerate) {
+        reportData.setReportTypeGenerate(reportTypeGenerate);
+        reportRegionsDc.getMutableItems().clear();
 
         clearQuery();
     }
 
-    @Subscribe("templateFileFormat")
-    public void onTemplateFileFormatValueChange(HasValue.ValueChangeEvent<TemplateFileType> event) {
-        reportDataDc.getItem().setTemplateFileType(event.getValue());
+    @Subscribe("entityField")
+    public void onEntityValueChange(HasValue.ValueChangeEvent<MetaClass> event) {
+        ReportData reportData = reportDataDc.getItem();
+        MetaClass currentMetaClass = event.getValue();
+        MetaClass prevMetaClass = event.getPrevValue();
+
+        if (prevMetaClass != null && currentMetaClass != null) {
+            dialogs.createOptionDialog()
+                    .withCaption(messages.getMessage("dialogs.Confirmation"))
+                    .withMessage(messages.getMessage(getClass(), "regionsClearConfirm"))
+                    .withActions(
+                            new DialogAction(DialogAction.Type.OK).withHandler(e -> updateReportEntity(prevMetaClass, currentMetaClass, reportData)),
+                            new DialogAction(DialogAction.Type.CANCEL))
+                    .show();
+        } else {
+            updateReportEntity(event.getPrevValue(), event.getValue(), reportData);
+        }
     }
 
-    protected void setGeneratedReportName(MetaClass prevValue, MetaClass value) {
-        String oldReportName = reportName.getValue();
-        if (StringUtils.isBlank(oldReportName)) {
-            String newText = messages.formatMessage(getClass(), "reportNamePattern", messageTools.getEntityCaption(value));
-            reportName.setValue(newText);
+    protected void updateReportEntity(MetaClass prevValue, MetaClass value, ReportData reportData) {
+        needUpdateEntityModel = true;
+        setReportName(reportData, prevValue, value);
+
+        reportData.getReportRegions().clear();
+        reportData.setEntityName(value.getName());
+
+        clearQuery();
+    }
+
+    protected void setReportName(ReportData reportData, MetaClass prevValue, MetaClass value) {
+        String oldName = reportData.getName();
+        if (StringUtils.isBlank(oldName)) {
+            reportData.setName(messages.formatMessage(getClass(), "reportNamePattern", messageTools.getEntityCaption(value)));
         } else {
             if (prevValue != null) {
                 //if old text contains MetaClass name substring, just replace it
                 String prevEntityCaption = messageTools.getEntityCaption(prevValue);
-                if (StringUtils.contains(oldReportName, prevEntityCaption)) {
+                if (StringUtils.contains(oldName, prevEntityCaption)) {
 
-                    String newText = oldReportName;
-                    int index = oldReportName.lastIndexOf(prevEntityCaption);
+                    String newName = oldName;
+                    int index = oldName.lastIndexOf(prevEntityCaption);
                     if (index > -1) {
-                        newText = StringUtils.substring(oldReportName, 0, index)
+                        newName = StringUtils.substring(oldName, 0, index)
                                 + messageTools.getEntityCaption(value)
-                                + StringUtils.substring(oldReportName, index + prevEntityCaption.length(), oldReportName.length());
+                                + StringUtils.substring(oldName, index + prevEntityCaption.length(), oldName.length());
                     }
 
-                    reportName.setValue(newText);
-                    if (!oldReportName.equals(messages.formatMessage(getClass(), "reportNamePattern", prevEntityCaption))) {
+                    reportData.setName(newName);
+                    if (!oldName.equals(messages.formatMessage(getClass(), "reportNamePattern", prevEntityCaption))) {
                         //if user changed auto generated report name and we have changed it, we show message to him
                         notifications.create(Notifications.NotificationType.TRAY)
                                 .withCaption(messages.getMessage(getClass(), "reportNameChanged"))
@@ -182,14 +201,14 @@ public class DetailsStepFragment extends StepFragment {
     }
 
     protected void initTemplateFormatLookupField() {
-        templateFileFormat.setOptionsMap(getAvailableTemplateFormats());
-        templateFileFormat.setTextInputAllowed(false);
-        templateFileFormat.setValue(TemplateFileType.DOCX);
+        templateFileTypeField.setOptionsMap(getAvailableTemplateFormats());
+        templateFileTypeField.setTextInputAllowed(false);
+        templateFileTypeField.setValue(TemplateFileType.DOCX);
     }
 
     protected void initReportTypeOptionGroup() {
-        reportTypeGenerate.setOptionsMap(getListedReportOptionsMap());
-        reportTypeGenerate.setValue(ReportTypeGenerate.SINGLE_ENTITY);
+        reportTypeGenerateField.setOptionsMap(getListedReportOptionsMap());
+        reportTypeGenerateField.setValue(ReportTypeGenerate.SINGLE_ENTITY);
     }
 
     protected Map<String, ReportTypeGenerate> getListedReportOptionsMap() {

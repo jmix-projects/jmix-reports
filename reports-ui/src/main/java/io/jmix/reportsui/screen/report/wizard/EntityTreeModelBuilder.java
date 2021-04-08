@@ -44,7 +44,7 @@ public class EntityTreeModelBuilder {
     protected MessageTools messageTools;
 
     @Autowired
-    protected ReportingWizard reportingWizard;
+    protected ReportsWizard reportsWizard;
 
     @Autowired
     protected ReportsProperties reportsProperties;
@@ -95,7 +95,7 @@ public class EntityTreeModelBuilder {
 //        MetaClass fileDescriptorMetaClass = metadata.getClass(FileDescriptor.class);
         MetaClass wrappedMetaClass = metadata.getClass(parentEntityTreeNode.getWrappedMetaClass());
         for (MetaProperty metaProperty : wrappedMetaClass.getProperties()) {
-            if (!reportingWizard.isPropertyAllowedForReportWizard(wrappedMetaClass, metaProperty)) {
+            if (!reportsWizard.isPropertyAllowedForReportWizard(wrappedMetaClass, metaProperty)) {
                 continue;
             }
             if (metaProperty.getRange().isClass()) {

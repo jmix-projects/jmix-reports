@@ -17,6 +17,7 @@
 package io.jmix.reports.entity.wizard;
 
 import io.jmix.core.entity.annotation.JmixGeneratedValue;
+import io.jmix.core.entity.annotation.JmixId;
 import io.jmix.core.entity.annotation.SystemLevel;
 import io.jmix.core.metamodel.annotation.JmixEntity;
 import io.jmix.core.metamodel.annotation.JmixProperty;
@@ -30,27 +31,20 @@ import java.util.UUID;
 @SystemLevel
 public class QueryParameter {
 
-    @Id
-    @JmixProperty
+    @JmixId
     @JmixGeneratedValue
     protected UUID id;
 
-    @JmixProperty
     protected String name;
 
-    @JmixProperty
     protected String javaClassName;
 
-    @JmixProperty
     protected ParameterType parameterType;
 
-    @JmixProperty
     protected String defaultValue;
 
-    @JmixProperty
     protected PredefinedTransformation predefinedTransformation;
 
-    @JmixProperty
     protected Boolean hidden;
 
     public UUID getId() {

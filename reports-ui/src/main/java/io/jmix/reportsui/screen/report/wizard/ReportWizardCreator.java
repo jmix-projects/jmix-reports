@@ -15,10 +15,11 @@
  */
 package io.jmix.reportsui.screen.report.wizard;
 
-import io.jmix.core.*;
+import io.jmix.core.Messages;
+import io.jmix.core.Metadata;
+import io.jmix.core.Stores;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.reports.app.EntityTree;
-import io.jmix.reports.app.service.ReportsWizard;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportGroup;
 import io.jmix.reports.entity.wizard.ReportData;
@@ -32,20 +33,22 @@ import io.jmix.ui.Notifications;
 import io.jmix.ui.ScreenBuilders;
 import io.jmix.ui.action.Action;
 import io.jmix.ui.action.DialogAction;
-import io.jmix.ui.component.*;
+import io.jmix.ui.component.Button;
+import io.jmix.ui.component.DialogWindow;
+import io.jmix.ui.component.Label;
 import io.jmix.ui.model.CollectionContainer;
 import io.jmix.ui.model.InstanceContainer;
 import io.jmix.ui.screen.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 @UiController("report_ReportWizardCreator")
 @UiDescriptor("report-wizard.xml")
-public class ReportWizardCreator extends Screen implements MainWizardScreen<Screen> {
+public class ReportWizardCreator extends Screen implements WizardScreen {
 
     @Autowired
     protected InstanceContainer<ReportData> reportDataDc;
@@ -78,7 +81,7 @@ public class ReportWizardCreator extends Screen implements MainWizardScreen<Scre
     protected Metadata metadata;
 
     @Autowired
-    protected ReportsWizard reportWizardService;
+    protected ReportsWizard reportWizard;
 
     @Autowired
     protected Messages messages;
@@ -105,31 +108,37 @@ public class ReportWizardCreator extends Screen implements MainWizardScreen<Scre
     protected void onInit(InitEvent event) {
         reportDataDc.setItem(metadata.create(ReportData.class));
 
-        stepFragmentManager.setMainWizardFrame(this);
-        stepFragmentManager.setStepFragments(getFullFragments());
+        stepFragmentManager.setWizardFragment(this);
+        stepFragmentManager.setStepFragments(getBasicFragments());
 
         stepFragmentManager.showCurrentFragment();
     }
 
+    @Subscribe
+    public void onAfterShow(AfterShowEvent event) {
+        setReportGroup();
+    }
+
     @Subscribe(id = "reportDataDc", target = Target.DATA_CONTAINER)
     public void onReportDataDcItemPropertyChange(InstanceContainer.ItemPropertyChangeEvent<ReportData> event) {
-        if (!event.getProperty().equals("reportTypeGenerate")) {
-            return;
-        }
+        if (event.getProperty().equals("reportTypeGenerate")) {
+            List<StepFragment> stepFragments = new ArrayList<>(getBasicFragments());
+            if (Objects.equals(event.getValue(), ReportTypeGenerate.LIST_OF_ENTITIES_WITH_QUERY)) {
+                stepFragments.add(1, queryStepFragment);
+            }
 
-        if (Objects.equals(event.getValue(), ReportTypeGenerate.LIST_OF_ENTITIES_WITH_QUERY)) {
-            stepFragmentManager.setStepFragments(getFullFragments());
-        } else {
-            stepFragmentManager.setStepFragments(getBasicFragments());
+            stepFragmentManager.setStepFragments(stepFragments);
         }
     }
 
-    private List<StepFragment> getBasicFragments() {
+    protected void setReportGroup() {
+        if (!groupsDc.getItems().isEmpty()) {
+            getItem().setGroup(groupsDc.getItems().iterator().next());
+        }
+    }
+
+    protected List<StepFragment> getBasicFragments() {
         return Arrays.asList(detailsFragment, regionsStepFragment, saveStepFragment);
-    }
-
-    protected List<StepFragment> getFullFragments() {
-        return Arrays.asList(detailsFragment, queryStepFragment, regionsStepFragment, saveStepFragment);
     }
 
     @Subscribe("nextBtn")
@@ -144,7 +153,7 @@ public class ReportWizardCreator extends Screen implements MainWizardScreen<Scre
         }
 
         if (detailsFragment.isNeedUpdateEntityModel()) {
-            EntityTree entityTree = reportWizardService.buildEntityTree(metaClass);
+            EntityTree entityTree = reportWizard.buildEntityTree(metaClass);
 
             regionsStepFragment.setEntityTreeHasSimpleAttrs(entityTree.getEntityTreeStructureInfo().isEntityTreeHasSimpleAttrs());
             regionsStepFragment.setEntityTreeHasCollections(entityTree.getEntityTreeStructureInfo().isEntityTreeRootHasCollections());
@@ -154,11 +163,13 @@ public class ReportWizardCreator extends Screen implements MainWizardScreen<Scre
             detailsFragment.setNeedUpdateEntityModel(false);
         }
         stepFragmentManager.nextFragment();
+        centerWindow();
     }
 
     @Subscribe("backBtn")
     public void onBackBtnClick(Button.ClickEvent event) {
         stepFragmentManager.prevFragment();
+        centerWindow();
     }
 
     @Override
@@ -212,7 +223,12 @@ public class ReportWizardCreator extends Screen implements MainWizardScreen<Scre
         }
     }
 
-    private void convertToReportAndForceCloseWizard() {
+    protected void centerWindow() {
+        DialogWindow dialogWindow = (DialogWindow) getWindow();
+        dialogWindow.center();
+    }
+
+    protected void convertToReportAndForceCloseWizard() {
         Report report = buildReport(false);
         if (report != null) {
             closeWithDefaultAction();
@@ -222,14 +238,9 @@ public class ReportWizardCreator extends Screen implements MainWizardScreen<Scre
     public Report buildReport(boolean temporary) {
         ReportData reportData = reportDataDc.getItem();
 
-        if (!groupsDc.getItems().isEmpty()) {
-            UUID id = groupsDc.getItems().iterator().next().getId();
-            reportData.setGroup(groupsDc.getItem(id));
-        }
-
         // be sure that reportData.name and reportData.outputFileFormat is not null before generation of template
         try {
-            byte[] templateByteArray = reportWizardService.generateTemplate(reportData, reportData.getTemplateFileType());
+            byte[] templateByteArray = reportWizard.generateTemplate(reportData, reportData.getTemplateFileType());
             reportData.setTemplateContent(templateByteArray);
         } catch (TemplateGenerationException e) {
             notifications.create(Notifications.NotificationType.WARNING)
@@ -237,17 +248,15 @@ public class ReportWizardCreator extends Screen implements MainWizardScreen<Scre
                     .show();
             return null;
         }
-        reportData.setTemplateFileType(reportData.getTemplateFileType());
-        //reportData.setOutputNamePattern(outputFileName.getValue());
 
-        MetaClass entityMetaClass = metadata.getClass(getItem().getEntityName());
+        MetaClass entityMetaClass = metadata.getClass(reportData.getEntityName());
         String storeName = entityMetaClass.getStore().getName();
 
         if (!Stores.isMain(storeName)) {
             reportData.setDataStore(storeName);
         }
 
-        Report report = reportWizardService.toReport(reportData, temporary);
+        Report report = reportWizard.toReport(reportData, temporary);
         reportData.setGeneratedReport(report);
         return report;
     }

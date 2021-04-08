@@ -21,13 +21,13 @@ import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.core.metamodel.model.MetaProperty;
 import io.jmix.reports.Reports;
 import io.jmix.reports.app.EntityTree;
-import io.jmix.reports.app.service.ReportsWizard;
 import io.jmix.reports.entity.BandDefinition;
 import io.jmix.reports.entity.DataSet;
 import io.jmix.reports.entity.DataSetType;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.wizard.ReportData;
 import io.jmix.reports.entity.wizard.ReportRegion;
+import io.jmix.reportsui.screen.report.wizard.ReportsWizard;
 import io.jmix.reportsui.screen.report.wizard.region.RegionEditor;
 import io.jmix.security.constraint.PolicyStore;
 import io.jmix.security.constraint.SecureOperations;
@@ -79,10 +79,11 @@ public class EditViewAction extends ListAction {
     @Autowired
     protected PolicyStore policyStore;
 
-    protected Table<DataSet> dataSetsTable;
-    protected CollectionContainer<BandDefinition> bandsDc;
     @Autowired
     protected DataManager dataManager;
+
+    protected Table<DataSet> dataSetsTable;
+    protected CollectionContainer<BandDefinition> bandsDc;
 
     public EditViewAction() {
         this(ID);

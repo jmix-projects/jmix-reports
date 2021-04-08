@@ -25,7 +25,9 @@ import io.jmix.reports.ReportsProperties;
 import io.jmix.reports.app.EntityTree;
 import io.jmix.reports.entity.*;
 import io.jmix.reports.entity.wizard.*;
+import io.jmix.reports.exception.TemplateGenerationException;
 import io.jmix.reports.util.DataSetFactory;
+import io.jmix.reportsui.screen.report.wizard.template.TemplateGenerator;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.Transformer;
 import org.apache.commons.lang3.StringUtils;
@@ -35,12 +37,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
+import javax.inject.Provider;
 import javax.persistence.Temporal;
 import java.lang.reflect.AnnotatedElement;
 import java.util.*;
 
-@Component("report_ReportingWizardApi")
-public class ReportingWizardImpl implements ReportingWizard {
+/**
+ * API for report wizard
+ */
+@Component("report_ReportsWizard")
+public class ReportsWizard {
 
     public static final String ROOT_BAND_DEFINITION_NAME = "Root";
     protected static final String DEFAULT_SINGLE_ENTITY_ALIAS = "entity";//cause Thesis used it for running reports from screens without selection input params
@@ -50,22 +56,34 @@ public class ReportingWizardImpl implements ReportingWizard {
 
     @Autowired
     protected Metadata metadata;
+
     @Autowired
     protected Reports reports;
+
     @Autowired
     protected ReportsProperties reportsProperties;
+
     @Autowired
     protected ExtendedEntities extendedEntities;
+
     @Autowired
     protected DataSetFactory dataSetFactory;
+
     @Autowired
     protected Messages messages;
+
     @Autowired
     protected MetadataTools metadataTools;
+
+    @Autowired
+    protected TemplateGenerator templateGenerator;
+
+    @Autowired
+    protected Provider<EntityTreeModelBuilder> entityTreeModelBuilderApiProvider;
+
     @Autowired
     protected FetchPlans fetchPlans;
 
-    @Override
     public Report toReport(ReportData reportData, boolean temporary) {
         Report report = createReport(reportData, temporary);
         ReportInputParameter mainParameter = createParameters(reportData, report);
@@ -301,7 +319,6 @@ public class ReportingWizardImpl implements ReportingWizard {
         return headerBandDefinition;
     }
 
-    @Override
     public FetchPlan createViewByReportRegions(EntityTreeNode entityTreeRootNode, List<ReportRegion> reportRegions) {
         MetaClass rootWrapperMetaClass = metadata.getClass(entityTreeRootNode.getWrappedMetaClass());
         FetchPlanBuilder fetchPlanBuilder = fetchPlans.builder(rootWrapperMetaClass.getJavaClass());
@@ -345,7 +362,6 @@ public class ReportingWizardImpl implements ReportingWizard {
      * @param collectionPropertyName must to be non-null for a tabulated region
      * @return report region
      */
-    @Override
     public ReportRegion createReportRegionByView(EntityTree entityTree, boolean isTabulated, @Nullable FetchPlan fetchPlan, @Nullable String collectionPropertyName) {
         if (StringUtils.isNotBlank(collectionPropertyName) && fetchPlan == null) {
             //without view we can`t correctly set rootNode for region which is necessary for tabulated regions for a
@@ -438,7 +454,6 @@ public class ReportingWizardImpl implements ReportingWizard {
         }
     }
 
-    @Override
     public boolean isEntityAllowedForReportWizard(final MetaClass effectiveMetaClass) {
         if (metadataTools.isSystemLevel(effectiveMetaClass)
                 || metadataTools.isJpaEmbeddable(effectiveMetaClass)
@@ -478,7 +493,7 @@ public class ReportingWizardImpl implements ReportingWizard {
         return !propertiesNamesList.isEmpty();
     }
 
-    @Override
+
     public boolean isPropertyAllowedForReportWizard(MetaClass metaClass, MetaProperty metaProperty) {
         //here we can`t just to determine metaclass using property argument cause it can be an ancestor of it
         List<String> propertiesBlackList = reportsProperties.getWizardPropertiesBlackList();
@@ -490,6 +505,14 @@ public class ReportingWizardImpl implements ReportingWizard {
         return !(propertiesBlackList.contains(classAndPropertyName)
                 || (propertiesBlackList.contains(originalDomainMetaClass.getName() + "." + metaProperty.getName())
                 && !wizardPropertiesExcludedBlackList.contains(classAndPropertyName)));
+    }
+
+    public byte[] generateTemplate(ReportData reportData, TemplateFileType templateFileType) throws TemplateGenerationException {
+        return templateGenerator.generateTemplate(reportData, templateFileType);
+    }
+
+    public EntityTree buildEntityTree(MetaClass metaClass) {
+        return entityTreeModelBuilderApiProvider.get().buildEntityTree(metaClass);
     }
 
     protected List<String> getWizardBlackListedEntities() {

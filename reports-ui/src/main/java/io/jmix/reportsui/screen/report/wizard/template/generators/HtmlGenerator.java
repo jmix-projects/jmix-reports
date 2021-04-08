@@ -24,12 +24,10 @@ import io.jmix.core.Messages;
 import io.jmix.reports.entity.wizard.RegionProperty;
 import io.jmix.reports.entity.wizard.ReportData;
 import io.jmix.reports.entity.wizard.ReportRegion;
-import io.jmix.reportsui.screen.report.wizard.ReportingWizardImpl;
+import io.jmix.reportsui.screen.report.wizard.ReportsWizard;
 import io.jmix.reportsui.screen.report.wizard.template.Generator;
 import io.jmix.reportsui.screen.report.wizard.template.ReportTemplatePlaceholder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.BeanDefinition;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -135,7 +133,7 @@ public class HtmlGenerator implements Generator {
         stringBuilder.append("\n<#assign ").
                 append(bandName).
                 append(" = ").
-                append(ReportingWizardImpl.ROOT_BAND_DEFINITION_NAME).
+                append(ReportsWizard.ROOT_BAND_DEFINITION_NAME).
                 append(".bands.").
                 append(bandName).
                 append("><br/>");

@@ -30,11 +30,11 @@ import javax.inject.Named;
 
 @UiController("report_ReportEntityTree.lookup")
 @UiDescriptor("entity-tree-lookup.xml")
-@LookupComponent("entityTreeFrame.entityTree")
 public class EntityTreeLookup extends StandardLookup {
 
     //    @Named("entityTreeFrame.reportEntityTreeNodeDs")
 //    protected AbstractTreeDatasource reportEntityTreeNodeDs;
+
     @Named("entityTreeFrame.entityTree")
     protected Tree entityTree;
     @Named("entityTreeFrame.reportPropertyName")
@@ -49,7 +49,7 @@ public class EntityTreeLookup extends StandardLookup {
     protected Notifications notifications;
 
     @WindowParam
-    protected EntityTreeNode rootNode;
+    protected EntityTreeNode rootEntity;
 
     @Subscribe
     protected void onInit(InitEvent event) {

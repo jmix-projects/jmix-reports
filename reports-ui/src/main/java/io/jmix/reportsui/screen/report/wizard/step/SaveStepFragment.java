@@ -19,12 +19,12 @@ package io.jmix.reportsui.screen.report.wizard.step;
 import io.jmix.core.CoreProperties;
 import io.jmix.core.Messages;
 import io.jmix.core.metamodel.model.MetaClass;
-import io.jmix.reports.app.service.ReportsWizard;
 import io.jmix.reports.entity.ReportOutputType;
 import io.jmix.reports.entity.wizard.ReportData;
 import io.jmix.reports.entity.wizard.TemplateFileType;
 import io.jmix.reports.exception.TemplateGenerationException;
 import io.jmix.reportsui.screen.report.wizard.OutputFormatTools;
+import io.jmix.reportsui.screen.report.wizard.ReportsWizard;
 import io.jmix.ui.Dialogs;
 import io.jmix.ui.Fragments;
 import io.jmix.ui.Notifications;
@@ -72,26 +72,16 @@ public class SaveStepFragment extends StepFragment {
     protected ReportsWizard reportWizardService;
 
     @Autowired
-    private ComboBox<ReportOutputType> outputFileFormat;
+    protected ComboBox<ReportOutputType> outputFileFormat;
 
     @Autowired
-    private TextField<String> outputFileName;
+    protected TextField<String> outputFileName;
 
     @Autowired
-    private Button downloadTemplateFile;
+    protected Button downloadTemplateFile;
 
     @Autowired
     protected OutputFormatTools outputFormatTools;
-
-    @Subscribe
-    public void onInit(InitEvent event) {
-        //beforeHideFrameHandler = new BeforeHideSaveStepFrameHandler();
-    }
-
-    @Subscribe("outputFileFormat")
-    public void onOutputFileFormatValueChange(HasValue.ValueChangeEvent<ReportOutputType> event) {
-        reportDataDc.getItem().setOutputFileType(event.getValue());
-    }
 
     @Subscribe("outputFileName")
     public void onOutputFileNameValueChange(HasValue.ValueChangeEvent<String> event) {
@@ -99,7 +89,7 @@ public class SaveStepFragment extends StepFragment {
     }
 
     @Install(to = "outputFileFormat", subject = "contextHelpIconClickHandler")
-    private void outputFileFormatContextHelpIconClickHandler(HasContextHelp.ContextHelpIconClickEvent contextHelpIconClickEvent) {
+    protected void outputFileFormatContextHelpIconClickHandler(HasContextHelp.ContextHelpIconClickEvent contextHelpIconClickEvent) {
         dialogs.createMessageDialog()
                 .withCaption(messages.getMessage("template.namePatternText"))
                 .withMessage(messages.getMessage("template.namePatternTextHelp"))
@@ -108,7 +98,7 @@ public class SaveStepFragment extends StepFragment {
                 .show();
     }
 
-    protected void setCorrectReportOutputType() {
+    protected void updateCorrectReportOutputType() {
         ReportOutputType outputFileFormatPrevValue = outputFileFormat.getValue();
         outputFileFormat.setValue(null);
         Map<String, ReportOutputType> optionsMap = outputFormatTools.getOutputAvailableFormats(reportDataDc.getItem().getTemplateFileType());
@@ -130,8 +120,9 @@ public class SaveStepFragment extends StepFragment {
 
     @Subscribe(id = "reportDataDc", target = Target.DATA_CONTAINER)
     public void onReportDataDcItemPropertyChange(InstanceContainer.ItemPropertyChangeEvent<ReportData> event) {
-        if (event.getProperty().equals("entity")) {
-            setCorrectReportOutputType();
+        if (event.getProperty().equals("entityName") || event.getProperty().equals("templateFileType")) {
+            updateCorrectReportOutputType();
+            updateDownloadTemplateFile();
         }
     }
 
@@ -161,11 +152,8 @@ public class SaveStepFragment extends StepFragment {
     public void beforeShow() {
         if (StringUtils.isEmpty(outputFileName.getValue())) {
             ReportData reportData = reportDataDc.getItem();
-            String templateFileName = generateOutputFileName(reportData.getTemplateFileType().toString().toLowerCase());
-            outputFileName.setValue(templateFileName);
+            outputFileName.setValue(generateOutputFileName(reportData.getTemplateFileType().toString().toLowerCase()));
         }
-        setCorrectReportOutputType();
-        initDownloadTemplateFile();
 
         //initChartPreview();
     }
@@ -200,7 +188,7 @@ public class SaveStepFragment extends StepFragment {
 //            }
 //        }
 
-    public void initDownloadTemplateFile() {
+    public void updateDownloadTemplateFile() {
         String templateFileName = generateTemplateFileName(reportDataDc.getItem().getTemplateFileType().toString().toLowerCase());
 
         downloadTemplateFile.setCaption(templateFileName);
@@ -219,7 +207,6 @@ public class SaveStepFragment extends StepFragment {
     public void onDownloadTemplateFileClick(Button.ClickEvent event) {
         ReportData reportData = reportDataDc.getItem();
         try {
-            //reportData.setName(wizard.reportName.getValue().toString());
             TemplateFileType templateFileType = reportData.getTemplateFileType();
             byte[] newTemplate = reportWizardService.generateTemplate(reportData, templateFileType);
             downloader.download(new ByteArrayDataProvider(
@@ -234,6 +221,7 @@ public class SaveStepFragment extends StepFragment {
                     .show();
         }
     }
+
 
             //todo chart
 //        protected void showChart() {

@@ -41,25 +41,44 @@ public abstract class StepFragment extends ScreenFragment {
     @Autowired
     protected Metadata metadata;
 
-    protected InitStepFrameHandler initFrameHandler;
-
     protected boolean validateBeforeNext = true;
     protected boolean validateBeforePrev = false;
 
-    protected boolean isInitialized;
+    /**
+     * Sets the caption for the wizard screen
+     *
+     * @return caption
+     */
+    public abstract String getCaption();
 
-    public void initFrame() {
-        if (!isInitialized) {
-            doDefaultInit();
-            if (initFrameHandler != null) {
-                initFrameHandler.initFrame();
-            }
-            isInitialized = true;
-        }
+    /**
+     * Sets the description for the wizard screen
+     *
+     * @return description
+     */
+    public abstract String getDescription();
+
+    /**
+     * Entry point for adding functionality before showing the fragment
+     */
+    public void beforeHide() {
     }
 
-    private void doDefaultInit() {
-        new DefaultFrameInitializer().initFrame();
+    /**
+     * Entry point for adding functionality before hiding the fragment
+     */
+    public void beforeShow() {
+    }
+
+    public void initFragment() {
+        for (Component c : getFragment().getComponents()) {
+            if (c instanceof Field) {
+                Field field = (Field) c;
+                if (field.isRequired() && StringUtils.isBlank(field.getRequiredMessage()) && StringUtils.isBlank(field.getCaption())) {
+                    field.setRequiredMessage(getDefaultRequiredMessage(messages.getMessage(field.getId())));
+                }
+            }
+        }
     }
 
     public List<String> validateFragment() {
@@ -77,38 +96,12 @@ public abstract class StepFragment extends ScreenFragment {
         return errors;
     }
 
-    public void beforeHide() {}
-
-    public void beforeShow() {}
-
-    public abstract String getCaption();
-
-    public abstract String getDescription();
-
     public boolean isValidateBeforeNext() {
         return validateBeforeNext;
     }
 
     public boolean isValidateBeforePrev() {
         return validateBeforePrev;
-    }
-
-    public interface InitStepFrameHandler {
-        void initFrame();
-    }
-
-    protected class DefaultFrameInitializer implements InitStepFrameHandler {
-        @Override
-        public void initFrame() {
-            for (Component c : getFragment().getComponents()) {
-                if (c instanceof Field) {
-                    Field field = (Field) c;
-                    if (field.isRequired() && StringUtils.isBlank(field.getRequiredMessage()) && StringUtils.isBlank(field.getCaption())) {
-                        field.setRequiredMessage(getDefaultRequiredMessage(messages.getMessage(field.getId())));
-                    }
-                }
-            }
-        }
     }
 
     protected String getDefaultRequiredMessage(String name) {

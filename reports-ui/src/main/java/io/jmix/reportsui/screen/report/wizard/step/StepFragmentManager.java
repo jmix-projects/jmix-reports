@@ -37,25 +37,26 @@ public class StepFragmentManager {
     protected Notifications notifications;
 
     protected List<StepFragment> stepFragments;
-    protected MainWizardScreen mainWizardScreen;
+    protected WizardScreen wizardScreen;
     protected int currentFrameIdx = 0;
 
     public void setStepFragments(List<StepFragment> stepFragments) {
         this.stepFragments = stepFragments;
 
-        setWizardCaption();
+        updateWizardCaption();
     }
 
-    public void setMainWizardFrame(MainWizardScreen mainWizardScreen) {
-        this.mainWizardScreen = mainWizardScreen;
+    public void setWizardFragment(WizardScreen wizardScreen) {
+        this.wizardScreen = wizardScreen;
     }
 
     public void showCurrentFragment() {
-        setWizardCaption();
-        setWizardDescription();
+        updateWizardCaption();
+        updateWizardDescription();
 
-        setNavigationButtonProps();
-        getCurrentStepFragment().initFrame();
+        visibleButtons();
+
+        getCurrentStepFragment().initFragment();
         getCurrentStepFragment().beforeShow();
         getCurrentStepFragment().getFragment().setVisible(true);
     }
@@ -64,31 +65,31 @@ public class StepFragmentManager {
         return stepFragments.get(currentFrameIdx);
     }
 
-    public void setWizardDescription() {
-        mainWizardScreen.setDescription(getCurrentStepFragment().getDescription());
+    public void updateWizardDescription() {
+        wizardScreen.setDescription(getCurrentStepFragment().getDescription());
     }
 
-    public void setWizardCaption() {
-        mainWizardScreen.setCaption(messages.formatMessage(getClass(), "stepNo",
+    public void updateWizardCaption() {
+        wizardScreen.setCaption(messages.formatMessage(getClass(), "stepNo",
                 getCurrentStepFragment().getCaption(),
                 currentFrameIdx + 1,
                 stepFragments.size())
         );
     }
 
-    protected void setNavigationButtonProps() {
+    protected void visibleButtons() {
         if (currentFrameIdx <= 0) {
-            mainWizardScreen.getForwardBtn().setVisible(true);
-            mainWizardScreen.getBackwardBtn().setVisible(false);
-            mainWizardScreen.getSaveBtn().setVisible(false);
+            wizardScreen.getForwardBtn().setVisible(true);
+            wizardScreen.getBackwardBtn().setVisible(false);
+            wizardScreen.getSaveBtn().setVisible(false);
         } else if (currentFrameIdx >= stepFragments.size() - 1) {
-            mainWizardScreen.getForwardBtn().setVisible(false);
-            mainWizardScreen.getBackwardBtn().setVisible(true);
-            mainWizardScreen.getSaveBtn().setVisible(true);
+            wizardScreen.getForwardBtn().setVisible(false);
+            wizardScreen.getBackwardBtn().setVisible(true);
+            wizardScreen.getSaveBtn().setVisible(true);
         } else {
-            mainWizardScreen.getBackwardBtn().setVisible(true);
-            mainWizardScreen.getForwardBtn().setVisible(true);
-            mainWizardScreen.getSaveBtn().setVisible(false);
+            wizardScreen.getBackwardBtn().setVisible(true);
+            wizardScreen.getForwardBtn().setVisible(true);
+            wizardScreen.getSaveBtn().setVisible(false);
         }
     }
 

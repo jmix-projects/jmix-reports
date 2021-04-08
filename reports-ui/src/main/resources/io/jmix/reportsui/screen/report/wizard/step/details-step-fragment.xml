@@ -27,24 +27,29 @@
 
     <layout width="100%" expand="groupBox">
         <groupBox id="groupBox" expand="spacer" spacing="true" width="100%">
-            <comboBox id="entity"
-                      caption="msg://entity"
-                      required="true" requiredMessage="msg://fillEntityMsg"
-                      description="msg://entityHintMsg" width="100%"/>
-            <comboBox id="templateFileFormat"
-                      caption="msg://templateFileFormat" required="true"
-                      requiredMessage="msg://fillTemplateTypeMsg"
-                      description="msg://templateTypeHintMsg" width="100%"/>
-            <textField id="reportName"
-                       property="name"
-                       caption="msg://reportName"
-                       required="true"
-                       requiredMessage="msg://fillReportNameMsg"
-                       width="100%"/>
-            <radioButtonGroup id="reportTypeGenerate"
-                              caption="msg://reportBuildType"
-                              description="msg://singleMultiEntityHintMsg"
-                              descriptionAsHtml="true"/>
+            <form dataContainer="reportDataDc" width="100%">
+                <column>
+                    <comboBox id="entityField"
+                              caption="msg://entity"
+                              required="true" requiredMessage="msg://fillEntityMsg"
+                              description="msg://entityHintMsg" width="100%"/>
+                    <comboBox id="templateFileTypeField"
+                              property="templateFileType"
+                              caption="msg://templateFileFormat" required="true"
+                              requiredMessage="msg://fillTemplateTypeMsg"
+                              description="msg://templateTypeHintMsg" width="100%"/>
+                    <textField id="reportNameField"
+                               property="name"
+                               caption="msg://reportName"
+                               required="true"
+                               requiredMessage="msg://fillReportNameMsg"
+                               width="100%"/>
+                    <radioButtonGroup id="reportTypeGenerateField"
+                                      caption="msg://reportBuildType"
+                                      description="msg://singleMultiEntityHintMsg"
+                                      descriptionAsHtml="true"/>
+                </column>
+            </form>
             <label id="spacer"/>
         </groupBox>
     </layout>

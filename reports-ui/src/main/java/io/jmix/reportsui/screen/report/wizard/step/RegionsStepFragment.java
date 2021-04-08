@@ -19,18 +19,12 @@ package io.jmix.reportsui.screen.report.wizard.step;
 import io.jmix.core.MessageTools;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.wizard.*;
-import io.jmix.reportsui.action.list.ItemOrderableAction;
 import io.jmix.reportsui.screen.ReportGuiManager;
 import io.jmix.reportsui.screen.report.wizard.ReportWizardCreator;
 import io.jmix.reportsui.screen.report.wizard.region.EntityTreeLookup;
 import io.jmix.reportsui.screen.report.wizard.region.RegionEditor;
-import io.jmix.ui.Dialogs;
-import io.jmix.ui.Notifications;
-import io.jmix.ui.ScreenBuilders;
-import io.jmix.ui.UiComponents;
-import io.jmix.ui.action.AbstractAction;
+import io.jmix.ui.*;
 import io.jmix.ui.action.Action;
-import io.jmix.ui.action.DialogAction;
 import io.jmix.ui.component.*;
 import io.jmix.ui.model.CollectionPropertyContainer;
 import io.jmix.ui.model.InstanceContainer;
@@ -86,11 +80,6 @@ public class RegionsStepFragment extends StepFragment {
     private CollectionPropertyContainer<ReportRegion> reportRegionsDc;
 
     @Autowired
-    private Button moveDownBtn;
-    @Autowired
-    private Button moveUpBtn;
-
-    @Autowired
     protected Button runBtn;
 
     protected Report lastGeneratedTmpReport;
@@ -112,10 +101,12 @@ public class RegionsStepFragment extends StepFragment {
 
     @Subscribe
     public void onInit(InitEvent event) {
-        initFrameHandler = new InitRegionsStepFrameHandler();
-        //beforeHideFrameHandler = new BeforeHideRegionsStepFrameHandler();
-
         initMoveAction();
+        initRegionsTable();
+    }
+
+    public void initRegionsTable() {
+        regionsTable.addGeneratedColumn("regionsGeneratedColumn", new ReportRegionTableColumnGenerator());
     }
 
     public void initMoveAction() {
@@ -159,7 +150,7 @@ public class RegionsStepFragment extends StepFragment {
         }
     }
 
-    private void openRegionEditorOnlyWithNestedCollections(final ReportRegion item) {//show lookup for choosing parent collection for tabulated region
+    protected void openRegionEditorOnlyWithNestedCollections(final ReportRegion item) {//show lookup for choosing parent collection for tabulated region
         final Map<String, Object> lookupParams = new HashMap<>();
         lookupParams.put("rootEntity", reportDataDc.getItem().getEntityTreeRootNode());
         lookupParams.put("collectionsOnly", Boolean.TRUE);
@@ -220,7 +211,7 @@ public class RegionsStepFragment extends StepFragment {
     public void onRunBtnClick(Button.ClickEvent event) {
         if (reportDataDc.getItem().getReportRegions().isEmpty()) {
             notifications.create(Notifications.NotificationType.TRAY)
-                    .withCaption(messages.getMessage("addRegionsWarn"))
+                    .withCaption(messages.getMessage(getClass(),"addRegionsWarn"))
                     .show();
             return;
         }
@@ -229,6 +220,19 @@ public class RegionsStepFragment extends StepFragment {
 
         if (lastGeneratedTmpReport != null) {
             reportGuiManager.runReport(lastGeneratedTmpReport, getFragment().getFrameOwner());
+        }
+    }
+
+    @Install(to = "regionsTable.remove", subject = "afterActionPerformedHandler")
+    protected void regionsTableRemoveAfterActionPerformedHandler(RemoveOperation.AfterActionPerformedEvent<ReportRegion> afterActionPerformedEvent) {
+        normalizeRegionPropertiesOrderNum();
+    }
+
+    protected void normalizeRegionPropertiesOrderNum() {
+        long normalizedIdx = 0;
+        List<ReportRegion> allItems = new ArrayList<>(reportRegionsDc.getItems());
+        for (ReportRegion item : allItems) {
+            item.setOrderNum(++normalizedIdx); //first must to be 1
         }
     }
 
@@ -288,7 +292,6 @@ public class RegionsStepFragment extends StepFragment {
             entityLbl.setStyleName(BOLD_LABEL_STYLE);
             entityLbl.setValue(messages.getMessage("entity"));
             Label entityValueLbl = uiComponents.create(Label.class);
-            //MetaClass wrapperMetaClass = currentReportRegionGeneratedColumn.getRegionPropertiesRootNode().getWrappedMetaClass();
 
             entityValueLbl.setValue(currentReportRegionGeneratedColumn.getNameForBand());
             entityValueLbl.setWidth(WIDTH_PERCENT_100);
@@ -314,14 +317,12 @@ public class RegionsStepFragment extends StepFragment {
             editBtn.setCaption(generateAttrsBtnCaption());
             editBtn.setStyleName("link");
             editBtn.setWidth(WIDTH_PERCENT_100);
-//            editBtn.setAction(editRegionAction);
             thirdRowAttrsLayout.add(entityLbl);
             thirdRowAttrsLayout.add(editBtn);
             return thirdRowAttrsLayout;
         }
 
         private String generateAttrsBtnCaption() {
-
             return StringUtils.abbreviate(StringUtils.join(
                     CollectionUtils.collect(currentReportRegionGeneratedColumn.getRegionProperties(),
                             RegionProperty::getHierarchicalLocalizedNameExceptRoot), ", "
@@ -330,107 +331,12 @@ public class RegionsStepFragment extends StepFragment {
         }
     }
 
-
-    protected class RemoveRegionAction extends AbstractAction {
-        public RemoveRegionAction() {
-            super("removeRegion");
-        }
-
-        @Override
-        public void actionPerform(Component component) {
-            if (regionsTable.getSingleSelected() != null) {
-                dialogs.createOptionDialog()
-                        .withCaption(messages.getMessage("dialogs.Confirmation"))
-                        .withMessage(messages.formatMessage("deleteRegion", regionsTable.getSingleSelected().getName()))
-                        .withActions(
-                                new DialogAction(DialogAction.Type.YES).withHandler(e -> {
-                                    reportRegionsDc.getMutableItems().remove(regionsTable.getSingleSelected());
-                                    normalizeRegionPropertiesOrderNum();
-                                }),
-                                new DialogAction(DialogAction.Type.NO).withPrimary(true)
-                        ).show();
-            }
-        }
-
-        @Override
-        public String getCaption() {
-            return "";
-        }
-
-        protected void normalizeRegionPropertiesOrderNum() {
-            long normalizedIdx = 0;
-            List<ReportRegion> allItems = new ArrayList<>(reportRegionsDc.getItems());
-            for (ReportRegion item : allItems) {
-                item.setOrderNum(++normalizedIdx); //first must to be 1
-            }
-        }
-    }
-
-//    protected class EditRegionAction extends AddRegionAction {
-//        public EditRegionAction() {
-//            super("removeRegion");
-//        }
-//
-//        @Override
-//        public void actionPerform(Component component) {
-//            if (wizard.regionsTable.getSingleSelected() != null) {
-//                Map<String, Object> editorParams = new HashMap<>();
-//                editorParams.put("rootEntity", wizard.regionsTable.getSingleSelected().getRegionPropertiesRootNode());
-//                editorParams.put("scalarOnly", Boolean.TRUE);
-//                editorParams.put("persistentOnly", ReportType.LIST_OF_ENTITIES_WITH_QUERY == wizard.reportTypeRadioButtonGroup.getValue());
-//
-//                RegionEditor regionEditor = wizard.screenBuilders.editor(ReportRegion.class, wizard)
-//                        .withScreenClass(RegionEditor.class)
-//                        .editEntity(wizard.regionsTable.getSingleSelected())
-//                        .withContainer(wizard.reportRegionsDc)
-//                        .withOpenMode(OpenMode.DIALOG)
-//                        .withOptions(new MapScreenOptions(editorParams))
-//                        .build();
-//                regionEditor.addAfterCloseListener(new RegionEditorCloseListener());
-//                regionEditor.show();
-//            }
-//        }
-//
-//        @Override
-//        public String getCaption() {
-//            return "";
-//        }
-//    }
-
-
     @Override
-    public void beforeShow() {
-        showAddRegion();
-        //setCorrectReportOutputType();
-        //TODO dialog options
-//            wizard.getDialogOptions()
-//                    .setHeight(wizard.wizardHeight).setHeightUnit(SizeUnit.PIXELS)
-//                    .center();
-    }
-
-    private void showAddRegion() {
+    public List<String> validateFragment() {
+        List<String> validationMessages = super.validateFragment();
         if (reportRegionsDc.getItems().isEmpty()) {
-//                if (reportDataDc.getItem().getReportTypeGenerate().isList()) {
-//                    if (entityTreeHasSimpleAttrs) {
-//                        addTabulatedRegionAction.actionPerform(getFragment());
-//                    }
-//                } else {
-//                    if (entityTreeHasSimpleAttrs && entityTreeHasCollections) {
-//                        addSimpleRegionAction.actionPerform(getFragment());
-//                    } else if (entityTreeHasSimpleAttrs) {
-//                        addSimpleRegionAction.actionPerform(getFragment());
-//                    } else if (entityTreeHasCollections) {
-//                        addTabulatedRegionAction.actionPerform(getFragment());
-//                    }
-//                }
+            validationMessages.add(messages.getMessage(getClass(), "addRegionsWarn"));
         }
-    }
-
-    protected class InitRegionsStepFrameHandler implements InitStepFrameHandler {
-        @Override
-        public void initFrame() {
-            regionsTable.addGeneratedColumn("regionsGeneratedColumn", new ReportRegionTableColumnGenerator());
-//            editRegionAction = new EditRegionAction();
-        }
+        return validationMessages;
     }
 }

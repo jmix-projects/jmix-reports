@@ -98,6 +98,7 @@ public class ReportData {
     @Transient
     protected String dataStore;
 
+    @JmixProperty
     @Transient
     protected TemplateFileType templateFileType;
 
