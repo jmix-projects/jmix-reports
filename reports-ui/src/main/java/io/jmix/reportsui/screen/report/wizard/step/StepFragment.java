@@ -70,6 +70,13 @@ public abstract class StepFragment extends ScreenFragment {
     public void beforeShow() {
     }
 
+    /**
+     * Entry point for adding functionality after the fragment is shown
+     */
+    public void afterShow() {
+
+    }
+
     public void initFragment() {
         for (Component c : getFragment().getComponents()) {
             if (c instanceof Field) {

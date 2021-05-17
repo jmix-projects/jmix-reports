@@ -39,6 +39,8 @@ public class QueryParameter {
 
     protected String javaClassName;
 
+    protected String entityMetaClassName;
+
     protected ParameterType parameterType;
 
     protected String defaultValue;
@@ -101,5 +103,13 @@ public class QueryParameter {
 
     public void setHidden(Boolean hidden) {
         this.hidden = hidden;
+    }
+
+    public String getEntityMetaClassName() {
+        return entityMetaClassName;
+    }
+
+    public void setEntityMetaClassName(String entityMetaClassName) {
+        this.entityMetaClassName = entityMetaClassName;
     }
 }
