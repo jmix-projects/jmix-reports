@@ -70,7 +70,7 @@
             </column>
             <column name="REPORT_TYPE" type="integer"/>
             <column name="DEFAULT_TEMPLATE_ID" type="${uuid.type}"/>
-            <column name="XML" type="longvarchar"/>
+            <column name="XML" type="clob"/>
             <column name="ROLES_IDX" type="varchar(1000)"/>
             <column name="SCREENS_IDX" type="varchar(1000)"/>
             <column name="INPUT_ENTITY_TYPES_IDX" type="varchar(1000)"/>
@@ -105,10 +105,10 @@
             <column name="IS_ALTERABLE_OUTPUT" type="boolean" defaultValue="false"/>
             <column name="IS_GROOVY" type="boolean" defaultValue="false"/>
             <column name="CUSTOM_DEFINED_BY" type="integer" defaultValue="100"/>
-            <column name="CUSTOM_CLASS" type="longvarchar"/>
+            <column name="CUSTOM_CLASS" type="clob"/>
             <column name="OUTPUT_NAME_PATTERN" type="varchar(255)"/>
             <column name="NAME" type="varchar(500)"/>
-            <column name="CONTENT" type="longvarbinary"/>
+            <column name="CONTENT" type="${byte_array.type}"/>
         </createTable>
 
         <addForeignKeyConstraint baseTableName="REPORT_REPORT"
@@ -131,9 +131,8 @@
             <column name="CREATED_BY" type="varchar(50)"/>
 
             <column name="REPORT_ID" type="${uuid.type}">
-                <constraints nullable="false"
-                             foreignKeyName="FK_REPORT_EXEC_TO_REPORT"
-                             references="REPORT_REPORT(ID)"/>
+                <constraints foreignKeyName="FK_REPORT_EXEC_TO_REPORT"
+                             references="REPORT_REPORT(ID)" />
             </column>
             <column name="REPORT_NAME" type="varchar(255)">
                 <constraints nullable="false"/>
