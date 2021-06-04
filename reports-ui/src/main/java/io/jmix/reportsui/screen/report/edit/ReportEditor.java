@@ -18,10 +18,7 @@ package io.jmix.reportsui.screen.report.edit;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.haulmont.yarg.structure.BandOrientation;
-import io.jmix.core.Messages;
-import io.jmix.core.Metadata;
-import io.jmix.core.MetadataTools;
-import io.jmix.core.SaveContext;
+import io.jmix.core.*;
 import io.jmix.core.common.util.ParamsMap;
 import io.jmix.reports.ReportPrintHelper;
 import io.jmix.reports.Reports;
@@ -36,10 +33,7 @@ import io.jmix.ui.component.Button;
 import io.jmix.ui.component.GroupBoxLayout;
 import io.jmix.ui.component.Tree;
 import io.jmix.ui.component.ValidationErrors;
-import io.jmix.ui.model.CollectionContainer;
-import io.jmix.ui.model.CollectionLoader;
-import io.jmix.ui.model.DataContext;
-import io.jmix.ui.model.InstanceContainer;
+import io.jmix.ui.model.*;
 import io.jmix.ui.screen.*;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.BooleanUtils;
@@ -47,10 +41,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.inject.Named;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @UiController("report_Report.edit")
 @UiDescriptor("report-edit.xml")
@@ -138,10 +130,22 @@ public class ReportEditor extends StandardEditor<Report> {
     protected ReportEditGeneralFragment generalFragment;
 
     @Autowired
-    private ScreenValidation screenValidation;
+    protected ScreenValidation screenValidation;
 
     @Autowired
-    private DataContext dataContext;
+    protected DataContext dataContext;
+
+    protected Map<UUID, FetchPlan> fetchPlansByDataSet = new HashMap<>();
+
+    @Subscribe(id = "reportDl", target = Target.DATA_LOADER)
+    public void onReportDlPostLoad(InstanceLoader.PostLoadEvent<Report> event) {
+        Report report = reports.convertToReport(event.getLoadedEntity().getXml());
+        report.getBands().stream()
+                .flatMap(bandDefinition -> bandDefinition.getDataSets().stream())
+                .filter(dataSet -> dataSet.getFetchPlan() != null)
+                .forEach(dataSet -> fetchPlansByDataSet.put(dataSet.getId(), dataSet.getFetchPlan()));
+        setFetchPlans();
+    }
 
     @Subscribe
     protected void initNewItem(InitEntityEvent<Report> event) {
@@ -200,10 +204,11 @@ public class ReportEditor extends StandardEditor<Report> {
     protected void onAfterInit(AfterInitEvent event) {
         bandTree.expandTree();
 
-        //bandEditor.setBandDefinition(bandTree.getSingleSelected());
         if (bandTree.getSingleSelected() == null) {
             bandEditor.setEnabled(false);
         }
+
+        bandEditor.setFetchPlans(fetchPlansByDataSet);
     }
 
     @Install(target = Target.DATA_CONTEXT)
@@ -296,8 +301,22 @@ public class ReportEditor extends StandardEditor<Report> {
     }
 
     protected void addCommitListeners() {
+        setFetchPlans();
         String xml = reports.convertToString(getEditedEntity());
         getEditedEntity().setXml(xml);
+    }
+
+    protected void setFetchPlans() {
+        if (!fetchPlansByDataSet.isEmpty()) {
+            List<DataSet> dataSets = bandsDc.getItems()
+                    .stream()
+                    .flatMap(bandDefinition -> bandDefinition.getDataSets().stream())
+                    .collect(Collectors.toList());
+            fetchPlansByDataSet.forEach((key, value) -> dataSets.stream()
+                    .filter(dataSet -> dataSet.getId().equals(key))
+                    .findFirst()
+                    .ifPresent(dataSet -> dataSet.setFetchPlan(value)));
+        }
     }
 
     protected void checkForNameDuplication(ValidationErrors errors, Multimap<String, BandDefinition> names) {
