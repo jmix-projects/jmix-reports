@@ -144,7 +144,7 @@ public class ReportEditor extends StandardEditor<Report> {
                 .flatMap(bandDefinition -> bandDefinition.getDataSets().stream())
                 .filter(dataSet -> dataSet.getFetchPlan() != null)
                 .forEach(dataSet -> fetchPlansByDataSet.put(dataSet.getId(), dataSet.getFetchPlan()));
-        setFetchPlans();
+        fillFetchPlans();
     }
 
     @Subscribe
@@ -301,21 +301,18 @@ public class ReportEditor extends StandardEditor<Report> {
     }
 
     protected void addCommitListeners() {
-        setFetchPlans();
+        fillFetchPlans();
         String xml = reports.convertToString(getEditedEntity());
         getEditedEntity().setXml(xml);
     }
 
-    protected void setFetchPlans() {
+    protected void fillFetchPlans() {
         if (!fetchPlansByDataSet.isEmpty()) {
-            List<DataSet> dataSets = bandsDc.getItems()
+            bandsDc.getItems()
                     .stream()
                     .flatMap(bandDefinition -> bandDefinition.getDataSets().stream())
-                    .collect(Collectors.toList());
-            fetchPlansByDataSet.forEach((key, value) -> dataSets.stream()
-                    .filter(dataSet -> dataSet.getId().equals(key))
-                    .findFirst()
-                    .ifPresent(dataSet -> dataSet.setFetchPlan(value)));
+                    .filter(dataSet -> fetchPlansByDataSet.containsKey(dataSet.getId()))
+                    .forEach(dataSet -> dataSet.setFetchPlan(fetchPlansByDataSet.get(dataSet.getId())));
         }
     }
 
