@@ -17,50 +17,23 @@
 package io.jmix.reports.runner;
 
 import com.haulmont.yarg.reporting.ReportOutputDocument;
-import io.jmix.reports.entity.ReportOutputType;
-import io.jmix.reports.entity.ReportTemplate;
-
-import java.util.Map;
+import io.jmix.reports.entity.Report;
 
 /**
- * Provides methods for configuring a single "run report" operation and running the report.
- *
- * Instances of this interface must be obtained by the {@link io.jmix.reports.runner.ReportRunners}.
+ * Interface is used for running reports
  */
 public interface ReportRunner {
 
     /**
-     * Sets report parameters
+     * Runs the report based on the information from the {@link ReportRunContext}. The run context may be created
+     * manually using the constructor or using the {@link ReportRunContextBuilder} builder.
+     *
+     * @param context the object that contains all information required to run the report
+     * @return report execution result
      */
-    ReportRunner withParams(Map<String, Object> params);
+    ReportOutputDocument runReport(ReportRunContext context);
 
-    /**
-     * Adds a single report parameter
-     */
-    ReportRunner addParam(String name, Object value);
+    ReportRunContextBuilder createRunContextBuilderByReportCode(String reportCode);
 
-    /**
-     * Sets the report template code that will be used for report generation
-     */
-    ReportRunner withTemplateCode(String templateCode);
-
-    /**
-     * Sets the report template instance that will be used for report generation
-     */
-    ReportRunner withTemplate(ReportTemplate template);
-
-    /**
-     * Sets the report output type
-     */
-    ReportRunner withOutputType(ReportOutputType outputType);
-
-    /**
-     * Sets the output name pattern
-     */
-    ReportRunner withOutputNamePattern(String outputNamePattern);
-
-    /**
-     * Runs the report and returns the generated {@link ReportOutputDocument}
-     */
-    ReportOutputDocument run();
+    ReportRunContextBuilder createRunContextBuilderByReportEntity(Report report);
 }

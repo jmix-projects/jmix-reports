@@ -14,29 +14,35 @@
  * limitations under the License.
  */
 
-package io.jmix.reports.runner.impl;
+package io.jmix.reports.runner;
 
 import io.jmix.reports.entity.Report;
-import io.jmix.reports.runner.ReportRunner;
-import io.jmix.reports.runner.ReportRunners;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-@Component("report_ReportRunners")
-public class ReportRunnersImpl implements ReportRunners {
+/**
+ * Class is used for creating instances of {@link ReportRunContextBuilder}
+ * <p>
+ * Usage example:
+ * <pre>
+ * reportRunContextBuilders.createByReportCode("order-report")
+ *  .withOutputType(ReportOutputType.PDF)
+ *  .addParam("order", order)
+ *  .build();
+ * </pre>
+ */
+@Component("report_ReportRunContextBuilders")
+public class ReportRunContextBuilders {
 
     @Autowired
-    private ObjectProvider<ReportRunner> reportRunnerObjectProvider;
+    private ObjectProvider<ReportRunContextBuilder> reportRunContextObjectProvider;
 
-    @Override
-    public ReportRunner byReportEntity(Report reportEntity) {
-        return reportRunnerObjectProvider.getObject(reportEntity);
+    public ReportRunContextBuilder createByReportCode(String reportCode) {
+        return reportRunContextObjectProvider.getObject(reportCode);
     }
 
-    @Override
-    public ReportRunner byReportCode(String reportCode) {
-        return reportRunnerObjectProvider.getObject(reportCode);
+    public ReportRunContextBuilder createByReportEntity(Report report) {
+        return reportRunContextObjectProvider.getObject(report);
     }
-
 }
