@@ -22,7 +22,9 @@ import io.jmix.core.Id;
 import io.jmix.core.Messages;
 import io.jmix.core.common.util.ParamsMap;
 import io.jmix.reports.entity.Report;
-import io.jmix.reportsui.screen.ReportGuiManager;
+import io.jmix.reportsui.runner.ShowParametersDialogMode;
+import io.jmix.reportsui.runner.UiReportRunContext;
+import io.jmix.reportsui.runner.UiReportRunner;
 import io.jmix.reportsui.screen.report.run.InputParametersDialog;
 import io.jmix.reportsui.screen.report.run.InputParametersFragment;
 import io.jmix.reportsui.screen.report.run.ReportRun;
@@ -42,6 +44,8 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
+import static io.jmix.reports.util.ReportTemplateUtils.inputParametersRequiredByTemplates;
+
 /**
  * Standard action for running the reports associated with current screen or list component.
  * <p>
@@ -60,7 +64,7 @@ public class RunReportAction extends ListAction {
 
     protected DataManager dataManager;
     protected ScreenBuilders screenBuilders;
-    protected ReportGuiManager reportGuiManager;
+    protected UiReportRunner uiReportRunner;
 
     public RunReportAction() {
         this(ID);
@@ -91,8 +95,8 @@ public class RunReportAction extends ListAction {
     }
 
     @Autowired
-    public void setReportGuiManager(ReportGuiManager reportGuiManager) {
-        this.reportGuiManager = reportGuiManager;
+    public void setUiReportRunner(UiReportRunner uiReportRunner) {
+        this.uiReportRunner = uiReportRunner;
     }
 
     @Override
@@ -134,10 +138,13 @@ public class RunReportAction extends ListAction {
 
             if (report.getInputParameters() != null
                     && report.getInputParameters().size() > 0
-                    || reportGuiManager.inputParametersRequiredByTemplates(report)) {
+                    || inputParametersRequiredByTemplates(report)) {
                 openReportParamsDialog(report, screen);
             } else {
-                reportGuiManager.printReport(report, Collections.emptyMap(), screen);
+                uiReportRunner.runAndShow(new UiReportRunContext(report)
+                        .setScreen(screen)
+                        .setShowParametersDialogMode(ShowParametersDialogMode.NO)
+                        .setParams(Collections.emptyMap()));
             }
         }
     }

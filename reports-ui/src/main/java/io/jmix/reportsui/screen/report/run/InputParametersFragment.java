@@ -16,16 +16,15 @@
 
 package io.jmix.reportsui.screen.report.run;
 
+import com.haulmont.yarg.util.converter.ObjectToStringConverter;
 import io.jmix.core.DataManager;
 import io.jmix.core.Id;
 import io.jmix.reports.ParameterClassResolver;
 import io.jmix.reports.ReportPrintHelper;
-import io.jmix.reports.Reports;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportInputParameter;
 import io.jmix.reports.entity.ReportOutputType;
 import io.jmix.reports.entity.ReportTemplate;
-import io.jmix.reportsui.screen.ReportGuiManager;
 import io.jmix.reportsui.screen.report.validators.ReportCollectionValidator;
 import io.jmix.reportsui.screen.report.validators.ReportParamFieldValidator;
 import io.jmix.ui.component.*;
@@ -38,6 +37,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import java.util.*;
+
+import static io.jmix.reports.util.ReportTemplateUtils.containsAlterableTemplate;
+import static io.jmix.reports.util.ReportTemplateUtils.supportAlterableForTemplate;
 
 @UiController("report_InputParameters.fragment")
 @UiDescriptor("input-parameters-fragment.xml")
@@ -72,13 +74,10 @@ public class InputParametersFragment extends ScreenFragment {
     protected CollectionLoader<ReportTemplate> templateReportsDl;
 
     @Autowired
-    protected Reports reports;
+    protected ObjectToStringConverter objectToStringConverter;
 
     @Autowired
     protected DataManager dataManager;
-
-    @Autowired
-    protected ReportGuiManager reportGuiManager;
 
     @Autowired
     protected ParameterClassResolver parameterClassResolver;
@@ -172,7 +171,7 @@ public class InputParametersFragment extends ScreenFragment {
         if (value == null && parameter.getDefaultValue() != null) {
             Class parameterClass = parameterClassResolver.resolveClass(parameter);
             if (parameterClass != null) {
-                value = reports.convertFromString(parameterClass, parameter.getDefaultValue());
+                value = objectToStringConverter.convertFromString(parameterClass, parameter.getDefaultValue());
             }
         }
 
@@ -215,7 +214,7 @@ public class InputParametersFragment extends ScreenFragment {
     }
 
     protected void updateOutputTypes() {
-        if (!reportGuiManager.containsAlterableTemplate(report)) {
+        if (!containsAlterableTemplate(report)) {
             setOutputTypeVisible(false);
             return;
         }
@@ -227,7 +226,7 @@ public class InputParametersFragment extends ScreenFragment {
             template = report.getDefaultTemplate();
         }
 
-        if (template != null && reportGuiManager.supportAlterableForTemplate(template)) {
+        if (template != null && supportAlterableForTemplate(template)) {
             List<ReportOutputType> outputTypes = ReportPrintHelper.getInputOutputTypesMapping().get(template.getExt());
             if (outputTypes != null && !outputTypes.isEmpty()) {
                 outputTypeComboBox.setOptionsList(outputTypes);

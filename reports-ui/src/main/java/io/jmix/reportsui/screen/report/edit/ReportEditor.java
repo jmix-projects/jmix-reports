@@ -21,7 +21,8 @@ import com.haulmont.yarg.structure.BandOrientation;
 import io.jmix.core.*;
 import io.jmix.core.common.util.ParamsMap;
 import io.jmix.reports.ReportPrintHelper;
-import io.jmix.reports.Reports;
+import io.jmix.reports.ReportsPersistence;
+import io.jmix.reports.ReportsSerialization;
 import io.jmix.reports.entity.*;
 import io.jmix.reportsui.screen.definition.edit.BandDefinitionEditor;
 import io.jmix.reportsui.screen.report.edit.tabs.ReportEditGeneralFragment;
@@ -84,7 +85,10 @@ public class ReportEditor extends StandardEditor<Report> {
     protected UiComponents uiComponents;
 
     @Autowired
-    protected Reports reports;
+    protected ReportsPersistence reportsPersistence;
+
+    @Autowired
+    protected ReportsSerialization reportsSerialization;
 
     @Autowired
     protected CollectionContainer<BandDefinition> bandsDc;
@@ -138,7 +142,7 @@ public class ReportEditor extends StandardEditor<Report> {
 
     @Subscribe(id = "reportDl", target = Target.DATA_LOADER)
     public void onReportDlPostLoad(InstanceLoader.PostLoadEvent<Report> event) {
-        Report report = reports.convertToReport(event.getLoadedEntity().getXml());
+        Report report = reportsSerialization.convertToReport(event.getLoadedEntity().getXml());
         report.getBands().stream()
                 .flatMap(bandDefinition -> bandDefinition.getDataSets().stream())
                 .filter(dataSet -> dataSet.getFetchPlan() != null)
@@ -223,7 +227,7 @@ public class ReportEditor extends StandardEditor<Report> {
         }
 
         if (reportToStore != null) {
-            result.add(reports.storeReportEntity(reportToStore));
+            result.add(reportsPersistence.save(reportToStore));
         }
         return result;
     }
@@ -301,7 +305,7 @@ public class ReportEditor extends StandardEditor<Report> {
 
     protected void addCommitListeners() {
         fillFetchPlans();
-        String xml = reports.convertToString(getEditedEntity());
+        String xml = reportsSerialization.convertToString(getEditedEntity());
         getEditedEntity().setXml(xml);
     }
 

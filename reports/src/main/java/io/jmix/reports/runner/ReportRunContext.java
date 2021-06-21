@@ -25,11 +25,33 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Class stores the information required for report running. The instance of the class may be created using the
- * constructor or using the {@link ReportRunContextBuilders} bean.
+ * Class stores the following information required for report running:
+ * <ul>
+ *     <li>{@link Report} entity</li>
+ *     <li>{@link ReportTemplate} entity: if not specified the default template is used</li>
+ *     <li>Input parameters</li>
+ *     <li>Type of output document</li>
+ *     <li>Name of output document</li>
+ * </ul>
+ * <br/>
+ * The instance of the class may be created using the
+ * constructor or using the {@link ReportRunner} bean.
  *
+ * <p/>
+ * Creation examples:
+ * <pre>
+ * ReportRunContext context = new ReportRunContext(report)
+ *                 .addParam("customer", customer)
+ *                 .addParam("minOrdersDate", date)
+ *                 .setOutputNamePattern("Orders");
+ *
+ * ReportRunContext context = new ReportRunContext(report)
+ *                 .setReportTemplate(template)
+ *                 .setOutputType(ReportOutputType.PDF)
+ *                 .setParams(paramsMap);
+ * </pre>
  * @see ReportRunContextBuilder
- * @see ReportRunContextBuilders
+ * @see ReportRunner
  */
 public class ReportRunContext {
     protected Report report;
@@ -42,6 +64,13 @@ public class ReportRunContext {
         return report;
     }
 
+    public ReportRunContext() {
+    }
+
+    public ReportRunContext(Report report) {
+        this.report = report;
+    }
+
     public ReportRunContext setReport(Report report) {
         this.report = report;
         return this;
@@ -52,8 +81,13 @@ public class ReportRunContext {
         return reportTemplate;
     }
 
-    public ReportRunContext setReportTemplate(ReportTemplate reportTemplate) {
+    public ReportRunContext setReportTemplate(@Nullable ReportTemplate reportTemplate) {
         this.reportTemplate = reportTemplate;
+        return this;
+    }
+
+    public ReportRunContext addParam(String alias, Object value) {
+        this.params.put(alias, value);
         return this;
     }
 
@@ -62,7 +96,7 @@ public class ReportRunContext {
         return outputType;
     }
 
-    public ReportRunContext setOutputType(ReportOutputType outputType) {
+    public ReportRunContext setOutputType(@Nullable ReportOutputType outputType) {
         this.outputType = outputType;
         return this;
     }

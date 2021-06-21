@@ -22,9 +22,11 @@ import io.jmix.core.Messages;
 import io.jmix.core.MetadataTools;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.core.security.CurrentAuthentication;
+import io.jmix.reports.ReportSecurityManager;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportGroup;
-import io.jmix.reportsui.screen.ReportGuiManager;
+import io.jmix.reportsui.runner.ShowParametersDialogMode;
+import io.jmix.reportsui.runner.UiReportRunner;
 import io.jmix.ui.action.Action;
 import io.jmix.ui.component.*;
 import io.jmix.ui.model.CollectionContainer;
@@ -47,7 +49,7 @@ public class ReportRun extends StandardLookup<Report> {
     protected Table<Report> reportsTable;
 
     @Autowired
-    protected ReportGuiManager reportGuiManager;
+    protected ReportSecurityManager reportSecurityManager;
 
     @Autowired
     protected CollectionContainer<Report> reportsDc;
@@ -79,6 +81,9 @@ public class ReportRun extends StandardLookup<Report> {
     @Autowired
     protected MetadataTools metadataTools;
 
+    @Autowired
+    protected UiReportRunner uiReportRunner;
+
     protected List<Report> reports;
 
     protected MetaClass metaClassParameter;
@@ -101,7 +106,7 @@ public class ReportRun extends StandardLookup<Report> {
     protected void onBeforeShow(BeforeShowEvent event) {
         List<Report> reports = this.reports;
         if (reports == null) {
-            reports = reportGuiManager.getAvailableReports(screenParameter, currentAuthentication.getUser(),
+            reports = reportSecurityManager.getAvailableReports(screenParameter, currentAuthentication.getUser(),
                     metaClassParameter);
         }
 
@@ -121,7 +126,10 @@ public class ReportRun extends StandardLookup<Report> {
             report = dataManager.load(Id.of(report))
                     .fetchPlan("report.edit")
                     .one();
-            reportGuiManager.runReport(report, ReportRun.this);
+            uiReportRunner.byReportEntity(report)
+                    .withScreen(ReportRun.this)
+                    .showParametersDialogMode(ShowParametersDialogMode.IF_REQUIRED)
+                    .runAndShow();
         }
     }
 
@@ -147,7 +155,7 @@ public class ReportRun extends StandardLookup<Report> {
         Date dateFilterValue = updatedDateFilter.getValue();
 
         List<Report> reports =
-                reportGuiManager.getAvailableReports(screenParameter, currentAuthentication.getUser(),
+                reportSecurityManager.getAvailableReports(screenParameter, currentAuthentication.getUser(),
                         metaClassParameter)
                         .stream()
                         .filter(report -> {

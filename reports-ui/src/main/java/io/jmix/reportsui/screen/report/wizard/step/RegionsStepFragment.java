@@ -20,7 +20,8 @@ import io.jmix.core.MessageTools;
 import io.jmix.core.metamodel.model.MetaClass;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.wizard.*;
-import io.jmix.reportsui.screen.ReportGuiManager;
+import io.jmix.reportsui.runner.ShowParametersDialogMode;
+import io.jmix.reportsui.runner.UiReportRunner;
 import io.jmix.reportsui.screen.report.wizard.ReportWizardCreator;
 import io.jmix.reportsui.screen.report.wizard.region.EntityTreeLookup;
 import io.jmix.reportsui.screen.report.wizard.region.RegionEditor;
@@ -84,7 +85,7 @@ public class RegionsStepFragment extends StepFragment {
     protected MessageTools messageTools;
 
     @Autowired
-    protected ReportGuiManager reportGuiManager;
+    protected UiReportRunner uiReportRunner;
 
     @Autowired
     private InstanceContainer<ReportData> reportDataDc;
@@ -296,7 +297,10 @@ public class RegionsStepFragment extends StepFragment {
         lastGeneratedTmpReport = reportWizardCreator.buildReport(true);
 
         if (lastGeneratedTmpReport != null) {
-            reportGuiManager.runReport(lastGeneratedTmpReport, getFragment().getFrameOwner());
+            uiReportRunner.byReportEntity(lastGeneratedTmpReport)
+                    .withScreen(getFragment().getFrameOwner())
+                    .showParametersDialogMode(ShowParametersDialogMode.IF_REQUIRED)
+                    .runAndShow();
         }
     }
 

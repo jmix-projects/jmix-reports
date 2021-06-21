@@ -16,18 +16,19 @@
 
 package io.jmix.reportsui.screen.report.wizard.step;
 
+import com.haulmont.yarg.util.converter.ObjectToStringConverter;
 import io.jmix.core.metamodel.datatype.FormatStringsRegistry;
 import io.jmix.core.security.CurrentAuthentication;
 import io.jmix.data.QueryParser;
 import io.jmix.data.QueryTransformerFactory;
-import io.jmix.reports.Reports;
 import io.jmix.reports.entity.ParameterType;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.wizard.QueryParameter;
 import io.jmix.reports.entity.wizard.RegionProperty;
 import io.jmix.reports.entity.wizard.ReportData;
 import io.jmix.reports.entity.wizard.ReportRegion;
-import io.jmix.reportsui.screen.ReportGuiManager;
+import io.jmix.reportsui.runner.ShowParametersDialogMode;
+import io.jmix.reportsui.runner.UiReportRunner;
 import io.jmix.reportsui.screen.report.wizard.ReportWizardCreator;
 import io.jmix.reportsui.screen.report.wizard.query.JpqlQueryBuilder;
 import io.jmix.ui.Dialogs;
@@ -80,16 +81,16 @@ public class QueryStepFragment extends StepFragment implements Suggester {
     protected Report lastGeneratedTmpReport;
 
     @Autowired
-    protected ReportGuiManager reportGuiManager;
+    protected ObjectToStringConverter objectToStringConverter;
+
+    @Autowired
+    protected UiReportRunner uiReportRunner;
 
     @Autowired
     protected FormatStringsRegistry formatStringsRegistry;
 
     @Autowired
     protected CurrentAuthentication currentAuthentication;
-
-    @Autowired
-    protected Reports reports;
 
     protected boolean regenerateQuery = false;
 
@@ -129,7 +130,10 @@ public class QueryStepFragment extends StepFragment implements Suggester {
         lastGeneratedTmpReport = reportWizardCreator.buildReport(true);
 
         if (lastGeneratedTmpReport != null) {
-            reportGuiManager.runReport(lastGeneratedTmpReport, getFragment().getFrameOwner());
+            uiReportRunner.byReportEntity(lastGeneratedTmpReport)
+                    .withScreen(getFragment().getFrameOwner())
+                    .showParametersDialogMode(ShowParametersDialogMode.IF_REQUIRED)
+                    .runAndShow();
         }
     }
 
@@ -246,7 +250,7 @@ public class QueryStepFragment extends StepFragment implements Suggester {
 
     protected void setDefaultValue(QueryParameter queryParameter) {
         try {
-            Object value = reports.convertFromString(Class.forName(queryParameter.getJavaClassName()), queryParameter.getDefaultValueString());
+            Object value = objectToStringConverter.convertFromString(Class.forName(queryParameter.getJavaClassName()), queryParameter.getDefaultValueString());
             queryParameter.setDefaultValue(value);
             queryParametersDc.replaceItem(queryParameter);
         } catch (ClassNotFoundException e) {

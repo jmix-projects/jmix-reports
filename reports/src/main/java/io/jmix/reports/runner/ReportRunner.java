@@ -31,9 +31,48 @@ public interface ReportRunner {
      * @param context the object that contains all information required to run the report
      * @return report execution result
      */
-    ReportOutputDocument runReport(ReportRunContext context);
+    ReportOutputDocument run(ReportRunContext context);
 
-    ReportRunContextBuilder createRunContextBuilderByReportCode(String reportCode);
+    /**
+     * Creates an instance of {@link ReportRunContextBuilder} for a report with specified code.
+     *
+     * <p/>
+     * Usage examples:
+     * <pre>
+     * ReportRunContext context = reportRunner.byReportCode("orders-report")
+     *                 .withParams(paramsMap)
+     *                 .withOutputType(ReportOutputType.PDF)
+     *                 .build();
+     *
+     *  ReportOutputDocument document = reportRunner.byReportCode("orders-report")
+     *                 .addParam("orders", ordersList)
+     *                 .withTemplateCode("orders-template")
+     *                 .run();
+     * </pre>
+     * @param reportCode report code
+     * @return builder to create an instance of {@link ReportRunContext} or to run a report
+     */
+    ReportRunContextBuilder byReportCode(String reportCode);
 
-    ReportRunContextBuilder createRunContextBuilderByReportEntity(Report report);
+    /**
+     * Creates an instance of {@link ReportRunContextBuilder} for specified report.
+     * <p/>
+     *
+     * Usage examples:
+     * <pre>
+     * ReportRunContext context = reportRunner.byReportEntity(report)
+     *                 .withParams(paramsMap)
+     *                 .withTemplateCode("orders-template")
+     *                 .build();
+     *
+     * ReportOutputDocument document = reportRunner.byReportEntity(report)
+     *                 .addParam("orders", orders)
+     *                 .withOutputType(ReportOutputType.PDF)
+     *                 .withOutputNamePattern("Orders")
+     *                 .run();
+     * </pre>
+     * @param report report entity
+     * @return builder to create an instance of {@link ReportRunContext} or to run a report
+     */
+    ReportRunContextBuilder byReportEntity(Report report);
 }

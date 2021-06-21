@@ -31,7 +31,7 @@ import io.jmix.reports.entity.JmixTableData;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportOutputType;
 import io.jmix.reports.entity.ReportTemplate;
-import io.jmix.reportsui.screen.ReportGuiManager;
+import io.jmix.reports.runner.ReportRunner;
 import io.jmix.ui.Actions;
 import io.jmix.ui.Fragments;
 import io.jmix.ui.UiComponents;
@@ -48,6 +48,7 @@ import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -56,11 +57,8 @@ import java.util.Set;
 @UiController("report_ShowReportTable.screen")
 @UiDescriptor("show-report-table-screen.xml")
 public class ShowReportTableScreen extends Screen {
-
     @Autowired
     protected GroupBoxLayout reportParamsBox;
-    @Autowired
-    protected ReportGuiManager reportGuiManager;
     @Autowired
     protected UiComponents uiComponents;
     @Autowired
@@ -93,6 +91,9 @@ public class ShowReportTableScreen extends Screen {
     @Autowired
     private DatatypeRegistry datatypeRegistry;
 
+    @Autowired
+    protected ReportRunner reportRunner;
+
     protected Report report;
 
     protected String templateCode;
@@ -107,7 +108,7 @@ public class ShowReportTableScreen extends Screen {
         this.report = report;
     }
 
-    public void setTemplateCode(String templateCode) {
+    public void setTemplateCode(@Nullable String templateCode) {
         this.templateCode = templateCode;
     }
 
@@ -166,7 +167,10 @@ public class ShowReportTableScreen extends Screen {
                 Report report = inputParametersFrame.getReport();
                 if (templateCode == null || templateCode.isEmpty())
                     templateCode = findTableCode(report);
-                ReportOutputDocument reportResult = reportGuiManager.getReportResult(report, parameters, templateCode);
+                ReportOutputDocument reportResult = reportRunner.byReportEntity(report)
+                        .withParams(parameters)
+                        .withTemplateCode(templateCode)
+                        .run();
                 JmixTableData dto = (JmixTableData) serialization.deserialize(reportResult.getContent());
                 drawTables(dto);
             } else {

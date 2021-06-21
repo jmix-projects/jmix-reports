@@ -19,9 +19,12 @@ import io.jmix.core.*;
 import io.jmix.core.accesscontext.CrudEntityContext;
 import io.jmix.core.common.util.ParamsMap;
 import io.jmix.core.metamodel.model.MetaClass;
-import io.jmix.reports.Reports;
+import io.jmix.reports.ReportImportExport;
+import io.jmix.reports.ReportsPersistence;
 import io.jmix.reports.entity.Report;
-import io.jmix.reportsui.screen.ReportGuiManager;
+import io.jmix.reports.entity.ReportTemplate;
+import io.jmix.reports.util.ReportsUtils;
+import io.jmix.reportsui.runner.UiReportRunner;
 import io.jmix.reportsui.screen.report.edit.ReportEditor;
 import io.jmix.reportsui.screen.report.history.ReportExecutionBrowser;
 import io.jmix.reportsui.screen.report.importdialog.ReportImportDialog;
@@ -47,6 +50,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Set;
 
+import static io.jmix.reports.util.ReportTemplateUtils.inputParametersRequiredByTemplates;
+
 @UiController("report_Report.browse")
 @UiDescriptor("report-browse.xml")
 @LookupComponent("reportsTable")
@@ -54,9 +59,9 @@ import java.util.Set;
 public class ReportBrowser extends StandardLookup<Report> {
 
     @Autowired
-    protected ReportGuiManager reportGuiManager;
+    protected ReportsPersistence reports;
     @Autowired
-    protected Reports reports;
+    protected ReportImportExport reportImportExport;
     @Autowired
     protected UiProperties uiProperties;
     @Autowired
@@ -89,6 +94,12 @@ public class ReportBrowser extends StandardLookup<Report> {
     protected ScreenBuilders screenBuilders;
     @Autowired
     protected MetadataTools metadataTools;
+
+    @Autowired
+    protected UiReportRunner uiReportRunner;
+
+    @Autowired
+    protected ReportsUtils reportsUtils;
 
     @Subscribe("popupCreateBtn.wizard")
     protected void onPopupCreateBtnWizard(Action.ActionPerformedEvent event) {
@@ -135,8 +146,7 @@ public class ReportBrowser extends StandardLookup<Report> {
         Report report = reportsTable.getSingleSelected();
         report = reloadReport(report, fetchPlanRepository.findFetchPlan(
                 metadata.getClass(Report.class), "report.edit"));
-        if (CollectionUtils.isNotEmpty(report.getInputParameters()) ||
-                reportGuiManager.inputParametersRequiredByTemplates(report)) {
+        if (CollectionUtils.isNotEmpty(report.getInputParameters()) || inputParametersRequiredByTemplates(report)) {
             screens.create(InputParametersDialog.class, OpenMode.DIALOG,
                     new MapScreenOptions(ParamsMap.of("report", report)))
                     .show()
@@ -144,7 +154,10 @@ public class ReportBrowser extends StandardLookup<Report> {
                         reportsTable.focus();
                     });
         } else {
-            reportGuiManager.printReport(report, Collections.emptyMap(), ReportBrowser.this);
+            uiReportRunner.byReportEntity(report)
+                    .withParams(Collections.emptyMap())
+                    .withScreen(ReportBrowser.this)
+                    .runAndShow();
         }
     }
 
@@ -166,7 +179,7 @@ public class ReportBrowser extends StandardLookup<Report> {
     protected void onTableExport(Action.ActionPerformedEvent event) {
         Set<Report> reportsTableSelected = reportsTable.getSelected();
         if (!reportsTableSelected.isEmpty()) {
-            ByteArrayDataProvider provider = new ByteArrayDataProvider(reports.exportReports(reportsTableSelected), uiProperties.getSaveExportedByteArrayDataThresholdBytes(), coreProperties.getTempDir());
+            ByteArrayDataProvider provider = new ByteArrayDataProvider(reportImportExport.exportReports(reportsTableSelected), uiProperties.getSaveExportedByteArrayDataThresholdBytes(), coreProperties.getTempDir());
             if (reportsTableSelected.size() > 1) {
                 downloader.download(provider, "Reports", DownloadFormat.ZIP);
             } else if (reportsTableSelected.size() == 1) {
@@ -179,13 +192,29 @@ public class ReportBrowser extends StandardLookup<Report> {
     protected void onTableCopy(Action.ActionPerformedEvent event) {
         Report report = reportsTable.getSingleSelected();
         if (report != null) {
-            reports.copyReport(report);
+            copyReport(report);
             reportDl.load();
         } else {
             notifications.create(Notifications.NotificationType.HUMANIZED)
                     .withCaption(messages.getMessage(getClass(), "notification.selectReport"))
                     .show();
         }
+    }
+
+    protected Report copyReport(Report source) {
+        source = dataManager.load(Id.of(source))
+                .fetchPlan("report.edit")
+                .one();
+        Report copiedReport = metadataTools.deepCopy(source);
+        copiedReport.setId(UuidProvider.createUuid());
+        copiedReport.setName(reportsUtils.generateReportName(source.getName()));
+        copiedReport.setCode(null);
+        for (ReportTemplate copiedTemplate : copiedReport.getTemplates()) {
+            copiedTemplate.setId(UuidProvider.createUuid());
+        }
+
+        reports.save(copiedReport);
+        return copiedReport;
     }
 
     @Install(to = "reportsTable.copy", subject = "enabledRule")
