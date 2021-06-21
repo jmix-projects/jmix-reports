@@ -26,7 +26,7 @@ import java.util.Collection;
 public interface UiReportRunner {
     /**
      * Runs the report based on the information from the {@link UiReportRunContext} and shows the result. The run context may be created
-     * manually using the constructor or using the {@link UiReportRunContextBuilder} builder.
+     * manually using the constructor or using the {@link FluentUiReportRunner}.
      *
      * @param context the object that contains all information required to run the report from UI
      */
@@ -52,7 +52,7 @@ public interface UiReportRunner {
     void multiRun(UiReportRunContext context, String multiParamAlias, Collection multiParamValue);
 
     /**
-     * Creates an instance of {@link UiReportRunContextBuilder} for a report with specified code.
+     * Creates an instance of {@link FluentUiReportRunner} for a report with specified code.
      * <p/>
      * Usage examples:
      * <pre>
@@ -61,28 +61,34 @@ public interface UiReportRunner {
      *                 .withOutputNamePattern("Orders")
      *                 .showParametersDialogMode(ShowParametersDialogMode.IF_REQUIRED)
      *                 .runInBackground(RunInBackgroundMode.YES, screen)
-     *                 .build();
-     *
-     * UiReportRunContext context = uiReportRunner.byReportCode("orders-report")
-     *                 .addParam("orders", ordersList)
-     *                 .runInBackground(RunInBackgroundMode.NO)
-     *                 .showParametersDialogMode(ShowParametersDialogMode.NO)
-     *                 .build();
+     *                 .buildContext();
      *
      * uiReportRunner.byReportCode("orders-report")
      *                 .addParam("orders", ordersList)
-     *                 .withScreen(screen)
+     *                 .runInBackground(RunInBackgroundMode.NO)
+     *                 .showParametersDialogMode(ShowParametersDialogMode.NO)
+     *                 .runAndShow();
+     *
+     * uiReportRunner.byReportCode("orders-report")
+     *                 .addParam("orders", ordersList)
+     *                 .withOriginFrameOwner(screen)
      *                 .showParametersDialogMode(ShowParametersDialogMode.YES)
      *                 .runAndShow();
+     *
+     * uiReportRunner.byReportCode("customer-orders-report")
+     *                 .addParam("minOrdersDate", date)
+     *                 .withOutputType(ReportOutputType.PDF)
+     *                 .withTemplateCode(""orders-template"")
+     *                 .multiRun("customer", customersList);
      * </pre>
      *
      * @param reportCode report code
-     * @return builder to create an instance of {@link UiReportRunContext} or to run a report
+     * @return instance of {@link FluentUiReportRunner}
      */
-    UiReportRunContextBuilder byReportCode(String reportCode);
+    FluentUiReportRunner byReportCode(String reportCode);
 
     /**
-     * Creates an instance of {@link UiReportRunContextBuilder} for specified report.
+     * Creates an instance of {@link FluentUiReportRunner} for specified report.
      * <p/>
      * Usage examples:
      * <pre>
@@ -91,24 +97,30 @@ public interface UiReportRunner {
      *                 .withOutputNamePattern("Orders")
      *                 .showParametersDialogMode(ShowParametersDialogMode.IF_REQUIRED)
      *                 .runInBackground(RunInBackgroundMode.YES, screen)
-     *                 .build();
+     *                 .buildContext();
      *
-     * UiReportRunContext context = uiReportRunner.byReportEntity(report)
+     * uiReportRunner.byReportEntity(report)
      *                 .addParam("orders", ordersList)
      *                 .runInBackground(RunInBackgroundMode.NO)
      *                 .showParametersDialogMode(ShowParametersDialogMode.NO)
-     *                 .build();
+     *                 .runAndShow();
      *
      * uiReportRunner.byReportEntity(report)
      *                 .withTemplate(template)
      *                 .addParam("orders", ordersList)
-     *                 .withScreen(screen)
+     *                 .withOriginFrameOwner(screen)
      *                 .showParametersDialogMode(ShowParametersDialogMode.YES)
      *                 .runAndShow();
+     *
+     * uiReportRunner.byReportEntity(report)
+     *                 .addParam("minOrdersDate", date)
+     *                 .withOutputType(ReportOutputType.PDF)
+     *                 .withTemplateCode(""orders-template"")
+     *                 .multiRun("customer", customersList);
      * </pre>
      *
      * @param report report entity
-     * @return builder to create an instance of {@link UiReportRunContext} or to run a report
+     * @return instance of {@link FluentUiReportRunner}
      */
-    UiReportRunContextBuilder byReportEntity(Report report);
+    FluentUiReportRunner byReportEntity(Report report);
 }

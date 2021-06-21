@@ -38,10 +38,7 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * Class is used for creating instances of {@link ReportRunContext}. It allows to create run contexts using various
- * additional criteria, e.g. run context may be created either by {@link Report} entity or by report code.
- * <p/>
- * The following parameters can be specified to create {@link ReportRunContext}:
+ * Class is used to run a report using various additional criteria:
  * <ul>
  *     <li>{@link Report} entity or report code</li>
  *     <li>{@link ReportTemplate} entity or template code: if none of these fields is set, the default template is used.</li>
@@ -50,11 +47,11 @@ import java.util.Optional;
  *     <li>Input parameters</li>
  * </ul>
  * <br/>
- * Use the {@link ReportRunner} bean to obtain an instance of the {@link ReportRunContextBuilder}.
+ * Use the {@link ReportRunner} bean to obtain an instance of the {@link FluentReportRunner}.
  */
-@Component("report_ReportRunContextBuilder")
+@Component("report_FluentReportRunner")
 @Scope(BeanDefinition.SCOPE_PROTOTYPE)
-public class ReportRunContextBuilder {
+public class FluentReportRunner {
 
     private static final String REPORT_RUN_FETCH_PLAN = "report.edit";
 
@@ -66,7 +63,7 @@ public class ReportRunContextBuilder {
     private ReportOutputType outputType;
     private String outputNamePattern;
 
-    private static final Logger log = LoggerFactory.getLogger(ReportRunContextBuilder.class);
+    private static final Logger log = LoggerFactory.getLogger(FluentReportRunner.class);
 
     @Autowired
     private DataManager dataManager;
@@ -76,14 +73,15 @@ public class ReportRunContextBuilder {
 
     private ReportRunner reportRunner;
 
-    public ReportRunContextBuilder(Report report) {
+    public FluentReportRunner(Report report) {
         this.report = report;
     }
 
-    public ReportRunContextBuilder(String reportCode) {
+    public FluentReportRunner(String reportCode) {
         this.reportCode = reportCode;
     }
 
+    @Autowired
     public void setReportRunner(ReportRunner reportRunner) {
         this.reportRunner = reportRunner;
     }
@@ -92,9 +90,9 @@ public class ReportRunContextBuilder {
      * Sets a map with input parameters.
      *
      * @param params input parameters
-     * @return current instance of builder
+     * @return current instance of fluent runner
      */
-    public ReportRunContextBuilder withParams(Map<String, Object> params) {
+    public FluentReportRunner withParams(Map<String, Object> params) {
         this.params = params;
         return this;
     }
@@ -104,9 +102,9 @@ public class ReportRunContextBuilder {
      *
      * @param alias parameter alias
      * @param value parameter value
-     * @return current instance of builder
+     * @return current instance of fluent runner
      */
-    public ReportRunContextBuilder addParam(String alias, Object value) {
+    public FluentReportRunner addParam(String alias, Object value) {
         params.put(alias, value);
         return this;
     }
@@ -115,9 +113,9 @@ public class ReportRunContextBuilder {
      * Sets a code of template that will be used to run a report.
      *
      * @param templateCode template code
-     * @return current instance of builder
+     * @return current instance of fluent runner
      */
-    public ReportRunContextBuilder withTemplateCode(@Nullable String templateCode) {
+    public FluentReportRunner withTemplateCode(@Nullable String templateCode) {
         this.templateCode = templateCode;
         return this;
     }
@@ -126,9 +124,9 @@ public class ReportRunContextBuilder {
      * Sets a template that will be used to run a report.
      *
      * @param template report template
-     * @return current instance of builder
+     * @return current instance of fluent runner
      */
-    public ReportRunContextBuilder withTemplate(@Nullable ReportTemplate template) {
+    public FluentReportRunner withTemplate(@Nullable ReportTemplate template) {
         this.template = template;
         return this;
     }
@@ -137,9 +135,9 @@ public class ReportRunContextBuilder {
      * Sets a type of output document.
      *
      * @param outputType type of output document.
-     * @return current instance of builder
+     * @return current instance of fluent runner
      */
-    public ReportRunContextBuilder withOutputType(ReportOutputType outputType) {
+    public FluentReportRunner withOutputType(ReportOutputType outputType) {
         this.outputType = outputType;
         return this;
     }
@@ -148,19 +146,19 @@ public class ReportRunContextBuilder {
      * Sets a name of output document.
      *
      * @param outputNamePattern name of an output document
-     * @return current instance of builder
+     * @return current instance of fluent runner
      */
-    public ReportRunContextBuilder withOutputNamePattern(@Nullable String outputNamePattern) {
+    public FluentReportRunner withOutputNamePattern(@Nullable String outputNamePattern) {
         this.outputNamePattern = outputNamePattern;
         return this;
     }
 
     /**
-     * Creates an instance of {@link ReportRunContext} based on the parameters specified for the builder.
+     * Creates an instance of {@link ReportRunContext} based on the parameters specified for the runner.
      *
      * @return run context
      */
-    public ReportRunContext build() {
+    public ReportRunContext buildContext() {
         Report report = getReportToUse();
         ReportTemplate reportTemplate = getReportTemplateToUse(report);
         return new ReportRunContext(report)
@@ -176,7 +174,7 @@ public class ReportRunContextBuilder {
      * @return report execution result
      */
     public ReportOutputDocument run() {
-        return reportRunner.run(build());
+        return reportRunner.run(buildContext());
     }
 
     private Optional<Report> loadReportByCode(String reportCode) {

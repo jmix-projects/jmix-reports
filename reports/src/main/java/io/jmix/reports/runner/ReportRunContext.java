@@ -50,7 +50,7 @@ import java.util.Map;
  *                 .setOutputType(ReportOutputType.PDF)
  *                 .setParams(paramsMap);
  * </pre>
- * @see ReportRunContextBuilder
+ * @see FluentReportRunner
  * @see ReportRunner
  */
 public class ReportRunContext {

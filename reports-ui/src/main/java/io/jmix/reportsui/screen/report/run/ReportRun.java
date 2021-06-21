@@ -127,7 +127,7 @@ public class ReportRun extends StandardLookup<Report> {
                     .fetchPlan("report.edit")
                     .one();
             uiReportRunner.byReportEntity(report)
-                    .withScreen(ReportRun.this)
+                    .withOriginFrameOwner(ReportRun.this)
                     .showParametersDialogMode(ShowParametersDialogMode.IF_REQUIRED)
                     .runAndShow();
         }

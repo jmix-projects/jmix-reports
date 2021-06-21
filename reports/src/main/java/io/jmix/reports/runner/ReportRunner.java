@@ -26,7 +26,7 @@ public interface ReportRunner {
 
     /**
      * Runs the report based on the information from the {@link ReportRunContext}. The run context may be created
-     * manually using the constructor or using the {@link ReportRunContextBuilder} builder.
+     * manually using the constructor or using the {@link FluentReportRunner}.
      *
      * @param context the object that contains all information required to run the report
      * @return report execution result
@@ -34,28 +34,28 @@ public interface ReportRunner {
     ReportOutputDocument run(ReportRunContext context);
 
     /**
-     * Creates an instance of {@link ReportRunContextBuilder} for a report with specified code.
-     *
+     * Creates an instance of {@link FluentReportRunner} for a report with specified code.
      * <p/>
      * Usage examples:
      * <pre>
      * ReportRunContext context = reportRunner.byReportCode("orders-report")
      *                 .withParams(paramsMap)
      *                 .withOutputType(ReportOutputType.PDF)
-     *                 .build();
+     *                 .buildContext();
      *
      *  ReportOutputDocument document = reportRunner.byReportCode("orders-report")
      *                 .addParam("orders", ordersList)
      *                 .withTemplateCode("orders-template")
      *                 .run();
      * </pre>
+     *
      * @param reportCode report code
-     * @return builder to create an instance of {@link ReportRunContext} or to run a report
+     * @return instance of {@link FluentReportRunner}
      */
-    ReportRunContextBuilder byReportCode(String reportCode);
+    FluentReportRunner byReportCode(String reportCode);
 
     /**
-     * Creates an instance of {@link ReportRunContextBuilder} for specified report.
+     * Creates an instance of {@link FluentReportRunner} for specified report.
      * <p/>
      *
      * Usage examples:
@@ -63,7 +63,7 @@ public interface ReportRunner {
      * ReportRunContext context = reportRunner.byReportEntity(report)
      *                 .withParams(paramsMap)
      *                 .withTemplateCode("orders-template")
-     *                 .build();
+     *                 .buildContext();
      *
      * ReportOutputDocument document = reportRunner.byReportEntity(report)
      *                 .addParam("orders", orders)
@@ -71,8 +71,9 @@ public interface ReportRunner {
      *                 .withOutputNamePattern("Orders")
      *                 .run();
      * </pre>
+     *
      * @param report report entity
-     * @return builder to create an instance of {@link ReportRunContext} or to run a report
+     * @return instance of {@link FluentReportRunner}
      */
-    ReportRunContextBuilder byReportEntity(Report report);
+    FluentReportRunner byReportEntity(Report report);
 }

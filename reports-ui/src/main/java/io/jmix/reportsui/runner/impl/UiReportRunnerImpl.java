@@ -79,7 +79,7 @@ public class UiReportRunnerImpl implements UiReportRunner {
     @Autowired
     protected ReportsUtils reportsUtils;
     @Autowired
-    protected ObjectProvider<UiReportRunContextBuilder> runContextBuilders;
+    protected ObjectProvider<FluentUiReportRunner> fluentUiReportRunners;
 
     @Override
     public void runAndShow(UiReportRunContext context) {
@@ -89,9 +89,9 @@ public class UiReportRunnerImpl implements UiReportRunner {
             return;
         }
 
-        FrameOwner screen = context.getScreen();
-        if (screen != null && needToRunInBackground(context)) {
-            Screen hostScreen = UiControllerUtils.getScreen(screen);
+        FrameOwner originFrameOwner = context.getOriginFrameOwner();
+        if (originFrameOwner != null && needToRunInBackground(context)) {
+            Screen hostScreen = UiControllerUtils.getScreen(originFrameOwner);
             runInBackground(context, hostScreen);
         } else {
             ReportOutputDocument reportOutputDocument = reportRunner.run(context.getReportRunContext());
@@ -107,11 +107,11 @@ public class UiReportRunnerImpl implements UiReportRunner {
             openReportParamsDialog(context, getInputParameter(context, multiParamAlias), true);
             return;
         }
-        FrameOwner screen = context.getScreen();
-        if (screen != null && needToRunInBackground(context)) {
+        FrameOwner originFrameOwner = context.getOriginFrameOwner();
+        if (originFrameOwner != null && needToRunInBackground(context)) {
             Report targetReport = getReportForPrinting(context.getReport());
             long timeout = reportsClientProperties.getBackgroundReportProcessingTimeoutMs();
-            Screen hostScreen = UiControllerUtils.getScreen(screen);
+            Screen hostScreen = UiControllerUtils.getScreen(originFrameOwner);
             BackgroundTask<Integer, List<ReportOutputDocument>> task =
                     new BackgroundTask<Integer, List<ReportOutputDocument>>(timeout, TimeUnit.MILLISECONDS, hostScreen) {
                         @SuppressWarnings("UnnecessaryLocalVariable")
@@ -162,17 +162,15 @@ public class UiReportRunnerImpl implements UiReportRunner {
     }
 
     @Override
-    public UiReportRunContextBuilder byReportCode(String reportCode) {
-        UiReportRunContextBuilder builder = runContextBuilders.getObject();
-        builder.setUiReportRunner(this);
-        return builder.init(reportCode);
+    public FluentUiReportRunner byReportCode(String reportCode) {
+        FluentUiReportRunner fluentRunner = fluentUiReportRunners.getObject();
+        return fluentRunner.init(reportCode);
     }
 
     @Override
-    public UiReportRunContextBuilder byReportEntity(Report report) {
-        UiReportRunContextBuilder builder = runContextBuilders.getObject();
-        builder.setUiReportRunner(this);
-        return builder.init(report);
+    public FluentUiReportRunner byReportEntity(Report report) {
+        FluentUiReportRunner fluentRunner = fluentUiReportRunners.getObject();
+        return fluentRunner.init(report);
     }
 
     protected void runInBackground(UiReportRunContext context, Screen hostScreen) {

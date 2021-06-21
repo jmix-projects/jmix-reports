@@ -142,7 +142,7 @@ public class RunReportAction extends ListAction {
                 openReportParamsDialog(report, screen);
             } else {
                 uiReportRunner.runAndShow(new UiReportRunContext(report)
-                        .setScreen(screen)
+                        .setOriginFrameOwner(screen)
                         .setShowParametersDialogMode(ShowParametersDialogMode.NO)
                         .setParams(Collections.emptyMap()));
             }

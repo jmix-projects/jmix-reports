@@ -156,7 +156,7 @@ public class ReportBrowser extends StandardLookup<Report> {
         } else {
             uiReportRunner.byReportEntity(report)
                     .withParams(Collections.emptyMap())
-                    .withScreen(ReportBrowser.this)
+                    .withOriginFrameOwner(ReportBrowser.this)
                     .runAndShow();
         }
     }

@@ -28,7 +28,7 @@ import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportInputParameter;
 import io.jmix.reports.exception.ReportingException;
 import io.jmix.reportsui.runner.ShowParametersDialogMode;
-import io.jmix.reportsui.runner.UiReportRunContextBuilder;
+import io.jmix.reportsui.runner.FluentUiReportRunner;
 import io.jmix.reportsui.runner.UiReportRunner;
 import io.jmix.reportsui.screen.report.run.InputParametersDialog;
 import io.jmix.reportsui.screen.report.run.ReportRun;
@@ -145,20 +145,20 @@ public abstract class AbstractPrintFormAction extends AbstractAction {
             boolean bulkPrint = reportTypeIsSingleEntity && moreThanOneEntitySelected;
             openReportParamsDialog(report, ParamsMap.of(reportInputParameter.getAlias(), resultingParamValue), outputFileName, reportInputParameter, bulkPrint);
         } else {
-            UiReportRunContextBuilder builder = uiReportRunner.byReportEntity(report)
-                    .withScreen(screen)
+            FluentUiReportRunner fluentRunner = uiReportRunner.byReportEntity(report)
+                    .withOriginFrameOwner(screen)
                     .showParametersDialogMode(ShowParametersDialogMode.NO)
                     .withOutputNamePattern(outputFileName);
             if (reportTypeIsSingleEntity) {
                 Collection selectedEntities = (Collection) resultingParamValue;
                 if (moreThanOneEntitySelected) {
-                    uiReportRunner.multiRun(builder.build(), reportInputParameter.getAlias(), selectedEntities);
+                    fluentRunner.multiRun(reportInputParameter.getAlias(), selectedEntities);
                 } else if (selectedEntities.size() == 1) {
-                    builder.addParam(reportInputParameter.getAlias(), selectedEntities.iterator().next())
+                    fluentRunner.addParam(reportInputParameter.getAlias(), selectedEntities.iterator().next())
                             .runAndShow();
                 }
             } else {
-                builder.addParam(reportInputParameter.getAlias(), resultingParamValue)
+                fluentRunner.addParam(reportInputParameter.getAlias(), resultingParamValue)
                         .runAndShow();
             }
         }

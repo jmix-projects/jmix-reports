@@ -36,7 +36,7 @@ import io.jmix.reports.entity.ReportTemplate;
 import io.jmix.reports.exception.*;
 import io.jmix.reports.libintegration.CustomFormatter;
 import io.jmix.reports.runner.ReportRunContext;
-import io.jmix.reports.runner.ReportRunContextBuilder;
+import io.jmix.reports.runner.FluentReportRunner;
 import io.jmix.reports.runner.ReportRunner;
 import io.jmix.reports.util.ReportsUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -62,7 +62,7 @@ public class ReportRunnerImpl implements ReportRunner {
     protected ReportingAPI reportingAPI;
 
     @Autowired
-    protected ObjectProvider<ReportRunContextBuilder> reportRunContextObjectProvider;
+    protected ObjectProvider<FluentReportRunner> fluentReportRunners;
 
     @Autowired
     protected EntityStates entityStates;
@@ -200,16 +200,12 @@ public class ReportRunnerImpl implements ReportRunner {
     }
 
     @Override
-    public ReportRunContextBuilder byReportCode(String reportCode) {
-        ReportRunContextBuilder builder = reportRunContextObjectProvider.getObject(reportCode);
-        builder.setReportRunner(this);
-        return builder;
+    public FluentReportRunner byReportCode(String reportCode) {
+        return fluentReportRunners.getObject(reportCode);
     }
 
     @Override
-    public ReportRunContextBuilder byReportEntity(Report report) {
-        ReportRunContextBuilder builder = reportRunContextObjectProvider.getObject(report);
-        builder.setReportRunner(this);
-        return builder;
+    public FluentReportRunner byReportEntity(Report report) {
+        return fluentReportRunners.getObject(report);
     }
 }

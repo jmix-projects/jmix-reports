@@ -298,7 +298,7 @@ public class RegionsStepFragment extends StepFragment {
 
         if (lastGeneratedTmpReport != null) {
             uiReportRunner.byReportEntity(lastGeneratedTmpReport)
-                    .withScreen(getFragment().getFrameOwner())
+                    .withOriginFrameOwner(getFragment().getFrameOwner())
                     .showParametersDialogMode(ShowParametersDialogMode.IF_REQUIRED)
                     .runAndShow();
         }

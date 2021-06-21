@@ -19,7 +19,7 @@ package io.jmix.reportsui.runner;
 import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportOutputType;
 import io.jmix.reports.entity.ReportTemplate;
-import io.jmix.reports.runner.ReportRunContextBuilder;
+import io.jmix.reports.runner.FluentReportRunner;
 import io.jmix.ui.screen.FrameOwner;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,13 +28,11 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.Map;
 
 /**
- * Class is used for creating instances of {@link UiReportRunContext}. It allows to create run contexts using various
- * additional criteria, e.g. run context may be created either by {@link Report} entity or by report code.
- * <p/>
- * The following parameters can be specified to create {@link UiReportRunContext}:
+ * Class is used to run a report using various additional criteria:
  * <ul>
  *     <li>{@link Report} entity or report code</li>
  *     <li>{@link ReportTemplate} entity or template code: if none of these fields is set, the default template is used.</li>
@@ -46,32 +44,33 @@ import java.util.Map;
  *     <li>Run a report synchronously or in the background (defined by {@link RunInBackgroundMode})</li>
  * </ul>
  * <br/>
- * Use the {@link UiReportRunner} bean to obtain an instance of the {@link UiReportRunContextBuilder}.
+ * Use the {@link UiReportRunner} bean to obtain an instance of the {@link FluentUiReportRunner}.
  */
-@Component("report_UiReportRunContextBuilder")
+@Component("report_FluentUiReportRunner")
 @Scope(BeanDefinition.SCOPE_PROTOTYPE)
-public class UiReportRunContextBuilder {
+public class FluentUiReportRunner {
     @Autowired
-    protected ObjectProvider<ReportRunContextBuilder> reportRunContextBuilders;
+    protected ObjectProvider<FluentReportRunner> fluentReportRunners;
 
-    private ReportRunContextBuilder reportRunContextBuilder;
-    private FrameOwner screen;
+    private FluentReportRunner fluentReportRunner;
+    private FrameOwner originFrameOwner;
     private RunInBackgroundMode runInBackgroundMode;
     private ShowParametersDialogMode showParametersDialogMode;
 
     private UiReportRunner uiReportRunner;
 
+    @Autowired
     public void setUiReportRunner(UiReportRunner uiReportRunner) {
         this.uiReportRunner = uiReportRunner;
     }
 
-    public UiReportRunContextBuilder init(Report report) {
-        this.reportRunContextBuilder = reportRunContextBuilders.getObject(report);
+    public FluentUiReportRunner init(Report report) {
+        this.fluentReportRunner = fluentReportRunners.getObject(report);
         return this;
     }
 
-    public UiReportRunContextBuilder init(String reportCode) {
-        this.reportRunContextBuilder = reportRunContextBuilders.getObject(reportCode);
+    public FluentUiReportRunner init(String reportCode) {
+        this.fluentReportRunner = fluentReportRunners.getObject(reportCode);
         return this;
     }
 
@@ -79,10 +78,10 @@ public class UiReportRunContextBuilder {
      * Sets a map with input parameters.
      *
      * @param params input parameters
-     * @return current instance of builder
+     * @return current instance of fluent runner
      */
-    public UiReportRunContextBuilder withParams(Map<String, Object> params) {
-        this.reportRunContextBuilder.withParams(params);
+    public FluentUiReportRunner withParams(Map<String, Object> params) {
+        this.fluentReportRunner.withParams(params);
         return this;
     }
 
@@ -91,10 +90,10 @@ public class UiReportRunContextBuilder {
      *
      * @param alias parameter alias
      * @param value parameter value
-     * @return current instance of builder
+     * @return current instance of fluent runner
      */
-    public UiReportRunContextBuilder addParam(String alias, Object value) {
-        this.reportRunContextBuilder.addParam(alias, value);
+    public FluentUiReportRunner addParam(String alias, Object value) {
+        this.fluentReportRunner.addParam(alias, value);
         return this;
     }
 
@@ -102,10 +101,10 @@ public class UiReportRunContextBuilder {
      * Sets a code of template that will be used to run a report.
      *
      * @param templateCode template code
-     * @return current instance of builder
+     * @return current instance of fluent runner
      */
-    public UiReportRunContextBuilder withTemplateCode(String templateCode) {
-        this.reportRunContextBuilder.withTemplateCode(templateCode);
+    public FluentUiReportRunner withTemplateCode(String templateCode) {
+        this.fluentReportRunner.withTemplateCode(templateCode);
         return this;
     }
 
@@ -113,10 +112,10 @@ public class UiReportRunContextBuilder {
      * Sets a template that will be used to run a report.
      *
      * @param template report template
-     * @return current instance of builder
+     * @return current instance of fluent runner
      */
-    public UiReportRunContextBuilder withTemplate(ReportTemplate template) {
-        this.reportRunContextBuilder.withTemplate(template);
+    public FluentUiReportRunner withTemplate(ReportTemplate template) {
+        this.fluentReportRunner.withTemplate(template);
         return this;
     }
 
@@ -124,10 +123,10 @@ public class UiReportRunContextBuilder {
      * Sets a type of output document.
      *
      * @param outputType type of output document.
-     * @return current instance of builder
+     * @return current instance of fluent runner
      */
-    public UiReportRunContextBuilder withOutputType(ReportOutputType outputType) {
-        this.reportRunContextBuilder.withOutputType(outputType);
+    public FluentUiReportRunner withOutputType(ReportOutputType outputType) {
+        this.fluentReportRunner.withOutputType(outputType);
         return this;
     }
 
@@ -135,10 +134,10 @@ public class UiReportRunContextBuilder {
      * Sets a name of output document.
      *
      * @param outputNamePattern name of an output document
-     * @return current instance of builder
+     * @return current instance of fluent runner
      */
-    public UiReportRunContextBuilder withOutputNamePattern(@Nullable String outputNamePattern) {
-        this.reportRunContextBuilder.withOutputNamePattern(outputNamePattern);
+    public FluentUiReportRunner withOutputNamePattern(@Nullable String outputNamePattern) {
+        this.fluentReportRunner.withOutputNamePattern(outputNamePattern);
         return this;
     }
 
@@ -148,7 +147,7 @@ public class UiReportRunContextBuilder {
      * @param mode mode to run the report in the background.
      * @return current instance of builder
      */
-    public UiReportRunContextBuilder runInBackground(RunInBackgroundMode mode) {
+    public FluentUiReportRunner runInBackground(RunInBackgroundMode mode) {
         this.runInBackgroundMode = mode;
         return this;
     }
@@ -157,13 +156,13 @@ public class UiReportRunContextBuilder {
      * Sets a mode to run the report in the background and screen.
      *
      * @param mode mode to run the report in the background
-     * @param screen screen or screen fragment from which the report runs
+     * @param originFrameOwner screen or screen fragment from which the report runs
      *
-     * @return current instance of builder
+     * @return current instance of fluent runner
      */
-    public UiReportRunContextBuilder runInBackground(RunInBackgroundMode mode, FrameOwner screen) {
+    public FluentUiReportRunner runInBackground(RunInBackgroundMode mode, FrameOwner originFrameOwner) {
         this.runInBackgroundMode = mode;
-        this.screen = screen;
+        this.originFrameOwner = originFrameOwner;
         return this;
     }
 
@@ -171,9 +170,9 @@ public class UiReportRunContextBuilder {
      * Sets a mode to show a dialog to input the report parameter before report run.
      *
      * @param mode mode to show a dialog to input the report parameter before report run
-     * @return current instance of builder
+     * @return current instance of fluent runner
      */
-    public UiReportRunContextBuilder showParametersDialogMode(ShowParametersDialogMode mode) {
+    public FluentUiReportRunner showParametersDialogMode(ShowParametersDialogMode mode) {
         this.showParametersDialogMode = mode;
         return this;
     }
@@ -181,23 +180,23 @@ public class UiReportRunContextBuilder {
     /**
      * Sets a screen or screen fragment from which the report runs.
      *
-     * @param screen screen or screen fragment from which the report runs
-     * @return current instance of builder
+     * @param originFrameOwner screen or screen fragment from which the report runs
+     * @return current instance of fluent runner
      */
-    public UiReportRunContextBuilder withScreen(FrameOwner screen) {
-        this.screen = screen;
+    public FluentUiReportRunner withOriginFrameOwner(FrameOwner originFrameOwner) {
+        this.originFrameOwner = originFrameOwner;
         return this;
     }
 
     /**
-     * Creates an instance of {@link UiReportRunContext} based on the parameters specified for the builder.
+     * Creates an instance of {@link UiReportRunContext} based on the parameters specified for the fluent runner.
      *
      * @return run context
      */
-    public UiReportRunContext build() {
+    public UiReportRunContext buildContext() {
         return new UiReportRunContext()
-                .setReportRunContext(this.reportRunContextBuilder.build())
-                .setScreen(this.screen)
+                .setReportRunContext(this.fluentReportRunner.buildContext())
+                .setOriginFrameOwner(this.originFrameOwner)
                 .setRunInBackgroundMode(this.runInBackgroundMode)
                 .setShowParametersDialogMode(this.showParametersDialogMode);
     }
@@ -206,6 +205,19 @@ public class UiReportRunContextBuilder {
      * Builds a {@link UiReportRunContext} instance, runs a report using this run context and shows the result.
      */
     public void runAndShow() {
-        uiReportRunner.runAndShow(build());
+        uiReportRunner.runAndShow(buildContext());
+    }
+
+    /**
+     * Builds a {@link UiReportRunContext} instance, runs a report for each object from the specified collection.
+     * Objects in the collection should have the same type as an input parameter with specified alias.
+     * If the report has other parameters besides the specified one, values for these parameters are copied for each report run.
+     * As result, the ZIP archive with executed reports is downloaded.
+     *
+     * @param multiParamAlias alias of the parameter for which a value from the collection is used for report execution
+     * @param multiParamValues collection of values
+     */
+    public void multiRun(String multiParamAlias, Collection multiParamValues) {
+        uiReportRunner.multiRun(buildContext(), multiParamAlias, multiParamValues);
     }
 }

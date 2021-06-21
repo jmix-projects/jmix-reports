@@ -26,7 +26,7 @@ import javax.annotation.Nullable;
 import java.util.Map;
 /**
  * Class stores the information required for report running from UI. The instance of the class may be created using the
- * constructor or using the {@link UiReportRunContextBuilder} bean.
+ * constructor or using the {@link FluentUiReportRunner} bean.
  * <p/>
  * In addition to options required to run a report, it is possible to control the following ones:
  * <ul>
@@ -40,7 +40,7 @@ import java.util.Map;
  *  UiReportRunContext context = new UiReportRunContext(report)
  *                 .addParam("customers", customersList)
  *                 .setOutputNamePattern("Customers")
- *                 .setScreen(screen)
+ *                 .setOriginFrameOwner(screen)
  *                 .setRunInBackgroundMode(RunInBackgroundMode.YES)
  *                 .setShowParametersDialogMode(ShowParametersDialogMode.NO);
  *
@@ -55,7 +55,7 @@ import java.util.Map;
  *                 .setShowParametersDialogMode(ShowParametersDialogMode.IF_REQUIRED);
  * </pre>
  *
- * @see UiReportRunContextBuilder
+ * @see FluentUiReportRunner
  * @see UiReportRunner
  * @see ShowParametersDialogMode
  * @see RunInBackgroundMode
@@ -63,7 +63,7 @@ import java.util.Map;
 public class UiReportRunContext {
     private ReportRunContext reportRunContext = new ReportRunContext();
 
-    private FrameOwner screen;
+    private FrameOwner originFrameOwner;
     private RunInBackgroundMode runInBackgroundMode;
     private ShowParametersDialogMode showParametersDialogMode;
 
@@ -83,12 +83,12 @@ public class UiReportRunContext {
     }
 
     @Nullable
-    public FrameOwner getScreen() {
-        return screen;
+    public FrameOwner getOriginFrameOwner() {
+        return originFrameOwner;
     }
 
-    public UiReportRunContext setScreen(FrameOwner screen) {
-        this.screen = screen;
+    public UiReportRunContext setOriginFrameOwner(FrameOwner originFrameOwner) {
+        this.originFrameOwner = originFrameOwner;
         return this;
     }
 

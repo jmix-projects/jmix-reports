@@ -131,7 +131,7 @@ public class QueryStepFragment extends StepFragment implements Suggester {
 
         if (lastGeneratedTmpReport != null) {
             uiReportRunner.byReportEntity(lastGeneratedTmpReport)
-                    .withScreen(getFragment().getFrameOwner())
+                    .withOriginFrameOwner(getFragment().getFrameOwner())
                     .showParametersDialogMode(ShowParametersDialogMode.IF_REQUIRED)
                     .runAndShow();
         }

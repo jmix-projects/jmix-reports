@@ -21,10 +21,7 @@ import io.jmix.reports.entity.Report;
 import io.jmix.reports.entity.ReportInputParameter;
 import io.jmix.reports.entity.ReportTemplate;
 import io.jmix.reports.exception.ReportParametersValidationException;
-import io.jmix.reportsui.runner.RunInBackgroundMode;
-import io.jmix.reportsui.runner.ShowParametersDialogMode;
-import io.jmix.reportsui.runner.UiReportRunContext;
-import io.jmix.reportsui.runner.UiReportRunner;
+import io.jmix.reportsui.runner.*;
 import io.jmix.reportsui.screen.ReportParameterValidator;
 import io.jmix.ui.Notifications;
 import io.jmix.ui.UiProperties;
@@ -120,18 +117,17 @@ public class InputParametersDialog extends Screen {
                 }
                 Report report = inputParametersFragment.getReport();
                 Map<String, Object> parameters = inputParametersFragment.collectParameters();
-                UiReportRunContext uiReportRunContext = uiReportRunner.byReportEntity(report)
+                FluentUiReportRunner fluentRunner = uiReportRunner.byReportEntity(report)
                         .withParams(parameters)
                         .withTemplateCode(templateCode)
                         .withOutputNamePattern(outputFileName)
                         .withOutputType(inputParametersFragment.getOutputType())
                         .showParametersDialogMode(ShowParametersDialogMode.NO)
-                        .runInBackground(runInBackgroundMode, this)
-                        .build();
+                        .runInBackground(runInBackgroundMode, this);
                 if (bulkPrint) {
-                    uiReportRunner.multiRun(uiReportRunContext, inputParameter.getAlias(), selectedEntities);
+                    fluentRunner.multiRun(inputParameter.getAlias(), selectedEntities);
                 } else {
-                    uiReportRunner.runAndShow(uiReportRunContext);
+                    fluentRunner.runAndShow();
                 }
             } else {
                 screenValidation.showValidationErrors(this, validationErrors);
